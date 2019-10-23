@@ -1,4 +1,4 @@
-module github.com/johnstarich/go
+module github.com/johnstarich/go/regext
 
 go 1.12
 
