@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net"
 	"runtime"
+	"sort"
 	"sync"
 	"time"
 
@@ -89,21 +90,25 @@ func (m *macOSDialer) DialContext(ctx context.Context, network, address string) 
 }
 
 func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Conn, error) {
-	conns := make(chan net.Conn, len(nameservers))
+	type dialResp struct {
+		ix   int
+		conn net.Conn
+	}
+	conns := make(chan dialResp, len(nameservers))
 
 	var wait sync.WaitGroup
 	wait.Add(len(nameservers))
 
-	for _, nameserver := range nameservers {
-		go func(nameserver string) {
+	for ix, nameserver := range nameservers {
+		go func(ix int, nameserver string) {
 			conn, err := m.dialer.DialContext(ctx, "udp", nameserver+":53")
 			if err != nil {
 				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Error(err))
 			} else {
-				conns <- conn
+				conns <- dialResp{ix: ix, conn: conn}
 			}
 			wait.Done()
-		}(nameserver)
+		}(ix, nameserver)
 	}
 	wait.Wait()
 	select {
@@ -113,12 +118,51 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	}
 	close(conns)
 
-	var allSuccessfulConns []staggercast.Conn
-	for conn := range conns {
-		allSuccessfulConns = append(allSuccessfulConns, conn.(staggercast.Conn)) // UDP connections must also support net.PacketConn
+	var allSuccessfulResps []dialResp
+	for resp := range conns {
+		allSuccessfulResps = append(allSuccessfulResps, resp)
 	}
-	if len(allSuccessfulConns) == 0 {
+	if len(allSuccessfulResps) == 0 {
 		return nil, errors.New("error dialing all nameservers")
 	}
-	return staggercast.New(allSuccessfulConns), nil
+	sort.Slice(allSuccessfulResps, func(a, b int) bool {
+		return allSuccessfulResps[a].ix < allSuccessfulResps[b].ix
+	})
+
+	var allSuccessfulConns []staggercast.PacketConn
+	for _, resp := range allSuccessfulResps {
+		allSuccessfulConns = append(allSuccessfulConns, resp.conn.(staggercast.PacketConn)) // UDP connections must also support net.PacketConn
+	}
+
+	staggerConn := staggercast.New(allSuccessfulConns)
+	staggerConn.Stagger(staggerTicker(150*time.Millisecond, 10*time.Millisecond))
+	return staggerConn, nil
+}
+
+func staggerTicker(initialDelay, d time.Duration) (<-chan struct{}, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(context.Background())
+	c := make(chan struct{})
+	go func() {
+		timer := time.NewTimer(initialDelay)
+		select {
+		case <-timer.C:
+		case <-ctx.Done():
+			timer.Stop()
+			return
+		}
+		timer.Stop()
+
+		ticker := time.NewTicker(d)
+		for {
+			select {
+			case <-ctx.Done():
+				ticker.Stop()
+				close(c)
+				return
+			case <-ticker.C:
+				c <- struct{}{}
+			}
+		}
+	}()
+	return c, cancel
 }
