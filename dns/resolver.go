@@ -117,15 +117,13 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	var wait sync.WaitGroup
 	wait.Add(len(nameservers))
 
+	m.Logger.Debug("Dialing all nameservers")
 	for ix, nameserver := range nameservers {
 		go func(ix int, nameserver string) {
-			logger := m.Logger.With(zap.String("nameserver", nameserver), zap.Int("index", ix))
-			logger.Debug("Dialing nameserver...")
 			conn, err := m.dialer.DialContext(ctx, "udp", nameserver+":53")
 			if err != nil {
-				logger.Warn("Error dialing nameserver", zap.Error(err))
+				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Int("index", ix), zap.Error(err))
 			} else {
-				logger.Debug("Dial succeeded")
 				conns <- dialResp{ix: ix, conn: conn}
 			}
 			wait.Done()
