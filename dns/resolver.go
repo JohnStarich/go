@@ -15,7 +15,9 @@ import (
 )
 
 type Config struct {
-	Logger *zap.Logger
+	Logger                 *zap.Logger
+	InitialNameserverDelay time.Duration
+	NextNameserverInterval time.Duration
 }
 
 const macOSRuntimeName = "darwin"
@@ -32,6 +34,12 @@ func NewWithConfig(config Config) *net.Resolver {
 	if config.Logger == nil {
 		config.Logger = zap.NewNop()
 	}
+	if config.InitialNameserverDelay == 0 {
+		config.InitialNameserverDelay = 150 * time.Millisecond
+	}
+	if config.NextNameserverInterval == 0 {
+		config.NextNameserverInterval = 10 * time.Millisecond
+	}
 
 	dialer := newMacOSDialer(config)
 
@@ -47,25 +55,35 @@ type Dialer interface {
 
 type macOSDialer struct {
 	Config
-	dialer    *net.Dialer
-	resolvers []scutil.Resolver
+	dialer      *net.Dialer
+	resolvers   []scutil.Resolver
+	resolversMu sync.Mutex
 }
 
 func newMacOSDialer(config Config) Dialer {
 	return &macOSDialer{
+		Config: config,
 		dialer: &net.Dialer{Timeout: 30 * time.Second},
 	}
 }
 
 func (m *macOSDialer) ensureResolvers() ([]scutil.Resolver, error) {
-	if len(m.resolvers) == 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		cfg, err := scutil.ReadMacOSDNS(ctx)
-		m.resolvers = cfg.Resolvers
-		return m.resolvers, err
+	if len(m.resolvers) != 0 {
+		return m.resolvers, nil
 	}
-	return m.resolvers, nil
+	m.resolversMu.Lock()
+	defer m.resolversMu.Unlock()
+	if len(m.resolvers) != 0 { // check again, could change while waiting on lock
+		return m.resolvers, nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	m.Logger.Info("Reading macOS DNS config from 'scutil'...")
+	cfg, err := scutil.ReadMacOSDNS(ctx)
+	m.resolvers = cfg.Resolvers
+	m.Logger.Info("Finished reading macOS DNS config from 'scutil'", zap.Error(err))
+	return m.resolvers, err
 }
 
 func (m *macOSDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
@@ -101,10 +119,13 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 
 	for ix, nameserver := range nameservers {
 		go func(ix int, nameserver string) {
+			logger := m.Logger.With(zap.String("nameserver", nameserver), zap.Int("index", ix))
+			logger.Debug("Dialing nameserver...")
 			conn, err := m.dialer.DialContext(ctx, "udp", nameserver+":53")
 			if err != nil {
-				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Error(err))
+				logger.Warn("Error dialing nameserver", zap.Error(err))
 			} else {
+				logger.Debug("Dial succeeded")
 				conns <- dialResp{ix: ix, conn: conn}
 			}
 			wait.Done()
@@ -125,7 +146,7 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	if len(allSuccessfulResps) == 0 {
 		return nil, errors.New("error dialing all nameservers")
 	}
-	sort.Slice(allSuccessfulResps, func(a, b int) bool {
+	sort.Slice(allSuccessfulResps, func(a, b int) bool { // preserve original nameserver order
 		return allSuccessfulResps[a].ix < allSuccessfulResps[b].ix
 	})
 
@@ -135,17 +156,21 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	}
 
 	staggerConn := staggercast.New(allSuccessfulConns)
-	staggerConn.Stagger(staggerTicker(150*time.Millisecond, 10*time.Millisecond))
+	staggerConn.Stagger(staggerTicker(m.InitialNameserverDelay, m.NextNameserverInterval, m.Logger))
 	return staggerConn, nil
 }
 
-func staggerTicker(initialDelay, d time.Duration) (<-chan struct{}, context.CancelFunc) {
+func staggerTicker(initialDelay, d time.Duration, logger *zap.Logger) (<-chan struct{}, context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())
 	c := make(chan struct{})
 	go func() {
+		index := 1
 		timer := time.NewTimer(initialDelay)
 		select {
 		case <-timer.C:
+			logger.Debug("scatter: Enabling connection", zap.Int("index", index))
+			index++
+			c <- struct{}{}
 		case <-ctx.Done():
 			timer.Stop()
 			return
@@ -160,6 +185,8 @@ func staggerTicker(initialDelay, d time.Duration) (<-chan struct{}, context.Canc
 				close(c)
 				return
 			case <-ticker.C:
+				logger.Debug("scatter: Enabling connection", zap.Int("index", index))
+				index++
 				c <- struct{}{}
 			}
 		}
