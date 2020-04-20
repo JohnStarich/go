@@ -70,20 +70,22 @@ func (m *macOSDialer) ensureResolvers() ([]scutil.Resolver, error) {
 func (m *macOSDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
 	resolvers, err := m.ensureResolvers()
 	if err != nil {
-		return nil, err
+		m.Logger.Error("Failed looking up macOS resolvers, falling back to builtin DNS dialer", zap.Error(err))
+		return m.dialer.DialContext(ctx, network, address)
 	}
+
 	var nameservers []string
 	for _, resolver := range resolvers {
 		nameservers = append(nameservers, resolver.Nameservers...)
 	}
 
 	conn, err := m.dialAll(ctx, nameservers)
-	if err == nil {
-		return conn, nil
+	if err != nil {
+		m.Logger.Error("Failed dialing macOS nameservers, falling back to builtin DNS dialer", zap.Error(err))
+		return m.dialer.DialContext(ctx, network, address)
 	}
 
-	m.Logger.Error("Failed dialing macOS nameservers, falling back to builtin DNS dialer", zap.Error(err))
-	return m.dialer.DialContext(ctx, network, address)
+	return conn, nil
 }
 
 func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Conn, error) {
@@ -92,11 +94,9 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	var wait sync.WaitGroup
 	wait.Add(len(nameservers))
 
-	nsCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
 	for _, nameserver := range nameservers {
 		go func(nameserver string) {
-			conn, err := m.dialer.DialContext(nsCtx, "udp", nameserver+":53")
+			conn, err := m.dialer.DialContext(ctx, "udp", nameserver+":53")
 			if err != nil {
 				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Error(err))
 			} else {
