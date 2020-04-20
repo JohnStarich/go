@@ -2,11 +2,14 @@ package dns
 
 import (
 	"context"
+	"errors"
 	"net"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/johnstarich/go/dns/scutil"
+	"github.com/johnstarich/go/dns/staggercast"
 	"go.uber.org/zap"
 )
 
@@ -69,33 +72,53 @@ func (m *macOSDialer) DialContext(ctx context.Context, network, address string) 
 	if err != nil {
 		return nil, err
 	}
-	count := 0
+	var nameservers []string
 	for _, resolver := range resolvers {
-		count += len(resolver.Nameservers)
+		nameservers = append(nameservers, resolver.Nameservers...)
 	}
-	conns := make(chan net.Conn, count)
+
+	conn, err := m.dialAll(ctx, nameservers)
+	if err == nil {
+		return conn, nil
+	}
+
+	m.Logger.Error("Failed dialing macOS nameservers, falling back to builtin DNS dialer", zap.Error(err))
+	return m.dialer.DialContext(ctx, network, address)
+}
+
+func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Conn, error) {
+	conns := make(chan net.Conn, len(nameservers))
+
+	var wait sync.WaitGroup
+	wait.Add(len(nameservers))
 
 	nsCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	for _, resolver := range resolvers {
-		for _, nameserver := range resolver.Nameservers {
-			go func(nameserver string) {
-				conn, err := m.dialer.DialContext(nsCtx, "udp", nameserver+":53")
-				if err != nil {
-					m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Error(err))
-				} else {
-					conns <- conn
-				}
-			}(nameserver)
-		}
+	for _, nameserver := range nameservers {
+		go func(nameserver string) {
+			conn, err := m.dialer.DialContext(nsCtx, "udp", nameserver+":53")
+			if err != nil {
+				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Error(err))
+			} else {
+				conns <- conn
+			}
+			wait.Done()
+		}(nameserver)
 	}
+	wait.Wait()
 	select {
-	case conn := <-conns:
-		return conn, nil
 	case <-ctx.Done():
 		return nil, ctx.Err()
-	case <-nsCtx.Done():
+	default:
 	}
-	m.Logger.Error("Falling back to builtin DNS dialer")
-	return m.dialer.DialContext(ctx, network, address)
+	close(conns)
+
+	var allSuccessfulConns []staggercast.Conn
+	for conn := range conns {
+		allSuccessfulConns = append(allSuccessfulConns, conn.(staggercast.Conn)) // UDP connections must also support net.PacketConn
+	}
+	if len(allSuccessfulConns) == 0 {
+		return nil, errors.New("error dialing all nameservers")
+	}
+	return staggercast.New(allSuccessfulConns), nil
 }
