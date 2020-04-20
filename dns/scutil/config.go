@@ -17,7 +17,7 @@ type Config struct {
 }
 
 type Resolver struct {
-	Domain         []string
+	Domain         string
 	Flags          []Flag
 	InterfaceIndex int
 	InterfaceName  string
@@ -31,8 +31,18 @@ type Resolver struct {
 }
 
 func ReadMacOSDNS(ctx context.Context) (Config, error) {
+	return readMacOSDNS(ctx, runSCUtilDNS)
+}
+
+func runSCUtilDNS(ctx context.Context) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "/usr/sbin/scutil", "--dns")
-	output, err := cmd.CombinedOutput()
+	return cmd.CombinedOutput()
+}
+
+type scutilExecutor func(ctx context.Context) ([]byte, error)
+
+func readMacOSDNS(ctx context.Context, getSCUtilDNS scutilExecutor) (Config, error) {
+	output, err := getSCUtilDNS(ctx)
 	if err != nil {
 		return Config{}, err
 	}
@@ -51,8 +61,10 @@ func ReadMacOSDNS(ctx context.Context) (Config, error) {
 
 		currentResolver := &config.Resolvers[len(config.Resolvers)-1]
 		switch {
-		case strings.Contains(key, "domain") && !strings.Contains(key, "search domain"):
-			currentResolver.Domain = append(currentResolver.Domain, value)
+		case strings.Contains(key, "search domain"):
+			currentResolver.SearchDomain = append(currentResolver.SearchDomain, value)
+		case strings.Contains(key, "domain"):
+			currentResolver.Domain = value
 		case strings.Contains(key, "flags"):
 			for _, flag := range strings.Split(value, ",") {
 				currentResolver.Flags = append(currentResolver.Flags, Flag(strings.TrimSpace(flag)))
@@ -88,8 +100,6 @@ func ReadMacOSDNS(ctx context.Context) (Config, error) {
 					currentResolver.Reach = append(currentResolver.Reach, status)
 				}
 			}
-		case strings.Contains(key, "search domain"):
-			currentResolver.SearchDomain = append(currentResolver.SearchDomain, value)
 		case strings.Contains(key, "timeout"):
 			i, err := strconv.ParseInt(value, 10, 64)
 			if err == nil {
@@ -104,8 +114,6 @@ func ReadMacOSDNS(ctx context.Context) (Config, error) {
 func splitKeyValue(line string) (key, value string) {
 	tokens := strings.SplitN(line, ":", 2)
 	switch len(tokens) {
-	case 0:
-		return "", ""
 	case 1:
 		return strings.TrimSpace(tokens[0]), ""
 	default:

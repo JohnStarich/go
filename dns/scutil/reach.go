@@ -30,5 +30,5 @@ const (
 	// DirectlyReachableAddress is when the network traffic to the specified
 	// nodename/address will not go through a gateway but is routed directly to
 	// one of the interfaces on the system.
-	DirectlyReachableAddress Reach = "Directly Reachable Addresss"
+	DirectlyReachableAddress Reach = "Directly Reachable Address"
 )
