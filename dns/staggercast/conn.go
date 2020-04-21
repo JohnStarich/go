@@ -5,6 +5,7 @@ package staggercast
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"sync"
@@ -36,8 +37,11 @@ type staggerConn struct {
 	replayMu     sync.RWMutex
 	tickerCancel context.CancelFunc
 	// capture last Write and SetDeadlines for replay on staggered connections
-	lastDeadline, lastReadDeadline, lastWriteDeadline time.Time
-	lastWrite                                         []byte
+	lastDeadline,
+	lastReadDeadline,
+	lastWriteDeadline time.Time
+	lastWrite     []byte
+	lastWriteAddr net.Addr // currently unused in replay
 }
 
 func New(conns []PacketConn) Conn {
@@ -66,20 +70,20 @@ func New(conns []PacketConn) Conn {
 // Example: Create and wrap a 'time.Ticker.C' with a duration of 1 second.
 // The first connection is attempted immediately. For every 1 second the Read hasn't returned, an additional connection is attempted.
 // Once a connection succeeds, the result is returned immediately from Read.
-func (p *staggerConn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc) {
-	p.replayMu.Lock()
+func (s *staggerConn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc) {
+	s.replayMu.Lock()
 
 	ctx, tickerCancel := context.WithCancel(context.Background())
-	p.tickerCancel = tickerCancel
+	s.tickerCancel = tickerCancel
 
-	totalLength := len(p.conns)
-	p.replay = make([]chan struct{}, totalLength)
-	for i := range p.replay {
-		p.replay[i] = make(chan struct{})
+	totalLength := len(s.conns)
+	s.replay = make([]chan struct{}, totalLength)
+	for i := range s.replay {
+		s.replay[i] = make(chan struct{})
 	}
-	close(p.replay[0]) // initial connection should immediately fire
+	close(s.replay[0]) // initial connection should immediately fire
 	connCount := atomic.NewUint64(1)
-	p.connCount = connCount
+	s.connCount = connCount
 
 	// listen for ticks and fire off replays on new connections
 	go func() {
@@ -93,59 +97,57 @@ func (p *staggerConn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc)
 					cancel()
 					return
 				}
-				go p.runReplay(count - 1)
+				go s.runReplay(count - 1)
 			case <-ctx.Done():
 				cancel()
 				return
 			}
 		}
 	}()
-	p.replayMu.Unlock()
+	s.replayMu.Unlock()
 }
 
 // runReplay synchronously reapplies the last Deadlines and the last Write
-func (p *staggerConn) runReplay(connIndex uint64) {
-	p.replayMu.RLock()
-	if !p.lastDeadline.IsZero() {
-		p.conns[connIndex].SetDeadline(p.lastDeadline)
+func (s *staggerConn) runReplay(connIndex uint64) {
+	s.replayMu.RLock()
+	if !s.lastDeadline.IsZero() {
+		s.conns[connIndex].SetDeadline(s.lastDeadline)
 	}
-	if !p.lastReadDeadline.IsZero() {
-		p.conns[connIndex].SetReadDeadline(p.lastReadDeadline)
+	if !s.lastReadDeadline.IsZero() {
+		s.conns[connIndex].SetReadDeadline(s.lastReadDeadline)
 	}
-	if !p.lastWriteDeadline.IsZero() {
-		p.conns[connIndex].SetWriteDeadline(p.lastWriteDeadline)
+	if !s.lastWriteDeadline.IsZero() {
+		s.conns[connIndex].SetWriteDeadline(s.lastWriteDeadline)
 	}
-	b := p.lastWrite
-	p.replayMu.RUnlock()
+	b := s.lastWrite
+	s.replayMu.RUnlock()
 	if b != nil {
-		p.conns[connIndex].Write(b)
+		s.conns[connIndex].Write(b)
 	}
-	close(p.replay[connIndex]) // fire off any pending iter's
+	close(s.replay[connIndex]) // fire off any pending iter's
 }
 
-func (p *staggerConn) getConnCount() int {
-	count := int(p.connCount.Load())
-	if count > len(p.conns) {
-		return len(p.conns)
+func (s *staggerConn) getConnCount() int {
+	count := int(s.connCount.Load())
+	if count > len(s.conns) {
+		return len(s.conns)
 	}
 	return count
 }
 
-func (p *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, err error)) error {
+func (s *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, err error)) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	var started atomic.Int64
-	done := make(chan struct{}, len(p.conns))
-	errs := make(chan error, len(p.conns))
-	for ix, conn := range p.conns {
+	done := make(chan struct{}, len(s.conns))
+	errs := make(chan error, len(s.conns))
+	for ix, conn := range s.conns {
 		go func(ix int, conn PacketConn) {
 			select {
-			case <-p.replay[ix]:
+			case <-s.replay[ix]:
 			case <-ctx.Done():
 				return
 			}
 
-			started.Inc()
 			keepGoing, err := fn(conn)
 			if err != nil {
 				errs <- err
@@ -156,7 +158,7 @@ func (p *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, 
 			}
 		}(ix, conn)
 	}
-	for i := 0; i < p.getConnCount(); i++ {
+	for i := 0; i < s.getConnCount(); i++ {
 		select {
 		case <-done:
 		case <-ctx.Done():
@@ -165,7 +167,7 @@ func (p *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, 
 	}
 
 ctxDone:
-	if len(errs) >= p.getConnCount() {
+	if len(errs) >= s.getConnCount() {
 		// only return an error if all conns failed
 		err := <-errs
 		return errors.Wrapf(err, "all connections have failed for %q", op)
@@ -173,19 +175,20 @@ ctxDone:
 	return nil
 }
 
-func (p *staggerConn) Read(b []byte) (n int, err error) {
+func (s *staggerConn) Read(b []byte) (n int, err error) {
 	type byteResp struct {
 		n int
 		b []byte
 	}
-	success := make(chan byteResp, len(p.conns))
-	failure := make(chan byteResp, len(p.conns))
-	err = p.iter("read", func(conn PacketConn) (bool, error) {
+	success := make(chan byteResp, len(s.conns))
+	failure := make(chan byteResp, len(s.conns))
+	err = s.iter("read", func(conn PacketConn) (bool, error) {
 		buf := make([]byte, len(b))
 		n, err := conn.Read(buf)
 		if err == nil {
 			success <- byteResp{n: n, b: buf}
 		} else {
+			fmt.Println("Error", err)
 			failure <- byteResp{n: n, b: buf}
 		}
 		return err != nil, err
@@ -201,13 +204,13 @@ func (p *staggerConn) Read(b []byte) (n int, err error) {
 	return
 }
 
-func (p *staggerConn) Write(b []byte) (n int, err error) {
-	p.replayMu.Lock()
-	p.lastWrite = b[:]
-	p.replayMu.Unlock()
-	success := make(chan int, len(p.conns))
-	failure := make(chan int, len(p.conns))
-	err = p.iter("write", func(conn PacketConn) (bool, error) {
+func (s *staggerConn) Write(b []byte) (n int, err error) {
+	s.replayMu.Lock()
+	s.lastWrite = b[:]
+	s.replayMu.Unlock()
+	success := make(chan int, len(s.conns))
+	failure := make(chan int, len(s.conns))
+	err = s.iter("write", func(conn PacketConn) (bool, error) {
 		n, err := conn.Write(b)
 		if err == nil {
 			success <- n
@@ -224,45 +227,46 @@ func (p *staggerConn) Write(b []byte) (n int, err error) {
 }
 
 // ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
-func (p *staggerConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
-	panic("read from")
-	type readResponse struct {
+func (s *staggerConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
+	type byteResp struct {
 		n    int
 		addr net.Addr
 		b    []byte
 	}
-	success := make(chan readResponse, len(p.conns))
-	failure := make(chan readResponse, len(p.conns))
-	err = p.iter("read from", func(conn PacketConn) (bool, error) {
+	success := make(chan byteResp, len(s.conns))
+	failure := make(chan byteResp, len(s.conns))
+	err = s.iter("read from", func(conn PacketConn) (bool, error) {
 		buf := make([]byte, len(b))
 		n, addr, err := conn.ReadFrom(buf)
 		if err == nil {
-			success <- readResponse{n: n, addr: addr, b: buf}
+			success <- byteResp{n: n, addr: addr, b: buf}
 		} else {
-			failure <- readResponse{n: n, addr: addr, b: buf}
+			failure <- byteResp{n: n, addr: addr, b: buf}
 		}
 		return err != nil, err
 	})
 	select {
 	case resp := <-success:
-		n, addr = resp.n, resp.addr
+		n = resp.n
+		addr = resp.addr
 		copy(b, resp.b)
 	case resp := <-failure:
-		n, addr = resp.n, resp.addr
+		n = resp.n
+		addr = resp.addr
 		copy(b, resp.b)
 	}
 	return
 }
 
 // WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
-func (p *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
-	panic("write to")
-	p.replayMu.Lock()
-	p.lastWrite = b[:]
-	p.replayMu.Unlock()
-	success := make(chan int, len(p.conns))
-	failure := make(chan int, len(p.conns))
-	err = p.iter("write to", func(conn PacketConn) (bool, error) {
+func (s *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
+	s.replayMu.Lock()
+	s.lastWrite = b[:]
+	s.lastWriteAddr = addr
+	s.replayMu.Unlock()
+	success := make(chan int, len(s.conns))
+	failure := make(chan int, len(s.conns))
+	err = s.iter("write to", func(conn PacketConn) (bool, error) {
 		n, err := conn.WriteTo(b, addr)
 		if err == nil {
 			success <- n
@@ -278,13 +282,13 @@ func (p *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
 	return
 }
 
-func (p *staggerConn) Close() error {
-	p.replayMu.RLock()
-	p.tickerCancel()
-	p.replayMu.RUnlock()
+func (s *staggerConn) Close() error {
+	s.replayMu.RLock()
+	s.tickerCancel()
+	s.replayMu.RUnlock()
 	// TODO Can this be done with iter?
 	var foundErr error
-	for _, conn := range p.conns {
+	for _, conn := range s.conns {
 		err := conn.Close()
 		if err != nil {
 			foundErr = err
@@ -293,39 +297,39 @@ func (p *staggerConn) Close() error {
 	return foundErr
 }
 
-func (p *staggerConn) LocalAddr() net.Addr {
+func (s *staggerConn) LocalAddr() net.Addr {
 	// This doesn't seem to matter for DNS connections, and it is not clear what a more appropriate result should be.
-	return p.conns[0].LocalAddr()
+	return s.conns[0].LocalAddr()
 }
 
-func (p *staggerConn) RemoteAddr() net.Addr {
+func (s *staggerConn) RemoteAddr() net.Addr {
 	// This doesn't seem to matter for DNS connections, and it is not clear what a more appropriate result should be.
-	return p.conns[0].RemoteAddr()
+	return s.conns[0].RemoteAddr()
 }
 
-func (p *staggerConn) SetDeadline(t time.Time) error {
-	p.replayMu.Lock()
-	p.lastDeadline = t
-	p.replayMu.Unlock()
-	return p.iter("deadline", func(conn PacketConn) (bool, error) {
+func (s *staggerConn) SetDeadline(t time.Time) error {
+	s.replayMu.Lock()
+	s.lastDeadline = t
+	s.replayMu.Unlock()
+	return s.iter("deadline", func(conn PacketConn) (bool, error) {
 		return true, conn.SetDeadline(t)
 	})
 }
 
-func (p *staggerConn) SetReadDeadline(t time.Time) error {
-	p.replayMu.Lock()
-	p.lastReadDeadline = t
-	p.replayMu.Unlock()
-	return p.iter("read deadline", func(conn PacketConn) (bool, error) {
+func (s *staggerConn) SetReadDeadline(t time.Time) error {
+	s.replayMu.Lock()
+	s.lastReadDeadline = t
+	s.replayMu.Unlock()
+	return s.iter("read deadline", func(conn PacketConn) (bool, error) {
 		return true, conn.SetReadDeadline(t)
 	})
 }
 
-func (p *staggerConn) SetWriteDeadline(t time.Time) error {
-	p.replayMu.Lock()
-	p.lastWriteDeadline = t
-	p.replayMu.Unlock()
-	return p.iter("write deadline", func(conn PacketConn) (bool, error) {
+func (s *staggerConn) SetWriteDeadline(t time.Time) error {
+	s.replayMu.Lock()
+	s.lastWriteDeadline = t
+	s.replayMu.Unlock()
+	return s.iter("write deadline", func(conn PacketConn) (bool, error) {
 		return true, conn.SetWriteDeadline(t)
 	})
 }
