@@ -27,22 +27,15 @@ func New() *net.Resolver {
 }
 
 func NewWithConfig(config Config) *net.Resolver {
-	if runtime.GOOS != macOSRuntimeName {
+	return newWithConfig(runtime.GOOS, config)
+}
+
+func newWithConfig(runtimeName string, config Config) *net.Resolver {
+	if runtimeName != macOSRuntimeName {
 		return &net.Resolver{}
 	}
 
-	if config.Logger == nil {
-		config.Logger = zap.NewNop()
-	}
-	if config.InitialNameserverDelay == 0 {
-		config.InitialNameserverDelay = 150 * time.Millisecond
-	}
-	if config.NextNameserverInterval == 0 {
-		config.NextNameserverInterval = 10 * time.Millisecond
-	}
-
 	dialer := newMacOSDialer(config)
-
 	return &net.Resolver{
 		PreferGo: true,
 		Dial:     dialer.DialContext,
@@ -58,12 +51,25 @@ type macOSDialer struct {
 	dialer      *net.Dialer
 	resolvers   []scutil.Resolver
 	resolversMu sync.Mutex
+
+	readResolvers func(context.Context) (scutil.Config, error)
 }
 
 func newMacOSDialer(config Config) Dialer {
+	if config.Logger == nil {
+		config.Logger = zap.NewNop()
+	}
+	if config.InitialNameserverDelay == 0 {
+		config.InitialNameserverDelay = 150 * time.Millisecond
+	}
+	if config.NextNameserverInterval == 0 {
+		config.NextNameserverInterval = 10 * time.Millisecond
+	}
+
 	return &macOSDialer{
-		Config: config,
-		dialer: &net.Dialer{Timeout: 30 * time.Second},
+		Config:        config,
+		dialer:        &net.Dialer{Timeout: 30 * time.Second},
+		readResolvers: scutil.ReadMacOSDNS,
 	}
 }
 
@@ -80,7 +86,7 @@ func (m *macOSDialer) ensureResolvers() ([]scutil.Resolver, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	m.Logger.Info("Reading macOS DNS config from 'scutil'...")
-	cfg, err := scutil.ReadMacOSDNS(ctx)
+	cfg, err := m.readResolvers(ctx)
 	m.resolvers = cfg.Resolvers
 	m.Logger.Info("Finished reading macOS DNS config from 'scutil'", zap.Error(err))
 	return m.resolvers, err
