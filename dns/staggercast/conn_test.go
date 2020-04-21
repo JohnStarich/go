@@ -21,6 +21,8 @@ func dialUDP(t *testing.T, address string) PacketConn {
 }
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	conns := []PacketConn{
 		dialUDP(t, "1.2.3.4:53"),
 		dialUDP(t, "5.6.7.8:53"),
@@ -53,6 +55,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestDialDNS(t *testing.T) {
+	t.Parallel()
+
 	type dnsServer struct {
 		delay     time.Duration
 		hostnames map[string][]string
@@ -95,7 +99,7 @@ func TestDialDNS(t *testing.T) {
 				}},
 			},
 			lookup:    "hi.local",
-			expectErr: "all connections have failed for \"write\": write udp [::1]:",
+			expectErr: "all connections have failed for \"write\": write udp",
 		},
 		{
 			description: "2 unresponsive nameservers",
@@ -108,7 +112,7 @@ func TestDialDNS(t *testing.T) {
 				}},
 			},
 			lookup:    "hi.local",
-			expectErr: "all connections have failed for \"write\": write udp [::1]:",
+			expectErr: "all connections have failed for \"write\": write udp",
 		},
 	} {
 		tc := tc // fix parallel access of loop variable
@@ -146,5 +150,175 @@ func TestDialDNS(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectAddrs, addrs)
 		})
+	}
+}
+
+func TestStagger(t *testing.T) {
+	t.Parallel()
+
+	var servers []string
+	addr, cancel := testhelpers.StartDNSServer(t, 30*time.Second, map[string][]string{
+		"hi.local.": {"1.2.3.4"},
+	})
+	defer cancel()
+	servers = append(servers, addr)
+	addr, cancel = testhelpers.StartDNSServer(t, 0, map[string][]string{
+		"hi.local.": {"5.6.7.8"},
+	})
+	defer cancel()
+	servers = append(servers, addr)
+
+	t.Run("stagger never enables", func(t *testing.T) {
+		res := &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				var conns []PacketConn
+				for _, addr := range servers {
+					conns = append(conns, dialUDP(t, addr))
+				}
+				conn := New(conns)
+				conn.Stagger(nil, func() {}) // effectively disable all further connections
+				return conn, nil
+			},
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+		defer cancel()
+
+		addrs, err := res.LookupHost(ctx, "hi.local")
+		assert.Empty(t, addrs)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "all connections have failed for \"write\": write udp")
+	})
+
+	t.Run("stagger eventually succeeds", func(t *testing.T) {
+		const delay = 1 * time.Second
+		res := &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				var conns []PacketConn
+				for _, addr := range servers {
+					conns = append(conns, dialUDP(t, addr))
+				}
+				conn := New(conns)
+
+				// stagger new connections with a ticker of 'delay' interval
+				ctx, cancel := context.WithCancel(ctx)
+				c := make(chan struct{})
+				go func() {
+					ticker := time.NewTicker(delay)
+					for {
+						select {
+						case <-ticker.C:
+							c <- struct{}{}
+						case <-ctx.Done():
+							ticker.Stop()
+							return
+						}
+					}
+				}()
+				conn.Stagger(c, cancel) // effectively disable all further connections
+				return conn, nil
+			},
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+		defer cancel()
+
+		start := time.Now()
+		addrs, err := res.LookupHost(ctx, "hi.local")
+		d := time.Since(start)
+		assert.Equal(t, []string{"5.6.7.8"}, addrs)
+		assert.NoError(t, err)
+		assert.LessOrEqual(t, int(delay), int(d), "DNS should not resolve before second connection is enabled")
+		assert.GreaterOrEqual(t, int(testTimeout), int(d), "DNS should resolve before the test times out")
+	})
+
+	t.Run("stagger enables all (almost) instantly", func(t *testing.T) {
+		res := &net.Resolver{
+			PreferGo: true,
+			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				var conns []PacketConn
+				for _, addr := range servers {
+					conns = append(conns, dialUDP(t, addr))
+				}
+				conn := New(conns)
+
+				// stagger new connections with a ticker of 'delay' interval
+				c := make(chan struct{})
+				close(c)
+				conn.Stagger(c, func() {}) // effectively disable all further connections
+				return conn, nil
+			},
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+		defer cancel()
+
+		start := time.Now()
+		addrs, err := res.LookupHost(ctx, "hi.local")
+		d := time.Since(start)
+		assert.Equal(t, []string{"5.6.7.8"}, addrs)
+		assert.NoError(t, err)
+		assert.Less(t, int(d), int(float64(testTimeout)*0.01), "Second connection should be used almost immediately")
+	})
+}
+
+func TestLocalAddr(t *testing.T) {
+	firstConn := dialUDP(t, "1.2.3.4:53")
+	conn := New([]PacketConn{
+		firstConn,
+		dialUDP(t, "5.6.7.8:53"),
+	})
+	assert.Equal(t, firstConn.LocalAddr(), conn.LocalAddr())
+}
+
+func TestRemoteAddr(t *testing.T) {
+	firstConn := dialUDP(t, "1.2.3.4:53")
+	conn := New([]PacketConn{
+		firstConn,
+		dialUDP(t, "5.6.7.8:53"),
+	})
+	assert.Equal(t, firstConn.RemoteAddr(), conn.RemoteAddr())
+}
+
+type wrapperConn struct {
+	PacketConn
+	readDeadline, writeDeadline time.Time
+}
+
+func (w *wrapperConn) SetWriteDeadline(t time.Time) error {
+	w.writeDeadline = t
+	return nil
+}
+
+func (w *wrapperConn) SetReadDeadline(t time.Time) error {
+	w.readDeadline = t
+	return nil
+}
+
+func TestSetReadDeadline(t *testing.T) {
+	conns := []PacketConn{
+		&wrapperConn{},
+		&wrapperConn{},
+	}
+	conn := New(conns)
+	someTime := time.Now()
+	assert.NoError(t, conn.SetReadDeadline(someTime))
+	for _, conn := range conns {
+		assert.Equal(t, someTime, conn.(*wrapperConn).readDeadline)
+	}
+}
+
+func TestSetWriteDeadline(t *testing.T) {
+	conns := []PacketConn{
+		&wrapperConn{},
+		&wrapperConn{},
+	}
+	conn := New(conns)
+	someTime := time.Now()
+	assert.NoError(t, conn.SetWriteDeadline(someTime))
+	for _, conn := range conns {
+		assert.Equal(t, someTime, conn.(*wrapperConn).writeDeadline)
 	}
 }

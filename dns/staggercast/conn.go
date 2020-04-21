@@ -5,7 +5,6 @@ package staggercast
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net"
 	"sync"
@@ -188,7 +187,6 @@ func (s *staggerConn) Read(b []byte) (n int, err error) {
 		if err == nil {
 			success <- byteResp{n: n, b: buf}
 		} else {
-			fmt.Println("Error", err)
 			failure <- byteResp{n: n, b: buf}
 		}
 		return err != nil, err
