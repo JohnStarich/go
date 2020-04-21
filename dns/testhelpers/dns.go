@@ -37,7 +37,10 @@ func hostnamesHandler(t *testing.T, ctx context.Context, responseDelay time.Dura
 		}
 
 		t.Logf("DNS message:\n%s", message.String())
-		w.WriteMsg(&message)
+		err := w.WriteMsg(&message)
+		if err != nil {
+			t.Logf("Error writing message: %s", err.Error())
+		}
 	}
 }
 

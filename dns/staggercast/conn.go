@@ -106,22 +106,22 @@ func (s *staggerConn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc)
 	s.replayMu.Unlock()
 }
 
-// runReplay synchronously reapplies the last Deadlines and the last Write
+// runReplay synchronously reapplies the last Deadlines and the last Write on a best-effort basis
 func (s *staggerConn) runReplay(connIndex uint64) {
 	s.replayMu.RLock()
 	if !s.lastDeadline.IsZero() {
-		s.conns[connIndex].SetDeadline(s.lastDeadline)
+		_ = s.conns[connIndex].SetDeadline(s.lastDeadline)
 	}
 	if !s.lastReadDeadline.IsZero() {
-		s.conns[connIndex].SetReadDeadline(s.lastReadDeadline)
+		_ = s.conns[connIndex].SetReadDeadline(s.lastReadDeadline)
 	}
 	if !s.lastWriteDeadline.IsZero() {
-		s.conns[connIndex].SetWriteDeadline(s.lastWriteDeadline)
+		_ = s.conns[connIndex].SetWriteDeadline(s.lastWriteDeadline)
 	}
 	b := s.lastWrite
 	s.replayMu.RUnlock()
 	if b != nil {
-		s.conns[connIndex].Write(b)
+		_, _ = s.conns[connIndex].Write(b)
 	}
 	close(s.replay[connIndex]) // fire off any pending iter's
 }

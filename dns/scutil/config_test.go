@@ -13,7 +13,7 @@ import (
 func TestRealSCUtilDNS(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		// will fail on non-macOS runs, so just run it for a sanity check
-		ReadMacOSDNS(context.Background())
+		_, _ = ReadMacOSDNS(context.Background())
 	})
 
 	t.Run("canceled context", func(t *testing.T) {
