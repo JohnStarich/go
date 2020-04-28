@@ -293,6 +293,7 @@ func TestRemoteAddr(t *testing.T) {
 type wrapperConn struct {
 	PacketConn
 	readDeadline, writeDeadline time.Time
+	remoteAddr                  net.Addr
 }
 
 func (w *wrapperConn) SetWriteDeadline(t time.Time) error {
@@ -303,6 +304,10 @@ func (w *wrapperConn) SetWriteDeadline(t time.Time) error {
 func (w *wrapperConn) SetReadDeadline(t time.Time) error {
 	w.readDeadline = t
 	return nil
+}
+
+func (w *wrapperConn) RemoteAddr() net.Addr {
+	return w.remoteAddr
 }
 
 func TestSetReadDeadline(t *testing.T) {
@@ -329,4 +334,19 @@ func TestSetWriteDeadline(t *testing.T) {
 	for _, conn := range conns {
 		assert.Equal(t, someTime, conn.(*wrapperConn).writeDeadline)
 	}
+}
+
+func TestStats(t *testing.T) {
+	_, addr, err := net.ParseCIDR("192.0.2.0/24")
+	require.NoError(t, err)
+
+	conn1, conn2 := &wrapperConn{}, &wrapperConn{remoteAddr: addr}
+
+	conn := New([]PacketConn{conn1, conn2}).(*staggerConn)
+	conn.firstResponder.Store(1)
+	stats := conn.Stats()
+	assert.Equal(t, Stats{
+		FastestRemoteIndex: 1,
+		FastestRemote:      addr,
+	}, stats)
 }

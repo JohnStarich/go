@@ -6,6 +6,7 @@ import (
 	"net"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,9 +49,9 @@ type Dialer interface {
 
 type macOSDialer struct {
 	Config
-	dialer      *net.Dialer
-	resolvers   []scutil.Resolver
-	resolversMu sync.Mutex
+	dialer        *net.Dialer
+	nameservers   []string
+	nameserversMu sync.RWMutex
 
 	readResolvers func(context.Context) (scutil.Config, error)
 }
@@ -73,35 +74,37 @@ func newMacOSDialer(config Config) Dialer {
 	}
 }
 
-func (m *macOSDialer) ensureResolvers() ([]scutil.Resolver, error) {
-	if len(m.resolvers) != 0 {
-		return m.resolvers, nil
+func (m *macOSDialer) ensureNameservers() ([]string, error) {
+	m.nameserversMu.RLock()
+	nameservers := m.nameservers
+	m.nameserversMu.RUnlock()
+	if len(nameservers) != 0 {
+		return nameservers, nil
 	}
-	m.resolversMu.Lock()
-	defer m.resolversMu.Unlock()
-	if len(m.resolvers) != 0 { // check again, could change while waiting on lock
-		return m.resolvers, nil
+	m.nameserversMu.Lock()
+	defer m.nameserversMu.Unlock()
+	if len(m.nameservers) != 0 { // check again, could change while waiting on lock
+		return m.nameservers, nil
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	m.Logger.Info("Reading macOS DNS config from 'scutil'...")
 	cfg, err := m.readResolvers(ctx)
-	m.resolvers = cfg.Resolvers
+	for _, resolver := range cfg.Resolvers {
+		for _, nameserver := range resolver.Nameservers {
+			m.nameservers = append(m.nameservers, nameserver+":53")
+		}
+	}
 	m.Logger.Info("Finished reading macOS DNS config from 'scutil'", zap.Error(err))
-	return m.resolvers, err
+	return m.nameservers, err
 }
 
 func (m *macOSDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	resolvers, err := m.ensureResolvers()
+	nameservers, err := m.ensureNameservers()
 	if err != nil {
 		m.Logger.Error("Failed looking up macOS resolvers, falling back to builtin DNS dialer", zap.Error(err))
 		return m.dialer.DialContext(ctx, network, address)
-	}
-
-	var nameservers []string
-	for _, resolver := range resolvers {
-		nameservers = append(nameservers, resolver.Nameservers...)
 	}
 
 	conn, err := m.dialAll(ctx, nameservers)
@@ -126,7 +129,7 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 	m.Logger.Debug("Dialing all nameservers")
 	for ix, nameserver := range nameservers {
 		go func(ix int, nameserver string) {
-			conn, err := m.dialer.DialContext(ctx, "udp", nameserver+":53")
+			conn, err := m.dialer.DialContext(ctx, "udp", nameserver)
 			if err != nil {
 				m.Logger.Warn("Error dialing nameserver", zap.String("nameserver", nameserver), zap.Int("index", ix), zap.Error(err))
 			} else {
@@ -161,6 +164,7 @@ func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Co
 
 	staggerConn := staggercast.New(allSuccessfulConns)
 	staggerConn.Stagger(staggerTicker(m.InitialNameserverDelay, m.NextNameserverInterval, m.Logger))
+	go m.reorderNameservers(ctx, staggerConn)
 	return staggerConn, nil
 }
 
@@ -196,4 +200,52 @@ func staggerTicker(initialDelay, d time.Duration, logger *zap.Logger) (<-chan st
 		}
 	}()
 	return c, cancel
+}
+
+func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.Conn) {
+	var zero time.Time
+	if deadline, ok := ctx.Deadline(); !ok || deadline == zero {
+		m.Logger.Debug("Skipping nameserver reorder, no deadline on context")
+		return
+	}
+
+	<-ctx.Done()
+	stats := conn.Stats()
+	if stats.FastestRemoteIndex == 0 {
+		return
+	}
+
+	m.nameserversMu.Lock()
+	defer m.nameserversMu.Unlock()
+
+	fastestRemoteAddr := stats.FastestRemote.String()
+	fastIndexNS := m.nameservers[stats.FastestRemoteIndex]
+	if !equalAddr(fastIndexNS, fastestRemoteAddr) {
+		m.Logger.Debug("Fastest remote already reordered", zap.String("remote", stats.FastestRemote.String()), zap.String("nsIndex", fastIndexNS))
+		return
+	}
+	newNS := []string{fastIndexNS}
+	newNS = append(newNS, m.nameservers[:stats.FastestRemoteIndex]...)
+	newNS = append(newNS, m.nameservers[stats.FastestRemoteIndex+1:]...)
+	m.nameservers = newNS
+	m.Logger.Debug("Reordering fastest nameserver to the front", zap.Strings("nameservers", newNS))
+}
+
+func equalAddr(addrs ...string) bool {
+	const (
+		defaultLocalIPv6Prefix = "[::]:"
+		realLocalIPv6Prefix    = "[::1]:"
+	)
+
+	for i, addr := range addrs {
+		if strings.HasPrefix(addr, defaultLocalIPv6Prefix) {
+			addrs[i] = realLocalIPv6Prefix + strings.TrimPrefix(addr, defaultLocalIPv6Prefix)
+		}
+	}
+	for i := 0; i < len(addrs)-1; i++ {
+		if addrs[i] != addrs[i+1] {
+			return false
+		}
+	}
+	return true
 }

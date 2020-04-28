@@ -65,7 +65,7 @@ func TestNewMacOSDialer(t *testing.T) {
 	})
 }
 
-func TestEnsureResolvers(t *testing.T) {
+func TestEnsureNameservers(t *testing.T) {
 	someConfig := scutil.Config{
 		Resolvers: []scutil.Resolver{
 			{Nameservers: []string{"1.2.3.4"}},
@@ -79,86 +79,95 @@ func TestEnsureResolvers(t *testing.T) {
 		assert.Less(t, callCount, 2, "Read should not be called more than once")
 		return someConfig, someError
 	}
-	resolvers, err := dialer.ensureResolvers()
+	var expectedNameservers []string
+	for _, ns := range someConfig.Resolvers[0].Nameservers {
+		expectedNameservers = append(expectedNameservers, ns+":53")
+	}
+	nameservers, err := dialer.ensureNameservers()
 	assert.Equal(t, someError, err)
-	assert.Equal(t, someConfig.Resolvers, resolvers)
-	require.Equal(t, someConfig.Resolvers, dialer.resolvers)
+	assert.Equal(t, expectedNameservers, nameservers)
+	require.Equal(t, expectedNameservers, dialer.nameservers)
 
-	resolvers, err = dialer.ensureResolvers() // should not call read again
-	assert.Equal(t, someConfig.Resolvers, resolvers)
+	nameservers, err = dialer.ensureNameservers() // should not call read again
+	assert.Equal(t, expectedNameservers, nameservers)
 	assert.NoError(t, err)
 }
 
 func testDialer(t *testing.T) *macOSDialer {
 	return newMacOSDialer(Config{Logger: zaptest.NewLogger(t)}).(*macOSDialer)
 }
+
 func TestDNSLookupHost(t *testing.T) {
-	addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-		ResponseDelay: 1 * time.Second,
-		Hostnames: map[string][]string{
-			"hi.local.": []string{"5.6.7.8"},
-		},
-		Port: 53,
-	})
-	defer cancel()
-	host, port, err := net.SplitHostPort(addr)
-	require.NoError(t, err)
-	require.Equal(t, "53", port)
-	if host == "::" {
-		host = "[::]" // Wrap IPv6 localhost in brackets
-	}
-	workingDNS := host
-	failingDNS := "1.2.3.4"
+	t.Parallel()
+	const (
+		working = true
+		failing = false
+	)
 
 	for _, tc := range []struct {
 		description string
-		nameservers []string
+		nameservers []bool // true is working, false is failing as defined above
 		expectErr   string
 	}{
 		{
 			description: "1 working nameserver",
-			nameservers: []string{workingDNS},
+			nameservers: []bool{working},
 		},
 		{
 			description: "1 failing nameserver",
-			nameservers: []string{failingDNS},
+			nameservers: []bool{failing},
 			expectErr:   "i/o timeout",
 		},
 		{
 			description: "2 working nameservers",
-			nameservers: []string{workingDNS, workingDNS},
+			nameservers: []bool{working, working},
 		},
 		{
 			description: "2 failing nameservers",
-			nameservers: []string{failingDNS, failingDNS},
+			nameservers: []bool{failing, failing},
 			expectErr:   "i/o timeout",
 		},
 		{
 			description: "1 failing, 1 working nameserver",
-			nameservers: []string{failingDNS, workingDNS},
+			nameservers: []bool{failing, working},
 		},
 		{
 			description: "1 working, 1 failing nameserver",
-			nameservers: []string{workingDNS, failingDNS},
+			nameservers: []bool{working, failing},
 		},
 		{
 			description: "many failing, 1 working nameserver",
-			nameservers: []string{
-				failingDNS,
-				failingDNS,
-				failingDNS,
-				failingDNS,
-				failingDNS,
-				failingDNS,
-				failingDNS,
-				workingDNS,
+			nameservers: []bool{
+				failing,
+				failing,
+				failing,
+				failing,
+				failing,
+				failing,
+				failing,
+				working,
 			},
 		},
 	} {
+		tc := tc
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+				ResponseDelay: 1 * time.Second,
+				Hostnames: map[string][]string{
+					"hi.local.": []string{"5.6.7.8"},
+				},
+			})
+			defer cancel()
+			failingDNS := "1.2.3.4:53"
+
 			dialer := testDialer(t)
-			dialer.resolvers = []scutil.Resolver{
-				{Nameservers: tc.nameservers},
+			for _, workingNS := range tc.nameservers {
+				nameserver := workingDNS
+				if !workingNS {
+					nameserver = failingDNS
+				}
+				dialer.nameservers = append(dialer.nameservers, nameserver)
 			}
 
 			ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
@@ -181,4 +190,51 @@ func TestDNSLookupHost(t *testing.T) {
 			assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		})
 	}
+}
+
+func TestReorderNameservers(t *testing.T) {
+	t.Parallel()
+	addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+		Hostnames: map[string][]string{
+			"hi.local.": []string{"5.6.7.8"},
+		},
+	})
+	defer cancel()
+
+	const initialDelay = 3 * time.Second
+	dialer := newMacOSDialer(Config{
+		InitialNameserverDelay: initialDelay,
+		Logger:                 zaptest.NewLogger(t),
+	}).(*macOSDialer)
+	dialer.nameservers = []string{"1.2.3.4:53", addr}
+	res := &net.Resolver{PreferGo: true, Dial: dialer.DialContext}
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	start := time.Now()
+	addrs, err := res.LookupHost(ctx, "hi.local")
+	duration := time.Since(start)
+	cancel() // explicitly cancel to reorder nameservers now
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"5.6.7.8"}, addrs)
+	assert.GreaterOrEqual(t, int(duration), int(initialDelay), "First request should take longer than initial delay")
+	time.Sleep(time.Second)
+	assert.Equal(t, []string{addr, "1.2.3.4:53"}, dialer.nameservers)
+
+	ctx, cancel = context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+	start = time.Now()
+	addrs, err = res.LookupHost(ctx, "hi.local")
+	duration = time.Since(start)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{"5.6.7.8"}, addrs)
+	assert.LessOrEqual(t, int(duration), int(initialDelay/100), "Second request should reorder and complete almost instantly")
+}
+
+func TestReorderNameserversNoDeadline(t *testing.T) {
+	dialer := testDialer(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	dialer.reorderNameservers(ctx, nil)
+	// Reordering should no-op and return immediately
 }

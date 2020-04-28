@@ -17,6 +17,7 @@ import (
 type Conn interface {
 	PacketConn
 	Stagger(ticker <-chan struct{}, cancel context.CancelFunc)
+	Stats() Stats
 }
 
 // PacketConn implements both net.Conn and net.PacketConn
@@ -25,6 +26,11 @@ type PacketConn interface {
 	io.Writer
 	RemoteAddr() net.Addr
 	net.PacketConn
+}
+
+type Stats struct {
+	FastestRemoteIndex int
+	FastestRemote      net.Addr
 }
 
 // staggerConn fires out all Writes to all outgoing connections, Reads return the first successful read.
@@ -41,6 +47,9 @@ type staggerConn struct {
 	lastWriteDeadline time.Time
 	lastWrite     []byte
 	lastWriteAddr net.Addr // currently unused in replay
+
+	// capture stats about connections for better ordering on the next call to staggercast.New
+	firstResponder *atomic.Int64
 }
 
 func New(conns []PacketConn) Conn {
@@ -59,6 +68,8 @@ func New(conns []PacketConn) Conn {
 		connCount:    atomic.NewUint64(uint64(len(conns))),
 		replay:       replay,
 		tickerCancel: func() {},
+
+		firstResponder: atomic.NewInt64(-1), // -1 marks no known first responder, so connection #0 can be designated first
 	}
 }
 
@@ -106,6 +117,30 @@ func (s *staggerConn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc)
 	s.replayMu.Unlock()
 }
 
+func (s *staggerConn) Stats() Stats {
+	ix := int(s.firstResponder.Load())
+	if ix < 0 {
+		ix = 0 // firstResponder of 0 is a no-op if re-order should occur
+	}
+	return Stats{
+		FastestRemoteIndex: ix,
+		FastestRemote:      s.conns[ix].RemoteAddr(),
+	}
+}
+
+type connOp string
+
+const (
+	readOp             connOp = "read"
+	writeOp            connOp = "write"
+	readFromOp         connOp = "read from"
+	writeToOp          connOp = "write to"
+	closeOp            connOp = "close"
+	setDeadlineOp      connOp = "set deadline"
+	setReadDeadlineOp  connOp = "set read deadline"
+	setWriteDeadlineOp connOp = "set write deadline"
+)
+
 // runReplay synchronously reapplies the last Deadlines and the last Write on a best-effort basis
 func (s *staggerConn) runReplay(connIndex uint64) {
 	s.replayMu.RLock()
@@ -134,7 +169,7 @@ func (s *staggerConn) getConnCount() int {
 	return count
 }
 
-func (s *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, err error)) error {
+func (s *staggerConn) iter(op connOp, fn func(conn PacketConn) (keepGoing bool, err error)) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	done := make(chan struct{}, len(s.conns))
@@ -150,6 +185,8 @@ func (s *staggerConn) iter(op string, fn func(conn PacketConn) (keepGoing bool, 
 			keepGoing, err := fn(conn)
 			if err != nil {
 				errs <- err
+			} else if op == readOp || op == readFromOp {
+				s.firstResponder.CAS(-1, int64(ix))
 			}
 			done <- struct{}{}
 			if !keepGoing {
@@ -181,7 +218,7 @@ func (s *staggerConn) Read(b []byte) (n int, err error) {
 	}
 	success := make(chan byteResp, len(s.conns))
 	failure := make(chan byteResp, len(s.conns))
-	err = s.iter("read", func(conn PacketConn) (bool, error) {
+	err = s.iter(readOp, func(conn PacketConn) (bool, error) {
 		buf := make([]byte, len(b))
 		n, err := conn.Read(buf)
 		if err == nil {
@@ -208,7 +245,7 @@ func (s *staggerConn) Write(b []byte) (n int, err error) {
 	s.replayMu.Unlock()
 	success := make(chan int, len(s.conns))
 	failure := make(chan int, len(s.conns))
-	err = s.iter("write", func(conn PacketConn) (bool, error) {
+	err = s.iter(writeOp, func(conn PacketConn) (bool, error) {
 		n, err := conn.Write(b)
 		if err == nil {
 			success <- n
@@ -233,7 +270,7 @@ func (s *staggerConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
 	}
 	success := make(chan byteResp, len(s.conns))
 	failure := make(chan byteResp, len(s.conns))
-	err = s.iter("read from", func(conn PacketConn) (bool, error) {
+	err = s.iter(readFromOp, func(conn PacketConn) (bool, error) {
 		buf := make([]byte, len(b))
 		n, addr, err := conn.ReadFrom(buf)
 		if err == nil {
@@ -264,7 +301,7 @@ func (s *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
 	s.replayMu.Unlock()
 	success := make(chan int, len(s.conns))
 	failure := make(chan int, len(s.conns))
-	err = s.iter("write to", func(conn PacketConn) (bool, error) {
+	err = s.iter(writeToOp, func(conn PacketConn) (bool, error) {
 		n, err := conn.WriteTo(b, addr)
 		if err == nil {
 			success <- n
@@ -309,7 +346,7 @@ func (s *staggerConn) SetDeadline(t time.Time) error {
 	s.replayMu.Lock()
 	s.lastDeadline = t
 	s.replayMu.Unlock()
-	return s.iter("deadline", func(conn PacketConn) (bool, error) {
+	return s.iter(setDeadlineOp, func(conn PacketConn) (bool, error) {
 		return true, conn.SetDeadline(t)
 	})
 }
@@ -318,7 +355,7 @@ func (s *staggerConn) SetReadDeadline(t time.Time) error {
 	s.replayMu.Lock()
 	s.lastReadDeadline = t
 	s.replayMu.Unlock()
-	return s.iter("read deadline", func(conn PacketConn) (bool, error) {
+	return s.iter(setReadDeadlineOp, func(conn PacketConn) (bool, error) {
 		return true, conn.SetReadDeadline(t)
 	})
 }
@@ -327,7 +364,7 @@ func (s *staggerConn) SetWriteDeadline(t time.Time) error {
 	s.replayMu.Lock()
 	s.lastWriteDeadline = t
 	s.replayMu.Unlock()
-	return s.iter("write deadline", func(conn PacketConn) (bool, error) {
+	return s.iter(setWriteDeadlineOp, func(conn PacketConn) (bool, error) {
 		return true, conn.SetWriteDeadline(t)
 	})
 }
