@@ -1,0 +1,10 @@
+language: go
+go:
+  - 1.13.x
+
+jobs:
+  include:
+    - name: Lint
+      script: make lint
+    - name: Test
+      script: make test
