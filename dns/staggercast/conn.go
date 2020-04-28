@@ -135,7 +135,6 @@ const (
 	writeOp            connOp = "write"
 	readFromOp         connOp = "read from"
 	writeToOp          connOp = "write to"
-	closeOp            connOp = "close"
 	setDeadlineOp      connOp = "set deadline"
 	setReadDeadlineOp  connOp = "set read deadline"
 	setWriteDeadlineOp connOp = "set write deadline"
@@ -321,7 +320,6 @@ func (s *staggerConn) Close() error {
 	s.replayMu.RLock()
 	s.tickerCancel()
 	s.replayMu.RUnlock()
-	// TODO Can this be done with iter?
 	var foundErr error
 	for _, conn := range s.conns {
 		err := conn.Close()
