@@ -6,7 +6,6 @@ import (
 	"net"
 	"runtime"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -220,7 +219,7 @@ func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.C
 
 	fastestRemoteAddr := stats.FastestRemote.String()
 	fastIndexNS := m.nameservers[stats.FastestRemoteIndex]
-	if !equalAddr(fastIndexNS, fastestRemoteAddr) {
+	if fastIndexNS != fastestRemoteAddr {
 		m.Logger.Debug("Fastest remote already reordered", zap.String("remote", stats.FastestRemote.String()), zap.String("nsIndex", fastIndexNS))
 		return
 	}
@@ -229,23 +228,4 @@ func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.C
 	newNS = append(newNS, m.nameservers[stats.FastestRemoteIndex+1:]...)
 	m.nameservers = newNS
 	m.Logger.Debug("Reordering fastest nameserver to the front", zap.Strings("nameservers", newNS))
-}
-
-func equalAddr(addrs ...string) bool {
-	const (
-		defaultLocalIPv6Prefix = "[::]:"
-		realLocalIPv6Prefix    = "[::1]:"
-	)
-
-	for i, addr := range addrs {
-		if strings.HasPrefix(addr, defaultLocalIPv6Prefix) {
-			addrs[i] = realLocalIPv6Prefix + strings.TrimPrefix(addr, defaultLocalIPv6Prefix)
-		}
-	}
-	for i := 0; i < len(addrs)-1; i++ {
-		if addrs[i] != addrs[i+1] {
-			return false
-		}
-	}
-	return true
 }

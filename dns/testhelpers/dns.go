@@ -55,10 +55,11 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 	mux := dns.NewServeMux()
 	mux.HandleFunc("local.", hostnamesHandler(t, ctx, config.ResponseDelay, config.Hostnames))
 
-	packetConn, err := net.ListenUDP("udp", &net.UDPAddr{Port: config.Port})
+	const network = "udp4"
+	packetConn, err := net.ListenUDP(network, &net.UDPAddr{Port: config.Port})
 	require.NoError(t, err)
 	server := &dns.Server{
-		Net:        "udp",
+		Net:        network,
 		PacketConn: packetConn,
 		Handler:    mux,
 	}
@@ -70,5 +71,9 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 		<-ctx.Done()
 		_ = server.Shutdown()
 	}()
-	return server.PacketConn.LocalAddr().String(), cancel
+	localAddr := server.PacketConn.LocalAddr().String()
+	_, port, err := net.SplitHostPort(localAddr)
+	require.NoError(t, err)
+	localAddr = "127.0.0.1:" + port
+	return localAddr, cancel
 }

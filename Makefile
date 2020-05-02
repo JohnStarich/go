@@ -53,3 +53,9 @@ test: $(MODULES:=-test)
 test-prep:
 	rm -rf cover/
 	mkdir cover
+	# Remove DNS timeouts from CI builds, so DNS tests with bad nameservers fail as expected.
+	if [[ "${CI}" == true ]]; then \
+		set -e; \
+		sudo sed -i'' -e '/options timeout:/d' /etc/resolv.conf; \
+		cat /etc/resolv.conf; \
+	fi
