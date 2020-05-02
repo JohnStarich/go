@@ -3,15 +3,6 @@ LINT_VERSION=1.25.1
 
 MODULES = $(sort $(patsubst %/,%,$(dir $(wildcard */go.mod))))
 
-# Make a template to run $CMD for every module's prefix, e.g. datasize-lint, datasize-test
-define MODULE_TEMPL
-.PHONY: $(1)-%
-$(1)-%:
-	cd $(1); \
-	$${CMD}
-endef
-$(foreach module,$(MODULES),$(eval $(call MODULE_TEMPL,$(module))))
-
 .PHONY: all
 all: lint test
 
@@ -22,27 +13,43 @@ lint-deps:
 	fi
 
 .PHONY: lint
-lint: CMD := golangci-lint run
-lint: lint-deps
 lint: $(MODULES:=-lint)
+.PHONY: %-lint
+%-lint: lint-deps
+	cd $*; golangci-lint run
 
 .PHONY: lint-fix
-lint-fix: CMD := golangci-lint run --fix
-lint-fix: lint-deps
 lint-fix: $(MODULES:=-lint-fix)
+%-lint-fix: lint-deps
+	cd $*; golangci-lint run --fix
 
+# 'go mod init ...' below is a hack so 'go tool cover' can generate reports
 .PHONY: test
-test: COVER := $(shell mktemp)
-test: CMD := \
+test: $(MODULES:=-test)
 	set -e; \
-	go test ./... -race -cover -coverprofile "${COVER}" >&2; \
-	coverage=$$(go tool cover -func "${COVER}" | tail -1 | awk '{print $$3}'); \
+	trap 'rm go.mod go.sum' EXIT; \
+	go mod init github.com/johnstarich/go; \
+	echo 'mode: atomic' > cover.out; \
+	cat cover/* | grep -v '^mode: ' >> cover.out; \
+	coverage=$$(go tool cover -func "cover.out" | tail -1 | awk '{print $$3}'); \
 	printf '##########################\n' >&2; \
 	printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
 	printf '##########################\n' >&2; \
-	echo "$$coverage";
-test: $(MODULES:=-test)
+	echo "$$coverage"; \
 	if [[ -n "$$COVERALLS_TOKEN" ]]; then \
 		go get github.com/mattn/goveralls; \
-		goveralls -coverprofile="${COVER}" -service=travis-ci -repotoken "$$COVERALLS_TOKEN"; \
+		goveralls -coverprofile="cover.out" -service=travis-ci -repotoken "$$COVERALLS_TOKEN"; \
 	fi
+
+.PHONY: %-test
+%-test: test-prep
+	cd $*; \
+	go test \
+		-race \
+		-cover -coverprofile "${PWD}/cover/$*.out" \
+		./... >&2
+
+.PHONY: test-prep
+test-prep:
+	rm -rf cover/
+	mkdir cover
