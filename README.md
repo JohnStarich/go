@@ -1,4 +1,4 @@
-# Go utilities
+# Go utilities [![Build Status](https://travis-ci.com/JohnStarich/go.svg?branch=master)](https://travis-ci.com/JohnStarich/go) [![Coverage Status](https://coveralls.io/repos/github/JohnStarich/go/badge.svg?branch=master)](https://coveralls.io/github/JohnStarich/go?branch=master)
 
 This is a collection of my Go utilities in one easy-to-import and easy-to-share place.
 
