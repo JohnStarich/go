@@ -156,11 +156,6 @@ func readTemplates(args Args, p *godoc.Presentation, fs vfs.FileSystem) {
 	p.MethodSetHTML = readTemplate(funcs, fs, "methodset.html")
 	p.PackageHTML = readTemplate(funcs, fs, "package.html")
 	p.PackageRootHTML = readTemplate(funcs, fs, "packageroot.html")
-	// Disable search, since that requires a server
-	p.SearchHTML = readTemplate(funcs, fs, "search.html")
-	p.SearchDocHTML = readTemplate(funcs, fs, "searchdoc.html")
-	p.SearchCodeHTML = readTemplate(funcs, fs, "searchcode.html")
-	p.SearchTxtHTML = readTemplate(funcs, fs, "searchtxt.html")
 }
 
 func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *template.Template {
