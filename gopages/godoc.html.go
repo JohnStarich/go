@@ -8,26 +8,26 @@ const (
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 {{with .Tabtitle}}
-  <title>{{html .}} - Go Documentation Server</title>
+  <title>{{html .}} - {{gopages "GoPages" "SiteTitle"}}</title>
 {{else}}
-  <title>Go Documentation Server</title>
+  <title>{{gopages "GoPages" "SiteTitle"}}</title>
 {{end}}
-<link type="text/css" rel="stylesheet" href="{{baseURL}}/lib/godoc/style.css">
+<link type="text/css" rel="stylesheet" href="{{gopages "" "BaseURL"}}/lib/godoc/style.css">
 {{if .TreeView}}
-<link rel="stylesheet" href="{{baseURL}}/lib/godoc/jquery.treeview.css">
+<link rel="stylesheet" href="{{gopages "" "BaseURL"}}/lib/godoc/jquery.treeview.css">
 {{end}}
 <script>window.initFuncs = [];</script>
-<script src="{{baseURL}}/lib/godoc/jquery.js" defer></script>
+<script src="{{gopages "" "BaseURL"}}/lib/godoc/jquery.js" defer></script>
 {{if .TreeView}}
-<script src="{{baseURL}}/lib/godoc/jquery.treeview.js" defer></script>
-<script src="{{baseURL}}/lib/godoc/jquery.treeview.edit.js" defer></script>
+<script src="{{gopages "" "BaseURL"}}/lib/godoc/jquery.treeview.js" defer></script>
+<script src="{{gopages "" "BaseURL"}}/lib/godoc/jquery.treeview.edit.js" defer></script>
 {{end}}
 
 {{if .Playground}}
-<script src="{{baseURL}}/lib/godoc/playground.js" defer></script>
+<script src="{{gopages "" "BaseURL"}}/lib/godoc/playground.js" defer></script>
 {{end}}
 {{with .Version}}<script>var goVersion = {{printf "%q" .}};</script>{{end}}
-<script src="{{baseURL}}/lib/godoc/godocs.js" defer></script>
+<script src="{{gopages "" "BaseURL"}}/lib/godoc/godocs.js" defer></script>
 </head>
 <body>
 
@@ -36,8 +36,8 @@ const (
 </div><!-- #lowframe -->
 
 <div id="topbar"{{if .Title}} class="wide"{{end}}><div class="container">
-<div class="top-heading" id="heading-wide"><a href="{{baseURL}}/pkg/">Go Documentation Server</a></div>
-<div class="top-heading" id="heading-narrow"><a href="{{baseURL}}/pkg/">GoDoc</a></div>
+<div class="top-heading" id="heading-wide"><a href="{{gopages "" "BaseURL"}}/pkg/">{{gopages "GoPages | Auto-generated docs" "SiteTitleLong" "SiteTitle"}}</a></div>
+<div class="top-heading" id="heading-narrow"><a href="{{gopages "" "BaseURL"}}/pkg/">{{gopages "GoPages" "SiteTitle"}}</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>

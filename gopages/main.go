@@ -24,14 +24,18 @@ import (
 )
 
 type Args struct {
-	BaseURL    string
-	OutputPath string
+	BaseURL         string
+	OutputPath      string
+	SiteDescription string
+	SiteTitle       string
 }
 
 func main() {
 	var args Args
 	flag.StringVar(&args.OutputPath, "out", "dist", "Output path for static files")
 	flag.StringVar(&args.BaseURL, "base", "", "Base URL to use for static assets")
+	flag.StringVar(&args.SiteTitle, "brand-title", "", "Branding title in the top left of documentation")
+	flag.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
 	flag.Parse()
 
 	err := run(args)
@@ -143,10 +147,7 @@ func scrape(p *godoc.Presentation, moduleRoot, packagePath, outputPath string) e
 
 func readTemplates(args Args, p *godoc.Presentation, fs vfs.FileSystem) {
 	funcs := p.FuncMap()
-	funcs["baseURL"] = func() string {
-		return args.BaseURL
-	}
-
+	addGoPagesFuncs(funcs, args)
 	p.CallGraphHTML = readTemplate(funcs, fs, "callgraph.html")
 	p.DirlistHTML = readTemplate(funcs, fs, "dirlist.html")
 	p.ErrorHTML = readTemplate(funcs, fs, "error.html")
@@ -211,4 +212,34 @@ window.location = {{.URL}}
 		panic(err)
 	}
 	return buf.String()
+}
+
+func addGoPagesFuncs(funcs template.FuncMap, args Args) {
+	var longTitle string
+	if args.SiteTitle != "" && args.SiteDescription != "" {
+		longTitle = fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
+	}
+	values := map[string]interface{}{
+		"BaseURL":       args.BaseURL,
+		"SiteTitle":     args.SiteTitle,
+		"SiteTitleLong": longTitle,
+	}
+	funcs["gopages"] = func(defaultValue, firstKey string, keys ...string) (string, error) {
+		keys = append([]string{firstKey}, keys...) // require at least one key
+		for _, key := range keys {
+			value, ok := values[key]
+			if !ok {
+				return "", errors.Errorf("Unknown gopages key: %q", key)
+			}
+			valueStr, isString := value.(string)
+			if !isString {
+				return "", errors.Errorf("gopages key %q is not a string", key)
+			}
+			if valueStr != "" {
+				return template.HTMLEscapeString(valueStr), nil
+			}
+		}
+		return defaultValue, nil
+	}
+
 }
