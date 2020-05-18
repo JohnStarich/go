@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -37,6 +38,8 @@ func main() {
 	flag.StringVar(&args.SiteTitle, "brand-title", "", "Branding title in the top left of documentation")
 	flag.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
 	flag.Parse()
+
+	log.SetOutput(ioutil.Discard) // disable godoc's internal logging
 
 	err := run(args)
 	if err != nil {
@@ -112,6 +115,7 @@ func run(args Args) error {
 			return err
 		}
 	}
+	fmt.Println("Done!")
 	return nil
 }
 
