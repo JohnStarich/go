@@ -86,9 +86,10 @@ func run(args Args) error {
 	corpus := godoc.NewCorpus(fs)
 	corpus.Init()
 
-	presentation := godoc.NewPresentation(corpus)
-	readTemplates(args, presentation, fs)
+	pres := godoc.NewPresentation(corpus)
+	readTemplates(args, pres, fs)
 
+	// Generate all static assets and save to /lib/godoc
 	for name, content := range static.Files {
 		path := filepath.Join(args.OutputPath, "lib", "godoc", name)
 		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
@@ -100,17 +101,35 @@ func run(args Args) error {
 		}
 	}
 
+	// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
 	err = ioutil.WriteFile(filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
 	if err != nil {
 		return err
 	}
 
+	custom404, err := genericPage(pres, "Page not found", `
+<p>
+<span class="alert" style="font-size:120%">
+Oops, this page doesn't exist.
+</span>
+</p>
+<p>If something should be here, <a href="https://github.com/JohnStarich/go/issues/new" target="_blank">open an issue</a>.</p>
+`)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
+	if err != nil {
+		return err
+	}
+
+	// For each package, generate an index page
 	paths, err := getPackagePaths(modulePackage)
 	if err != nil {
 		return err
 	}
 	for _, path := range paths {
-		err = scrape(presentation, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
+		err = scrapePackage(pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
 		if err != nil {
 			return err
 		}
@@ -119,7 +138,34 @@ func run(args Args) error {
 	return nil
 }
 
-func scrape(p *godoc.Presentation, moduleRoot, packagePath, outputPath string) error {
+func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
+	recorder := httptest.NewRecorder()
+	do(recorder)
+	if recorder.Result().StatusCode != http.StatusOK {
+		return nil, errors.Errorf("Error generating page: [%d]\n%s", recorder.Result().StatusCode, recorder.Body.String())
+	}
+	return recorder.Body.Bytes(), nil
+}
+
+func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
+	return doRequest(func(w http.ResponseWriter) {
+		pres.ServeHTTP(w, &http.Request{
+			URL: &url.URL{Path: path},
+		})
+	})
+}
+
+func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
+	return doRequest(func(w http.ResponseWriter) {
+		pres.ServePage(w, godoc.Page{
+			Title:    title,
+			Tabtitle: title,
+			Body:     []byte(body),
+		})
+	})
+}
+
+func scrapePackage(pres *godoc.Presentation, moduleRoot, packagePath, outputPath string) error {
 	if moduleRoot != packagePath && !strings.HasPrefix(packagePath, moduleRoot+"/") {
 		return errors.Errorf("Package path %q must be rooted by module: %q", packagePath, moduleRoot)
 	}
@@ -134,33 +180,28 @@ func scrape(p *godoc.Presentation, moduleRoot, packagePath, outputPath string) e
 	outputComponents = append(outputComponents, "index.html")
 	outputPath = filepath.Join(outputComponents...)
 
-	recorder := httptest.NewRecorder()
-	p.ServeHTTP(recorder, &http.Request{
-		URL: &url.URL{
-			Path: path.Join("/pkg", packagePath) + "/",
-		},
-	})
-	if recorder.Result().StatusCode != http.StatusOK {
-		return errors.Errorf("Error scraping doc: [%d]\n%s", recorder.Result().StatusCode, recorder.Body.String())
+	page, err := getPage(pres, path.Join("/pkg", packagePath)+"/")
+	if err != nil {
+		return err
 	}
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(outputPath, recorder.Body.Bytes(), 0600)
+	return ioutil.WriteFile(outputPath, page, 0600)
 }
 
-func readTemplates(args Args, p *godoc.Presentation, fs vfs.FileSystem) {
-	funcs := p.FuncMap()
+func readTemplates(args Args, pres *godoc.Presentation, fs vfs.FileSystem) {
+	funcs := pres.FuncMap()
 	addGoPagesFuncs(funcs, args)
-	p.CallGraphHTML = readTemplate(funcs, fs, "callgraph.html")
-	p.DirlistHTML = readTemplate(funcs, fs, "dirlist.html")
-	p.ErrorHTML = readTemplate(funcs, fs, "error.html")
-	p.ExampleHTML = readTemplate(funcs, fs, "example.html")
-	p.GodocHTML = parseTemplate(funcs, "godoc.html", godocHTML)
-	p.ImplementsHTML = readTemplate(funcs, fs, "implements.html")
-	p.MethodSetHTML = readTemplate(funcs, fs, "methodset.html")
-	p.PackageHTML = readTemplate(funcs, fs, "package.html")
-	p.PackageRootHTML = readTemplate(funcs, fs, "packageroot.html")
+	pres.CallGraphHTML = readTemplate(funcs, fs, "callgraph.html")
+	pres.DirlistHTML = readTemplate(funcs, fs, "dirlist.html")
+	pres.ErrorHTML = readTemplate(funcs, fs, "error.html")
+	pres.ExampleHTML = readTemplate(funcs, fs, "example.html")
+	pres.GodocHTML = parseTemplate(funcs, "godoc.html", godocHTML)
+	pres.ImplementsHTML = readTemplate(funcs, fs, "implements.html")
+	pres.MethodSetHTML = readTemplate(funcs, fs, "methodset.html")
+	pres.PackageHTML = readTemplate(funcs, fs, "package.html")
+	pres.PackageRootHTML = readTemplate(funcs, fs, "packageroot.html")
 }
 
 func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *template.Template {

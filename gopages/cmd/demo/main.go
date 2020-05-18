@@ -6,11 +6,23 @@ import (
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("dist"))
+	fs := http.Dir("dist")
+	fileServer := http.FileServer(fs)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, err := fs.Open(r.URL.Path)
+		if err == nil {
+			fileServer.ServeHTTP(w, r)
+		} else {
+			r.URL.Path = "/404.html"
+			r.URL.RawPath = "/404.html"
+			fileServer.ServeHTTP(w, r)
+		}
+	})
 
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: fs,
+		Handler: mux,
 	}
 	fmt.Println("Starting demo server on :8080...")
 	server.ListenAndServe()
