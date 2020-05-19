@@ -84,7 +84,9 @@ func run(args Args) error {
 	fs.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
 
 	corpus := godoc.NewCorpus(fs)
-	corpus.Init()
+	if err := corpus.Init(); err != nil {
+		return err
+	}
 
 	pres := godoc.NewPresentation(corpus)
 	readTemplates(args, pres, fs)

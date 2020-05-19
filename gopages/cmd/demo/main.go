@@ -25,5 +25,5 @@ func main() {
 		Handler: mux,
 	}
 	fmt.Println("Starting demo server on :8080...")
-	server.ListenAndServe()
+	_ = server.ListenAndServe()
 }
