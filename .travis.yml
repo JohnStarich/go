@@ -8,6 +8,8 @@ jobs:
       script: make lint
     - name: Test
       script: make test
+    - name: Docs
+      script: make deploy-docs
 
 notifications:
   email: false

@@ -59,3 +59,24 @@ test-prep:
 		sudo sed -i'' -e '/options timeout:/d' /etc/resolv.conf; \
 		cat /etc/resolv.conf; \
 	fi
+
+out:
+	mkdir -p out
+
+.PHONY: deploy-docs
+deploy-docs: $(MODULES:=-deploy-docs)
+
+.PHONY: %-deploy-docs
+%-deploy-docs:
+	$(MAKE) deploy-docs-prep && \
+	cd $* && \
+	../out/gopages \
+		-base /go/$* \
+		-out "${PWD}/$*" \
+		-gh-pages \
+		-gh-pages-user "${GIT_USER}" \
+		-gh-pages-token "${GIT_TOKEN}"
+
+.PHONY: deploy-docs-prep
+deploy-docs-prep: out
+	cd ./gopages; go build -o ../out/gopages .
