@@ -120,7 +120,7 @@ func run(args Args) error {
 		SingleBranch:  true,
 	})
 	if err != nil {
-		return errors.Wrap(err, "Failed to clone in-memory copy of repo")
+		return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
 	}
 
 	workTree, err := repo.Worktree()
