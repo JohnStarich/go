@@ -12,4 +12,6 @@
 // To show usage:
 //   gopages -help
 //
+// To automatically commit to the gh-pages branch, use the -gh-pages flag.
+//
 package main

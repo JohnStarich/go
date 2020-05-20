@@ -23,11 +23,16 @@ import (
 	"golang.org/x/tools/godoc/static"
 	"golang.org/x/tools/godoc/vfs"
 	"golang.org/x/tools/godoc/vfs/mapfs"
+	"gopkg.in/src-d/go-billy.v4"
+	"gopkg.in/src-d/go-billy.v4/helper/mount"
+	"gopkg.in/src-d/go-billy.v4/helper/polyfill"
+	"gopkg.in/src-d/go-billy.v4/memfs"
+	"gopkg.in/src-d/go-billy.v4/osfs"
 	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	gitHTTP "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	"gopkg.in/src-d/go-git.v4/storage/memory"
 )
 
 const (
@@ -103,73 +108,45 @@ func run(args Args) error {
 		return err
 	}
 
-	repo, err := git.PlainOpenWithOptions(modulePath, &git.PlainOpenOptions{
-		DetectDotGit: true,
+	repoRoot, remote, err := getCurrentPathAndRemote(modulePath)
+	if err != nil {
+		return err
+	}
+
+	// TODO try cloning via file path instead
+	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+		URL:           remote,
+		ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
+		SingleBranch:  true,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "Failed to open repo at %q", modulePath)
+		return errors.Wrap(err, "Failed to clone in-memory copy of repo")
 	}
+
 	workTree, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
-	head, err := repo.Head()
+
+	absOutputPath, err := filepath.Abs(outputPath)
 	if err != nil {
-		return errors.Wrap(err, "Failed to get current branch info")
+		return errors.Wrap(err, "Failed to get absolute path of output directory")
 	}
-	originalBranch := head.Name()
-	if !head.Name().IsBranch() {
-		branches, err := repo.Branches()
-		if err != nil {
-			return err
-		}
-		err = branches.ForEach(func(ref *plumbing.Reference) error {
-			if ref.Hash() == head.Hash() {
-				originalBranch = ref.Name()
-				branches.Close()
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-	defer func() {
-		fmt.Println("Checking out original branch", originalBranch)
-		_ = workTree.Checkout(&git.CheckoutOptions{Branch: originalBranch, Force: true}) // return to original branch on best-effort basis
-	}()
-
-	br := plumbing.NewBranchReferenceName(ghPagesBranch)
-	rbr := plumbing.NewRemoteReferenceName(git.DefaultRemoteName, ghPagesBranch)
-
-	remote, err := repo.Remote(git.DefaultRemoteName)
+	relOutputPath, err := filepath.Rel(repoRoot, absOutputPath)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
 	}
-	err = remote.Fetch(&git.FetchOptions{
-		RefSpecs: []config.RefSpec{
-			config.RefSpec("+" + br + ":" + rbr),
-		},
-	})
-	if err != nil && err != git.NoErrAlreadyUpToDate {
-		return errors.Wrap(err, "Failed to fetch gh-pages branch")
+	_, err = workTree.Remove(relOutputPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to remove output path from repo")
 	}
 
-	if err := workTree.Checkout(&git.CheckoutOptions{Branch: rbr}); err != nil {
-		if err == plumbing.ErrReferenceNotFound {
-			return errors.New("Failed to checkout gh-pages branch: Create and push a branch with 'git checkout --orphan gh-pages', then try again")
-		}
-		return errors.Wrap(err, "Failed to checkout gh-pages branch")
-	}
-
-	if err := os.RemoveAll(outputPath); err != nil {
-		return err
-	}
-	if err := os.Rename(args.OutputPath, outputPath); err != nil {
+	m := mount.New(workTree.Filesystem, filepath.Dir(args.OutputPath), osfs.New(filepath.Dir(args.OutputPath)))
+	if err := renameRecursive(polyfill.New(m), args.OutputPath, relOutputPath); err != nil {
 		return errors.Wrap(err, "Failed to move generated docs into repo")
 	}
 
-	if _, err := workTree.Add("."); err != nil {
+	if _, err := workTree.Add(relOutputPath); err != nil {
 		return errors.Wrap(err, "Failed to add output dir to git")
 	}
 
@@ -184,9 +161,7 @@ func run(args Args) error {
 		return errors.Wrap(err, "Failed to commit gopages files")
 	}
 
-	pushOpts := &git.PushOptions{
-		RefSpecs: []config.RefSpec{config.RefSpec("HEAD:" + br)},
-	}
+	pushOpts := &git.PushOptions{}
 	if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
 		pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
 	}
@@ -412,4 +387,48 @@ func addGoPagesFuncs(funcs template.FuncMap, args Args) {
 		return defaultValue, nil
 	}
 
+}
+
+func getCurrentPathAndRemote(repoPath string) (string, string, error) {
+	repo, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{
+		DetectDotGit: true,
+	})
+	if err != nil {
+		return "", "", errors.Wrapf(err, "Failed to open repo at %q", repoPath)
+	}
+
+	fs, err := repo.Worktree()
+	if err != nil {
+		return "", "", errors.Wrap(err, "Failed to set up work tree for repo")
+	}
+	repoRoot := fs.Filesystem.Root()
+
+	remote, err := repo.Remote(git.DefaultRemoteName)
+	return repoRoot, remote.Config().URLs[0], errors.Wrap(err, "Failed to get repo remote")
+}
+
+func renameRecursive(fs billy.Filesystem, source, dest string) error {
+	info, err := fs.Stat(source)
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return fs.Rename(source, dest)
+	}
+
+	if err := fs.MkdirAll(dest, info.Mode()); err != nil {
+		return err
+	}
+
+	files, err := fs.ReadDir(source)
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		err := renameRecursive(fs, fs.Join(source, f.Name()), fs.Join(dest, f.Name()))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

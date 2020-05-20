@@ -66,9 +66,9 @@ out:
 .PHONY: deploy-docs
 deploy-docs: $(MODULES:=-deploy-docs)
 
-.PHONY: %-deploy-docs
-%-deploy-docs:
-	$(MAKE) deploy-docs-prep && \
+.PHONY: %-docs
+%-docs:
+	$(MAKE) docs-prep && \
 	cd $* && \
 	../out/gopages \
 		-base /go/$* \
@@ -77,6 +77,6 @@ deploy-docs: $(MODULES:=-deploy-docs)
 		-gh-pages-user "${GIT_USER}" \
 		-gh-pages-token "${GIT_TOKEN}"
 
-.PHONY: deploy-docs-prep
-deploy-docs-prep: out
+.PHONY: docs-prep
+docs-prep: out
 	cd ./gopages; go build -o ../out/gopages .
