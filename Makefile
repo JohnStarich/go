@@ -67,8 +67,7 @@ out:
 deploy-docs: $(MODULES:=-docs)
 
 .PHONY: %-docs
-%-docs:
-	$(MAKE) docs-prep && \
+%-docs: docs-prep
 	cd $* && \
 	../out/gopages \
 		-base /go/$* \
