@@ -64,7 +64,7 @@ out:
 	mkdir -p out
 
 .PHONY: deploy-docs
-deploy-docs: $(MODULES:=-deploy-docs)
+deploy-docs: $(MODULES:=-docs)
 
 .PHONY: %-docs
 %-docs:
