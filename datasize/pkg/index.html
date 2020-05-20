@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>datasize - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/datasize/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/datasize/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/datasize/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/datasize/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/datasize/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package datasize
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/johnstarich/go/datasize"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Size">type Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Bytes">func Bytes(bytes int64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Exabytes">func Exabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Exbibytes">func Exbibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Gibibytes">func Gibibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Gigabytes">func Gigabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Kibibytes">func Kibibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Kilobytes">func Kilobytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Mebibytes">func Mebibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Megabytes">func Megabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#New">func New(bytes int64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#NewFromInt">func NewFromInt(bytes *big.Int) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Pebibytes">func Pebibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Petabytes">func Petabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Tebibytes">func Tebibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Terabytes">func Terabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Yobibytes">func Yobibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Yottabytes">func Yottabytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Zebibytes">func Zebibytes(b float64) Size</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Zettabytes">func Zettabytes(b float64) Size</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Bytes">func (s Size) Bytes() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Exabytes">func (s Size) Exabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Exbibytes">func (s Size) Exbibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.FormatIEC">func (s Size) FormatIEC() (value float64, unit string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.FormatSI">func (s Size) FormatSI() (value float64, unit string)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Gibibytes">func (s Size) Gibibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Gigabytes">func (s Size) Gigabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Kibibytes">func (s Size) Kibibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Kilobytes">func (s Size) Kilobytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Mebibytes">func (s Size) Mebibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Megabytes">func (s Size) Megabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Pebibytes">func (s Size) Pebibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Petabytes">func (s Size) Petabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.String">func (s Size) String() string</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Tebibytes">func (s Size) Tebibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Terabytes">func (s Size) Terabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Yobibytes">func (s Size) Yobibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Yottabytes">func (s Size) Yottabytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Zebibytes">func (s Size) Zebibytes() float64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Size.Zettabytes">func (s Size) Zettabytes() float64</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/johnstarich/go/datasize/size.go">size.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+		
+			
+			
+			<h2 id="Size">type <a href="/src/github.com/johnstarich/go/datasize/size.go?s=708:744#L18">Size</a>
+				<a class="permalink" href="#Size">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Size struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="Bytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=885:913#L30">Bytes</a>
+					<a class="permalink" href="#Bytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Bytes(bytes <a href="/pkg/builtin/#int64">int64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Exabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1348:1377#L54">Exabytes</a>
+					<a class="permalink" href="#Exabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Exabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Exbibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2006:2036#L86">Exbibytes</a>
+					<a class="permalink" href="#Exbibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Exbibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Gibibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1760:1790#L74">Gibibytes</a>
+					<a class="permalink" href="#Gibibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Gibibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Gigabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1102:1132#L42">Gigabytes</a>
+					<a class="permalink" href="#Gigabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Gigabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Kibibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1596:1626#L66">Kibibytes</a>
+					<a class="permalink" href="#Kibibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Kibibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Kilobytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=938:968#L34">Kilobytes</a>
+					<a class="permalink" href="#Kilobytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Kilobytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Mebibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1678:1708#L70">Mebibytes</a>
+					<a class="permalink" href="#Mebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Mebibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Megabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1020:1050#L38">Megabytes</a>
+					<a class="permalink" href="#Megabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Megabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="New">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=746:772#L22">New</a>
+					<a class="permalink" href="#New">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func New(bytes <a href="/pkg/builtin/#int64">int64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="NewFromInt">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=816:852#L26">NewFromInt</a>
+					<a class="permalink" href="#NewFromInt">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func NewFromInt(bytes *<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Pebibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1924:1954#L82">Pebibytes</a>
+					<a class="permalink" href="#Pebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Pebibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Petabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1266:1296#L50">Petabytes</a>
+					<a class="permalink" href="#Petabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Petabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Tebibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1842:1872#L78">Tebibytes</a>
+					<a class="permalink" href="#Tebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Tebibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Terabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1184:1214#L46">Terabytes</a>
+					<a class="permalink" href="#Terabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Terabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Yobibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2170:2200#L94">Yobibytes</a>
+					<a class="permalink" href="#Yobibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Yobibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Yottabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1512:1543#L62">Yottabytes</a>
+					<a class="permalink" href="#Yottabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Yottabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Zebibytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2088:2118#L90">Zebibytes</a>
+					<a class="permalink" href="#Zebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Zebibytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+				
+				<h3 id="Zettabytes">func <a href="/src/github.com/johnstarich/go/datasize/size.go?s=1428:1459#L58">Zettabytes</a>
+					<a class="permalink" href="#Zettabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Zettabytes(b <a href="/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
+				
+				
+				
+			
+
+			
+				
+				<h3 id="Size.Bytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2252:2279#L98">Bytes</a>
+					<a class="permalink" href="#Size.Bytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Bytes() <a href="/pkg/builtin/#int64">int64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Exabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3061:3093#L135">Exabytes</a>
+					<a class="permalink" href="#Size.Exabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Exabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Exbibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3703:3736#L167">Exbibytes</a>
+					<a class="permalink" href="#Size.Exbibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Exbibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.FormatIEC">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=4604:4658#L202">FormatIEC</a>
+					<a class="permalink" href="#Size.FormatIEC">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) FormatIEC() (value <a href="/pkg/builtin/#float64">float64</a>, unit <a href="/pkg/builtin/#string">string</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.FormatSI">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3943:3996#L179">FormatSI</a>
+					<a class="permalink" href="#Size.FormatSI">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) FormatSI() (value <a href="/pkg/builtin/#float64">float64</a>, unit <a href="/pkg/builtin/#string">string</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Gibibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3463:3496#L155">Gibibytes</a>
+					<a class="permalink" href="#Size.Gibibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Gibibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Gigabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2821:2854#L123">Gigabytes</a>
+					<a class="permalink" href="#Size.Gigabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Gigabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Kibibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3303:3336#L147">Kibibytes</a>
+					<a class="permalink" href="#Size.Kibibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Kibibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Kilobytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2661:2694#L115">Kilobytes</a>
+					<a class="permalink" href="#Size.Kilobytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Kilobytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Mebibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3383:3416#L151">Mebibytes</a>
+					<a class="permalink" href="#Size.Mebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Mebibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Megabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2741:2774#L119">Megabytes</a>
+					<a class="permalink" href="#Size.Megabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Megabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Pebibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3623:3656#L163">Pebibytes</a>
+					<a class="permalink" href="#Size.Pebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Pebibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Petabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2981:3014#L131">Petabytes</a>
+					<a class="permalink" href="#Size.Petabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Petabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.String">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=5272:5301#L225">String</a>
+					<a class="permalink" href="#Size.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) String() <a href="/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Tebibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3543:3576#L159">Tebibytes</a>
+					<a class="permalink" href="#Size.Tebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Tebibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Terabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=2901:2934#L127">Terabytes</a>
+					<a class="permalink" href="#Size.Terabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Terabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Yobibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3863:3896#L175">Yobibytes</a>
+					<a class="permalink" href="#Size.Yobibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Yobibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Yottabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3221:3255#L143">Yottabytes</a>
+					<a class="permalink" href="#Size.Yottabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Yottabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Zebibytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3783:3816#L171">Zebibytes</a>
+					<a class="permalink" href="#Size.Zebibytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Zebibytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="Size.Zettabytes">func (Size) <a href="/src/github.com/johnstarich/go/datasize/size.go?s=3139:3173#L139">Zettabytes</a>
+					<a class="permalink" href="#Size.Zettabytes">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Size">Size</a>) Zettabytes() <a href="/pkg/builtin/#float64">float64</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
