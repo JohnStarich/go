@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>staggercast - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/dns/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/dns/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/dns/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package staggercast
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/johnstarich/go/dns/staggercast"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Conn">type Conn</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#New">func New(conns []PacketConn) Conn</a></dd>
+				
+				
+			
+				
+				<dd><a href="#PacketConn">type PacketConn</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Stats">type Stats</a></dd>
+				
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go">conn.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+		
+			
+			
+			<h2 id="Conn">type <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=393:503#L7">Conn</a>
+				<a class="permalink" href="#Conn">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Conn interface {
+    <a href="#PacketConn">PacketConn</a>
+    Stagger(ticker &lt;-chan struct{}, cancel <a href="/pkg/context/">context</a>.<a href="/pkg/context/#CancelFunc">CancelFunc</a>)
+    Stats() <a href="#Stats">Stats</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="New">func <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=1343:1376#L45">New</a>
+					<a class="permalink" href="#New">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func New(conns []<a href="#PacketConn">PacketConn</a>) <a href="#Conn">Conn</a></pre>
+				
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="PacketConn">type <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=563:653#L14">PacketConn</a>
+				<a class="permalink" href="#PacketConn">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+PacketConn implements both net.Conn and net.PacketConn
+</p>
+
+			<pre>type PacketConn interface {
+    <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Reader">Reader</a>
+    <a href="/pkg/io/">io</a>.<a href="/pkg/io/#Writer">Writer</a>
+    RemoteAddr() <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a>
+    <a href="/pkg/net/">net</a>.<a href="/pkg/net/#PacketConn">PacketConn</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Stats">type <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=655:729#L21">Stats</a>
+				<a class="permalink" href="#Stats">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Stats struct {
+<span id="Stats.FastestRemoteIndex"></span>    FastestRemoteIndex <a href="/pkg/builtin/#int">int</a>
+<span id="Stats.FastestRemote"></span>    FastestRemote      <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>

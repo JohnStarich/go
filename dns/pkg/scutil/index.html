@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>scutil - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/dns/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/dns/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/dns/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package scutil
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/johnstarich/go/dns/scutil"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Config">type Config</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ReadMacOSDNS">func ReadMacOSDNS(ctx context.Context) (Config, error)</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Flag">type Flag</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Reach">type Reach</a></dd>
+				
+				
+			
+				
+				<dd><a href="#Resolver">type Resolver</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Resolver.Reachable">func (r Resolver) Reachable() bool</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/johnstarich/go/dns/scutil/config.go">config.go</a>
+			
+				<a href="/src/github.com/johnstarich/go/dns/scutil/flag.go">flag.go</a>
+			
+				<a href="/src/github.com/johnstarich/go/dns/scutil/reach.go">reach.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+		
+			
+			
+			<h2 id="Config">type <a href="/src/github.com/johnstarich/go/dns/scutil/config.go?s=175:219#L5">Config</a>
+				<a class="permalink" href="#Config">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Config struct {
+<span id="Config.Resolvers"></span>    Resolvers []<a href="#Resolver">Resolver</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="ReadMacOSDNS">func <a href="/src/github.com/johnstarich/go/dns/scutil/config.go?s=530:584#L23">ReadMacOSDNS</a>
+					<a class="permalink" href="#ReadMacOSDNS">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func ReadMacOSDNS(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="Flag">type <a href="/src/github.com/johnstarich/go/dns/scutil/flag.go?s=16:32#L1">Flag</a>
+				<a class="permalink" href="#Flag">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Flag <a href="/pkg/builtin/#string">string</a></pre>
+
+			
+				
+				<pre>const (
+    <span class="comment">// Scoped requires a resolver to only send queries on the specified interface</span>
+    <span id="Scoped">Scoped</span> <a href="#Flag">Flag</a> = &#34;Scoped&#34;
+
+    <span id="RequestARecords">RequestARecords</span> <a href="#Flag">Flag</a> = &#34;Request A records&#34;
+)</pre>
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Reach">type <a href="/src/github.com/johnstarich/go/dns/scutil/reach.go?s=16:33#L1">Reach</a>
+				<a class="permalink" href="#Reach">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Reach <a href="/pkg/builtin/#string">string</a></pre>
+
+			
+				
+				<pre>const (
+    <span class="comment">// NotReachable is when the specified nodename/address cannot be reached using</span>
+    <span class="comment">// the current network configuration.</span>
+    <span id="NotReachable">NotReachable</span> <a href="#Reach">Reach</a> = &#34;Not Reachable&#34;
+    <span class="comment">// Reachable is when the specified nodename/address can be reached using the</span>
+    <span class="comment">// current network configuration.</span>
+    <span id="Reachable">Reachable</span> <a href="#Reach">Reach</a> = &#34;Reachable&#34;
+    <span class="comment">// TransientReachable is when the specified nodename/address can be reached</span>
+    <span class="comment">// via a transient (e.g. PPP) connection.</span>
+    <span id="TransientReachable">TransientReachable</span> <a href="#Reach">Reach</a> = &#34;Transient Connection&#34;
+    <span class="comment">// ConnectionRequired is when the specified nodename/address can be reached</span>
+    <span class="comment">// using the current network configuration but a connection must first be established.</span>
+    <span class="comment">// As an example, this status would be returned for a dialup connection that</span>
+    <span class="comment">// was not currently active but could handle network traffic for the target system.</span>
+    <span id="ConnectionRequired">ConnectionRequired</span> <a href="#Reach">Reach</a> = &#34;Connection Required&#34;
+    <span class="comment">// ConnectionAutomatic is when the specified nodename/address can be reached</span>
+    <span class="comment">// using the current network configuration but a connection must first be</span>
+    <span class="comment">// established. Any traffic directed to the specified name/address will</span>
+    <span class="comment">// initiate the connection.</span>
+    <span id="ConnectionAutomatic">ConnectionAutomatic</span> <a href="#Reach">Reach</a> = &#34;Connection Automatic&#34;
+    <span class="comment">// LocalAddress is when the specified nodename/address is one associated</span>
+    <span class="comment">// with a network interface on the system.</span>
+    <span id="LocalAddress">LocalAddress</span> <a href="#Reach">Reach</a> = &#34;Local Address&#34;
+    <span class="comment">// DirectlyReachableAddress is when the network traffic to the specified</span>
+    <span class="comment">// nodename/address will not go through a gateway but is routed directly to</span>
+    <span class="comment">// one of the interfaces on the system.</span>
+    <span id="DirectlyReachableAddress">DirectlyReachableAddress</span> <a href="#Reach">Reach</a> = &#34;Directly Reachable Address&#34;
+)</pre>
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="Resolver">type <a href="/src/github.com/johnstarich/go/dns/scutil/config.go?s=221:528#L9">Resolver</a>
+				<a class="permalink" href="#Resolver">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type Resolver struct {
+<span id="Resolver.Domain"></span>    Domain         <a href="/pkg/builtin/#string">string</a>
+<span id="Resolver.Flags"></span>    Flags          []<a href="#Flag">Flag</a>
+<span id="Resolver.InterfaceIndex"></span>    InterfaceIndex <a href="/pkg/builtin/#int">int</a>
+<span id="Resolver.InterfaceName"></span>    InterfaceName  <a href="/pkg/builtin/#string">string</a>
+<span id="Resolver.MulticastDNS"></span>    MulticastDNS   <a href="/pkg/builtin/#bool">bool</a>
+<span id="Resolver.Nameservers"></span>    Nameservers    []<a href="/pkg/builtin/#string">string</a>
+<span id="Resolver.Order"></span>    Order          <a href="/pkg/builtin/#int">int</a>
+<span id="Resolver.Reach"></span>    Reach          []<a href="#Reach">Reach</a>
+
+<span id="Resolver.SearchDomain"></span>    SearchDomain []<a href="/pkg/builtin/#string">string</a>
+<span id="Resolver.Timeout"></span>    Timeout      <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Duration">Duration</a>
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Resolver.Reachable">func (Resolver) <a href="/src/github.com/johnstarich/go/dns/scutil/config.go?s=3291:3325#L114">Reachable</a>
+					<a class="permalink" href="#Resolver.Reachable">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (r <a href="#Resolver">Resolver</a>) Reachable() <a href="/pkg/builtin/#bool">bool</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
