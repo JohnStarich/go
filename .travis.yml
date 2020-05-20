@@ -10,6 +10,7 @@ jobs:
       script: make test
     - name: Docs
       script: make deploy-docs
+      if: branch = master AND NOT type = pull_request
 
 notifications:
   email: false
