@@ -1,4 +1,4 @@
-# dns
+# dns <a href="https://johnstarich.com/go/dns"><img src="https://img.shields.io/badge/gopages-reference-%235272B4" /></a>
 
 Implements a working macOS DNS resolver (really just a `Dial`er) for projects that must cross-compile from Linux systems or just don't want CGO.
 

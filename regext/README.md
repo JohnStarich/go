@@ -1,4 +1,4 @@
-# regext
+# regext <a href="https://johnstarich.com/go/regext"><img src="https://img.shields.io/badge/gopages-reference-%235272B4" /></a>
 
 Extended regex, so you can *almost* read regular expressions. 😉
 
