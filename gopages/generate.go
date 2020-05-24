@@ -11,6 +11,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/go-git/go-billy/v5"
+	"github.com/go-git/go-billy/v5/util"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
@@ -18,8 +20,6 @@ import (
 	"golang.org/x/tools/godoc/static"
 	"golang.org/x/tools/godoc/vfs"
 	"golang.org/x/tools/godoc/vfs/mapfs"
-	"gopkg.in/src-d/go-billy.v4"
-	"gopkg.in/src-d/go-billy.v4/util"
 )
 
 func readTemplates(pres *godoc.Presentation, funcs template.FuncMap, fs vfs.FileSystem) {
