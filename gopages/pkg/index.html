@@ -14,7 +14,7 @@
 
 
 
-<script>var goVersion = "go1.13.5";</script>
+<script>var goVersion = "go1.13.11";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
 </head>
 <body>
@@ -87,13 +87,23 @@ A &#39;go.mod&#39; file must be present in the current directory.
 gopages
 </pre>
 <p>
-To show usage:
+Usage of gopages:
 </p>
-<pre>gopages -help
+<pre>-base string
+  	Base URL to use for static assets
+-brand-description string
+  	Branding description in the top left of documentation
+-brand-title string
+  	Branding title in the top left of documentation
+-gh-pages
+  	Automatically commit the output path to the gh-pages branch. The current branch must be clean.
+-gh-pages-token string
+  	The Git token to push with. Usually this is an API key.
+-gh-pages-user string
+  	The Git username to push with
+-out string
+  	Output path for static files (default &#34;dist&#34;)
 </pre>
-<p>
-To automatically commit to the gh-pages branch, use the -gh-pages flag.
-</p>
 
 	
 
@@ -143,13 +153,24 @@ To automatically commit to the gh-pages branch, use the -gh-pages flag.
 					</td>
 				</tr>
 			
+				<tr>
+				
+					<td class="pkg-name" style="padding-left: 20px;">
+						<a href="cmd/gendoc/">gendoc</a>
+					</td>
+				
+					<td class="pkg-synopsis">
+						gopages generates static files for Go documentation, formatted with godoc.
+					</td>
+				</tr>
+			
 		</table>
 	</div>
 
 
 
 <div id="footer">
-Build version go1.13.5.<br>
+Build version go1.13.11.<br>
 </div>
 
 </div><!-- .container -->

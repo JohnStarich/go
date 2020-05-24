@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>demo - GoPages</title>
+  <title>gendoc - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
 
@@ -37,7 +37,7 @@
 
 
   <h1>
-    Command demo
+    Command gendoc
     <span class="text-muted"></span>
   </h1>
 
@@ -69,7 +69,27 @@
 
 	
 		
-		
+		<p>
+gopages generates static files for Go documentation, formatted with godoc.
+</p>
+<p>
+Installation:
+</p>
+<pre>go get github.com/johnstarich/go/gopages
+</pre>
+<p>
+Generate documentation for your module by running without any flags.
+</p>
+<p>
+A &#39;go.mod&#39; file must be present in the current directory.
+</p>
+<pre>cd ./mymodule
+gopages
+</pre>
+<p>
+{{.Usage | comment}}
+</p>
+
 	
 
 	
