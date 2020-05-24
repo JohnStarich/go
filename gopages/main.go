@@ -11,9 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
-	"gopkg.in/src-d/go-billy.v4"
-	"gopkg.in/src-d/go-billy.v4/helper/mount"
-	"gopkg.in/src-d/go-billy.v4/helper/polyfill"
 	"gopkg.in/src-d/go-billy.v4/memfs"
 	"gopkg.in/src-d/go-billy.v4/osfs"
 	"gopkg.in/src-d/go-git.v4"
@@ -79,21 +76,8 @@ func run(args Args) error {
 	}
 
 	if !args.GitHubPages {
-		if err := os.RemoveAll(args.OutputPath); err != nil {
-			return err
-		}
-		return generateDocs(modulePath, modulePackage, args)
-	}
-
-	// use temporary dir for output path, "move" files to in-memory git repo, then commit and push changes
-	outputPath := args.OutputPath
-	args.OutputPath, err = ioutil.TempDir("", "")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(args.OutputPath)
-	if err := generateDocs(modulePath, modulePackage, args); err != nil {
-		return err
+		fs := osfs.New("")
+		return generateDocs(modulePath, modulePackage, args, fs, fs)
 	}
 
 	repoRoot, remote, err := getCurrentPathAndRemote(modulePath)
@@ -101,8 +85,19 @@ func run(args Args) error {
 		return err
 	}
 
-	// TODO try cloning via file path instead
-	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
+	absOutputPath, err := filepath.Abs(args.OutputPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get absolute path of output directory")
+	}
+	args.OutputPath, err = filepath.Rel(repoRoot, absOutputPath)
+	if err != nil {
+		return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
+	}
+
+	src := osfs.New("")
+	fs := memfs.New()
+
+	repo, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
 		URL:           remote,
 		ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
 		SingleBranch:  true,
@@ -111,30 +106,16 @@ func run(args Args) error {
 		return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
 	}
 
+	if err := generateDocs(modulePath, modulePackage, args, src, fs); err != nil {
+		return err
+	}
+
 	workTree, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
 
-	absOutputPath, err := filepath.Abs(outputPath)
-	if err != nil {
-		return errors.Wrap(err, "Failed to get absolute path of output directory")
-	}
-	relOutputPath, err := filepath.Rel(repoRoot, absOutputPath)
-	if err != nil {
-		return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
-	}
-	_, err = workTree.Remove(relOutputPath)
-	if err != nil {
-		return errors.Wrap(err, "Failed to remove output path from repo")
-	}
-
-	m := mount.New(workTree.Filesystem, filepath.Dir(args.OutputPath), osfs.New(filepath.Dir(args.OutputPath)))
-	if err := renameRecursive(polyfill.New(m), args.OutputPath, relOutputPath); err != nil {
-		return errors.Wrap(err, "Failed to move generated docs into repo")
-	}
-
-	if _, err := workTree.Add(relOutputPath); err != nil {
+	if _, err := workTree.Add("."); err != nil {
 		return errors.Wrap(err, "Failed to add output dir to git")
 	}
 
@@ -142,7 +123,7 @@ func run(args Args) error {
 	if args.SiteTitle != "" {
 		commitMessage += ": " + args.SiteTitle
 	}
-	_, err = workTree.Commit(commitMessage, &git.CommitOptions{
+	commit, err := workTree.Commit(commitMessage, &git.CommitOptions{
 		Author: &object.Signature{Name: "GoPages", When: time.Now()},
 	})
 	if err != nil {
@@ -154,7 +135,7 @@ func run(args Args) error {
 		pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
 	}
 	err = repo.Push(pushOpts)
-	return errors.Wrap(err, "Failed to push gopages commit")
+	return errors.Wrapf(err, "Failed to push gopages commit %q", commit)
 }
 
 func getCurrentPathAndRemote(repoPath string) (string, string, error) {
@@ -172,31 +153,6 @@ func getCurrentPathAndRemote(repoPath string) (string, string, error) {
 	repoRoot := fs.Filesystem.Root()
 
 	remote, err := repo.Remote(git.DefaultRemoteName)
-	return repoRoot, remote.Config().URLs[0], errors.Wrap(err, "Failed to get repo remote")
-}
-
-func renameRecursive(fs billy.Filesystem, source, dest string) error {
-	info, err := fs.Stat(source)
-	if err != nil {
-		return err
-	}
-	if !info.IsDir() {
-		return fs.Rename(source, dest)
-	}
-
-	if err := fs.MkdirAll(dest, info.Mode()); err != nil {
-		return err
-	}
-
-	files, err := fs.ReadDir(source)
-	if err != nil {
-		return err
-	}
-	for _, f := range files {
-		err := renameRecursive(fs, fs.Join(source, f.Name()), fs.Join(dest, f.Name()))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	remoteURL := remote.Config().URLs[0]
+	return repoRoot, remoteURL, errors.Wrap(err, "Failed to get repo remote")
 }

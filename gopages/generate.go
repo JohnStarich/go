@@ -3,11 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -19,6 +17,8 @@ import (
 	"golang.org/x/tools/godoc/static"
 	"golang.org/x/tools/godoc/vfs"
 	"golang.org/x/tools/godoc/vfs/mapfs"
+	"gopkg.in/src-d/go-billy.v4"
+	"gopkg.in/src-d/go-billy.v4/util"
 )
 
 func readTemplates(pres *godoc.Presentation, funcs template.FuncMap, fs vfs.FileSystem) {
@@ -80,19 +80,26 @@ func addGoPagesFuncs(funcs template.FuncMap, args Args) {
 	}
 }
 
-func generateDocs(modulePath, modulePackage string, args Args) error {
-	if err := os.MkdirAll(args.OutputPath, 0700); err != nil {
-		return err
+func generateDocs(modulePath, modulePackage string, args Args, src, fs billy.Filesystem) error {
+	if err := util.RemoveAll(fs, args.OutputPath); err != nil {
+		return errors.Wrap(err, "Failed to clean output directory")
+	}
+	if err := fs.MkdirAll(args.OutputPath, 0700); err != nil {
+		return errors.Wrap(err, "Failed to create output directory")
 	}
 
 	fmt.Println("Generating godoc static pages for module...", modulePackage)
 
-	fs := vfs.NewNameSpace()
-	fs.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
-	modFS := vfs.OS(modulePath)
-	fs.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
+	ns := vfs.NewNameSpace()
+	ns.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
+	srcRoot, err := src.Chroot(modulePath)
+	if err != nil {
+		return err
+	}
+	modFS := &filesystemOpener{Filesystem: srcRoot}
+	ns.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
 
-	corpus := godoc.NewCorpus(fs)
+	corpus := godoc.NewCorpus(ns)
 	if err := corpus.Init(); err != nil {
 		return err
 	}
@@ -100,22 +107,22 @@ func generateDocs(modulePath, modulePackage string, args Args) error {
 	pres := godoc.NewPresentation(corpus)
 	funcs := pres.FuncMap()
 	addGoPagesFuncs(funcs, args)
-	readTemplates(pres, funcs, fs)
+	readTemplates(pres, funcs, ns)
 
 	// Generate all static assets and save to /lib/godoc
 	for name, content := range static.Files {
 		path := filepath.Join(args.OutputPath, "lib", "godoc", name)
-		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		if err := fs.MkdirAll(filepath.Dir(path), 0700); err != nil {
 			return err
 		}
-		err := ioutil.WriteFile(path, []byte(content), 0600)
+		err := util.WriteFile(fs, path, []byte(content), 0600)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
-	err := ioutil.WriteFile(filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
+	err = util.WriteFile(fs, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
 	if err != nil {
 		return err
 	}
@@ -131,7 +138,7 @@ Oops, this page doesn't exist.
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
+	err = util.WriteFile(fs, filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
 	if err != nil {
 		return err
 	}
@@ -142,7 +149,7 @@ Oops, this page doesn't exist.
 		return err
 	}
 	for _, path := range paths {
-		err = scrapePackage(pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
+		err = scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
 		if err != nil {
 			return err
 		}
@@ -178,7 +185,7 @@ func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
 	})
 }
 
-func scrapePackage(pres *godoc.Presentation, moduleRoot, packagePath, outputPath string) error {
+func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, packagePath, outputPath string) error {
 	if moduleRoot != packagePath && !strings.HasPrefix(packagePath, moduleRoot+"/") {
 		return errors.Errorf("Package path %q must be rooted by module: %q", packagePath, moduleRoot)
 	}
@@ -197,10 +204,10 @@ func scrapePackage(pres *godoc.Presentation, moduleRoot, packagePath, outputPath
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
+	if err := fs.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(outputPath, page, 0600)
+	return util.WriteFile(fs, outputPath, page, 0600)
 }
 
 func getPackagePaths(modulePackage string) ([]string, error) {
@@ -238,4 +245,20 @@ window.location = {{.URL}}
 		panic(err)
 	}
 	return buf.String()
+}
+
+type filesystemOpener struct {
+	billy.Filesystem
+}
+
+func (f *filesystemOpener) Open(name string) (vfs.ReadSeekCloser, error) {
+	return f.OpenFile(name, 0, 0)
+}
+
+func (f *filesystemOpener) RootType(path string) vfs.RootType {
+	return ""
+}
+
+func (f *filesystemOpener) String() string {
+	return "*filesystemOpener"
 }
