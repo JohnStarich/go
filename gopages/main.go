@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -34,21 +35,37 @@ type Args struct {
 	SiteTitle        string
 }
 
-func main() {
+func parseFlags() (Args, string, error) {
 	var args Args
-	flag.StringVar(&args.OutputPath, "out", "dist", "Output path for static files")
-	flag.StringVar(&args.BaseURL, "base", "", "Base URL to use for static assets")
-	flag.StringVar(&args.SiteTitle, "brand-title", "", "Branding title in the top left of documentation")
-	flag.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
-	flag.BoolVar(&args.GitHubPages, "gh-pages", false, "Automatically commit the output path to the gh-pages branch. The current branch must be clean.")
-	flag.StringVar(&args.GitHubPagesUser, "gh-pages-user", "", "The Git username to push with")
-	flag.StringVar(&args.GitHubPagesToken, "gh-pages-token", "", "The Git token to push with. Usually this is an API key.")
-	flag.Parse()
+	commandLine := flag.NewFlagSet("gopages", flag.ContinueOnError)
+	commandLine.StringVar(&args.OutputPath, "out", "dist", "Output path for static files")
+	commandLine.StringVar(&args.BaseURL, "base", "", "Base URL to use for static assets")
+	commandLine.StringVar(&args.SiteTitle, "brand-title", "", "Branding title in the top left of documentation")
+	commandLine.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
+	commandLine.BoolVar(&args.GitHubPages, "gh-pages", false, "Automatically commit the output path to the gh-pages branch. The current branch must be clean.")
+	commandLine.StringVar(&args.GitHubPagesUser, "gh-pages-user", "", "The Git username to push with")
+	commandLine.StringVar(&args.GitHubPagesToken, "gh-pages-token", "", "The Git token to push with. Usually this is an API key.")
+	var output bytes.Buffer
+	commandLine.SetOutput(&output)
+	err := commandLine.Parse(os.Args[1:]) // prints usage if fails
+	return args, output.String(), err
+}
+
+func main() {
+	args, usageOutput, err := parseFlags()
+	switch err {
+	case nil:
+	case flag.ErrHelp:
+		fmt.Print(usageOutput)
+		os.Exit(0)
+	default:
+		fmt.Print(usageOutput)
+		os.Exit(2)
+	}
 
 	log.SetOutput(ioutil.Discard) // disable godoc's internal logging
 
-	err := run(args)
-	if err != nil {
+	if err := run(args); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
