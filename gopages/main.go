@@ -1,7 +1,8 @@
+//go:generate go run ./cmd/gendoc -template ./cmd/gendoc/doc.go -out doc.go
+
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 	"gopkg.in/src-d/go-billy.v4/memfs"
@@ -25,34 +27,8 @@ const (
 	ghPagesBranch = "gh-pages"
 )
 
-type Args struct {
-	BaseURL          string
-	GitHubPages      bool
-	GitHubPagesToken string
-	GitHubPagesUser  string
-	OutputPath       string
-	SiteDescription  string
-	SiteTitle        string
-}
-
-func parseFlags() (Args, string, error) {
-	var args Args
-	commandLine := flag.NewFlagSet("gopages", flag.ContinueOnError)
-	commandLine.StringVar(&args.OutputPath, "out", "dist", "Output path for static files")
-	commandLine.StringVar(&args.BaseURL, "base", "", "Base URL to use for static assets")
-	commandLine.StringVar(&args.SiteTitle, "brand-title", "", "Branding title in the top left of documentation")
-	commandLine.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
-	commandLine.BoolVar(&args.GitHubPages, "gh-pages", false, "Automatically commit the output path to the gh-pages branch. The current branch must be clean.")
-	commandLine.StringVar(&args.GitHubPagesUser, "gh-pages-user", "", "The Git username to push with")
-	commandLine.StringVar(&args.GitHubPagesToken, "gh-pages-token", "", "The Git token to push with. Usually this is an API key.")
-	var output bytes.Buffer
-	commandLine.SetOutput(&output)
-	err := commandLine.Parse(os.Args[1:]) // prints usage if fails
-	return args, output.String(), err
-}
-
 func main() {
-	args, usageOutput, err := parseFlags()
+	args, usageOutput, err := flags.Parse(os.Args[1:]...)
 	switch err {
 	case nil:
 	case flag.ErrHelp:
@@ -71,7 +47,7 @@ func main() {
 	}
 }
 
-func run(args Args) error {
+func run(args flags.Args) error {
 	modulePath, err := os.Getwd()
 	if err != nil {
 		return err

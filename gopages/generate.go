@@ -11,6 +11,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/godoc"
@@ -51,7 +52,7 @@ func parseTemplate(funcs template.FuncMap, name, data string) *template.Template
 	return t
 }
 
-func addGoPagesFuncs(funcs template.FuncMap, args Args) {
+func addGoPagesFuncs(funcs template.FuncMap, args flags.Args) {
 	var longTitle string
 	if args.SiteTitle != "" && args.SiteDescription != "" {
 		longTitle = fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
@@ -80,7 +81,7 @@ func addGoPagesFuncs(funcs template.FuncMap, args Args) {
 	}
 }
 
-func generateDocs(modulePath, modulePackage string, args Args, src, fs billy.Filesystem) error {
+func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs billy.Filesystem) error {
 	if err := util.RemoveAll(fs, args.OutputPath); err != nil {
 		return errors.Wrap(err, "Failed to clean output directory")
 	}
