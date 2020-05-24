@@ -88,8 +88,6 @@ func generateDocs(modulePath, modulePackage string, args Args, src, fs billy.Fil
 		return errors.Wrap(err, "Failed to create output directory")
 	}
 
-	fmt.Println("Generating godoc static pages for module...", modulePackage)
-
 	ns := vfs.NewNameSpace()
 	ns.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
 	srcRoot, err := src.Chroot(modulePath)
@@ -154,7 +152,6 @@ Oops, this page doesn't exist.
 			return err
 		}
 	}
-	fmt.Println("Done!")
 	return nil
 }
 

@@ -75,6 +75,8 @@ func run(args Args) error {
 		return errors.Errorf("Unable to find module package name in go.mod file: %s", goMod)
 	}
 
+	fmt.Println("Generating godoc static pages for module...", modulePackage)
+
 	if !args.GitHubPages {
 		fs := osfs.New("")
 		return generateDocs(modulePath, modulePackage, args, fs, fs)
@@ -109,6 +111,8 @@ func run(args Args) error {
 	if err := generateDocs(modulePath, modulePackage, args, src, fs); err != nil {
 		return err
 	}
+
+	fmt.Println("Committing and pushing changes to gh-pages branch...")
 
 	workTree, err := repo.Worktree()
 	if err != nil {
