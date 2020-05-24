@@ -26,19 +26,18 @@ lint-fix: $(MODULES:=-lint-fix)
 # 'go mod init ...' below is a hack so 'go tool cover' can generate reports
 .PHONY: test
 test: $(MODULES:=-test)
-	set -e; \
-	trap 'rm go.mod go.sum' EXIT; \
-	go mod init github.com/johnstarich/go; \
-	echo 'mode: atomic' > cover.out; \
-	cat cover/* | grep -v '^mode: ' >> cover.out; \
-	coverage=$$(go tool cover -func "cover.out" | tail -1 | awk '{print $$3}'); \
-	printf '##########################\n' >&2; \
-	printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
-	printf '##########################\n' >&2; \
-	echo "$$coverage"; \
-	if [[ -n "$$COVERALLS_TOKEN" ]]; then \
-		go get github.com/mattn/goveralls; \
-		goveralls -coverprofile="cover.out" -service=travis-ci -repotoken "$$COVERALLS_TOKEN"; \
+	echo 'mode: atomic' > cover.out
+	cat cover/* | grep -v '^mode: ' | sed 's@github.com/johnstarich/go@.@' >> cover.out
+	set -e -o pipefail; \
+		coverage=$$(go tool cover -func "cover.out" | tail -1 | awk '{print $$3}'); \
+		printf '##########################\n' >&2; \
+		printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
+		printf '##########################\n' >&2; \
+		echo "$$coverage"
+	@if [[ -n "${COVERALLS_TOKEN}" ]]; then \
+		set -ex; \
+		(cd /tmp; go get github.com/mattn/goveralls); \
+		goveralls -coverprofile="cover.out" -service=travis-ci -repotoken "${COVERALLS_TOKEN}"; \
 	fi
 
 .PHONY: %-test
