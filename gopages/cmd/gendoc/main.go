@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 )
@@ -19,13 +20,13 @@ func main() {
 	flag.Parse()
 	if err := run(*templatePath, *outPath); err != nil {
 		fmt.Fprintln(os.Stderr, errors.Wrap(err, "gendoc").Error())
-		os.Exit(1)
+		cmd.Exit(1)
 	}
 }
 
 func run(templatePath, outPath string) error {
-	if templatePath == "" {
-		return errors.New("Provide a doc template file path")
+	if templatePath == "" || outPath == "" {
+		return errors.New("Provide doc template and output file paths")
 	}
 	templateBytes, err := ioutil.ReadFile(templatePath)
 	if err != nil {

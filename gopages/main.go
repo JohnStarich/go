@@ -18,6 +18,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	gitHTTP "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
@@ -28,31 +29,39 @@ const (
 )
 
 func main() {
-	args, usageOutput, err := flags.Parse(os.Args[1:]...)
+	mainArgs(run, os.Getwd, os.Args[1:]...)
+}
+
+func mainArgs(
+	runner func(string, flags.Args) error,
+	getWD func() (string, error),
+	osArgs ...string,
+) {
+	args, usageOutput, err := flags.Parse(osArgs...)
 	switch err {
 	case nil:
 	case flag.ErrHelp:
 		fmt.Print(usageOutput)
-		os.Exit(0)
+		return
 	default:
 		fmt.Print(usageOutput)
-		os.Exit(2)
+		cmd.Exit(2)
 	}
 
 	log.SetOutput(ioutil.Discard) // disable godoc's internal logging
 
-	if err := run(args); err != nil {
+	modulePath, err := getWD()
+	if err != nil {
+		panic(errors.Wrap(err, "Failed to get current directory"))
+	}
+
+	if err := runner(modulePath, args); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		cmd.Exit(1)
 	}
 }
 
-func run(args flags.Args) error {
-	modulePath, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
+func run(modulePath string, args flags.Args) error {
 	goMod := filepath.Join(modulePath, "go.mod")
 	if _, err := os.Stat(goMod); os.IsNotExist(err) {
 		return errors.New("go.mod not found in the current directory")

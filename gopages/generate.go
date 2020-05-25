@@ -93,14 +93,14 @@ func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs bil
 	ns.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
 	srcRoot, err := src.Chroot(modulePath)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Failed to chroot the source file system to %q", modulePath)
 	}
 	modFS := &filesystemOpener{Filesystem: srcRoot}
 	ns.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
 
 	corpus := godoc.NewCorpus(ns)
 	if err := corpus.Init(); err != nil {
-		return err
+		return errors.Wrap(err, "Failed to initialize corpus")
 	}
 
 	pres := godoc.NewPresentation(corpus)
