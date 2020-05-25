@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>pipe - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/gopages/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/gopages/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/gopages/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/gopages/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package pipe
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/johnstarich/go/gopages/internal/pipe"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+Package pipe helps chain together multiple error-returning operations, such that the first error is returned immediately.
+This is especially useful on error guards for eliminating boilerplate and easily achieving full test coverage.
+</p>
+
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+				
+				<dd><a href="#ErrIf">func ErrIf(cond bool, err error) error</a></dd>
+			
+			
+				
+				<dd><a href="#Op">type Op</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Chain">func Chain(ops ...Op) Op</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#ChainFuncs">func ChainFuncs(opFuncs ...OpFunc) Op</a></dd>
+				
+				
+			
+				
+				<dd><a href="#OpFunc">type OpFunc</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#OpFunc.Do">func (o OpFunc) Do() error</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go">op.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+			
+			
+			<h2 id="ErrIf">func <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=1195:1233#L36">ErrIf</a>
+				<a class="permalink" href="#ErrIf">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func ErrIf(cond <a href="/pkg/builtin/#bool">bool</a>, err <a href="/pkg/builtin/#error">error</a>) <a href="/pkg/builtin/#error">error</a></pre>
+			<p>
+ErrIf returns &#39;err&#39; if &#39;cond&#39; is true, nil otherwise
+</p>
+
+			
+			
+
+		
+		
+			
+			
+			<h2 id="Op">type <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=356:389#L1">Op</a>
+				<a class="permalink" href="#Op">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+Op creates an error-returning operation abstraction to help eliminate error handling boilerplate
+</p>
+
+			<pre>type Op interface {
+    Do() <a href="/pkg/builtin/#error">error</a>
+}</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="Chain">func <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=745:769#L13">Chain</a>
+					<a class="permalink" href="#Chain">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Chain(ops ...<a href="#Op">Op</a>) <a href="#Op">Op</a></pre>
+				<p>
+Chain combines each Op into a chain. When executed, each Op is run in-order
+and the first error is returned immediately.
+</p>
+
+				
+				
+			
+				
+				<h3 id="ChainFuncs">func <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=881:918#L18">ChainFuncs</a>
+					<a class="permalink" href="#ChainFuncs">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func ChainFuncs(opFuncs ...<a href="#OpFunc">OpFunc</a>) <a href="#Op">Op</a></pre>
+				<p>
+ChainFuncs is identical to Chain, but takes the more convenient OpFunc type instead
+</p>
+
+				
+				
+			
+
+			
+		
+			
+			
+			<h2 id="OpFunc">type <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=531:555#L3">OpFunc</a>
+				<a class="permalink" href="#OpFunc">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+OpFunc is an Op and is interchangeable with the corresponding function type.
+OpFuncs are useful for inlining custom functions as Ops.
+</p>
+
+			<pre>type OpFunc func() <a href="/pkg/builtin/#error">error</a></pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="OpFunc.Do">func (OpFunc) <a href="/src/github.com/johnstarich/go/gopages/internal/pipe/op.go?s=557:583#L5">Do</a>
+					<a class="permalink" href="#OpFunc.Do">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (o <a href="#OpFunc">OpFunc</a>) Do() <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
