@@ -31,7 +31,10 @@ func TestGenerateDocs(t *testing.T) {
 	thingFS := osfs.New("")
 	outputFS := memfs.New()
 	writeFile := func(path, contents string) {
-		err := ioutil.WriteFile(filepath.Join(thing, path), []byte(contents), 0600)
+		path = filepath.Join(thing, path)
+		err := os.MkdirAll(filepath.Dir(path), 0700)
+		require.NoError(t, err)
+		err = ioutil.WriteFile(path, []byte(contents), 0600)
 		require.NoError(t, err)
 	}
 
@@ -40,6 +43,14 @@ func TestGenerateDocs(t *testing.T) {
 package main
 
 func main() {
+	println("Hello world")
+}
+`)
+	writeFile("internal/hello/hello.go", `
+package lib
+
+// Hello says hello
+func Hello() {
 	println("Hello world")
 }
 `)
@@ -52,6 +63,7 @@ func main() {
 		"404.html",
 		"index.html",
 		"pkg/index.html",
+		"pkg/internal/hello/index.html",
 	}
 	sort.Strings(expectedDocs)
 	var foundDocs []string
@@ -62,6 +74,12 @@ func main() {
 	})
 	sort.Strings(foundDocs)
 	assert.Equal(t, expectedDocs, foundDocs)
+
+	f, err := outputFS.Open("pkg/index.html")
+	require.NoError(t, err)
+	indexContents, err := ioutil.ReadAll(f)
+	require.NoError(t, err)
+	assert.Contains(t, string(indexContents), "internal/hello")
 }
 
 func walkFS(t *testing.T, fs billy.Filesystem, path string, visit func(path string)) {

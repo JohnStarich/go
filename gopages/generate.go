@@ -191,7 +191,10 @@ func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
 	return doRequest(func(w http.ResponseWriter) {
 		pres.ServeHTTP(w, &http.Request{
-			URL: &url.URL{Path: path},
+			URL: &url.URL{
+				Path:     path,
+				RawQuery: "m=all", // show index pages for internal packages
+			},
 		})
 	})
 }
