@@ -124,6 +124,61 @@
 				
 				
 			
+				
+				<dd><a href="#connOp">type connOp</a></dd>
+				
+				
+			
+				
+				<dd><a href="#staggerConn">type staggerConn</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.Close">func (s *staggerConn) Close() error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.LocalAddr">func (s *staggerConn) LocalAddr() net.Addr</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.Read">func (s *staggerConn) Read(b []byte) (n int, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.ReadFrom">func (s *staggerConn) ReadFrom(b []byte) (n int, addr net.Addr, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.RemoteAddr">func (s *staggerConn) RemoteAddr() net.Addr</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.SetDeadline">func (s *staggerConn) SetDeadline(t time.Time) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.SetReadDeadline">func (s *staggerConn) SetReadDeadline(t time.Time) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.SetWriteDeadline">func (s *staggerConn) SetWriteDeadline(t time.Time) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.Stagger">func (s *staggerConn) Stagger(ticker &lt;-chan struct{}, cancel context.CancelFunc)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.Stats">func (s *staggerConn) Stats() Stats</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.Write">func (s *staggerConn) Write(b []byte) (n int, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.WriteTo">func (s *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.getConnCount">func (s *staggerConn) getConnCount() int</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.iter">func (s *staggerConn) iter(op connOp, fn func(conn PacketConn) (keepGoing bool, err error)) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#staggerConn.runReplay">func (s *staggerConn) runReplay(connIndex uint64)</a></dd>
+				
+			
 			
 			</dl>
 			</div><!-- #manual-nav -->
@@ -240,6 +295,280 @@ PacketConn implements both net.Conn and net.PacketConn
 
 			
 
+			
+		
+			
+			
+			<h2 id="connOp">type <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=3701:3719#L121">connOp</a>
+				<a class="permalink" href="#connOp">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type connOp <a href="/pkg/builtin/#string">string</a></pre>
+
+			
+				
+				<pre>const (
+    <span id="readOp">readOp</span>             connOp = &#34;read&#34;
+    <span id="writeOp">writeOp</span>            connOp = &#34;write&#34;
+    <span id="readFromOp">readFromOp</span>         connOp = &#34;read from&#34;
+    <span id="writeToOp">writeToOp</span>          connOp = &#34;write to&#34;
+    <span id="setDeadlineOp">setDeadlineOp</span>      connOp = &#34;set deadline&#34;
+    <span id="setReadDeadlineOp">setReadDeadlineOp</span>  connOp = &#34;set read deadline&#34;
+    <span id="setWriteDeadlineOp">setWriteDeadlineOp</span> connOp = &#34;set write deadline&#34;
+)</pre>
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+		
+			
+			
+			<h2 id="staggerConn">type <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=836:1341#L27">staggerConn</a>
+				<a class="permalink" href="#staggerConn">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+staggerConn fires out all Writes to all outgoing connections, Reads return the first successful read.
+</p>
+
+			<pre>type staggerConn struct {
+<span id="staggerConn.conns"></span>    conns []<a href="#PacketConn">PacketConn</a>
+
+<span id="staggerConn.connCount"></span>    connCount    *<a href="/pkg/go.uber.org/atomic/">atomic</a>.<a href="/pkg/go.uber.org/atomic/#Uint64">Uint64</a>
+<span id="staggerConn.replay"></span>    replay       []chan struct{}
+<span id="staggerConn.replayMu"></span>    replayMu     <a href="/pkg/sync/">sync</a>.<a href="/pkg/sync/#RWMutex">RWMutex</a>
+<span id="staggerConn.tickerCancel"></span>    tickerCancel <a href="/pkg/context/">context</a>.<a href="/pkg/context/#CancelFunc">CancelFunc</a>
+    <span class="comment">// capture last Write and SetDeadlines for replay on staggered connections</span>
+<span id="staggerConn.lastDeadline"></span>    lastDeadline,
+    lastReadDeadline,
+    lastWriteDeadline <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>
+<span id="staggerConn.lastWrite"></span>    lastWrite     []<a href="/pkg/builtin/#byte">byte</a>
+<span id="staggerConn.lastWriteAddr"></span>    lastWriteAddr <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a> <span class="comment">// currently unused in replay</span>
+
+    <span class="comment">// capture stats about connections for better ordering on the next call to staggercast.New</span>
+<span id="staggerConn.firstResponder"></span>    firstResponder *<a href="/pkg/go.uber.org/atomic/">atomic</a>.<a href="/pkg/go.uber.org/atomic/#Int64">Int64</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="staggerConn.Close">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=8198:8233#L309">Close</a>
+					<a class="permalink" href="#staggerConn.Close">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) Close() <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.LocalAddr">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=8433:8475#L323">LocalAddr</a>
+					<a class="permalink" href="#staggerConn.LocalAddr">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) LocalAddr() <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.Read">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=5731:5786#L203">Read</a>
+					<a class="permalink" href="#staggerConn.Read">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) Read(b []<a href="/pkg/builtin/#byte">byte</a>) (n <a href="/pkg/builtin/#int">int</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.ReadFrom">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=6881:6955#L254">ReadFrom</a>
+					<a class="permalink" href="#staggerConn.ReadFrom">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) ReadFrom(b []<a href="/pkg/builtin/#byte">byte</a>) (n <a href="/pkg/builtin/#int">int</a>, addr <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.RemoteAddr">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=8627:8670#L328">RemoteAddr</a>
+					<a class="permalink" href="#staggerConn.RemoteAddr">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) RemoteAddr() <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.SetDeadline">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=8823:8875#L333">SetDeadline</a>
+					<a class="permalink" href="#staggerConn.SetDeadline">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) SetDeadline(t <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>) <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.SetReadDeadline">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=9048:9104#L342">SetReadDeadline</a>
+					<a class="permalink" href="#staggerConn.SetReadDeadline">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) SetReadDeadline(t <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>) <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.SetWriteDeadline">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=9289:9346#L351">SetWriteDeadline</a>
+					<a class="permalink" href="#staggerConn.SetWriteDeadline">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) SetWriteDeadline(t <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Time">Time</a>) <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.Stagger">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=2550:2630#L73">Stagger</a>
+					<a class="permalink" href="#staggerConn.Stagger">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) Stagger(ticker &lt;-chan struct{}, cancel <a href="/pkg/context/">context</a>.<a href="/pkg/context/#CancelFunc">CancelFunc</a>)</pre>
+				<p>
+Stagger controls when secondary connections are attempted after the first. For any new enabled connection, the last Write and SetDeadlines are replayed onto it.
+If Stagger is called after the connection is started, then the behavior is undefined.
+First connection is attempted immediately, then all future connections will be enabled when receiving from ticker.
+</p>
+<p>
+Example: Create and wrap a &#39;time.Ticker.C&#39; with a duration of 1 second.
+The first connection is attempted immediately. For every 1 second the Read hasn&#39;t returned, an additional connection is attempted.
+Once a connection succeeds, the result is returned immediately from Read.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.Stats">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=3448:3483#L110">Stats</a>
+					<a class="permalink" href="#staggerConn.Stats">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) Stats() <a href="#Stats">Stats</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.Write">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=6316:6372#L231">Write</a>
+					<a class="permalink" href="#staggerConn.Write">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) Write(b []<a href="/pkg/builtin/#byte">byte</a>) (n <a href="/pkg/builtin/#int">int</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.WriteTo">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=7705:7778#L286">WriteTo</a>
+					<a class="permalink" href="#staggerConn.WriteTo">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) WriteTo(b []<a href="/pkg/builtin/#byte">byte</a>, addr <a href="/pkg/net/">net</a>.<a href="/pkg/net/#Addr">Addr</a>) (n <a href="/pkg/builtin/#int">int</a>, err <a href="/pkg/builtin/#error">error</a>)</pre>
+				<p>
+WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.getConnCount">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=4644:4684#L153">getConnCount</a>
+					<a class="permalink" href="#staggerConn.getConnCount">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) getConnCount() <a href="/pkg/builtin/#int">int</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.iter">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=4790:4887#L161">iter</a>
+					<a class="permalink" href="#staggerConn.iter">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) iter(op connOp, fn func(conn <a href="#PacketConn">PacketConn</a>) (keepGoing <a href="/pkg/builtin/#bool">bool</a>, err <a href="/pkg/builtin/#error">error</a>)) <a href="/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="staggerConn.runReplay">func (*staggerConn) <a href="/src/github.com/johnstarich/go/dns/staggercast/conn.go?s=4127:4176#L134">runReplay</a>
+					<a class="permalink" href="#staggerConn.runReplay">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *staggerConn) runReplay(connIndex <a href="/pkg/builtin/#uint64">uint64</a>)</pre>
+				<p>
+runReplay synchronously reapplies the last Deadlines and the last Write on a best-effort basis
+</p>
+
+				
+				
+				
 			
 		
 	
