@@ -168,7 +168,8 @@ Oops, this page doesn't exist.
 		},
 		func() error {
 			var ops []pipe.OpFunc
-			for _, path := range packagePaths {
+			for i := range packagePaths {
+				path := packagePaths[i]
 				ops = append(ops, func() error {
 					return scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
 				})

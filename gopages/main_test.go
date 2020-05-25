@@ -124,7 +124,10 @@ func TestRun(t *testing.T) {
 			require.NoError(t, err)
 
 			writeFile := func(path, contents string) {
-				err := ioutil.WriteFile(filepath.Join(modulePath, path), []byte(contents), 0600)
+				path = filepath.Join(modulePath, path)
+				err := os.MkdirAll(filepath.Dir(path), 0700)
+				require.NoError(t, err)
+				err = ioutil.WriteFile(path, []byte(contents), 0600)
 				require.NoError(t, err)
 			}
 
@@ -133,6 +136,14 @@ func TestRun(t *testing.T) {
 package main
 
 func main() {
+	println("Hello world")
+}
+`)
+			writeFile("lib/lib.go", `
+package lib
+
+// Hello says hi
+func Hello() {
 	println("Hello world")
 }
 `)
@@ -147,6 +158,7 @@ func main() {
 			}
 			require.NoError(t, err)
 
+			var foundLib bool
 			var fileNames []string
 			if contains(tc.args, "-gh-pages") {
 				// fetch the new head commit and walk the files in the diff
@@ -158,7 +170,9 @@ func main() {
 				require.NoError(t, err)
 				err = files.ForEach(func(f *object.File) error {
 					name := strings.TrimPrefix(f.Name, "dist"+string(filepath.Separator))
-					if !strings.HasPrefix(name, "lib") {
+					if strings.HasPrefix(name, "lib") {
+						foundLib = true
+					} else {
 						fileNames = append(fileNames, name)
 					}
 					return nil
@@ -174,19 +188,24 @@ func main() {
 					name := strings.TrimPrefix(path, prefix)
 					if err == nil &&
 						!info.IsDir() &&
-						!strings.HasPrefix(name, string(filepath.Separator)) &&
-						!strings.HasPrefix(name, "lib") {
-						fileNames = append(fileNames, name)
+						!strings.HasPrefix(name, string(filepath.Separator)) {
+						if strings.HasPrefix(name, "lib") {
+							foundLib = true
+						} else {
+							fileNames = append(fileNames, name)
+						}
 					}
 					return nil
 				})
 				require.NoError(t, err)
 			}
 			require.NoError(t, err)
+			assert.True(t, foundLib)
 			assert.Equal(t, []string{
 				"404.html",
 				"index.html",
 				"pkg/index.html",
+				"pkg/lib/index.html",
 			}, fileNames)
 		})
 	}
