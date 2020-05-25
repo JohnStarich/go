@@ -104,12 +104,23 @@
 			<dl>
 			
 			
+				<dd><a href="#pkg-variables">Variables</a></dd>
+			
 			
 				
 				<dd><a href="#Compile">func Compile(expr string) (*regexp.Regexp, error)</a></dd>
 			
 				
 				<dd><a href="#MustCompile">func MustCompile(expr string) *regexp.Regexp</a></dd>
+			
+				
+				<dd><a href="#extendedRegexp">func extendedRegexp(expr string) string</a></dd>
+			
+				
+				<dd><a href="#removeComments">func removeComments(expr string) string</a></dd>
+			
+				
+				<dd><a href="#removeWhitespace">func removeWhitespace(expr string) string</a></dd>
 			
 			
 			
@@ -134,6 +145,15 @@
 		
 
 		
+		
+			<h2 id="pkg-variables">Variables</h2>
+			
+				
+				<pre>var (
+    <span id="whitespaceRe">whitespaceRe</span> = <a href="/pkg/regexp/">regexp</a>.<a href="/pkg/regexp/#MustCompile">MustCompile</a>(`\s+`)
+    <span id="commentsRe">commentsRe</span>   = <a href="/pkg/regexp/">regexp</a>.<a href="/pkg/regexp/#MustCompile">MustCompile</a>(`(?:\\#|[^#])*`)
+)</pre>
+			
 		
 		
 			
@@ -164,6 +184,45 @@ Compile compiles expr as a regular expression in a Perl-like &#34;extended&#34; 
 MustCompile compiles expr as a regular expression in a Perl-like &#34;extended&#34; mode where whitespace characters and comments are ignored
 </p>
 
+			
+			
+
+		
+			
+			
+			<h2 id="extendedRegexp">func <a href="/src/github.com/johnstarich/go/regext/extended.go?s=621:660#L13">extendedRegexp</a>
+				<a class="permalink" href="#extendedRegexp">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func extendedRegexp(expr <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="removeComments">func <a href="/src/github.com/johnstarich/go/regext/extended.go?s=739:778#L19">removeComments</a>
+				<a class="permalink" href="#removeComments">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func removeComments(expr <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
+			
+			
+
+		
+			
+			
+			<h2 id="removeWhitespace">func <a href="/src/github.com/johnstarich/go/regext/extended.go?s=937:978#L27">removeWhitespace</a>
+				<a class="permalink" href="#removeWhitespace">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func removeWhitespace(expr <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			
 			
 			
 
