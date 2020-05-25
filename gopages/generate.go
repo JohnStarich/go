@@ -14,6 +14,7 @@ import (
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/godoc"
@@ -66,15 +67,19 @@ func addGoPagesFuncs(funcs template.FuncMap, args flags.Args) {
 		keys = append([]string{firstKey}, keys...) // require at least one key
 		for _, key := range keys {
 			value, ok := values[key]
-			if !ok {
-				return "", errors.Errorf("Unknown gopages key: %q", key)
-			}
-			valueStr, isString := value.(string)
-			if !isString {
-				return "", errors.Errorf("gopages key %q is not a string", key)
-			}
-			if valueStr != "" {
-				return template.HTMLEscapeString(valueStr), nil
+			var valueStr string
+			err := pipe.ChainFuncs(
+				func() error {
+					return pipe.ErrIf(!ok, errors.Errorf("Unknown gopages key: %q", key))
+				},
+				func() error {
+					var isString bool
+					valueStr, isString = value.(string)
+					return pipe.ErrIf(!isString, errors.Errorf("gopages key %q is not a string", key))
+				},
+			).Do()
+			if err != nil || valueStr != "" {
+				return template.HTMLEscapeString(valueStr), err
 			}
 		}
 		return defaultValue, nil
@@ -82,25 +87,33 @@ func addGoPagesFuncs(funcs template.FuncMap, args flags.Args) {
 }
 
 func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs billy.Filesystem) error {
-	if err := util.RemoveAll(fs, args.OutputPath); err != nil {
-		return errors.Wrap(err, "Failed to clean output directory")
-	}
-	if err := fs.MkdirAll(args.OutputPath, 0700); err != nil {
-		return errors.Wrap(err, "Failed to create output directory")
-	}
+	var ns vfs.NameSpace
+	var srcRoot billy.Filesystem
+	var corpus *godoc.Corpus
+	err := pipe.ChainFuncs(
+		func() error {
+			return errors.Wrap(util.RemoveAll(fs, args.OutputPath), "Failed to clean output directory")
+		},
+		func() error {
+			return errors.Wrap(fs.MkdirAll(args.OutputPath, 0700), "Failed to create output directory")
+		},
+		func() error {
+			ns = vfs.NewNameSpace()
+			ns.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
+			var err error
+			srcRoot, err = src.Chroot(modulePath)
+			return errors.Wrapf(err, "Failed to chroot the source file system to %q", modulePath)
+		},
+		func() error {
+			modFS := &filesystemOpener{Filesystem: srcRoot}
+			ns.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
 
-	ns := vfs.NewNameSpace()
-	ns.Bind("/lib/godoc", mapfs.New(static.Files), "/", vfs.BindReplace)
-	srcRoot, err := src.Chroot(modulePath)
+			corpus = godoc.NewCorpus(ns)
+			return errors.Wrap(corpus.Init(), "Are there any Go files present? Failed to initialize corpus")
+		},
+	).Do()
 	if err != nil {
-		return errors.Wrapf(err, "Failed to chroot the source file system to %q", modulePath)
-	}
-	modFS := &filesystemOpener{Filesystem: srcRoot}
-	ns.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
-
-	corpus := godoc.NewCorpus(ns)
-	if err := corpus.Init(); err != nil {
-		return errors.Wrap(err, "Are there any Go files present? Failed to initialize corpus")
+		return err
 	}
 
 	pres := godoc.NewPresentation(corpus)
@@ -109,24 +122,32 @@ func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs bil
 	readTemplates(pres, funcs, ns)
 
 	// Generate all static assets and save to /lib/godoc
-	for name, content := range static.Files {
+	var ops []pipe.OpFunc
+	for name := range static.Files {
+		content := static.Files[name]
 		path := filepath.Join(args.OutputPath, "lib", "godoc", name)
-		if err := fs.MkdirAll(filepath.Dir(path), 0700); err != nil {
-			return err
-		}
-		err := util.WriteFile(fs, path, []byte(content), 0600)
-		if err != nil {
-			return err
-		}
+		ops = append(ops, func() error {
+			return fs.MkdirAll(filepath.Dir(path), 0700)
+		}, func() error {
+			return util.WriteFile(fs, path, []byte(content), 0600)
+		})
 	}
-
-	// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
-	err = util.WriteFile(fs, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
+	err = pipe.ChainFuncs(ops...).Do()
 	if err != nil {
 		return err
 	}
 
-	custom404, err := genericPage(pres, "Page not found", `
+	var packagePaths []string
+	var custom404 []byte
+	return pipe.ChainFuncs(
+		func() error {
+			// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
+			return util.WriteFile(fs, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
+		},
+		func() error {
+			// Generate a custom 404 page as a catch-all
+			var err error
+			custom404, err = genericPage(pres, "Page not found", `
 <p>
 <span class="alert" style="font-size:120%">
 Oops, this page doesn't exist.
@@ -134,35 +155,36 @@ Oops, this page doesn't exist.
 </p>
 <p>If something should be here, <a href="https://github.com/JohnStarich/go/issues/new" target="_blank">open an issue</a>.</p>
 `)
-	if err != nil {
-		return err
-	}
-	err = util.WriteFile(fs, filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
-	if err != nil {
-		return err
-	}
-
-	// For each package, generate an index page
-	paths, err := getPackagePaths(modulePackage)
-	if err != nil {
-		return err
-	}
-	for _, path := range paths {
-		err = scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
-		if err != nil {
 			return err
-		}
-	}
-	return nil
+		},
+		func() error {
+			return util.WriteFile(fs, filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
+		},
+		func() error {
+			// For each package, generate an index page
+			var err error
+			packagePaths, err = getPackagePaths(modulePackage)
+			return err
+		},
+		func() error {
+			var ops []pipe.OpFunc
+			for _, path := range packagePaths {
+				ops = append(ops, func() error {
+					return scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
+				})
+			}
+			return pipe.ChainFuncs(ops...).Do()
+		},
+	).Do()
 }
 
 func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 	recorder := httptest.NewRecorder()
 	do(recorder)
-	if recorder.Result().StatusCode != http.StatusOK {
-		return nil, errors.Errorf("Error generating page: [%d]\n%s", recorder.Result().StatusCode, recorder.Body.String())
-	}
-	return recorder.Body.Bytes(), nil
+	return recorder.Body.Bytes(), pipe.ErrIf(
+		recorder.Result().StatusCode != http.StatusOK,
+		errors.Errorf("Error generating page: [%d]\n%s", recorder.Result().StatusCode, recorder.Body.String()),
+	)
 }
 
 func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
@@ -198,29 +220,32 @@ func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, pa
 	outputComponents = append(outputComponents, "index.html")
 	outputPath = filepath.Join(outputComponents...)
 
-	page, err := getPage(pres, path.Join("/pkg", packagePath)+"/")
-	if err != nil {
-		return err
-	}
-	if err := fs.MkdirAll(filepath.Dir(outputPath), 0700); err != nil {
-		return err
-	}
-	return util.WriteFile(fs, outputPath, page, 0600)
+	var page []byte
+	return pipe.ChainFuncs(
+		func() error {
+			var err error
+			page, err = getPage(pres, path.Join("/pkg", packagePath)+"/")
+			return err
+		},
+		func() error {
+			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
+		},
+		func() error {
+			return util.WriteFile(fs, outputPath, page, 0600)
+		},
+	).Do()
 }
 
 func getPackagePaths(modulePackage string) ([]string, error) {
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedName,
 	}, modulePackage+"/...")
-	if err != nil {
-		return nil, err
-	}
 
 	paths := make([]string, len(pkgs))
 	for i, pkg := range pkgs {
 		paths[i] = pkg.PkgPath
 	}
-	return paths, nil
+	return paths, err
 }
 
 func redirect(url string) string {
