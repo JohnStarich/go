@@ -163,6 +163,7 @@ func main() {
 					}
 					return nil
 				})
+				require.NoError(t, err)
 			} else {
 				err := filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
 					prefix := strings.Join([]string{
