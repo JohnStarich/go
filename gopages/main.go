@@ -20,6 +20,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 )
@@ -63,18 +64,23 @@ func mainArgs(
 
 func run(modulePath string, args flags.Args) error {
 	goMod := filepath.Join(modulePath, "go.mod")
-	if _, err := os.Stat(goMod); os.IsNotExist(err) {
-		return errors.New("go.mod not found in the current directory")
-	}
-
-	buf, err := ioutil.ReadFile(goMod)
+	var modulePackage string
+	err := pipe.ChainFuncs(
+		func() error {
+			_, err := os.Stat(goMod)
+			return pipe.ErrIf(os.IsNotExist(err), errors.New("go.mod not found in the current directory"))
+		},
+		func() error {
+			buf, err := ioutil.ReadFile(goMod)
+			modulePackage = modfile.ModulePath(buf)
+			return err
+		},
+		func() error {
+			return pipe.ErrIf(modulePackage == "", errors.Errorf("Unable to find module package name in go.mod file: %s", goMod))
+		},
+	).Do()
 	if err != nil {
 		return err
-	}
-
-	modulePackage := modfile.ModulePath(buf)
-	if modulePackage == "" {
-		return errors.Errorf("Unable to find module package name in go.mod file: %s", goMod)
 	}
 
 	fmt.Println("Generating godoc static pages for module...", modulePackage)
@@ -84,64 +90,83 @@ func run(modulePath string, args flags.Args) error {
 		return generateDocs(modulePath, modulePackage, args, fs, fs)
 	}
 
-	repoRoot, remote, err := getCurrentPathAndRemote(modulePath)
+	var repoRoot, remote string
+	var absOutputPath string
+	err = pipe.ChainFuncs(
+		func() error {
+			var err error
+			repoRoot, remote, err = getCurrentPathAndRemote(modulePath)
+			return err
+		},
+		func() error {
+			var err error
+			absOutputPath, err = filepath.Abs(args.OutputPath)
+			return errors.Wrap(err, "Failed to get absolute path of output directory")
+		},
+		func() error {
+			var err error
+			args.OutputPath, err = filepath.Rel(repoRoot, absOutputPath)
+			return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
+		},
+	).Do()
 	if err != nil {
 		return err
-	}
-
-	absOutputPath, err := filepath.Abs(args.OutputPath)
-	if err != nil {
-		return errors.Wrap(err, "Failed to get absolute path of output directory")
-	}
-	args.OutputPath, err = filepath.Rel(repoRoot, absOutputPath)
-	if err != nil {
-		return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
 	}
 
 	src := osfs.New("")
 	fs := memfs.New()
 
-	repo, err := git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
-		URL:           remote,
-		ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
-		SingleBranch:  true,
-	})
+	var repo *git.Repository
+	err = pipe.ChainFuncs(
+		func() error {
+			var err error
+			repo, err = git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
+				URL:           remote,
+				ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
+				SingleBranch:  true,
+			})
+			return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
+		},
+		func() error {
+			return generateDocs(modulePath, modulePackage, args, src, fs)
+		},
+	).Do()
 	if err != nil {
-		return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
-	}
-
-	if err := generateDocs(modulePath, modulePackage, args, src, fs); err != nil {
 		return err
 	}
 
 	fmt.Println("Committing and pushing changes to gh-pages branch...")
 
-	workTree, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	if _, err := workTree.Add("."); err != nil {
-		return errors.Wrap(err, "Failed to add output dir to git")
-	}
-
-	commitMessage := "Update GoPages"
-	if args.SiteTitle != "" {
-		commitMessage += ": " + args.SiteTitle
-	}
-	commit, err := workTree.Commit(commitMessage, &git.CommitOptions{
-		Author: &object.Signature{Name: "GoPages", When: time.Now()},
-	})
-	if err != nil {
-		return errors.Wrap(err, "Failed to commit gopages files")
-	}
-
-	pushOpts := &git.PushOptions{}
-	if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
-		pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
-	}
-	err = repo.Push(pushOpts)
-	return errors.Wrapf(err, "Failed to push gopages commit %q", commit)
+	var workTree *git.Worktree
+	return pipe.ChainFuncs(
+		func() error {
+			var err error
+			workTree, err = repo.Worktree()
+			return err
+		},
+		func() error {
+			_, err := workTree.Add(".")
+			return errors.Wrap(err, "Failed to add output dir to git")
+		},
+		func() error {
+			commitMessage := "Update GoPages"
+			if args.SiteTitle != "" {
+				commitMessage += ": " + args.SiteTitle
+			}
+			_, err := workTree.Commit(commitMessage, &git.CommitOptions{
+				Author: commitAuthor(),
+			})
+			return errors.Wrap(err, "Failed to commit gopages files")
+		},
+		func() error {
+			pushOpts := &git.PushOptions{}
+			if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
+				pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
+			}
+			err = repo.Push(pushOpts)
+			return errors.Wrap(err, "Failed to push gopages commit")
+		},
+	).Do()
 }
 
 func getCurrentPathAndRemote(repoPath string) (string, string, error) {
@@ -156,9 +181,16 @@ func getCurrentPathAndRemote(repoPath string) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Wrap(err, "Failed to set up work tree for repo")
 	}
-	repoRoot := fs.Filesystem.Root()
+	repoRoot, err := filepath.EvalSymlinks(fs.Filesystem.Root())
+	if err != nil {
+		return "", "", err
+	}
 
 	remote, err := repo.Remote(git.DefaultRemoteName)
 	remoteURL := remote.Config().URLs[0]
 	return repoRoot, remoteURL, errors.Wrap(err, "Failed to get repo remote")
+}
+
+func commitAuthor() *object.Signature {
+	return &object.Signature{Name: "GoPages", When: time.Now()}
 }

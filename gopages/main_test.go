@@ -3,8 +3,13 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
@@ -68,4 +73,129 @@ func TestMainArgs(t *testing.T) {
 			assert.NotPanics(t, runTest)
 		})
 	}
+}
+
+func TestRun(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		args        []string
+		expectErr   string
+	}{
+		{
+			description: "happy path, no flags",
+		},
+		{
+			description: "happy path, gh-pages",
+			args:        []string{"-gh-pages"},
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			// create dummy repo to enable cloning
+			ghPagesDir, err := ioutil.TempDir("", "")
+			require.NoError(t, err)
+			defer os.RemoveAll(ghPagesDir)
+			ghPagesRepo, err := git.PlainInit(ghPagesDir, false)
+			require.NoError(t, err)
+			workTree, err := ghPagesRepo.Worktree()
+			require.NoError(t, err)
+			_, err = workTree.Commit("Initial commit", &git.CommitOptions{
+				Author: commitAuthor(),
+			})
+			require.NoError(t, err)
+			require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
+				Create: true,
+			}))
+
+			modulePath, err := ioutil.TempDir("", "")
+			require.NoError(t, err)
+			defer os.RemoveAll(modulePath)
+			wd, err := os.Getwd()
+			require.NoError(t, err)
+			require.NoError(t, os.Chdir(modulePath))
+			defer func() {
+				require.NoError(t, os.Chdir(wd))
+			}()
+
+			// prepare origin remote pointing to dummy repo
+			_, err = git.PlainClone(modulePath, false, &git.CloneOptions{
+				URL: ghPagesDir,
+			})
+			require.NoError(t, err)
+
+			writeFile := func(path, contents string) {
+				err := ioutil.WriteFile(filepath.Join(modulePath, path), []byte(contents), 0600)
+				require.NoError(t, err)
+			}
+
+			writeFile("go.mod", `module thing`)
+			writeFile("main.go", `
+package main
+
+func main() {
+	println("Hello world")
+}
+`)
+
+			args, _, err := flags.Parse(tc.args...)
+			require.NoError(t, err)
+
+			err = run(modulePath, args)
+			if tc.expectErr != "" {
+				assert.EqualError(t, err, tc.expectErr)
+				return
+			}
+			require.NoError(t, err)
+
+			var fileNames []string
+			if contains(tc.args, "-gh-pages") {
+				// fetch the new head commit and walk the files in the diff
+				head, err := ghPagesRepo.Head()
+				require.NoError(t, err)
+				headCommit, err := ghPagesRepo.CommitObject(head.Hash())
+				require.NoError(t, err)
+				files, err := headCommit.Files()
+				require.NoError(t, err)
+				err = files.ForEach(func(f *object.File) error {
+					name := strings.TrimPrefix(f.Name, "dist"+string(filepath.Separator))
+					if !strings.HasPrefix(name, "lib") {
+						fileNames = append(fileNames, name)
+					}
+					return nil
+				})
+			} else {
+				err := filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
+					prefix := strings.Join([]string{
+						modulePath,
+						"dist",
+						"",
+					}, string(filepath.Separator))
+					name := strings.TrimPrefix(path, prefix)
+					if err == nil &&
+						!info.IsDir() &&
+						!strings.HasPrefix(name, string(filepath.Separator)) &&
+						!strings.HasPrefix(name, "lib") {
+						fileNames = append(fileNames, name)
+					}
+					return nil
+				})
+				require.NoError(t, err)
+			}
+			require.NoError(t, err)
+			assert.Equal(t, []string{
+				"404.html",
+				"index.html",
+				"pkg/index.html",
+			}, fileNames)
+		})
+	}
+}
+
+func contains(strs []string, s string) bool {
+	for _, str := range strs {
+		if str == s {
+			return true
+		}
+	}
+	return false
 }

@@ -100,7 +100,7 @@ func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs bil
 
 	corpus := godoc.NewCorpus(ns)
 	if err := corpus.Init(); err != nil {
-		return errors.Wrap(err, "Failed to initialize corpus")
+		return errors.Wrap(err, "Are there any Go files present? Failed to initialize corpus")
 	}
 
 	pres := godoc.NewPresentation(corpus)
