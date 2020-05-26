@@ -117,6 +117,7 @@ func run(modulePath string, args flags.Args) error {
 	fs := memfs.New()
 
 	var repo *git.Repository
+	var workTree *git.Worktree
 	err = pipe.ChainFuncs(
 		func() error {
 			var err error
@@ -128,6 +129,15 @@ func run(modulePath string, args flags.Args) error {
 			return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
 		},
 		func() error {
+			var err error
+			workTree, err = repo.Worktree()
+			return err
+		},
+		func() error {
+			_, _ = workTree.Remove(args.OutputPath) // remove old files on a best-effort basis. if the path doesn't exist, it could error
+			return nil
+		},
+		func() error {
 			return generateDocs(modulePath, modulePackage, args, src, fs)
 		},
 	).Do()
@@ -137,15 +147,9 @@ func run(modulePath string, args flags.Args) error {
 
 	fmt.Println("Committing and pushing changes to gh-pages branch...")
 
-	var workTree *git.Worktree
 	return pipe.ChainFuncs(
 		func() error {
-			var err error
-			workTree, err = repo.Worktree()
-			return err
-		},
-		func() error {
-			_, err := workTree.Add(".")
+			_, err := workTree.Add(args.OutputPath)
 			return errors.Wrap(err, "Failed to add output dir to git")
 		},
 		func() error {
