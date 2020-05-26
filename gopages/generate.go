@@ -142,7 +142,7 @@ func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs bil
 	return pipe.ChainFuncs(
 		func() error {
 			// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
-			return util.WriteFile(fs, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/")), 0600)
+			return util.WriteFile(fs, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/"+modulePackage)), 0600)
 		},
 		func() error {
 			// Generate a custom 404 page as a catch-all
@@ -171,7 +171,7 @@ Oops, this page doesn't exist.
 			for i := range packagePaths {
 				path := packagePaths[i]
 				ops = append(ops, func() error {
-					return scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath, "pkg"))
+					return scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath))
 				})
 			}
 			return pipe.ChainFuncs(ops...).Do()
@@ -209,20 +209,13 @@ func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
 	})
 }
 
-func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, packagePath, outputPath string) error {
+func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, packagePath, outputBasePath string) error {
 	if moduleRoot != packagePath && !strings.HasPrefix(packagePath, moduleRoot+"/") {
 		return errors.Errorf("Package path %q must be rooted by module: %q", packagePath, moduleRoot)
 	}
-	var packageRelPath string
-	if moduleRoot != packagePath {
-		packageRelPath = strings.TrimPrefix(packagePath, moduleRoot+"/")
-	}
-	outputComponents := filepath.SplitList(outputPath)
-	if packageRelPath != "" {
-		outputComponents = append(outputComponents, strings.Split(packageRelPath, "/")...)
-	}
+	outputComponents := append([]string{outputBasePath, "pkg"}, strings.Split(packagePath, "/")...)
 	outputComponents = append(outputComponents, "index.html")
-	outputPath = filepath.Join(outputComponents...)
+	outputPath := filepath.Join(outputComponents...)
 
 	var page []byte
 	return pipe.ChainFuncs(

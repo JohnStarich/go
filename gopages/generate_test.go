@@ -62,8 +62,8 @@ func Hello() {
 	expectedDocs := []string{
 		"404.html",
 		"index.html",
-		"pkg/index.html",
-		"pkg/internal/hello/index.html",
+		"pkg/thing/index.html",
+		"pkg/thing/internal/hello/index.html",
 	}
 	sort.Strings(expectedDocs)
 	var foundDocs []string
@@ -75,7 +75,7 @@ func Hello() {
 	sort.Strings(foundDocs)
 	assert.Equal(t, expectedDocs, foundDocs)
 
-	f, err := outputFS.Open("pkg/index.html")
+	f, err := outputFS.Open("pkg/thing/index.html")
 	require.NoError(t, err)
 	indexContents, err := ioutil.ReadAll(f)
 	require.NoError(t, err)

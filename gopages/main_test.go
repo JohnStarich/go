@@ -204,8 +204,8 @@ func Hello() {
 			assert.Equal(t, []string{
 				"404.html",
 				"index.html",
-				"pkg/index.html",
-				"pkg/lib/index.html",
+				"pkg/thing/index.html",
+				"pkg/thing/lib/index.html",
 			}, fileNames)
 		})
 	}
