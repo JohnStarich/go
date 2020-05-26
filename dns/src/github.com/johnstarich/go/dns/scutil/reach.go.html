@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>src/github.com/johnstarich/go/dns/scutil/reach.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/dns/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/dns/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/dns/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/johnstarich">johnstarich</a>/<a href="/src/github.com/johnstarich/go">go</a>/<a href="/src/github.com/johnstarich/go/dns">dns</a>/<a href="/src/github.com/johnstarich/go/dns/scutil">scutil</a>/<span class="text-muted">reach.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/johnstarich/go/dns/scutil">github.com/johnstarich/go/dns/scutil</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type='text/javascript'>document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1&nbsp;&nbsp;</span>package scutil
+<span id="L2" class="ln">     2&nbsp;&nbsp;</span>
+<span id="L3" class="ln">     3&nbsp;&nbsp;</span>type Reach string
+<span id="L4" class="ln">     4&nbsp;&nbsp;</span>
+<span id="L5" class="ln">     5&nbsp;&nbsp;</span><span class="comment">// docs lifted from the &#39;scutil&#39; man page</span>
+<span id="L6" class="ln">     6&nbsp;&nbsp;</span>
+<span id="L7" class="ln">     7&nbsp;&nbsp;</span>const (
+<span id="L8" class="ln">     8&nbsp;&nbsp;</span>	<span class="comment">// NotReachable is when the specified nodename/address cannot be reached using</span>
+<span id="L9" class="ln">     9&nbsp;&nbsp;</span>	<span class="comment">// the current network configuration.</span>
+<span id="L10" class="ln">    10&nbsp;&nbsp;</span>	NotReachable Reach = &#34;Not Reachable&#34;
+<span id="L11" class="ln">    11&nbsp;&nbsp;</span>	<span class="comment">// Reachable is when the specified nodename/address can be reached using the</span>
+<span id="L12" class="ln">    12&nbsp;&nbsp;</span>	<span class="comment">// current network configuration.</span>
+<span id="L13" class="ln">    13&nbsp;&nbsp;</span>	Reachable Reach = &#34;Reachable&#34;
+<span id="L14" class="ln">    14&nbsp;&nbsp;</span>	<span class="comment">// TransientReachable is when the specified nodename/address can be reached</span>
+<span id="L15" class="ln">    15&nbsp;&nbsp;</span>	<span class="comment">// via a transient (e.g. PPP) connection.</span>
+<span id="L16" class="ln">    16&nbsp;&nbsp;</span>	TransientReachable Reach = &#34;Transient Connection&#34;
+<span id="L17" class="ln">    17&nbsp;&nbsp;</span>	<span class="comment">// ConnectionRequired is when the specified nodename/address can be reached</span>
+<span id="L18" class="ln">    18&nbsp;&nbsp;</span>	<span class="comment">// using the current network configuration but a connection must first be established.</span>
+<span id="L19" class="ln">    19&nbsp;&nbsp;</span>	<span class="comment">// As an example, this status would be returned for a dialup connection that</span>
+<span id="L20" class="ln">    20&nbsp;&nbsp;</span>	<span class="comment">// was not currently active but could handle network traffic for the target system.</span>
+<span id="L21" class="ln">    21&nbsp;&nbsp;</span>	ConnectionRequired Reach = &#34;Connection Required&#34;
+<span id="L22" class="ln">    22&nbsp;&nbsp;</span>	<span class="comment">// ConnectionAutomatic is when the specified nodename/address can be reached</span>
+<span id="L23" class="ln">    23&nbsp;&nbsp;</span>	<span class="comment">// using the current network configuration but a connection must first be</span>
+<span id="L24" class="ln">    24&nbsp;&nbsp;</span>	<span class="comment">// established. Any traffic directed to the specified name/address will</span>
+<span id="L25" class="ln">    25&nbsp;&nbsp;</span>	<span class="comment">// initiate the connection.</span>
+<span id="L26" class="ln">    26&nbsp;&nbsp;</span>	ConnectionAutomatic Reach = &#34;Connection Automatic&#34;
+<span id="L27" class="ln">    27&nbsp;&nbsp;</span>	<span class="comment">// LocalAddress is when the specified nodename/address is one associated</span>
+<span id="L28" class="ln">    28&nbsp;&nbsp;</span>	<span class="comment">// with a network interface on the system.</span>
+<span id="L29" class="ln">    29&nbsp;&nbsp;</span>	LocalAddress Reach = &#34;Local Address&#34;
+<span id="L30" class="ln">    30&nbsp;&nbsp;</span>	<span class="comment">// DirectlyReachableAddress is when the network traffic to the specified</span>
+<span id="L31" class="ln">    31&nbsp;&nbsp;</span>	<span class="comment">// nodename/address will not go through a gateway but is routed directly to</span>
+<span id="L32" class="ln">    32&nbsp;&nbsp;</span>	<span class="comment">// one of the interfaces on the system.</span>
+<span id="L33" class="ln">    33&nbsp;&nbsp;</span>	DirectlyReachableAddress Reach = &#34;Directly Reachable Address&#34;
+<span id="L34" class="ln">    34&nbsp;&nbsp;</span>)
+<span id="L35" class="ln">    35&nbsp;&nbsp;</span>
+</pre><p><a href="/src/github.com/johnstarich/go/dns/scutil/reach.go?m=text">View as plain text</a></p>
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
