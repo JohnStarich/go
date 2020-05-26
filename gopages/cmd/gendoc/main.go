@@ -33,7 +33,7 @@ func run(templatePath, outPath string) error {
 		return err
 	}
 
-	f, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(outPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -42,9 +42,12 @@ func run(templatePath, outPath string) error {
 }
 
 func genDoc(templateBytes []byte, w io.Writer) error {
+	templateStr := string(templateBytes)
+	templateStr = strings.Replace(templateStr, "\n\npackage main", "\npackage main", 1) // enable the comment for godoc by removing the blank line above 'package main'
+
 	tmpl := template.New("")
 	tmpl.Funcs(funcMap())
-	docTemplate, err := tmpl.Parse(string(templateBytes))
+	docTemplate, err := tmpl.Parse(templateStr)
 	if err != nil {
 		return err
 	}

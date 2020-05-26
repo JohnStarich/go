@@ -25,4 +25,5 @@
 //   -out string
 //     	Output path for static files (default "dist")
 // 
+//
 package main
