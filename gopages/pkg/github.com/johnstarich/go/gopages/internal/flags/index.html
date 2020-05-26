@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>cmd - GoPages</title>
+  <title>flags - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
 
@@ -37,7 +37,7 @@
 
 
   <h1>
-    Package cmd
+    Package flags
     <span class="text-muted"></span>
   </h1>
 
@@ -71,14 +71,12 @@
 		
 		<div id="short-nav">
 			<dl>
-			<dd><code>import "github.com/johnstarich/go/gopages/cmd"</code></dd>
+			<dd><code>import "github.com/johnstarich/go/gopages/internal/flags"</code></dd>
 			</dl>
 			<dl>
 			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
 			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
 			
-			
-				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
 			
 			</dl>
 		</div>
@@ -106,15 +104,15 @@
 			<dl>
 			
 			
-				<dd><a href="#pkg-variables">Variables</a></dd>
 			
 			
 				
-				<dd><a href="#Exit">func Exit(code int)</a></dd>
-			
+				<dd><a href="#Args">type Args</a></dd>
 				
-				<dd><a href="#SetupTestExiter">func SetupTestExiter(t *testing.T)</a></dd>
-			
+					
+					<dd>&nbsp; &nbsp; <a href="#Parse">func Parse(osArgs ...string) (Args, string, error)</a></dd>
+				
+				
 			
 			
 			</dl>
@@ -127,7 +125,7 @@
 			<p>
 			<span style="font-size:90%">
 			
-				<a href="/src/github.com/johnstarich/go/gopages/cmd/exiter.go">exiter.go</a>
+				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go">flags.go</a>
 			
 			</span>
 			</p>
@@ -139,40 +137,50 @@
 
 		
 		
-			<h2 id="pkg-variables">Variables</h2>
-			
-				
-				<pre>var <span id="exiter">exiter</span> = <a href="/pkg/os/">os</a>.<a href="/pkg/os/#Exit">Exit</a></pre>
-			
 		
 		
 			
 			
-			<h2 id="Exit">func <a href="/src/github.com/johnstarich/go/gopages/cmd/exiter.go?s=90:109#L2">Exit</a>
-				<a class="permalink" href="#Exit">&#xb6;</a>
+			<h2 id="Args">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L8">Args</a>
+				<a class="permalink" href="#Args">&#xb6;</a>
 				
 				
 			</h2>
-			<pre>func Exit(code <a href="/pkg/builtin/#int">int</a>)</pre>
+			
+			<pre>type Args struct {
+<span id="Args.BaseURL"></span>    BaseURL          <a href="/pkg/builtin/#string">string</a>
+<span id="Args.GitHubPages"></span>    GitHubPages      <a href="/pkg/builtin/#bool">bool</a>
+<span id="Args.GitHubPagesToken"></span>    GitHubPagesToken <a href="/pkg/builtin/#string">string</a>
+<span id="Args.GitHubPagesUser"></span>    GitHubPagesUser  <a href="/pkg/builtin/#string">string</a>
+<span id="Args.OutputPath"></span>    OutputPath       <a href="/pkg/builtin/#string">string</a>
+<span id="Args.SiteDescription"></span>    SiteDescription  <a href="/pkg/builtin/#string">string</a>
+<span id="Args.SiteTitle"></span>    SiteTitle        <a href="/pkg/builtin/#string">string</a>
+}
+</pre>
+
+			
+
+			
+
 			
 			
 			
 
+			
+				
+				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L18">Parse</a>
+					<a class="permalink" href="#Parse">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func Parse(osArgs ...<a href="/pkg/builtin/#string">string</a>) (<a href="#Args">Args</a>, <a href="/pkg/builtin/#string">string</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+			
+
+			
 		
-			
-			
-			<h2 id="SetupTestExiter">func <a href="/src/github.com/johnstarich/go/gopages/cmd/exiter.go?s=129:163#L6">SetupTestExiter</a>
-				<a class="permalink" href="#SetupTestExiter">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func SetupTestExiter(t *<a href="/pkg/testing/">testing</a>.<a href="/pkg/testing/#T">T</a>)</pre>
-			
-			
-			
-
-		
-		
 	
 
 	
@@ -180,49 +188,6 @@
 
 
 
-
-	
-	
-		<h2 id="pkg-subdirectories">Subdirectories</h2>
-	
-	<div class="pkg-dir">
-		<table>
-			<tr>
-				<th class="pkg-name">Name</th>
-				<th class="pkg-synopsis">Synopsis</th>
-			</tr>
-
-			
-			<tr>
-				<td colspan="2"><a href="..">..</a></td>
-			</tr>
-			
-
-			
-				<tr>
-				
-					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="demo/?m=all">demo</a>
-					</td>
-				
-					<td class="pkg-synopsis">
-						
-					</td>
-				</tr>
-			
-				<tr>
-				
-					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="gendoc/?m=all">gendoc</a>
-					</td>
-				
-					<td class="pkg-synopsis">
-						gopages generates static files for Go documentation, formatted with godoc.
-					</td>
-				</tr>
-			
-		</table>
-	</div>
 
 
 

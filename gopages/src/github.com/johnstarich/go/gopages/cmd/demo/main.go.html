@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>src/github.com/johnstarich/go/gopages/cmd/demo/main.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/gopages/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/gopages/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/gopages/pkg/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/gopages/pkg/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/src">src</a>/<a href="/src/github.com">github.com</a>/<a href="/src/github.com/johnstarich">johnstarich</a>/<a href="/src/github.com/johnstarich/go">go</a>/<a href="/src/github.com/johnstarich/go/gopages">gopages</a>/<a href="/src/github.com/johnstarich/go/gopages/cmd">cmd</a>/<a href="/src/github.com/johnstarich/go/gopages/cmd/demo">demo</a>/<span class="text-muted">main.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/pkg/github.com/johnstarich/go/gopages/cmd/demo">github.com/johnstarich/go/gopages/cmd/demo</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type='text/javascript'>document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1&nbsp;&nbsp;</span>package main
+<span id="L2" class="ln">     2&nbsp;&nbsp;</span>
+<span id="L3" class="ln">     3&nbsp;&nbsp;</span>import (
+<span id="L4" class="ln">     4&nbsp;&nbsp;</span>	&#34;fmt&#34;
+<span id="L5" class="ln">     5&nbsp;&nbsp;</span>	&#34;net/http&#34;
+<span id="L6" class="ln">     6&nbsp;&nbsp;</span>	&#34;strings&#34;
+<span id="L7" class="ln">     7&nbsp;&nbsp;</span>)
+<span id="L8" class="ln">     8&nbsp;&nbsp;</span>
+<span id="L9" class="ln">     9&nbsp;&nbsp;</span>func main() {
+<span id="L10" class="ln">    10&nbsp;&nbsp;</span>	fs := http.Dir(&#34;dist&#34;)
+<span id="L11" class="ln">    11&nbsp;&nbsp;</span>	fileServer := http.FileServer(fs)
+<span id="L12" class="ln">    12&nbsp;&nbsp;</span>	mux := http.NewServeMux()
+<span id="L13" class="ln">    13&nbsp;&nbsp;</span>	mux.HandleFunc(&#34;/&#34;, func(w http.ResponseWriter, r *http.Request) {
+<span id="L14" class="ln">    14&nbsp;&nbsp;</span>		_, err := fs.Open(r.URL.Path)
+<span id="L15" class="ln">    15&nbsp;&nbsp;</span>		if err == nil {
+<span id="L16" class="ln">    16&nbsp;&nbsp;</span>			fileServer.ServeHTTP(w, r)
+<span id="L17" class="ln">    17&nbsp;&nbsp;</span>			return
+<span id="L18" class="ln">    18&nbsp;&nbsp;</span>		}
+<span id="L19" class="ln">    19&nbsp;&nbsp;</span>		if strings.HasSuffix(r.URL.Path, &#34;.go&#34;) {
+<span id="L20" class="ln">    20&nbsp;&nbsp;</span>			<span class="comment">// GitHub Pages automatically looks up a corresponding .html file if it exists</span>
+<span id="L21" class="ln">    21&nbsp;&nbsp;</span>			_, err := fs.Open(r.URL.Path + &#34;.html&#34;)
+<span id="L22" class="ln">    22&nbsp;&nbsp;</span>			if err == nil {
+<span id="L23" class="ln">    23&nbsp;&nbsp;</span>				r.URL.Path += &#34;.html&#34;
+<span id="L24" class="ln">    24&nbsp;&nbsp;</span>				fileServer.ServeHTTP(w, r)
+<span id="L25" class="ln">    25&nbsp;&nbsp;</span>				return
+<span id="L26" class="ln">    26&nbsp;&nbsp;</span>			}
+<span id="L27" class="ln">    27&nbsp;&nbsp;</span>		}
+<span id="L28" class="ln">    28&nbsp;&nbsp;</span>		r.URL.Path = &#34;/404.html&#34;
+<span id="L29" class="ln">    29&nbsp;&nbsp;</span>		r.URL.RawPath = &#34;/404.html&#34;
+<span id="L30" class="ln">    30&nbsp;&nbsp;</span>		fileServer.ServeHTTP(w, r)
+<span id="L31" class="ln">    31&nbsp;&nbsp;</span>	})
+<span id="L32" class="ln">    32&nbsp;&nbsp;</span>
+<span id="L33" class="ln">    33&nbsp;&nbsp;</span>	server := http.Server{
+<span id="L34" class="ln">    34&nbsp;&nbsp;</span>		Addr:    &#34;:8080&#34;,
+<span id="L35" class="ln">    35&nbsp;&nbsp;</span>		Handler: mux,
+<span id="L36" class="ln">    36&nbsp;&nbsp;</span>	}
+<span id="L37" class="ln">    37&nbsp;&nbsp;</span>	fmt.Println(&#34;Starting demo server on :8080...&#34;)
+<span id="L38" class="ln">    38&nbsp;&nbsp;</span>	_ = server.ListenAndServe()
+<span id="L39" class="ln">    39&nbsp;&nbsp;</span>}
+<span id="L40" class="ln">    40&nbsp;&nbsp;</span>
+</pre><p><a href="/src/github.com/johnstarich/go/gopages/cmd/demo/main.go?m=text">View as plain text</a></p>
+
+<div id="footer">
+Build version go1.13.11.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
