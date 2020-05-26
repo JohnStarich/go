@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -13,11 +14,20 @@ func main() {
 		_, err := fs.Open(r.URL.Path)
 		if err == nil {
 			fileServer.ServeHTTP(w, r)
-		} else {
-			r.URL.Path = "/404.html"
-			r.URL.RawPath = "/404.html"
-			fileServer.ServeHTTP(w, r)
+			return
 		}
+		if strings.HasSuffix(r.URL.Path, ".go") {
+			// GitHub Pages automatically looks up a corresponding .html file if it exists
+			_, err := fs.Open(r.URL.Path + ".html")
+			if err == nil {
+				r.URL.Path += ".html"
+				fileServer.ServeHTTP(w, r)
+				return
+			}
+		}
+		r.URL.Path = "/404.html"
+		r.URL.RawPath = "/404.html"
+		fileServer.ServeHTTP(w, r)
 	})
 
 	server := http.Server{

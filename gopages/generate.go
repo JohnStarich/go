@@ -117,6 +117,25 @@ func generateDocs(modulePath, modulePackage string, args flags.Args, src, fs bil
 	}
 
 	pres := godoc.NewPresentation(corpus)
+	// attempt to override URLs for source code links
+	// TODO fix links from source pages back to docs
+	pres.URLForSrc = func(src string) string {
+		// seems godoc lib documentation is incorrect here, 'src' is actually the whole package path to the file
+		return path.Join(args.BaseURL, "/src", src)
+	}
+	pres.URLForSrcPos = func(src string, line, low, high int) string {
+		return (&url.URL{
+			Path:     path.Join(args.BaseURL, src),
+			Fragment: fmt.Sprintf("L%d", line),
+		}).String()
+	}
+	pres.URLForSrcQuery = func(src, query string, line int) string {
+		return (&url.URL{
+			Path:     path.Join(args.BaseURL, src),
+			RawQuery: query,
+			Fragment: fmt.Sprintf("L%d", line),
+		}).String()
+	}
 	funcs := pres.FuncMap()
 	addGoPagesFuncs(funcs, args)
 	readTemplates(pres, funcs, ns)
@@ -171,10 +190,19 @@ Oops, this page doesn't exist.
 			for i := range packagePaths {
 				path := packagePaths[i]
 				ops = append(ops, func() error {
-					return scrapePackage(fs, pres, modulePackage, path, filepath.Join(args.OutputPath))
+					return writePackageIndex(fs, pres, path, args.OutputPath)
 				})
 			}
 			return pipe.ChainFuncs(ops...).Do()
+		},
+		func() error {
+			return walkFiles(srcRoot, "/", func(file string) error {
+				if !strings.HasSuffix(file, ".go") {
+					return nil
+				}
+				dir, base := filepath.Split(file)
+				return writeSourceFile(fs, pres, path.Join(modulePackage, dir), base, args.OutputPath)
+			})
 		},
 	).Do()
 }
@@ -189,13 +217,12 @@ func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 }
 
 func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
+	u, err := url.Parse(path)
+	if err != nil {
+		panic(err)
+	}
 	return doRequest(func(w http.ResponseWriter) {
-		pres.ServeHTTP(w, &http.Request{
-			URL: &url.URL{
-				Path:     path,
-				RawQuery: "m=all", // show index pages for internal packages
-			},
-		})
+		pres.ServeHTTP(w, &http.Request{URL: u})
 	})
 }
 
@@ -209,11 +236,12 @@ func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
 	})
 }
 
-func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, packagePath, outputBasePath string) error {
-	if moduleRoot != packagePath && !strings.HasPrefix(packagePath, moduleRoot+"/") {
-		return errors.Errorf("Package path %q must be rooted by module: %q", packagePath, moduleRoot)
-	}
-	outputComponents := append([]string{outputBasePath, "pkg"}, strings.Split(packagePath, "/")...)
+func pathSplit(path string) []string {
+	return strings.Split(path, "/")
+}
+
+func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePath, outputBasePath string) error {
+	outputComponents := append([]string{outputBasePath, "pkg"}, pathSplit(packagePath)...)
 	outputComponents = append(outputComponents, "index.html")
 	outputPath := filepath.Join(outputComponents...)
 
@@ -221,7 +249,28 @@ func scrapePackage(fs billy.Filesystem, pres *godoc.Presentation, moduleRoot, pa
 	return pipe.ChainFuncs(
 		func() error {
 			var err error
-			page, err = getPage(pres, path.Join("/pkg", packagePath)+"/")
+			page, err = getPage(pres, path.Join("/pkg", packagePath)+"/?m=all") // show index pages for internal packages
+			return err
+		},
+		func() error {
+			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
+		},
+		func() error {
+			return util.WriteFile(fs, outputPath, page, 0600)
+		},
+	).Do()
+}
+
+func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, packagePath, fileName, outputBasePath string) error {
+	outputComponents := append([]string{outputBasePath, "src"}, pathSplit(packagePath)...)
+	outputComponents = append(outputComponents, fileName)
+	outputPath := filepath.Join(outputComponents...) + ".html"
+
+	var page []byte
+	return pipe.ChainFuncs(
+		func() error {
+			var err error
+			page, err = getPage(pres, path.Join("/src", packagePath, fileName))
 			return err
 		},
 		func() error {
@@ -281,4 +330,27 @@ func (f *filesystemOpener) RootType(path string) vfs.RootType {
 
 func (f *filesystemOpener) String() string {
 	return "*filesystemOpener"
+}
+
+func walkFiles(fs billy.Filesystem, path string, visit func(path string) error) error {
+	info, err := fs.Stat(path)
+	if err != nil {
+		return errors.Wrap(err, "Error looking up file")
+	}
+
+	if !info.IsDir() {
+		return visit(path)
+	}
+
+	dir, err := fs.ReadDir(path)
+	if err != nil {
+		return errors.Wrapf(err, "Error reading directory %q", path)
+	}
+	for _, info = range dir {
+		err := walkFiles(fs, filepath.Join(path, info.Name()), visit)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

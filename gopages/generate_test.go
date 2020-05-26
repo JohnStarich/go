@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/johnstarich/go/gopages/internal/flags"
@@ -64,14 +63,17 @@ func Hello() {
 		"index.html",
 		"pkg/thing/index.html",
 		"pkg/thing/internal/hello/index.html",
+		"src/thing/internal/hello/hello.go.html",
+		"src/thing/main.go.html",
 	}
 	sort.Strings(expectedDocs)
 	var foundDocs []string
-	walkFS(t, outputFS, "", func(path string) {
+	require.NoError(t, walkFiles(outputFS, "", func(path string) error {
 		if !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
 			foundDocs = append(foundDocs, path)
 		}
-	})
+		return nil
+	}))
 	sort.Strings(foundDocs)
 	assert.Equal(t, expectedDocs, foundDocs)
 
@@ -80,25 +82,4 @@ func Hello() {
 	indexContents, err := ioutil.ReadAll(f)
 	require.NoError(t, err)
 	assert.Contains(t, string(indexContents), "internal/hello")
-}
-
-func walkFS(t *testing.T, fs billy.Filesystem, path string, visit func(path string)) {
-	t.Helper()
-	info, err := fs.Stat(path)
-	if err != nil {
-		t.Fatalf("Error looking up file: %s", err.Error())
-	}
-
-	if !info.IsDir() {
-		visit(path)
-		return
-	}
-
-	dir, err := fs.ReadDir(path)
-	if err != nil {
-		t.Fatalf("Error reading directory %q: %s", path, err.Error())
-	}
-	for _, info = range dir {
-		walkFS(t, fs, filepath.Join(path, info.Name()), visit)
-	}
 }

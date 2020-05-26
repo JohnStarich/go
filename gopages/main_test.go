@@ -206,6 +206,8 @@ func Hello() {
 				"index.html",
 				"pkg/thing/index.html",
 				"pkg/thing/lib/index.html",
+				"src/thing/lib/lib.go.html",
+				"src/thing/main.go.html",
 			}, fileNames)
 		})
 	}
