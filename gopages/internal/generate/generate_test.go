@@ -1,4 +1,4 @@
-package main
+package generate
 
 import (
 	"io/ioutil"
@@ -55,7 +55,7 @@ func Hello() {
 `)
 
 	args := flags.Args{}
-	err = generateDocs(thing, "thing", args, thingFS, outputFS)
+	err = Docs(thing, "thing", thingFS, outputFS, args)
 	assert.NoError(t, err)
 
 	expectedDocs := []string{

@@ -20,6 +20,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/johnstarich/go/gopages/internal/generate"
 	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
@@ -87,7 +88,7 @@ func run(modulePath string, args flags.Args) error {
 
 	if !args.GitHubPages {
 		fs := osfs.New("")
-		return generateDocs(modulePath, modulePackage, args, fs, fs)
+		return generate.Docs(modulePath, modulePackage, fs, fs, args)
 	}
 
 	var repoRoot, remote string
@@ -138,7 +139,7 @@ func run(modulePath string, args flags.Args) error {
 			return nil
 		},
 		func() error {
-			return generateDocs(modulePath, modulePackage, args, src, fs)
+			return generate.Docs(modulePath, modulePackage, src, fs, args)
 		},
 	).Do()
 	if err != nil {
