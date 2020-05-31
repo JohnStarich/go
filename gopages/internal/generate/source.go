@@ -44,7 +44,7 @@ func addBaseURL(baseURL string, node *html.Node) {
 	if node.Type == html.ElementNode && node.Data == "a" {
 		for i := range node.Attr {
 			attr := &node.Attr[i]
-			if attr.Key == "href" && strings.HasPrefix(attr.Val, "/") {
+			if attr.Key == "href" && strings.HasPrefix(attr.Val, "/") && !strings.HasPrefix(attr.Val, baseURL) {
 				attr.Val = path.Join(baseURL, attr.Val)
 				break
 			}

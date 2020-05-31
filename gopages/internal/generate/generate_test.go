@@ -37,7 +37,7 @@ func TestGenerateDocs(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	writeFile("go.mod", `module thing`)
+	writeFile("go.mod", `module github.com/my/thing`)
 	writeFile("main.go", `
 package main
 
@@ -53,23 +53,34 @@ func Hello() {
 	println("Hello world")
 }
 `)
+	writeFile(".git/something", `ignored dot dir`)
+	writeFile(".dotfile", `ignored dot file`)
 
 	args := flags.Args{}
-	err = Docs(thing, "thing", thingFS, outputFS, args)
+	err = Docs(thing, "github.com/my/thing", thingFS, outputFS, args)
 	assert.NoError(t, err)
 
 	expectedDocs := []string{
 		"404.html",
 		"index.html",
-		"pkg/thing/index.html",
-		"pkg/thing/internal/hello/index.html",
-		"src/thing/internal/hello/hello.go.html",
-		"src/thing/main.go.html",
+		"pkg/github.com/index.html",
+		"pkg/github.com/my/index.html",
+		"pkg/github.com/my/thing/index.html",
+		"pkg/github.com/my/thing/internal/hello/index.html",
+		"pkg/github.com/my/thing/internal/index.html",
+		"pkg/index.html",
+		"src/github.com/index.html",
+		"src/github.com/my/index.html",
+		"src/github.com/my/thing/index.html",
+		"src/github.com/my/thing/internal/hello/hello.go.html",
+		"src/github.com/my/thing/internal/hello/index.html",
+		"src/github.com/my/thing/internal/index.html",
+		"src/github.com/my/thing/main.go.html",
+		"src/index.html",
 	}
-	sort.Strings(expectedDocs)
 	var foundDocs []string
-	require.NoError(t, walkFiles(outputFS, "", func(path string) error {
-		if !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
+	require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
+		if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
 			foundDocs = append(foundDocs, path)
 		}
 		return nil
@@ -77,7 +88,7 @@ func Hello() {
 	sort.Strings(foundDocs)
 	assert.Equal(t, expectedDocs, foundDocs)
 
-	f, err := outputFS.Open("pkg/thing/index.html")
+	f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
 	require.NoError(t, err)
 	indexContents, err := ioutil.ReadAll(f)
 	require.NoError(t, err)

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/gopages/internal/pipe"
+	"github.com/johnstarich/go/gopages/internal/safememfs"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/godoc"
@@ -44,6 +46,8 @@ func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags
 		func() error {
 			modFS := &filesystemOpener{Filesystem: srcRoot}
 			ns.Bind(path.Join("/src", modulePackage), modFS, "/", vfs.BindReplace)
+			parentDirectoriesFS := &filesystemOpener{Filesystem: makePath("src/" + modulePackage)} // create empty directories for outside module
+			ns.Bind("/", parentDirectoriesFS, "/", vfs.BindAfter)
 
 			corpus = godoc.NewCorpus(ns)
 			return errors.Wrap(corpus.Init(), "Are there any Go files present? Failed to initialize corpus")
@@ -133,13 +137,61 @@ Oops, this page doesn't exist.
 			return pipe.ChainFuncs(ops...).Do()
 		},
 		func() error {
-			return walkFiles(srcRoot, "/", func(file string) error {
-				if !strings.HasSuffix(file, ".go") {
+			// For each directory in and above above the module, generate a src and pkg page
+			var ops []pipe.OpFunc
+			var base string // collect the last base path (should always be the same after a loop iteration
+			for _, packagePath := range packagePaths {
+				for base = ""; packagePath != ""; packagePath, base = path.Split(packagePath) {
+					packagePath = path.Clean(packagePath)
+					p, b := packagePath, base // local scope copies
+					ops = append(ops,
+						func() error {
+							return writePackageIndex(fs, pres, p, args.OutputPath)
+						},
+						func() error {
+							return writeSourceFile(fs, pres, args.BaseURL, p, true, b, args.OutputPath)
+						},
+					)
+				}
+			}
+			// and run again on the last path segment (e.g. github.com)
+			ops = append(ops,
+				func() error {
+					return writeSourceFile(fs, pres, args.BaseURL, "", true, base, args.OutputPath)
+				},
+				func() error {
+					return writePackageIndex(fs, pres, base, args.OutputPath)
+				},
+			)
+			return pipe.ChainFuncs(ops...).Do()
+		},
+		func() error {
+			// For each source file and directory inside the module, generate a src page
+			return walkFiles(srcRoot, "/", func(file string, isDir bool) error {
+				dir, base := filepath.Split(file)
+				if strings.HasPrefix(base, ".") {
+					// skip dot files, e.g. '.git'
+					return pipe.ErrIf(isDir, filepath.SkipDir)
+				}
+				if isDir && args.OutputPath != "" && strings.TrimPrefix(file, "/") == args.OutputPath {
+					// skip the destination directory if it's set to avoid infinite recursion
+					return filepath.SkipDir
+				}
+				if !(isDir || filepath.Ext(file) == ".go") {
+					// only scrape directories and Go files
 					return nil
 				}
-				dir, base := filepath.Split(file)
-				return writeSourceFile(fs, pres, args.BaseURL, path.Join(modulePackage, dir), base, args.OutputPath)
+				packagePath := path.Join(modulePackage, dir)
+				return writeSourceFile(fs, pres, args.BaseURL, packagePath, isDir, base, args.OutputPath)
 			})
+		},
+		func() error {
+			// Generate root package index, displaying all packages
+			return writePackageIndex(fs, pres, "", args.OutputPath)
+		},
+		func() error {
+			// Generate root src index, displaying all top level files
+			return writeSourceFile(fs, pres, args.BaseURL, "", true, "", args.OutputPath)
 		},
 	).Do()
 }
@@ -198,16 +250,21 @@ func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePat
 	).Do()
 }
 
-func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath, fileName, outputBasePath string) error {
+func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string) error {
 	outputComponents := append([]string{outputBasePath, "src"}, pathSplit(packagePath)...)
 	outputComponents = append(outputComponents, fileName)
+	var pathSuffix string
+	if isDir {
+		outputComponents = append(outputComponents, "index")
+		pathSuffix = "/"
+	}
 	outputPath := filepath.Join(outputComponents...) + ".html"
 
 	var page []byte
 	return pipe.ChainFuncs(
 		func() error {
 			var err error
-			page, err = getPage(pres, path.Join("/src", packagePath, fileName))
+			page, err = getPage(pres, path.Join("/src", packagePath, fileName)+pathSuffix)
 			return err
 		},
 		func() error {
@@ -274,14 +331,29 @@ func (f *filesystemOpener) String() string {
 	return "*filesystemOpener"
 }
 
-func walkFiles(fs billy.Filesystem, path string, visit func(path string) error) error {
-	info, err := fs.Stat(path)
+func walkFiles(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
+	err := walkFilesFn(fs, path, visit)
+	return pipe.ErrIf(err != filepath.SkipDir, err)
+}
+
+func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
+	info, err := fs.Lstat(path)
 	if err != nil {
 		return errors.Wrap(err, "Error looking up file")
 	}
 
-	if !info.IsDir() {
-		return visit(path)
+	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
+		// ignore symlinks to avoid infinite recursion
+		return nil
+	}
+
+	isDir := info.IsDir()
+	if err := visit(path, isDir); err != nil {
+		return err
+	}
+
+	if !isDir {
+		return nil
 	}
 
 	dir, err := fs.ReadDir(path)
@@ -289,10 +361,24 @@ func walkFiles(fs billy.Filesystem, path string, visit func(path string) error) 
 		return errors.Wrapf(err, "Error reading directory %q", path)
 	}
 	for _, info = range dir {
-		err := walkFiles(fs, filepath.Join(path, info.Name()), visit)
-		if err != nil {
+		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
+		if err == filepath.SkipDir {
+			if !info.IsDir() {
+				break // for SkipDir on a file, skip remaining files in directory
+			}
+			// otherwise continue recursing other files in this dir
+		} else if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func makePath(path string) billy.Filesystem {
+	fs := safememfs.New()
+	err := fs.MkdirAll(path, 0600)
+	if err != nil {
+		panic(err)
+	}
+	return fs
 }
