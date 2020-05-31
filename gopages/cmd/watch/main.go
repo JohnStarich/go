@@ -1,7 +1,7 @@
 // Command watch generates docs and starts an HTTP endpoint to serve them. Also runs a file watcher on the current module to regenerate docs on change events.
 //
 // watch is useful for testing godoc code comments and while developing on gopages itself.
-// Accepts the same flags as gopages.
+// Accepts the same flags as gopages, -gh-pages flags are ignored.
 package main
 
 import (
