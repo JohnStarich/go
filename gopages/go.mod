@@ -3,6 +3,7 @@ module github.com/johnstarich/go/gopages
 go 1.13
 
 require (
+	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.0.0
 	github.com/pkg/errors v0.9.1

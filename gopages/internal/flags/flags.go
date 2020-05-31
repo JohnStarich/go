@@ -5,6 +5,7 @@ import (
 	"flag"
 )
 
+// Args contains all command-line options for gopages
 type Args struct {
 	BaseURL          string
 	GitHubPages      bool
