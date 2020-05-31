@@ -24,8 +24,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/go/datasize/pkg/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/go/datasize/pkg/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="/go/datasize/pkg/github.com/johnstarich/go/datasize/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/datasize/pkg/github.com/johnstarich/go/datasize/">GoPages</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -104,14 +104,6 @@
 			<dl>
 			
 			
-				<dd><a href="#pkg-variables">Variables</a></dd>
-			
-			
-				
-				<dd><a href="#divideBigInt">func divideBigInt(numerator, denominator *big.Int) float64</a></dd>
-			
-				
-				<dd><a href="#scaleBigInt">func scaleBigInt(scalar float64, n *big.Int) *big.Int</a></dd>
 			
 			
 				
@@ -259,56 +251,6 @@
 
 		
 		
-			<h2 id="pkg-variables">Variables</h2>
-			
-				
-				<pre>var (
-    <span id="kilobytes">kilobytes</span>  = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e3)
-    <span id="megabytes">megabytes</span>  = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e6)
-    <span id="gigabytes">gigabytes</span>  = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e9)
-    <span id="terabytes">terabytes</span>  = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e12)
-    <span id="petabytes">petabytes</span>  = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e15)
-    <span id="exabytes">exabytes</span>   = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e18)
-    <span id="zettabytes">zettabytes</span> = <a href="/pkg/builtin/#new">new</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>).<a href="#Mul">Mul</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e18), <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e3))
-    <span id="yottabytes">yottabytes</span> = <a href="/pkg/builtin/#new">new</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>).<a href="#Mul">Mul</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e18), <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1e6))
-
-    <span id="kibibytes">kibibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 10)
-    <span id="mebibytes">mebibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 20)
-    <span id="gibibytes">gibibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 30)
-    <span id="tebibytes">tebibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 40)
-    <span id="pebibytes">pebibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 50)
-    <span id="exbibytes">exbibytes</span> = <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1 &lt;&lt; 60)
-    <span id="zebibytes">zebibytes</span> = <a href="/pkg/builtin/#new">new</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>).<a href="#Mul">Mul</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1&lt;&lt;60), <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1&lt;&lt;10))
-    <span id="yobibytes">yobibytes</span> = <a href="/pkg/builtin/#new">new</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>).<a href="#Mul">Mul</a>(<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1&lt;&lt;60), <a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#NewInt">NewInt</a>(1&lt;&lt;20))
-)</pre>
-			
-		
-		
-			
-			
-			<h2 id="divideBigInt">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L120">divideBigInt</a>
-				<a class="permalink" href="#divideBigInt">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func divideBigInt(numerator, denominator *<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
-			
-			
-			
-
-		
-			
-			
-			<h2 id="scaleBigInt">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L112">scaleBigInt</a>
-				<a class="permalink" href="#scaleBigInt">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func scaleBigInt(scalar <a href="/pkg/builtin/#float64">float64</a>, n *<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>) *<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a></pre>
-			
-			
-			
-
 		
 		
 			
@@ -320,7 +262,7 @@
 			</h2>
 			
 			<pre>type Size struct {
-<span id="Size.value"></span>    value *<a href="/pkg/math/big/">big</a>.<a href="/pkg/math/big/#Int">Int</a>
+    <span class="comment">// contains filtered or unexported fields</span>
 }
 </pre>
 
