@@ -58,6 +58,13 @@ func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags
 	}
 
 	pres := godoc.NewPresentation(corpus)
+	pres.AdjustPageInfoMode = func(req *http.Request, mode godoc.PageInfoMode) godoc.PageInfoMode {
+		switch {
+		case req.URL.Path == "/pkg/", strings.HasPrefix(req.URL.Path, "/pkg/") && strings.HasSuffix(req.URL.Path, "/internal/"):
+			mode |= godoc.NoFiltering
+		}
+		return mode
+	}
 	// attempt to override URLs for source code links
 	// TODO fix links from source pages back to docs
 	pres.URLForSrc = func(src string) string {
@@ -238,7 +245,7 @@ func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePat
 	return pipe.ChainFuncs(
 		func() error {
 			var err error
-			page, err = getPage(pres, path.Join("/pkg", packagePath)+"/?m=all") // show index pages for internal packages
+			page, err = getPage(pres, path.Join("/pkg", packagePath)+"/")
 			return err
 		},
 		func() error {

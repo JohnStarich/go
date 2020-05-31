@@ -53,6 +53,9 @@ func Hello() {
 	println("Hello world")
 }
 `)
+	writeFile("mylib/lib.go", `
+package mylib
+`)
 	writeFile(".git/something", `ignored dot dir`)
 	writeFile(".dotfile", `ignored dot file`)
 
@@ -68,6 +71,7 @@ func Hello() {
 		"pkg/github.com/my/thing/index.html",
 		"pkg/github.com/my/thing/internal/hello/index.html",
 		"pkg/github.com/my/thing/internal/index.html",
+		"pkg/github.com/my/thing/mylib/index.html",
 		"pkg/index.html",
 		"src/github.com/index.html",
 		"src/github.com/my/index.html",
@@ -76,6 +80,8 @@ func Hello() {
 		"src/github.com/my/thing/internal/hello/index.html",
 		"src/github.com/my/thing/internal/index.html",
 		"src/github.com/my/thing/main.go.html",
+		"src/github.com/my/thing/mylib/index.html",
+		"src/github.com/my/thing/mylib/lib.go.html",
 		"src/index.html",
 	}
 	var foundDocs []string
@@ -92,5 +98,5 @@ func Hello() {
 	require.NoError(t, err)
 	indexContents, err := ioutil.ReadAll(f)
 	require.NoError(t, err)
-	assert.Contains(t, string(indexContents), "internal/hello")
+	assert.Contains(t, string(indexContents), "mylib")
 }
