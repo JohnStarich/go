@@ -138,7 +138,7 @@ Oops, this page doesn't exist.
 					return nil
 				}
 				dir, base := filepath.Split(file)
-				return writeSourceFile(fs, pres, path.Join(modulePackage, dir), base, args.OutputPath)
+				return writeSourceFile(fs, pres, args.BaseURL, path.Join(modulePackage, dir), base, args.OutputPath)
 			})
 		},
 	).Do()
@@ -198,7 +198,7 @@ func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePat
 	).Do()
 }
 
-func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, packagePath, fileName, outputBasePath string) error {
+func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath, fileName, outputBasePath string) error {
 	outputComponents := append([]string{outputBasePath, "src"}, pathSplit(packagePath)...)
 	outputComponents = append(outputComponents, fileName)
 	outputPath := filepath.Join(outputComponents...) + ".html"
@@ -208,6 +208,11 @@ func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, packagePath,
 		func() error {
 			var err error
 			page, err = getPage(pres, path.Join("/src", packagePath, fileName))
+			return err
+		},
+		func() error {
+			var err error
+			page, err = customizeSourceCodePage(baseURL, page)
 			return err
 		},
 		func() error {
