@@ -24,8 +24,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/github.com/johnstarich/go/dns/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/github.com/johnstarich/go/dns/">GoPages</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -105,8 +105,6 @@
 			<div id="manual-nav">
 			<dl>
 			
-				<dd><a href="#pkg-constants">Constants</a></dd>
-			
 			
 			
 				
@@ -114,12 +112,6 @@
 			
 				
 				<dd><a href="#NewWithConfig">func NewWithConfig(config Config) *net.Resolver</a></dd>
-			
-				
-				<dd><a href="#newWithConfig">func newWithConfig(runtimeName string, config Config) *net.Resolver</a></dd>
-			
-				
-				<dd><a href="#staggerTicker">func staggerTicker(initialDelay, d time.Duration, logger *zap.Logger) (&lt;-chan struct{}, context.CancelFunc)</a></dd>
 			
 			
 				
@@ -130,26 +122,6 @@
 				
 				<dd><a href="#Dialer">type Dialer</a></dd>
 				
-					
-					<dd>&nbsp; &nbsp; <a href="#newMacOSDialer">func newMacOSDialer(config Config) Dialer</a></dd>
-				
-				
-			
-				
-				<dd><a href="#macOSDialer">type macOSDialer</a></dd>
-				
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#macOSDialer.DialContext">func (m *macOSDialer) DialContext(ctx context.Context, network, address string) (net.Conn, error)</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#macOSDialer.dialAll">func (m *macOSDialer) dialAll(ctx context.Context, nameservers []string) (net.Conn, error)</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#macOSDialer.ensureNameservers">func (m *macOSDialer) ensureNameservers() ([]string, error)</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#macOSDialer.reorderNameservers">func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.Conn)</a></dd>
 				
 			
 			
@@ -174,12 +146,6 @@
 		
 
 		
-			<h2 id="pkg-constants">Constants</h2>
-			
-				
-				<pre>const <span id="macOSRuntimeName">macOSRuntimeName</span> = &#34;darwin&#34;</pre>
-			
-		
 		
 		
 			
@@ -203,32 +169,6 @@
 				
 			</h2>
 			<pre>func NewWithConfig(config <a href="#Config">Config</a>) *<a href="/pkg/net/">net</a>.<a href="/pkg/net/#Resolver">Resolver</a></pre>
-			
-			
-			
-
-		
-			
-			
-			<h2 id="newWithConfig">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L33">newWithConfig</a>
-				<a class="permalink" href="#newWithConfig">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func newWithConfig(runtimeName <a href="/pkg/builtin/#string">string</a>, config <a href="#Config">Config</a>) *<a href="/pkg/net/">net</a>.<a href="/pkg/net/#Resolver">Resolver</a></pre>
-			
-			
-			
-
-		
-			
-			
-			<h2 id="staggerTicker">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L170">staggerTicker</a>
-				<a class="permalink" href="#staggerTicker">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func staggerTicker(initialDelay, d <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Duration">Duration</a>, logger *<a href="/pkg/go.uber.org/zap/">zap</a>.<a href="/pkg/go.uber.org/zap/#Logger">Logger</a>) (&lt;-chan struct{}, <a href="/pkg/context/">context</a>.<a href="/pkg/context/#CancelFunc">CancelFunc</a>)</pre>
 			
 			
 			
@@ -283,96 +223,7 @@
 			
 
 			
-				
-				<h3 id="newMacOSDialer">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L58">newMacOSDialer</a>
-					<a class="permalink" href="#newMacOSDialer">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func newMacOSDialer(config <a href="#Config">Config</a>) <a href="#Dialer">Dialer</a></pre>
-				
-				
-				
-			
 
-			
-		
-			
-			
-			<h2 id="macOSDialer">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L49">macOSDialer</a>
-				<a class="permalink" href="#macOSDialer">&#xb6;</a>
-				
-				
-			</h2>
-			
-			<pre>type macOSDialer struct {
-    <a href="#Config">Config</a>
-<span id="macOSDialer.dialer"></span>    dialer        *<a href="/pkg/net/">net</a>.<a href="/pkg/net/#Dialer">Dialer</a>
-<span id="macOSDialer.nameservers"></span>    nameservers   []<a href="/pkg/builtin/#string">string</a>
-<span id="macOSDialer.nameserversMu"></span>    nameserversMu <a href="/pkg/sync/">sync</a>.<a href="/pkg/sync/#RWMutex">RWMutex</a>
-
-<span id="macOSDialer.readResolvers"></span>    readResolvers func(<a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>) (<a href="/pkg/github.com/johnstarich/go/dns/scutil/">scutil</a>.<a href="/pkg/github.com/johnstarich/go/dns/scutil/#Config">Config</a>, <a href="/pkg/builtin/#error">error</a>)
-}
-</pre>
-
-			
-
-			
-
-			
-			
-			
-
-			
-
-			
-				
-				<h3 id="macOSDialer.DialContext">func (*macOSDialer) <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L102">DialContext</a>
-					<a class="permalink" href="#macOSDialer.DialContext">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func (m *macOSDialer) DialContext(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>, network, address <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/net/">net</a>.<a href="/pkg/net/#Conn">Conn</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-				
-				
-				
-				
-			
-				
-				<h3 id="macOSDialer.dialAll">func (*macOSDialer) <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L118">dialAll</a>
-					<a class="permalink" href="#macOSDialer.dialAll">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func (m *macOSDialer) dialAll(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>, nameservers []<a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/net/">net</a>.<a href="/pkg/net/#Conn">Conn</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-				
-				
-				
-				
-			
-				
-				<h3 id="macOSDialer.ensureNameservers">func (*macOSDialer) <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L76">ensureNameservers</a>
-					<a class="permalink" href="#macOSDialer.ensureNameservers">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func (m *macOSDialer) ensureNameservers() ([]<a href="/pkg/builtin/#string">string</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-				
-				
-				
-				
-			
-				
-				<h3 id="macOSDialer.reorderNameservers">func (*macOSDialer) <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L204">reorderNameservers</a>
-					<a class="permalink" href="#macOSDialer.reorderNameservers">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func (m *macOSDialer) reorderNameservers(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>, conn <a href="/pkg/github.com/johnstarich/go/dns/staggercast/">staggercast</a>.<a href="/pkg/github.com/johnstarich/go/dns/staggercast/#Conn">Conn</a>)</pre>
-				
-				
-				
-				
 			
 		
 	
@@ -404,7 +255,7 @@
 				<tr>
 				
 					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="init/?m=all">init</a>
+						<a href="init/">init</a>
 					</td>
 				
 					<td class="pkg-synopsis">
@@ -415,7 +266,7 @@
 				<tr>
 				
 					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="scutil/?m=all">scutil</a>
+						<a href="scutil/">scutil</a>
 					</td>
 				
 					<td class="pkg-synopsis">
@@ -426,7 +277,7 @@
 				<tr>
 				
 					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="staggercast/?m=all">staggercast</a>
+						<a href="staggercast/">staggercast</a>
 					</td>
 				
 					<td class="pkg-synopsis">
@@ -437,7 +288,7 @@
 				<tr>
 				
 					<td class="pkg-name" style="padding-left: 0px;">
-						<a href="testhelpers/?m=all">testhelpers</a>
+						<a href="testhelpers/">testhelpers</a>
 					</td>
 				
 					<td class="pkg-synopsis">

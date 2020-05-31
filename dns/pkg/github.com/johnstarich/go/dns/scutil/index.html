@@ -24,8 +24,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="/go/dns/pkg/github.com/johnstarich/go/dns/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/dns/pkg/github.com/johnstarich/go/dns/">GoPages</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -105,21 +105,12 @@
 			
 			
 			
-				
-				<dd><a href="#runSCUtilDNS">func runSCUtilDNS(ctx context.Context) ([]byte, error)</a></dd>
-			
-				
-				<dd><a href="#splitKeyValue">func splitKeyValue(line string) (key, value string)</a></dd>
-			
 			
 				
 				<dd><a href="#Config">type Config</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#ReadMacOSDNS">func ReadMacOSDNS(ctx context.Context) (Config, error)</a></dd>
-				
-					
-					<dd>&nbsp; &nbsp; <a href="#readMacOSDNS">func readMacOSDNS(ctx context.Context, getSCUtilDNS scutilExecutor) (Config, error)</a></dd>
 				
 				
 			
@@ -139,11 +130,6 @@
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Resolver.Reachable">func (r Resolver) Reachable() bool</a></dd>
-				
-			
-				
-				<dd><a href="#scutilExecutor">type scutilExecutor</a></dd>
-				
 				
 			
 			
@@ -173,32 +159,6 @@
 
 		
 		
-		
-			
-			
-			<h2 id="runSCUtilDNS">func <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L37">runSCUtilDNS</a>
-				<a class="permalink" href="#runSCUtilDNS">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func runSCUtilDNS(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-			
-			
-			
-
-		
-			
-			
-			<h2 id="splitKeyValue">func <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L114">splitKeyValue</a>
-				<a class="permalink" href="#splitKeyValue">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func splitKeyValue(line <a href="/pkg/builtin/#string">string</a>) (key, value <a href="/pkg/builtin/#string">string</a>)</pre>
-			
-			
-			
-
 		
 		
 			
@@ -230,17 +190,6 @@
 					
 				</h3>
 				<pre>func ReadMacOSDNS(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-				
-				
-				
-			
-				
-				<h3 id="readMacOSDNS">func <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L44">readMacOSDNS</a>
-					<a class="permalink" href="#readMacOSDNS">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func readMacOSDNS(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>, getSCUtilDNS scutilExecutor) (<a href="#Config">Config</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
 				
 				
 				
@@ -347,9 +296,10 @@
 <span id="Resolver.Nameservers"></span>    Nameservers    []<a href="/pkg/builtin/#string">string</a>
 <span id="Resolver.Order"></span>    Order          <a href="/pkg/builtin/#int">int</a>
 <span id="Resolver.Reach"></span>    Reach          []<a href="#Reach">Reach</a>
-<span id="Resolver.reachable"></span>    reachable      <a href="/pkg/builtin/#bool">bool</a> <span class="comment">// cached status from Reach</span>
-<span id="Resolver.SearchDomain"></span>    SearchDomain   []<a href="/pkg/builtin/#string">string</a>
-<span id="Resolver.Timeout"></span>    Timeout        <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Duration">Duration</a>
+
+<span id="Resolver.SearchDomain"></span>    SearchDomain []<a href="/pkg/builtin/#string">string</a>
+<span id="Resolver.Timeout"></span>    Timeout      <a href="/pkg/time/">time</a>.<a href="/pkg/time/#Duration">Duration</a>
+    <span class="comment">// contains filtered or unexported fields</span>
 }
 </pre>
 
@@ -375,28 +325,6 @@
 				
 				
 				
-			
-		
-			
-			
-			<h2 id="scutilExecutor">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L42">scutilExecutor</a>
-				<a class="permalink" href="#scutilExecutor">&#xb6;</a>
-				
-				
-			</h2>
-			
-			<pre>type scutilExecutor func(ctx <a href="/pkg/context/">context</a>.<a href="/pkg/context/#Context">Context</a>) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
-
-			
-
-			
-
-			
-			
-			
-
-			
-
 			
 		
 	
