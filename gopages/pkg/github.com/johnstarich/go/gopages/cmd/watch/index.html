@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>demo - GoPages</title>
+  <title>watch - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
 
@@ -24,8 +24,8 @@
 </div><!-- #lowframe -->
 
 <div id="topbar" class="wide"><div class="container">
-<div class="top-heading" id="heading-wide"><a href="/go/gopages/pkg/">GoPages | Auto-generated docs</a></div>
-<div class="top-heading" id="heading-narrow"><a href="/go/gopages/pkg/">GoPages</a></div>
+<div class="top-heading" id="heading-wide"><a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/">GoPages</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
@@ -37,7 +37,7 @@
 
 
   <h1>
-    Command demo
+    Command watch
     <span class="text-muted"></span>
   </h1>
 
@@ -69,7 +69,14 @@
 
 	
 		
-		
+		<p>
+Command watch generates docs and starts an HTTP endpoint to serve them. Also runs a file watcher on the current module to regenerate docs on change events.
+</p>
+<p>
+watch is useful for testing godoc code comments and while developing on gopages itself.
+Accepts the same flags as gopages, -gh-pages flags are ignored.
+</p>
+
 	
 
 	

@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/gopages/internal/generate/template.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/gopages/lib/godoc/jquery.js" defer=""></script>
+
+
+
+<script>var goVersion = "go1.13.11";</script>
+<script src="/go/gopages/lib/godoc/godocs.js" defer=""></script>
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/gopages/src">src</a>/<a href="/go/gopages/src/github.com">github.com</a>/<a href="/go/gopages/src/github.com/johnstarich">johnstarich</a>/<a href="/go/gopages/src/github.com/johnstarich/go">go</a>/<a href="/go/gopages/src/github.com/johnstarich/go/gopages">gopages</a>/<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal">internal</a>/<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate">generate</a>/<span class="text-muted">template.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate">github.com/johnstarich/go/gopages/internal/generate</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package generate
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;fmt&#34;
+<span id="L5" class="ln">     5  </span>	&#34;path&#34;
+<span id="L6" class="ln">     6  </span>	&#34;text/template&#34;
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span>	&#34;github.com/johnstarich/go/gopages/internal/flags&#34;
+<span id="L9" class="ln">     9  </span>	&#34;github.com/johnstarich/go/gopages/internal/pipe&#34;
+<span id="L10" class="ln">    10  </span>	&#34;github.com/pkg/errors&#34;
+<span id="L11" class="ln">    11  </span>	&#34;golang.org/x/tools/godoc&#34;
+<span id="L12" class="ln">    12  </span>	&#34;golang.org/x/tools/godoc/vfs&#34;
+<span id="L13" class="ln">    13  </span>)
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
+<span id="L16" class="ln">    16  </span>	var longTitle string
+<span id="L17" class="ln">    17  </span>	if args.SiteTitle != &#34;&#34; &amp;&amp; args.SiteDescription != &#34;&#34; {
+<span id="L18" class="ln">    18  </span>		longTitle = fmt.Sprintf(&#34;%s | %s&#34;, args.SiteTitle, args.SiteDescription)
+<span id="L19" class="ln">    19  </span>	}
+<span id="L20" class="ln">    20  </span>	values := map[string]interface{}{
+<span id="L21" class="ln">    21  </span>		&#34;BaseURL&#34;:       args.BaseURL,
+<span id="L22" class="ln">    22  </span>		&#34;ModuleURL&#34;:     path.Join(args.BaseURL, &#34;pkg&#34;, modulePackage) + &#34;/&#34;,
+<span id="L23" class="ln">    23  </span>		&#34;SiteTitle&#34;:     args.SiteTitle,
+<span id="L24" class="ln">    24  </span>		&#34;SiteTitleLong&#34;: longTitle,
+<span id="L25" class="ln">    25  </span>	}
+<span id="L26" class="ln">    26  </span>	funcs[&#34;gopages&#34;] = func(defaultValue, firstKey string, keys ...string) (string, error) {
+<span id="L27" class="ln">    27  </span>		keys = append([]string{firstKey}, keys...) <span class="comment">// require at least one key</span>
+<span id="L28" class="ln">    28  </span>		for _, key := range keys {
+<span id="L29" class="ln">    29  </span>			value, ok := values[key]
+<span id="L30" class="ln">    30  </span>			var valueStr string
+<span id="L31" class="ln">    31  </span>			err := pipe.ChainFuncs(
+<span id="L32" class="ln">    32  </span>				func() error {
+<span id="L33" class="ln">    33  </span>					return pipe.ErrIf(!ok, errors.Errorf(&#34;Unknown gopages key: %q&#34;, key))
+<span id="L34" class="ln">    34  </span>				},
+<span id="L35" class="ln">    35  </span>				func() error {
+<span id="L36" class="ln">    36  </span>					var isString bool
+<span id="L37" class="ln">    37  </span>					valueStr, isString = value.(string)
+<span id="L38" class="ln">    38  </span>					return pipe.ErrIf(!isString, errors.Errorf(&#34;gopages key %q is not a string&#34;, key))
+<span id="L39" class="ln">    39  </span>				},
+<span id="L40" class="ln">    40  </span>			).Do()
+<span id="L41" class="ln">    41  </span>			if err != nil || valueStr != &#34;&#34; {
+<span id="L42" class="ln">    42  </span>				return template.HTMLEscapeString(valueStr), err
+<span id="L43" class="ln">    43  </span>			}
+<span id="L44" class="ln">    44  </span>		}
+<span id="L45" class="ln">    45  </span>		return defaultValue, nil
+<span id="L46" class="ln">    46  </span>	}
+<span id="L47" class="ln">    47  </span>}
+<span id="L48" class="ln">    48  </span>
+<span id="L49" class="ln">    49  </span>func readTemplates(pres *godoc.Presentation, funcs template.FuncMap, fs vfs.FileSystem) {
+<span id="L50" class="ln">    50  </span>	pres.CallGraphHTML = readTemplate(funcs, fs, &#34;callgraph.html&#34;)
+<span id="L51" class="ln">    51  </span>	pres.DirlistHTML = readTemplate(funcs, fs, &#34;dirlist.html&#34;)
+<span id="L52" class="ln">    52  </span>	pres.ErrorHTML = readTemplate(funcs, fs, &#34;error.html&#34;)
+<span id="L53" class="ln">    53  </span>	pres.ExampleHTML = readTemplate(funcs, fs, &#34;example.html&#34;)
+<span id="L54" class="ln">    54  </span>	pres.GodocHTML = parseTemplate(funcs, &#34;godoc.html&#34;, godocHTML)
+<span id="L55" class="ln">    55  </span>	pres.ImplementsHTML = readTemplate(funcs, fs, &#34;implements.html&#34;)
+<span id="L56" class="ln">    56  </span>	pres.MethodSetHTML = readTemplate(funcs, fs, &#34;methodset.html&#34;)
+<span id="L57" class="ln">    57  </span>	pres.PackageHTML = readTemplate(funcs, fs, &#34;package.html&#34;)
+<span id="L58" class="ln">    58  </span>	pres.PackageRootHTML = readTemplate(funcs, fs, &#34;packageroot.html&#34;)
+<span id="L59" class="ln">    59  </span>}
+<span id="L60" class="ln">    60  </span>
+<span id="L61" class="ln">    61  </span>func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *template.Template {
+<span id="L62" class="ln">    62  </span>	<span class="comment">// use underlying file system fs to read the template file</span>
+<span id="L63" class="ln">    63  </span>	<span class="comment">// (cannot use template ParseFile functions directly)</span>
+<span id="L64" class="ln">    64  </span>	data, err := vfs.ReadFile(fs, path.Join(&#34;lib/godoc&#34;, name))
+<span id="L65" class="ln">    65  </span>	if err != nil {
+<span id="L66" class="ln">    66  </span>		panic(err)
+<span id="L67" class="ln">    67  </span>	}
+<span id="L68" class="ln">    68  </span>	return parseTemplate(funcs, name, string(data))
+<span id="L69" class="ln">    69  </span>}
+<span id="L70" class="ln">    70  </span>
+<span id="L71" class="ln">    71  </span>func parseTemplate(funcs template.FuncMap, name, data string) *template.Template {
+<span id="L72" class="ln">    72  </span>	t, err := template.New(name).Funcs(funcs).Parse(data)
+<span id="L73" class="ln">    73  </span>	if err != nil {
+<span id="L74" class="ln">    74  </span>		panic(err)
+<span id="L75" class="ln">    75  </span>	}
+<span id="L76" class="ln">    76  </span>	return t
+<span id="L77" class="ln">    77  </span>}
+<span id="L78" class="ln">    78  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.13.11.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>
