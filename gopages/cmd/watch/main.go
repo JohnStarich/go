@@ -1,6 +1,12 @@
+// Command watch generates docs and starts an HTTP endpoint to serve them. Also runs a file watcher on the current module to regenerate docs on change events.
+//
+// watch is useful for testing godoc code comments and while developing on gopages itself.
+// Accepts the same flags as gopages.
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +17,7 @@ import (
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/osfs"
+	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/gopages/internal/generate"
 	"github.com/johnstarich/go/gopages/internal/pipe"
@@ -19,15 +26,30 @@ import (
 )
 
 func main() {
+	args, usageOutput, err := flags.Parse(os.Args[1:]...)
+	switch err {
+	case nil:
+	case flag.ErrHelp:
+		fmt.Print(usageOutput)
+		return
+	default:
+		fmt.Print(usageOutput)
+		cmd.Exit(2)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	fs, err := pagesFileSystem(wd)
+	fs, err := pagesFileSystem(ctx, wd, args)
 	if err != nil {
 		panic(err)
 	}
 	fileServer := http.FileServer(fs)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		_, err := fs.Open(r.URL.Path)
@@ -35,7 +57,7 @@ func main() {
 			fileServer.ServeHTTP(w, r)
 			return
 		}
-		if strings.HasSuffix(r.URL.Path, ".go") {
+		if !strings.HasSuffix(r.URL.Path, "/") {
 			// GitHub Pages automatically looks up a corresponding .html file if it exists
 			_, err := fs.Open(r.URL.Path + ".html")
 			if err == nil {
@@ -57,12 +79,13 @@ func main() {
 	_ = server.ListenAndServe()
 }
 
-func pagesFileSystem(modulePath string) (http.FileSystem, error) {
+func pagesFileSystem(ctx context.Context, modulePath string, args flags.Args) (http.FileSystem, error) {
 	src := osfs.New("")
 	fs := memfs.New()
 
 	goMod := filepath.Join(modulePath, "go.mod")
 	var modulePackage string
+	var rootedFS billy.Filesystem
 	err := pipe.ChainFuncs(
 		func() error {
 			_, err := os.Stat(goMod)
@@ -77,23 +100,38 @@ func pagesFileSystem(modulePath string) (http.FileSystem, error) {
 			return pipe.ErrIf(modulePackage == "", errors.Errorf("Unable to find module package name in go.mod file: %s", goMod))
 		},
 		func() error {
-			return generate.Docs(modulePath, modulePackage, src, fs, flags.Args{})
+			return watch(ctx, modulePath, func() error {
+				return generate.Docs(modulePath, modulePackage, src, fs, args)
+			})
+		},
+		func() error {
+			var err error
+			rootedFS, err = fs.Chroot(args.OutputPath)
+			return err
 		},
 	).Do()
-	return &httpFSWrapper{fs}, err
+
+	return &httpFSWrapper{base: args.BaseURL, Filesystem: rootedFS}, err
 }
 
 type httpFSWrapper struct {
+	base string
 	billy.Filesystem
 }
 
 func (h *httpFSWrapper) Open(name string) (http.File, error) {
+	if !strings.HasPrefix(name, h.base) {
+		return nil, os.ErrNotExist
+	}
+	name = strings.TrimPrefix(name, h.base)
+	name = filepath.FromSlash(name)
 	info, err := h.Filesystem.Stat(name)
 	if err != nil {
 		return nil, err
 	}
 
 	var file billy.File
+	// memfs.Open doesn't work for directories, so create a false dir for those instead
 	if info.IsDir() {
 		file, err = memfs.New().Create(name)
 	} else {
