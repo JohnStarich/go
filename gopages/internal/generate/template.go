@@ -12,13 +12,14 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-func addGoPagesFuncs(funcs template.FuncMap, args flags.Args) {
+func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
 	var longTitle string
 	if args.SiteTitle != "" && args.SiteDescription != "" {
 		longTitle = fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
 	}
 	values := map[string]interface{}{
 		"BaseURL":       args.BaseURL,
+		"ModuleURL":     path.Join(args.BaseURL, "pkg", modulePackage) + "/",
 		"SiteTitle":     args.SiteTitle,
 		"SiteTitleLong": longTitle,
 	}

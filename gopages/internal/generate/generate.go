@@ -85,7 +85,7 @@ func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags
 		}).String()
 	}
 	funcs := pres.FuncMap()
-	addGoPagesFuncs(funcs, args)
+	addGoPagesFuncs(funcs, modulePackage, args)
 	readTemplates(pres, funcs, ns)
 
 	// Generate all static assets and save to /lib/godoc

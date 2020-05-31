@@ -36,8 +36,8 @@ const (
 </div><!-- #lowframe -->
 
 <div id="topbar"{{if .Title}} class="wide"{{end}}><div class="container">
-<div class="top-heading" id="heading-wide"><a href="{{gopages "" "BaseURL"}}/pkg/">{{gopages "GoPages | Auto-generated docs" "SiteTitleLong" "SiteTitle"}}</a></div>
-<div class="top-heading" id="heading-narrow"><a href="{{gopages "" "BaseURL"}}/pkg/">{{gopages "GoPages" "SiteTitle"}}</a></div>
+<div class="top-heading" id="heading-wide"><a href="{{gopages "" "ModuleURL"}}">{{gopages "GoPages | Auto-generated docs" "SiteTitleLong" "SiteTitle"}}</a></div>
+<div class="top-heading" id="heading-narrow"><a href="{{gopages "" "ModuleURL"}}">{{gopages "GoPages" "SiteTitle"}}</a></div>
 <a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
 
 </div></div>
