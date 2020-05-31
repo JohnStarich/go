@@ -149,7 +149,7 @@ func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 	do(recorder)
 	return recorder.Body.Bytes(), pipe.ErrIf(
 		recorder.Result().StatusCode != http.StatusOK,
-		errors.Errorf("Error generating page: [%d]\n%s", recorder.Result().StatusCode, recorder.Body.String()),
+		errors.Errorf("Error generating page: [%d]\n%s\n%s", recorder.Result().StatusCode, recorder.Header(), recorder.Body.String()),
 	)
 }
 
