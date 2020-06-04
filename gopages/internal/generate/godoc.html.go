@@ -22,6 +22,7 @@ const (
 <script src="{{gopages "" "BaseURL"}}/lib/godoc/jquery.treeview.js" defer></script>
 <script src="{{gopages "" "BaseURL"}}/lib/godoc/jquery.treeview.edit.js" defer></script>
 {{end}}
+{{gopagesWatchScript}}
 
 {{if .Playground}}
 <script src="{{gopages "" "BaseURL"}}/lib/godoc/playground.js" defer></script>

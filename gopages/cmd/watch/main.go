@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -23,6 +24,10 @@ import (
 	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
+)
+
+const (
+	lastUpdatedHeader = "GoPages-Last-Updated"
 )
 
 func main() {
@@ -36,6 +41,8 @@ func main() {
 		fmt.Print(usageOutput)
 		cmd.Exit(2)
 	}
+	args.Watch = true
+	var updatedTime string
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -44,7 +51,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fs, err := pagesFileSystem(ctx, wd, args)
+	fs, err := pagesFileSystem(ctx, wd, &updatedTime, args)
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +59,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(lastUpdatedHeader, updatedTime)
+
 		_, err := fs.Open(r.URL.Path)
 		if err == nil {
 			fileServer.ServeHTTP(w, r)
@@ -79,7 +88,7 @@ func main() {
 	_ = server.ListenAndServe()
 }
 
-func pagesFileSystem(ctx context.Context, modulePath string, args flags.Args) (http.FileSystem, error) {
+func pagesFileSystem(ctx context.Context, modulePath string, updateTime *string, args flags.Args) (http.FileSystem, error) {
 	src := osfs.New("")
 	fs := memfs.New()
 
@@ -101,7 +110,9 @@ func pagesFileSystem(ctx context.Context, modulePath string, args flags.Args) (h
 		},
 		func() error {
 			return watch(ctx, modulePath, func() error {
-				return generate.Docs(modulePath, modulePackage, src, fs, args)
+				err := generate.Docs(modulePath, modulePackage, src, fs, args)
+				*updateTime = time.Now().Format(time.RFC3339)
+				return err
 			})
 		},
 		func() error {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"text/template"
+	"time"
 
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/gopages/internal/pipe"
@@ -43,6 +44,26 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 			}
 		}
 		return defaultValue, nil
+	}
+	funcs["gopagesWatchScript"] = func() string {
+		if !args.Watch {
+			return ""
+		}
+		return fmt.Sprintf(`
+<script>
+const startDate = %q
+const timeoutMillis = 2000
+const poll = () => {
+	fetch(window.location).then(resp => {
+		const newDate = resp.headers.get("GoPages-Last-Updated")
+		if (newDate != startDate) {
+			window.location.reload()
+		}
+	})
+}
+window.setInterval(poll, timeoutMillis)
+</script>
+`, time.Now().Format(time.RFC3339))
 	}
 }
 

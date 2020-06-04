@@ -14,6 +14,7 @@ type Args struct {
 	OutputPath       string
 	SiteDescription  string
 	SiteTitle        string
+	Watch            bool // not added as a flag, only enabled when running from ./cmd/watch
 }
 
 func Parse(osArgs ...string) (Args, string, error) {
