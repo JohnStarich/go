@@ -19,7 +19,7 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 	}
 	values := map[string]interface{}{
 		"BaseURL":       args.BaseURL,
-		"ModuleURL":     path.Join(args.BaseURL, "pkg", modulePackage) + "/",
+		"ModuleURL":     path.Join(args.BaseURL, "/pkg", modulePackage) + "/",
 		"SiteTitle":     args.SiteTitle,
 		"SiteTitleLong": longTitle,
 	}
