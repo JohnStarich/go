@@ -5,15 +5,32 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/pkg/errors"
 )
+
+const maxOpenFiles = 1 << 14 // 2^14 appears to be the maximum value for macOS and 2^20 on linux
 
 func watch(ctx context.Context, path string, do func() error) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
+	}
+
+	// increase soft open file limit to maximum
+	var rLimit syscall.Rlimit
+	if err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit); err != nil {
+		return errors.Wrap(err, "Failed to get open file limit")
+	}
+	if rLimit.Cur < rLimit.Max && rLimit.Cur < maxOpenFiles {
+		rLimit.Cur = min(rLimit.Max, maxOpenFiles)
+		err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+		if err != nil {
+			return errors.Wrap(err, "Failed to increase soft open file limit")
+		}
 	}
 
 	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
@@ -58,4 +75,11 @@ func watch(ctx context.Context, path string, do func() error) error {
 		}
 	}()
 	return nil
+}
+
+func min(a, b uint64) uint64 {
+	if a < b {
+		return a
+	}
+	return b
 }
