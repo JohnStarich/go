@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 	"path"
+	"strings"
 	"text/template"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 )
 
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
+	funcs["node_html"] = nodeHTML(funcs["node_html"].(node_htmlFunc), args.BaseURL)
+
 	var longTitle string
 	if args.SiteTitle != "" && args.SiteDescription != "" {
 		longTitle = fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
@@ -95,4 +98,15 @@ func parseTemplate(funcs template.FuncMap, name, data string) *template.Template
 		panic(err)
 	}
 	return t
+}
+
+type node_htmlFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
+
+// nodeHTML runs the original 'node_html' template func, then rewrites any links inside it
+func nodeHTML(original node_htmlFunc, baseURL string) node_htmlFunc {
+	pkgURL := path.Join(baseURL, "/pkg")
+	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
+		s := original(info, node, linkify)
+		return strings.ReplaceAll(s, `<a href="/pkg/`, fmt.Sprintf(`<a href="%s/`, pkgURL))
+	}
 }
