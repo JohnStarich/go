@@ -9,6 +9,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/mod v0.3.0
-	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/tools v0.0.0-20201021000207-d49c4edd7d96
 )
