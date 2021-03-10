@@ -1,4 +1,4 @@
-module github.com/johnstarich/go/dns
+module github.com/hashicorp/go-darwin-dns/dns
 
 go 1.13
 
