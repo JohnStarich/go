@@ -21,6 +21,8 @@ import (
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/gopages/internal/generate"
+	"github.com/johnstarich/go/gopages/internal/generate/source"
+	"github.com/johnstarich/go/gopages/internal/module"
 	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
@@ -51,7 +53,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fs, err := pagesFileSystem(ctx, wd, &updatedTime, args)
+	modulePackage, err := module.Package(wd)
+	if err != nil {
+		panic(err)
+	}
+	linker, err := args.Linker(modulePackage)
+	if err != nil {
+		panic(err)
+	}
+	fs, err := pagesFileSystem(ctx, wd, &updatedTime, args, linker)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +98,7 @@ func main() {
 	_ = server.ListenAndServe()
 }
 
-func pagesFileSystem(ctx context.Context, modulePath string, updateTime *string, args flags.Args) (http.FileSystem, error) {
+func pagesFileSystem(ctx context.Context, modulePath string, updateTime *string, args flags.Args, linker source.Linker) (http.FileSystem, error) {
 	src := osfs.New("")
 	fs := memfs.New()
 
@@ -110,7 +120,7 @@ func pagesFileSystem(ctx context.Context, modulePath string, updateTime *string,
 		},
 		func() error {
 			return watch(ctx, modulePath, func() error {
-				err := generate.Docs(modulePath, modulePackage, src, fs, args)
+				err := generate.Docs(modulePath, modulePackage, src, fs, args, linker)
 				*updateTime = time.Now().Format(time.RFC3339)
 				return err
 			})

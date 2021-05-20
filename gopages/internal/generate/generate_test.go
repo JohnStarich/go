@@ -60,7 +60,10 @@ package mylib
 	writeFile(".dotfile", `ignored dot file`)
 
 	args := flags.Args{}
-	err = Docs(thing, "github.com/my/thing", thingFS, outputFS, args)
+	const modulePackage = "github.com/my/thing"
+	linker, err := args.Linker(modulePackage)
+	require.NoError(t, err)
+	err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
 	assert.NoError(t, err)
 
 	expectedDocs := []string{
