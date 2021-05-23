@@ -13,5 +13,5 @@ jobs:
     - name: Deploy Docs
       run: make deploy-docs
       env:
-        GIT_USER: ${{ env.GITHUB_ACTOR }}
+        GIT_USER: ${GITHUB_ACTOR}
         GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
