@@ -37,7 +37,7 @@ test: $(MODULES:=-test)
 	@if [[ -n "${COVERALLS_TOKEN}" ]]; then \
 		set -ex; \
 		(cd /tmp; go get github.com/mattn/goveralls); \
-		goveralls -coverprofile="cover.out" -service=github -repotoken "${COVERALLS_TOKEN}"; \
+		goveralls -coverprofile="cover.out" -service=github; \
 	fi
 
 .PHONY: %-test
