@@ -3,7 +3,7 @@ name: CD
 on: [push]
 
 jobs:
-  lint:
+  docs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
