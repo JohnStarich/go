@@ -21,9 +21,10 @@ import (
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/gopages/internal/generate"
+	"github.com/johnstarich/go/gopages/internal/generate/source"
+	"github.com/johnstarich/go/gopages/internal/module"
 	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/pkg/errors"
-	"golang.org/x/mod/modfile"
 )
 
 const (
@@ -64,20 +65,18 @@ func mainArgs(
 }
 
 func run(modulePath string, args flags.Args) error {
-	goMod := filepath.Join(modulePath, "go.mod")
 	var modulePackage string
+	var linker source.Linker
 	err := pipe.ChainFuncs(
 		func() error {
-			_, err := os.Stat(goMod)
-			return pipe.ErrIf(os.IsNotExist(err), errors.New("go.mod not found in the current directory"))
-		},
-		func() error {
-			buf, err := ioutil.ReadFile(goMod)
-			modulePackage = modfile.ModulePath(buf)
+			var err error
+			modulePackage, err = module.Package(modulePath)
 			return err
 		},
 		func() error {
-			return pipe.ErrIf(modulePackage == "", errors.Errorf("Unable to find module package name in go.mod file: %s", goMod))
+			var err error
+			linker, err = args.Linker(modulePackage)
+			return err
 		},
 	).Do()
 	if err != nil {
@@ -85,10 +84,9 @@ func run(modulePath string, args flags.Args) error {
 	}
 
 	fmt.Println("Generating godoc static pages for module...", modulePackage)
-
 	if !args.GitHubPages {
 		fs := osfs.New("")
-		return generate.Docs(modulePath, modulePackage, fs, fs, args)
+		return generate.Docs(modulePath, modulePackage, fs, fs, args, linker)
 	}
 
 	var repoRoot, remote string
@@ -139,7 +137,7 @@ func run(modulePath string, args flags.Args) error {
 			return nil
 		},
 		func() error {
-			return generate.Docs(modulePath, modulePackage, src, fs, args)
+			return generate.Docs(modulePath, modulePackage, src, fs, args, linker)
 		},
 	).Do()
 	if err != nil {
@@ -175,25 +173,35 @@ func run(modulePath string, args flags.Args) error {
 }
 
 func getCurrentPathAndRemote(repoPath string) (string, string, error) {
-	repo, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{
-		DetectDotGit: true,
-	})
-	if err != nil {
-		return "", "", errors.Wrapf(err, "Failed to open repo at %q", repoPath)
-	}
-
-	fs, err := repo.Worktree()
-	if err != nil {
-		return "", "", errors.Wrap(err, "Failed to set up work tree for repo")
-	}
-	repoRoot, err := filepath.EvalSymlinks(fs.Filesystem.Root())
-	if err != nil {
-		return "", "", err
-	}
-
-	remote, err := repo.Remote(git.DefaultRemoteName)
-	remoteURL := remote.Config().URLs[0]
-	return repoRoot, remoteURL, errors.Wrap(err, "Failed to get repo remote")
+	var repo *git.Repository
+	var fs *git.Worktree
+	var repoRoot string
+	var remoteURL string
+	err := pipe.ChainFuncs(
+		func() error {
+			var err error
+			repo, err = git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{
+				DetectDotGit: true,
+			})
+			return errors.Wrapf(err, "Failed to open repo at %q", repoPath)
+		},
+		func() error {
+			var err error
+			fs, err = repo.Worktree()
+			return errors.Wrap(err, "Failed to set up work tree for repo")
+		},
+		func() error {
+			var err error
+			repoRoot, err = filepath.EvalSymlinks(fs.Filesystem.Root())
+			return err
+		},
+		func() error {
+			remote, err := repo.Remote(git.DefaultRemoteName)
+			remoteURL = remote.Config().URLs[0]
+			return errors.Wrap(err, "Failed to get repo remote")
+		},
+	).Do()
+	return repoRoot, remoteURL, err
 }
 
 func commitAuthor() *object.Signature {

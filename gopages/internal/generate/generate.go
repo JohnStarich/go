@@ -15,6 +15,7 @@ import (
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/johnstarich/go/gopages/internal/generate/source"
 	"github.com/johnstarich/go/gopages/internal/pipe"
 	"github.com/johnstarich/go/gopages/internal/safememfs"
 	"github.com/pkg/errors"
@@ -25,7 +26,7 @@ import (
 	"golang.org/x/tools/godoc/vfs/mapfs"
 )
 
-func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags.Args) error {
+func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags.Args, linker source.Linker) error {
 	var ns vfs.NameSpace
 	var srcRoot billy.Filesystem
 	var corpus *godoc.Corpus
@@ -69,20 +70,23 @@ func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags
 	// TODO fix links from source pages back to docs
 	pres.URLForSrc = func(src string) string {
 		// seems godoc lib documentation is incorrect here, 'src' is actually the whole package path to the file
-		return path.Join(args.BaseURL, "/src", src)
+		src = strings.TrimPrefix(src, "/")
+		u := linker.LinkToSource(src, source.LinkOptions{})
+		return u.String()
 	}
 	pres.URLForSrcPos = func(src string, line, low, high int) string {
-		return (&url.URL{
-			Path:     path.Join(args.BaseURL, src),
-			Fragment: fmt.Sprintf("L%d", line),
-		}).String()
+		src = strings.TrimPrefix(src, "/src/")
+		u := linker.LinkToSource(src, source.LinkOptions{
+			Line: line,
+		})
+		return u.String()
 	}
 	pres.URLForSrcQuery = func(src, query string, line int) string {
-		return (&url.URL{
-			Path:     path.Join(args.BaseURL, src),
-			RawQuery: query,
-			Fragment: fmt.Sprintf("L%d", line),
-		}).String()
+		src = strings.TrimPrefix(src, "/src/")
+		u := linker.LinkToSource(src, source.LinkOptions{
+			Line: line,
+		})
+		return u.String()
 	}
 	funcs := pres.FuncMap()
 	addGoPagesFuncs(funcs, modulePackage, args)
@@ -156,7 +160,7 @@ Oops, this page doesn't exist.
 							return writePackageIndex(fs, pres, p, args.OutputPath)
 						},
 						func() error {
-							return writeSourceFile(fs, pres, args.BaseURL, p, true, b, args.OutputPath)
+							return writeSourceFile(fs, pres, args.BaseURL, p, true, b, args.OutputPath, linker)
 						},
 					)
 				}
@@ -164,7 +168,7 @@ Oops, this page doesn't exist.
 			// and run again on the last path segment (e.g. github.com)
 			ops = append(ops,
 				func() error {
-					return writeSourceFile(fs, pres, args.BaseURL, "", true, base, args.OutputPath)
+					return writeSourceFile(fs, pres, args.BaseURL, "", true, base, args.OutputPath, linker)
 				},
 				func() error {
 					return writePackageIndex(fs, pres, base, args.OutputPath)
@@ -189,7 +193,7 @@ Oops, this page doesn't exist.
 					return nil
 				}
 				packagePath := path.Join(modulePackage, dir)
-				return writeSourceFile(fs, pres, args.BaseURL, packagePath, isDir, base, args.OutputPath)
+				return writeSourceFile(fs, pres, args.BaseURL, packagePath, isDir, base, args.OutputPath, linker)
 			})
 		},
 		func() error {
@@ -198,7 +202,7 @@ Oops, this page doesn't exist.
 		},
 		func() error {
 			// Generate root src index, displaying all top level files
-			return writeSourceFile(fs, pres, args.BaseURL, "", true, "", args.OutputPath)
+			return writeSourceFile(fs, pres, args.BaseURL, "", true, "", args.OutputPath, linker)
 		},
 	).Do()
 }
@@ -257,7 +261,11 @@ func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePat
 	).Do()
 }
 
-func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string) error {
+func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string, linker source.Linker) error {
+	if scrapeLinker, ok := linker.(source.ScrapeChecker); ok && !scrapeLinker.ShouldScrapePackage(packagePath) {
+		return nil
+	}
+
 	outputComponents := append([]string{outputBasePath, "src"}, pathSplit(packagePath)...)
 	outputComponents = append(outputComponents, fileName)
 	var pathSuffix string

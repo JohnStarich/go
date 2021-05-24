@@ -17,9 +17,9 @@ import (
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
 	funcs["node_html"] = nodeHTML(funcs["node_html"].(node_htmlFunc), args.BaseURL)
 
-	var longTitle string
-	if args.SiteTitle != "" && args.SiteDescription != "" {
-		longTitle = fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
+	longTitle := fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
+	if args.SiteTitle == "" || args.SiteDescription == "" {
+		longTitle = ""
 	}
 	values := map[string]interface{}{
 		"BaseURL":       args.BaseURL,
@@ -49,10 +49,7 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 		return defaultValue, nil
 	}
 	funcs["gopagesWatchScript"] = func() string {
-		if !args.Watch {
-			return ""
-		}
-		return fmt.Sprintf(`
+		script := fmt.Sprintf(`
 <script>
 const startDate = %q
 const timeoutMillis = 2000
@@ -67,6 +64,10 @@ const poll = () => {
 window.setInterval(poll, timeoutMillis)
 </script>
 `, time.Now().Format(time.RFC3339))
+		if !args.Watch {
+			script = ""
+		}
+		return script
 	}
 }
 
@@ -93,11 +94,7 @@ func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *templ
 }
 
 func parseTemplate(funcs template.FuncMap, name, data string) *template.Template {
-	t, err := template.New(name).Funcs(funcs).Parse(data)
-	if err != nil {
-		panic(err)
-	}
-	return t
+	return template.Must(template.New(name).Funcs(funcs).Parse(data))
 }
 
 type node_htmlFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
