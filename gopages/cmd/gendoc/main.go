@@ -67,5 +67,6 @@ func funcMap() template.FuncMap {
 		"comment": func(s string) string {
 			return strings.ReplaceAll(s, "\n", "\n// ")
 		},
+		"wordWrap": wordWrapLines,
 	}
 }

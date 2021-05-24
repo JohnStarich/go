@@ -17,7 +17,8 @@
 //   -brand-title string
 //     	Branding title in the top left of documentation
 //   -gh-pages
-//     	Automatically commit the output path to the gh-pages branch. The current branch must be clean.
+//     	Automatically commit the output path to the gh-pages branch. The current branch
+//     	must be clean.
 //   -gh-pages-token string
 //     	The Git token to push with. Usually this is an API key.
 //   -gh-pages-user string
@@ -25,7 +26,10 @@
 //   -out string
 //     	Output path for static files (default "dist")
 //   -source-link string
-//     	Custom source code link template. Disables built-in source code pages. For example, 'https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}' generates links compatible with GitHub and GitLab. Must be a valid Go template and must generate valid URLs.
+//     	Custom source code link template. Disables built-in source code pages. For
+//     	example, "https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}"
+//     	generates links compatible with GitHub and GitLab. Must be a valid Go template
+//     	and must generate valid URLs.
 // 
 //
 package main

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -66,4 +67,36 @@ func TestMain(t *testing.T) {
 	assert.PanicsWithError(t, "Attempted to exit with exit code 1", func() {
 		main()
 	})
+}
+
+func TestSmallestNonNegative(t *testing.T) {
+	for _, tc := range []struct {
+		input  []int
+		expect int
+	}{
+		{
+			input:  []int{2, 1, 0},
+			expect: 0,
+		},
+		{
+			input:  []int{-1, 2, 3},
+			expect: 2,
+		},
+		{
+			input:  []int{1, -2, 3},
+			expect: 1,
+		},
+		{
+			input:  []int{1, 2, -3},
+			expect: 1,
+		},
+		{
+			input:  []int{-1},
+			expect: 0,
+		},
+	} {
+		t.Run(fmt.Sprintln(tc.input), func(t *testing.T) {
+			assert.Equal(t, tc.expect, smallestNonNegative(tc.input...))
+		})
+	}
 }
