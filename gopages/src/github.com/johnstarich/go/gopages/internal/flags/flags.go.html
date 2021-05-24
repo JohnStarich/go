@@ -59,36 +59,47 @@
 <span id="L3" class="ln">     3  </span>import (
 <span id="L4" class="ln">     4  </span>	&#34;bytes&#34;
 <span id="L5" class="ln">     5  </span>	&#34;flag&#34;
-<span id="L6" class="ln">     6  </span>)
-<span id="L7" class="ln">     7  </span>
-<span id="L8" class="ln">     8  </span><span class="comment">// Args contains all command-line options for gopages</span>
-<span id="L9" class="ln">     9  </span>type Args struct {
-<span id="L10" class="ln">    10  </span>	BaseURL          string
-<span id="L11" class="ln">    11  </span>	GitHubPages      bool
-<span id="L12" class="ln">    12  </span>	GitHubPagesToken string
-<span id="L13" class="ln">    13  </span>	GitHubPagesUser  string
-<span id="L14" class="ln">    14  </span>	OutputPath       string
-<span id="L15" class="ln">    15  </span>	SiteDescription  string
-<span id="L16" class="ln">    16  </span>	SiteTitle        string
-<span id="L17" class="ln">    17  </span>	Watch            bool <span class="comment">// not added as a flag, only enabled when running from ./cmd/watch</span>
-<span id="L18" class="ln">    18  </span>}
-<span id="L19" class="ln">    19  </span>
-<span id="L20" class="ln">    20  </span>func Parse(osArgs ...string) (Args, string, error) {
-<span id="L21" class="ln">    21  </span>	var args Args
-<span id="L22" class="ln">    22  </span>	commandLine := flag.NewFlagSet(&#34;gopages&#34;, flag.ContinueOnError)
-<span id="L23" class="ln">    23  </span>	commandLine.StringVar(&amp;args.OutputPath, &#34;out&#34;, &#34;dist&#34;, &#34;Output path for static files&#34;)
-<span id="L24" class="ln">    24  </span>	commandLine.StringVar(&amp;args.BaseURL, &#34;base&#34;, &#34;&#34;, &#34;Base URL to use for static assets&#34;)
-<span id="L25" class="ln">    25  </span>	commandLine.StringVar(&amp;args.SiteTitle, &#34;brand-title&#34;, &#34;&#34;, &#34;Branding title in the top left of documentation&#34;)
-<span id="L26" class="ln">    26  </span>	commandLine.StringVar(&amp;args.SiteDescription, &#34;brand-description&#34;, &#34;&#34;, &#34;Branding description in the top left of documentation&#34;)
-<span id="L27" class="ln">    27  </span>	commandLine.BoolVar(&amp;args.GitHubPages, &#34;gh-pages&#34;, false, &#34;Automatically commit the output path to the gh-pages branch. The current branch must be clean.&#34;)
-<span id="L28" class="ln">    28  </span>	commandLine.StringVar(&amp;args.GitHubPagesUser, &#34;gh-pages-user&#34;, &#34;&#34;, &#34;The Git username to push with&#34;)
-<span id="L29" class="ln">    29  </span>	commandLine.StringVar(&amp;args.GitHubPagesToken, &#34;gh-pages-token&#34;, &#34;&#34;, &#34;The Git token to push with. Usually this is an API key.&#34;)
-<span id="L30" class="ln">    30  </span>	var output bytes.Buffer
-<span id="L31" class="ln">    31  </span>	commandLine.SetOutput(&amp;output)
-<span id="L32" class="ln">    32  </span>	err := commandLine.Parse(osArgs) <span class="comment">// prints usage if fails</span>
-<span id="L33" class="ln">    33  </span>	return args, output.String(), err
-<span id="L34" class="ln">    34  </span>}
-<span id="L35" class="ln">    35  </span>
+<span id="L6" class="ln">     6  </span>
+<span id="L7" class="ln">     7  </span>	&#34;github.com/johnstarich/go/gopages/internal/generate/source&#34;
+<span id="L8" class="ln">     8  </span>)
+<span id="L9" class="ln">     9  </span>
+<span id="L10" class="ln">    10  </span><span class="comment">// Args contains all command-line options for gopages</span>
+<span id="L11" class="ln">    11  </span>type Args struct {
+<span id="L12" class="ln">    12  </span>	BaseURL            string
+<span id="L13" class="ln">    13  </span>	GitHubPages        bool
+<span id="L14" class="ln">    14  </span>	GitHubPagesToken   string
+<span id="L15" class="ln">    15  </span>	GitHubPagesUser    string
+<span id="L16" class="ln">    16  </span>	SourceLinkTemplate string
+<span id="L17" class="ln">    17  </span>	OutputPath         string
+<span id="L18" class="ln">    18  </span>	SiteDescription    string
+<span id="L19" class="ln">    19  </span>	SiteTitle          string
+<span id="L20" class="ln">    20  </span>	Watch              bool <span class="comment">// not added as a flag, only enabled when running from ./cmd/watch</span>
+<span id="L21" class="ln">    21  </span>}
+<span id="L22" class="ln">    22  </span>
+<span id="L23" class="ln">    23  </span>func Parse(osArgs ...string) (Args, string, error) {
+<span id="L24" class="ln">    24  </span>	var args Args
+<span id="L25" class="ln">    25  </span>	commandLine := flag.NewFlagSet(&#34;gopages&#34;, flag.ContinueOnError)
+<span id="L26" class="ln">    26  </span>	commandLine.StringVar(&amp;args.OutputPath, &#34;out&#34;, &#34;dist&#34;, &#34;Output path for static files&#34;)
+<span id="L27" class="ln">    27  </span>	commandLine.StringVar(&amp;args.BaseURL, &#34;base&#34;, &#34;&#34;, &#34;Base URL to use for static assets&#34;)
+<span id="L28" class="ln">    28  </span>	commandLine.StringVar(&amp;args.SiteTitle, &#34;brand-title&#34;, &#34;&#34;, &#34;Branding title in the top left of documentation&#34;)
+<span id="L29" class="ln">    29  </span>	commandLine.StringVar(&amp;args.SiteDescription, &#34;brand-description&#34;, &#34;&#34;, &#34;Branding description in the top left of documentation&#34;)
+<span id="L30" class="ln">    30  </span>	commandLine.StringVar(&amp;args.SourceLinkTemplate, &#34;source-link&#34;, &#34;&#34;, &#34;Custom source code link template. Disables built-in source code pages. For example, &#39;https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&#39; generates links compatible with GitHub and GitLab. Must be a valid Go template and must generate valid URLs.&#34;)
+<span id="L31" class="ln">    31  </span>	commandLine.BoolVar(&amp;args.GitHubPages, &#34;gh-pages&#34;, false, &#34;Automatically commit the output path to the gh-pages branch. The current branch must be clean.&#34;)
+<span id="L32" class="ln">    32  </span>	commandLine.StringVar(&amp;args.GitHubPagesUser, &#34;gh-pages-user&#34;, &#34;&#34;, &#34;The Git username to push with&#34;)
+<span id="L33" class="ln">    33  </span>	commandLine.StringVar(&amp;args.GitHubPagesToken, &#34;gh-pages-token&#34;, &#34;&#34;, &#34;The Git token to push with. Usually this is an API key.&#34;)
+<span id="L34" class="ln">    34  </span>	var output bytes.Buffer
+<span id="L35" class="ln">    35  </span>	commandLine.SetOutput(&amp;output)
+<span id="L36" class="ln">    36  </span>	err := commandLine.Parse(osArgs) <span class="comment">// prints usage if fails</span>
+<span id="L37" class="ln">    37  </span>	return args, output.String(), err
+<span id="L38" class="ln">    38  </span>}
+<span id="L39" class="ln">    39  </span>
+<span id="L40" class="ln">    40  </span>func (a Args) Linker(modulePackage string) (source.Linker, error) {
+<span id="L41" class="ln">    41  </span>	if a.SourceLinkTemplate != &#34;&#34; {
+<span id="L42" class="ln">    42  </span>		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)
+<span id="L43" class="ln">    43  </span>	}
+<span id="L44" class="ln">    44  </span>	return newGoPagesLinker(a.BaseURL), nil
+<span id="L45" class="ln">    45  </span>}
+<span id="L46" class="ln">    46  </span>
 </pre><p></p>
 
 <div id="footer">

@@ -80,10 +80,12 @@
 <span id="L24" class="ln">    24  </span><span class="comment">//     	The Git username to push with</span>
 <span id="L25" class="ln">    25  </span><span class="comment">//   -out string</span>
 <span id="L26" class="ln">    26  </span><span class="comment">//     	Output path for static files (default &#34;dist&#34;)</span>
-<span id="L27" class="ln">    27  </span><span class="comment">// </span>
-<span id="L28" class="ln">    28  </span><span class="comment">//</span>
-<span id="L29" class="ln">    29  </span>package main
-<span id="L30" class="ln">    30  </span>
+<span id="L27" class="ln">    27  </span><span class="comment">//   -source-link string</span>
+<span id="L28" class="ln">    28  </span><span class="comment">//     	Custom source code link template. Disables built-in source code pages. For example, &#39;https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&#39; generates links compatible with GitHub and GitLab. Must be a valid Go template and must generate valid URLs.</span>
+<span id="L29" class="ln">    29  </span><span class="comment">// </span>
+<span id="L30" class="ln">    30  </span><span class="comment">//</span>
+<span id="L31" class="ln">    31  </span>package main
+<span id="L32" class="ln">    32  </span>
 </pre><p></p>
 
 <div id="footer">

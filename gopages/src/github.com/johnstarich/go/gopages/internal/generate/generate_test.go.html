@@ -116,47 +116,50 @@
 <span id="L60" class="ln">    60  </span>	writeFile(&#34;.dotfile&#34;, `ignored dot file`)
 <span id="L61" class="ln">    61  </span>
 <span id="L62" class="ln">    62  </span>	args := flags.Args{}
-<span id="L63" class="ln">    63  </span>	err = Docs(thing, &#34;github.com/my/thing&#34;, thingFS, outputFS, args)
-<span id="L64" class="ln">    64  </span>	assert.NoError(t, err)
-<span id="L65" class="ln">    65  </span>
-<span id="L66" class="ln">    66  </span>	expectedDocs := []string{
-<span id="L67" class="ln">    67  </span>		&#34;404.html&#34;,
-<span id="L68" class="ln">    68  </span>		&#34;index.html&#34;,
-<span id="L69" class="ln">    69  </span>		&#34;pkg/github.com/index.html&#34;,
-<span id="L70" class="ln">    70  </span>		&#34;pkg/github.com/my/index.html&#34;,
-<span id="L71" class="ln">    71  </span>		&#34;pkg/github.com/my/thing/index.html&#34;,
-<span id="L72" class="ln">    72  </span>		&#34;pkg/github.com/my/thing/internal/hello/index.html&#34;,
-<span id="L73" class="ln">    73  </span>		&#34;pkg/github.com/my/thing/internal/index.html&#34;,
-<span id="L74" class="ln">    74  </span>		&#34;pkg/github.com/my/thing/mylib/index.html&#34;,
-<span id="L75" class="ln">    75  </span>		&#34;pkg/index.html&#34;,
-<span id="L76" class="ln">    76  </span>		&#34;src/github.com/index.html&#34;,
-<span id="L77" class="ln">    77  </span>		&#34;src/github.com/my/index.html&#34;,
-<span id="L78" class="ln">    78  </span>		&#34;src/github.com/my/thing/index.html&#34;,
-<span id="L79" class="ln">    79  </span>		&#34;src/github.com/my/thing/internal/hello/hello.go.html&#34;,
-<span id="L80" class="ln">    80  </span>		&#34;src/github.com/my/thing/internal/hello/index.html&#34;,
-<span id="L81" class="ln">    81  </span>		&#34;src/github.com/my/thing/internal/index.html&#34;,
-<span id="L82" class="ln">    82  </span>		&#34;src/github.com/my/thing/main.go.html&#34;,
-<span id="L83" class="ln">    83  </span>		&#34;src/github.com/my/thing/mylib/index.html&#34;,
-<span id="L84" class="ln">    84  </span>		&#34;src/github.com/my/thing/mylib/lib.go.html&#34;,
-<span id="L85" class="ln">    85  </span>		&#34;src/index.html&#34;,
-<span id="L86" class="ln">    86  </span>	}
-<span id="L87" class="ln">    87  </span>	var foundDocs []string
-<span id="L88" class="ln">    88  </span>	require.NoError(t, walkFiles(outputFS, &#34;&#34;, func(path string, isDir bool) error {
-<span id="L89" class="ln">    89  </span>		if !isDir &amp;&amp; !strings.HasPrefix(path, filepath.Join(&#34;lib&#34;, &#34;godoc&#34;)) {
-<span id="L90" class="ln">    90  </span>			foundDocs = append(foundDocs, path)
-<span id="L91" class="ln">    91  </span>		}
-<span id="L92" class="ln">    92  </span>		return nil
-<span id="L93" class="ln">    93  </span>	}))
-<span id="L94" class="ln">    94  </span>	sort.Strings(foundDocs)
-<span id="L95" class="ln">    95  </span>	assert.Equal(t, expectedDocs, foundDocs)
-<span id="L96" class="ln">    96  </span>
-<span id="L97" class="ln">    97  </span>	f, err := outputFS.Open(&#34;pkg/github.com/my/thing/index.html&#34;)
-<span id="L98" class="ln">    98  </span>	require.NoError(t, err)
-<span id="L99" class="ln">    99  </span>	indexContents, err := ioutil.ReadAll(f)
-<span id="L100" class="ln">   100  </span>	require.NoError(t, err)
-<span id="L101" class="ln">   101  </span>	assert.Contains(t, string(indexContents), &#34;mylib&#34;)
-<span id="L102" class="ln">   102  </span>}
-<span id="L103" class="ln">   103  </span>
+<span id="L63" class="ln">    63  </span>	const modulePackage = &#34;github.com/my/thing&#34;
+<span id="L64" class="ln">    64  </span>	linker, err := args.Linker(modulePackage)
+<span id="L65" class="ln">    65  </span>	require.NoError(t, err)
+<span id="L66" class="ln">    66  </span>	err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
+<span id="L67" class="ln">    67  </span>	assert.NoError(t, err)
+<span id="L68" class="ln">    68  </span>
+<span id="L69" class="ln">    69  </span>	expectedDocs := []string{
+<span id="L70" class="ln">    70  </span>		&#34;404.html&#34;,
+<span id="L71" class="ln">    71  </span>		&#34;index.html&#34;,
+<span id="L72" class="ln">    72  </span>		&#34;pkg/github.com/index.html&#34;,
+<span id="L73" class="ln">    73  </span>		&#34;pkg/github.com/my/index.html&#34;,
+<span id="L74" class="ln">    74  </span>		&#34;pkg/github.com/my/thing/index.html&#34;,
+<span id="L75" class="ln">    75  </span>		&#34;pkg/github.com/my/thing/internal/hello/index.html&#34;,
+<span id="L76" class="ln">    76  </span>		&#34;pkg/github.com/my/thing/internal/index.html&#34;,
+<span id="L77" class="ln">    77  </span>		&#34;pkg/github.com/my/thing/mylib/index.html&#34;,
+<span id="L78" class="ln">    78  </span>		&#34;pkg/index.html&#34;,
+<span id="L79" class="ln">    79  </span>		&#34;src/github.com/index.html&#34;,
+<span id="L80" class="ln">    80  </span>		&#34;src/github.com/my/index.html&#34;,
+<span id="L81" class="ln">    81  </span>		&#34;src/github.com/my/thing/index.html&#34;,
+<span id="L82" class="ln">    82  </span>		&#34;src/github.com/my/thing/internal/hello/hello.go.html&#34;,
+<span id="L83" class="ln">    83  </span>		&#34;src/github.com/my/thing/internal/hello/index.html&#34;,
+<span id="L84" class="ln">    84  </span>		&#34;src/github.com/my/thing/internal/index.html&#34;,
+<span id="L85" class="ln">    85  </span>		&#34;src/github.com/my/thing/main.go.html&#34;,
+<span id="L86" class="ln">    86  </span>		&#34;src/github.com/my/thing/mylib/index.html&#34;,
+<span id="L87" class="ln">    87  </span>		&#34;src/github.com/my/thing/mylib/lib.go.html&#34;,
+<span id="L88" class="ln">    88  </span>		&#34;src/index.html&#34;,
+<span id="L89" class="ln">    89  </span>	}
+<span id="L90" class="ln">    90  </span>	var foundDocs []string
+<span id="L91" class="ln">    91  </span>	require.NoError(t, walkFiles(outputFS, &#34;&#34;, func(path string, isDir bool) error {
+<span id="L92" class="ln">    92  </span>		if !isDir &amp;&amp; !strings.HasPrefix(path, filepath.Join(&#34;lib&#34;, &#34;godoc&#34;)) {
+<span id="L93" class="ln">    93  </span>			foundDocs = append(foundDocs, path)
+<span id="L94" class="ln">    94  </span>		}
+<span id="L95" class="ln">    95  </span>		return nil
+<span id="L96" class="ln">    96  </span>	}))
+<span id="L97" class="ln">    97  </span>	sort.Strings(foundDocs)
+<span id="L98" class="ln">    98  </span>	assert.Equal(t, expectedDocs, foundDocs)
+<span id="L99" class="ln">    99  </span>
+<span id="L100" class="ln">   100  </span>	f, err := outputFS.Open(&#34;pkg/github.com/my/thing/index.html&#34;)
+<span id="L101" class="ln">   101  </span>	require.NoError(t, err)
+<span id="L102" class="ln">   102  </span>	indexContents, err := ioutil.ReadAll(f)
+<span id="L103" class="ln">   103  </span>	require.NoError(t, err)
+<span id="L104" class="ln">   104  </span>	assert.Contains(t, string(indexContents), &#34;mylib&#34;)
+<span id="L105" class="ln">   105  </span>}
+<span id="L106" class="ln">   106  </span>
 </pre><p></p>
 
 <div id="footer">

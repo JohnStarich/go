@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#375EAB">
 
-  <title>generate - GoPages</title>
+  <title>module - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/gopages/lib/godoc/style.css">
 
@@ -38,7 +38,7 @@
 
 
   <h1>
-    Package generate
+    Package module
     <span class="text-muted"></span>
   </h1>
 
@@ -72,14 +72,12 @@
 		
 		<div id="short-nav">
 			<dl>
-			<dd><code>import "github.com/johnstarich/go/gopages/internal/generate"</code></dd>
+			<dd><code>import "github.com/johnstarich/go/gopages/internal/module"</code></dd>
 			</dl>
 			<dl>
 			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
 			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
 			
-			
-				<dd><a href="#pkg-subdirectories">Subdirectories</a></dd>
 			
 			</dl>
 		</div>
@@ -109,7 +107,7 @@
 			
 			
 				
-				<dd><a href="#Docs">func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags.Args, linker source.Linker) error</a></dd>
+				<dd><a href="#Package">func Package(modulePath string) (string, error)</a></dd>
 			
 			
 			
@@ -123,13 +121,7 @@
 			<p>
 			<span style="font-size:90%">
 			
-				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/generate.go">generate.go</a>
-			
-				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/godoc.html.go">godoc.html.go</a>
-			
-				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source.go">source.go</a>
-			
-				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/template.go">template.go</a>
+				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/module/module.go">module.go</a>
 			
 			</span>
 			</p>
@@ -144,12 +136,12 @@
 		
 			
 			
-			<h2 id="Docs">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/generate.go#L29">Docs</a>
-				<a class="permalink" href="#Docs">&#xb6;</a>
+			<h2 id="Package">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/module/module.go#L13">Package</a>
+				<a class="permalink" href="#Package">&#xb6;</a>
 				
 				
 			</h2>
-			<pre>func Docs(modulePath, modulePackage <a href="/go/gopages/pkg/builtin/#string">string</a>, src, fs billy.<a href="#Filesystem">Filesystem</a>, args <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/flags/">flags</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/flags/#Args">Args</a>, linker <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#Linker">Linker</a>) <a href="/go/gopages/pkg/builtin/#error">error</a></pre>
+			<pre>func Package(modulePath <a href="/go/gopages/pkg/builtin/#string">string</a>) (<a href="/go/gopages/pkg/builtin/#string">string</a>, <a href="/go/gopages/pkg/builtin/#error">error</a>)</pre>
 			
 			
 			
@@ -163,27 +155,6 @@
 
 
 
-
-	
-	
-		<h2 id="pkg-subdirectories">Subdirectories</h2>
-	
-	<div class="pkg-dir">
-		<table>
-			<tr>
-				<th class="pkg-name">Name</th>
-				<th class="pkg-synopsis">Synopsis</th>
-			</tr>
-
-			
-			<tr>
-				<td colspan="2"><a href="..">..</a></td>
-			</tr>
-			
-
-			
-		</table>
-	</div>
 
 
 

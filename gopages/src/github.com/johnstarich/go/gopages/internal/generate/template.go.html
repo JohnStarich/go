@@ -73,9 +73,9 @@
 <span id="L17" class="ln">    17  </span>func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
 <span id="L18" class="ln">    18  </span>	funcs[&#34;node_html&#34;] = nodeHTML(funcs[&#34;node_html&#34;].(node_htmlFunc), args.BaseURL)
 <span id="L19" class="ln">    19  </span>
-<span id="L20" class="ln">    20  </span>	var longTitle string
-<span id="L21" class="ln">    21  </span>	if args.SiteTitle != &#34;&#34; &amp;&amp; args.SiteDescription != &#34;&#34; {
-<span id="L22" class="ln">    22  </span>		longTitle = fmt.Sprintf(&#34;%s | %s&#34;, args.SiteTitle, args.SiteDescription)
+<span id="L20" class="ln">    20  </span>	longTitle := fmt.Sprintf(&#34;%s | %s&#34;, args.SiteTitle, args.SiteDescription)
+<span id="L21" class="ln">    21  </span>	if args.SiteTitle == &#34;&#34; || args.SiteDescription == &#34;&#34; {
+<span id="L22" class="ln">    22  </span>		longTitle = &#34;&#34;
 <span id="L23" class="ln">    23  </span>	}
 <span id="L24" class="ln">    24  </span>	values := map[string]interface{}{
 <span id="L25" class="ln">    25  </span>		&#34;BaseURL&#34;:       args.BaseURL,
@@ -105,68 +105,65 @@
 <span id="L49" class="ln">    49  </span>		return defaultValue, nil
 <span id="L50" class="ln">    50  </span>	}
 <span id="L51" class="ln">    51  </span>	funcs[&#34;gopagesWatchScript&#34;] = func() string {
-<span id="L52" class="ln">    52  </span>		if !args.Watch {
-<span id="L53" class="ln">    53  </span>			return &#34;&#34;
-<span id="L54" class="ln">    54  </span>		}
-<span id="L55" class="ln">    55  </span>		return fmt.Sprintf(`
-<span id="L56" class="ln">    56  </span>&lt;script&gt;
-<span id="L57" class="ln">    57  </span>const startDate = %q
-<span id="L58" class="ln">    58  </span>const timeoutMillis = 2000
-<span id="L59" class="ln">    59  </span>const poll = () =&gt; {
-<span id="L60" class="ln">    60  </span>	fetch(window.location).then(resp =&gt; {
-<span id="L61" class="ln">    61  </span>		const newDate = resp.headers.get(&#34;GoPages-Last-Updated&#34;)
-<span id="L62" class="ln">    62  </span>		if (newDate != startDate) {
-<span id="L63" class="ln">    63  </span>			window.location.reload()
-<span id="L64" class="ln">    64  </span>		}
-<span id="L65" class="ln">    65  </span>	})
-<span id="L66" class="ln">    66  </span>}
-<span id="L67" class="ln">    67  </span>window.setInterval(poll, timeoutMillis)
-<span id="L68" class="ln">    68  </span>&lt;/script&gt;
-<span id="L69" class="ln">    69  </span>`, time.Now().Format(time.RFC3339))
-<span id="L70" class="ln">    70  </span>	}
-<span id="L71" class="ln">    71  </span>}
-<span id="L72" class="ln">    72  </span>
-<span id="L73" class="ln">    73  </span>func readTemplates(pres *godoc.Presentation, funcs template.FuncMap, fs vfs.FileSystem) {
-<span id="L74" class="ln">    74  </span>	pres.CallGraphHTML = readTemplate(funcs, fs, &#34;callgraph.html&#34;)
-<span id="L75" class="ln">    75  </span>	pres.DirlistHTML = readTemplate(funcs, fs, &#34;dirlist.html&#34;)
-<span id="L76" class="ln">    76  </span>	pres.ErrorHTML = readTemplate(funcs, fs, &#34;error.html&#34;)
-<span id="L77" class="ln">    77  </span>	pres.ExampleHTML = readTemplate(funcs, fs, &#34;example.html&#34;)
-<span id="L78" class="ln">    78  </span>	pres.GodocHTML = parseTemplate(funcs, &#34;godoc.html&#34;, godocHTML)
-<span id="L79" class="ln">    79  </span>	pres.ImplementsHTML = readTemplate(funcs, fs, &#34;implements.html&#34;)
-<span id="L80" class="ln">    80  </span>	pres.MethodSetHTML = readTemplate(funcs, fs, &#34;methodset.html&#34;)
-<span id="L81" class="ln">    81  </span>	pres.PackageHTML = readTemplate(funcs, fs, &#34;package.html&#34;)
-<span id="L82" class="ln">    82  </span>	pres.PackageRootHTML = readTemplate(funcs, fs, &#34;packageroot.html&#34;)
-<span id="L83" class="ln">    83  </span>}
-<span id="L84" class="ln">    84  </span>
-<span id="L85" class="ln">    85  </span>func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *template.Template {
-<span id="L86" class="ln">    86  </span>	<span class="comment">// use underlying file system fs to read the template file</span>
-<span id="L87" class="ln">    87  </span>	<span class="comment">// (cannot use template ParseFile functions directly)</span>
-<span id="L88" class="ln">    88  </span>	data, err := vfs.ReadFile(fs, path.Join(&#34;lib/godoc&#34;, name))
-<span id="L89" class="ln">    89  </span>	if err != nil {
-<span id="L90" class="ln">    90  </span>		panic(err)
-<span id="L91" class="ln">    91  </span>	}
-<span id="L92" class="ln">    92  </span>	return parseTemplate(funcs, name, string(data))
-<span id="L93" class="ln">    93  </span>}
-<span id="L94" class="ln">    94  </span>
-<span id="L95" class="ln">    95  </span>func parseTemplate(funcs template.FuncMap, name, data string) *template.Template {
-<span id="L96" class="ln">    96  </span>	t, err := template.New(name).Funcs(funcs).Parse(data)
-<span id="L97" class="ln">    97  </span>	if err != nil {
-<span id="L98" class="ln">    98  </span>		panic(err)
-<span id="L99" class="ln">    99  </span>	}
-<span id="L100" class="ln">   100  </span>	return t
-<span id="L101" class="ln">   101  </span>}
-<span id="L102" class="ln">   102  </span>
-<span id="L103" class="ln">   103  </span>type node_htmlFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
-<span id="L104" class="ln">   104  </span>
-<span id="L105" class="ln">   105  </span><span class="comment">// nodeHTML runs the original &#39;node_html&#39; template func, then rewrites any links inside it</span>
-<span id="L106" class="ln">   106  </span>func nodeHTML(original node_htmlFunc, baseURL string) node_htmlFunc {
-<span id="L107" class="ln">   107  </span>	pkgURL := path.Join(baseURL, &#34;/pkg&#34;)
-<span id="L108" class="ln">   108  </span>	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
-<span id="L109" class="ln">   109  </span>		s := original(info, node, linkify)
-<span id="L110" class="ln">   110  </span>		return strings.ReplaceAll(s, `&lt;a href=&#34;/pkg/`, fmt.Sprintf(`&lt;a href=&#34;%s/`, pkgURL))
-<span id="L111" class="ln">   111  </span>	}
-<span id="L112" class="ln">   112  </span>}
-<span id="L113" class="ln">   113  </span>
+<span id="L52" class="ln">    52  </span>		script := fmt.Sprintf(`
+<span id="L53" class="ln">    53  </span>&lt;script&gt;
+<span id="L54" class="ln">    54  </span>const startDate = %q
+<span id="L55" class="ln">    55  </span>const timeoutMillis = 2000
+<span id="L56" class="ln">    56  </span>const poll = () =&gt; {
+<span id="L57" class="ln">    57  </span>	fetch(window.location).then(resp =&gt; {
+<span id="L58" class="ln">    58  </span>		const newDate = resp.headers.get(&#34;GoPages-Last-Updated&#34;)
+<span id="L59" class="ln">    59  </span>		if (newDate != startDate) {
+<span id="L60" class="ln">    60  </span>			window.location.reload()
+<span id="L61" class="ln">    61  </span>		}
+<span id="L62" class="ln">    62  </span>	})
+<span id="L63" class="ln">    63  </span>}
+<span id="L64" class="ln">    64  </span>window.setInterval(poll, timeoutMillis)
+<span id="L65" class="ln">    65  </span>&lt;/script&gt;
+<span id="L66" class="ln">    66  </span>`, time.Now().Format(time.RFC3339))
+<span id="L67" class="ln">    67  </span>		if !args.Watch {
+<span id="L68" class="ln">    68  </span>			script = &#34;&#34;
+<span id="L69" class="ln">    69  </span>		}
+<span id="L70" class="ln">    70  </span>		return script
+<span id="L71" class="ln">    71  </span>	}
+<span id="L72" class="ln">    72  </span>}
+<span id="L73" class="ln">    73  </span>
+<span id="L74" class="ln">    74  </span>func readTemplates(pres *godoc.Presentation, funcs template.FuncMap, fs vfs.FileSystem) {
+<span id="L75" class="ln">    75  </span>	pres.CallGraphHTML = readTemplate(funcs, fs, &#34;callgraph.html&#34;)
+<span id="L76" class="ln">    76  </span>	pres.DirlistHTML = readTemplate(funcs, fs, &#34;dirlist.html&#34;)
+<span id="L77" class="ln">    77  </span>	pres.ErrorHTML = readTemplate(funcs, fs, &#34;error.html&#34;)
+<span id="L78" class="ln">    78  </span>	pres.ExampleHTML = readTemplate(funcs, fs, &#34;example.html&#34;)
+<span id="L79" class="ln">    79  </span>	pres.GodocHTML = parseTemplate(funcs, &#34;godoc.html&#34;, godocHTML)
+<span id="L80" class="ln">    80  </span>	pres.ImplementsHTML = readTemplate(funcs, fs, &#34;implements.html&#34;)
+<span id="L81" class="ln">    81  </span>	pres.MethodSetHTML = readTemplate(funcs, fs, &#34;methodset.html&#34;)
+<span id="L82" class="ln">    82  </span>	pres.PackageHTML = readTemplate(funcs, fs, &#34;package.html&#34;)
+<span id="L83" class="ln">    83  </span>	pres.PackageRootHTML = readTemplate(funcs, fs, &#34;packageroot.html&#34;)
+<span id="L84" class="ln">    84  </span>}
+<span id="L85" class="ln">    85  </span>
+<span id="L86" class="ln">    86  </span>func readTemplate(funcs template.FuncMap, fs vfs.FileSystem, name string) *template.Template {
+<span id="L87" class="ln">    87  </span>	<span class="comment">// use underlying file system fs to read the template file</span>
+<span id="L88" class="ln">    88  </span>	<span class="comment">// (cannot use template ParseFile functions directly)</span>
+<span id="L89" class="ln">    89  </span>	data, err := vfs.ReadFile(fs, path.Join(&#34;lib/godoc&#34;, name))
+<span id="L90" class="ln">    90  </span>	if err != nil {
+<span id="L91" class="ln">    91  </span>		panic(err)
+<span id="L92" class="ln">    92  </span>	}
+<span id="L93" class="ln">    93  </span>	return parseTemplate(funcs, name, string(data))
+<span id="L94" class="ln">    94  </span>}
+<span id="L95" class="ln">    95  </span>
+<span id="L96" class="ln">    96  </span>func parseTemplate(funcs template.FuncMap, name, data string) *template.Template {
+<span id="L97" class="ln">    97  </span>	return template.Must(template.New(name).Funcs(funcs).Parse(data))
+<span id="L98" class="ln">    98  </span>}
+<span id="L99" class="ln">    99  </span>
+<span id="L100" class="ln">   100  </span>type node_htmlFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
+<span id="L101" class="ln">   101  </span>
+<span id="L102" class="ln">   102  </span><span class="comment">// nodeHTML runs the original &#39;node_html&#39; template func, then rewrites any links inside it</span>
+<span id="L103" class="ln">   103  </span>func nodeHTML(original node_htmlFunc, baseURL string) node_htmlFunc {
+<span id="L104" class="ln">   104  </span>	pkgURL := path.Join(baseURL, &#34;/pkg&#34;)
+<span id="L105" class="ln">   105  </span>	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
+<span id="L106" class="ln">   106  </span>		s := original(info, node, linkify)
+<span id="L107" class="ln">   107  </span>		return strings.ReplaceAll(s, `&lt;a href=&#34;/pkg/`, fmt.Sprintf(`&lt;a href=&#34;%s/`, pkgURL))
+<span id="L108" class="ln">   108  </span>	}
+<span id="L109" class="ln">   109  </span>}
+<span id="L110" class="ln">   110  </span>
 </pre><p></p>
 
 <div id="footer">
