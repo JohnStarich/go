@@ -217,13 +217,11 @@ func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 }
 
 func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
-	u, err := url.Parse(path)
-	if err != nil {
-		panic(err)
-	}
-	return doRequest(func(w http.ResponseWriter) {
+	u := &url.URL{Path: path}
+	respBody, err := doRequest(func(w http.ResponseWriter) {
 		pres.ServeHTTP(w, &http.Request{URL: u})
 	})
+	return respBody, err
 }
 
 func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {

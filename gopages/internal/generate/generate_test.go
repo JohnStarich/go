@@ -58,6 +58,7 @@ package mylib
 `)
 	writeFile(".git/something", `ignored dot dir`)
 	writeFile(".dotfile", `ignored dot file`)
+	writeFile("%name.PascalCased%/other.go", `package bad_url_decode`)
 
 	args := flags.Args{}
 	const modulePackage = "github.com/my/thing"
@@ -71,6 +72,7 @@ package mylib
 		"index.html",
 		"pkg/github.com/index.html",
 		"pkg/github.com/my/index.html",
+		"pkg/github.com/my/thing/%name.PascalCased%/index.html", // Verifies fix for https://github.com/JohnStarich/go/issues/7
 		"pkg/github.com/my/thing/index.html",
 		"pkg/github.com/my/thing/internal/hello/index.html",
 		"pkg/github.com/my/thing/internal/index.html",
@@ -78,6 +80,8 @@ package mylib
 		"pkg/index.html",
 		"src/github.com/index.html",
 		"src/github.com/my/index.html",
+		"src/github.com/my/thing/%name.PascalCased%/index.html",
+		"src/github.com/my/thing/%name.PascalCased%/other.go.html",
 		"src/github.com/my/thing/index.html",
 		"src/github.com/my/thing/internal/hello/hello.go.html",
 		"src/github.com/my/thing/internal/hello/index.html",
