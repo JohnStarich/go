@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.15.12";</script>
+<script>var goVersion = "go1.15.15";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer=""></script>
 </head>
 <body>
@@ -273,191 +273,188 @@
 <span id="L217" class="ln">   217  </span>}
 <span id="L218" class="ln">   218  </span>
 <span id="L219" class="ln">   219  </span>func getPage(pres *godoc.Presentation, path string) ([]byte, error) {
-<span id="L220" class="ln">   220  </span>	u, err := url.Parse(path)
-<span id="L221" class="ln">   221  </span>	if err != nil {
-<span id="L222" class="ln">   222  </span>		panic(err)
-<span id="L223" class="ln">   223  </span>	}
-<span id="L224" class="ln">   224  </span>	return doRequest(func(w http.ResponseWriter) {
-<span id="L225" class="ln">   225  </span>		pres.ServeHTTP(w, &amp;http.Request{URL: u})
-<span id="L226" class="ln">   226  </span>	})
-<span id="L227" class="ln">   227  </span>}
-<span id="L228" class="ln">   228  </span>
-<span id="L229" class="ln">   229  </span>func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
-<span id="L230" class="ln">   230  </span>	return doRequest(func(w http.ResponseWriter) {
-<span id="L231" class="ln">   231  </span>		pres.ServePage(w, godoc.Page{
-<span id="L232" class="ln">   232  </span>			Title:    title,
-<span id="L233" class="ln">   233  </span>			Tabtitle: title,
-<span id="L234" class="ln">   234  </span>			Body:     []byte(body),
-<span id="L235" class="ln">   235  </span>		})
-<span id="L236" class="ln">   236  </span>	})
-<span id="L237" class="ln">   237  </span>}
-<span id="L238" class="ln">   238  </span>
-<span id="L239" class="ln">   239  </span>func pathSplit(path string) []string {
-<span id="L240" class="ln">   240  </span>	return strings.Split(path, &#34;/&#34;)
-<span id="L241" class="ln">   241  </span>}
-<span id="L242" class="ln">   242  </span>
-<span id="L243" class="ln">   243  </span>func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePath, outputBasePath string) error {
-<span id="L244" class="ln">   244  </span>	outputComponents := append([]string{outputBasePath, &#34;pkg&#34;}, pathSplit(packagePath)...)
-<span id="L245" class="ln">   245  </span>	outputComponents = append(outputComponents, &#34;index.html&#34;)
-<span id="L246" class="ln">   246  </span>	outputPath := filepath.Join(outputComponents...)
-<span id="L247" class="ln">   247  </span>
-<span id="L248" class="ln">   248  </span>	var page []byte
-<span id="L249" class="ln">   249  </span>	return pipe.ChainFuncs(
-<span id="L250" class="ln">   250  </span>		func() error {
-<span id="L251" class="ln">   251  </span>			var err error
-<span id="L252" class="ln">   252  </span>			page, err = getPage(pres, path.Join(&#34;/pkg&#34;, packagePath)+&#34;/&#34;)
-<span id="L253" class="ln">   253  </span>			return err
+<span id="L220" class="ln">   220  </span>	u := &amp;url.URL{Path: path}
+<span id="L221" class="ln">   221  </span>	return doRequest(func(w http.ResponseWriter) {
+<span id="L222" class="ln">   222  </span>		pres.ServeHTTP(w, &amp;http.Request{URL: u})
+<span id="L223" class="ln">   223  </span>	})
+<span id="L224" class="ln">   224  </span>}
+<span id="L225" class="ln">   225  </span>
+<span id="L226" class="ln">   226  </span>func genericPage(pres *godoc.Presentation, title, body string) ([]byte, error) {
+<span id="L227" class="ln">   227  </span>	return doRequest(func(w http.ResponseWriter) {
+<span id="L228" class="ln">   228  </span>		pres.ServePage(w, godoc.Page{
+<span id="L229" class="ln">   229  </span>			Title:    title,
+<span id="L230" class="ln">   230  </span>			Tabtitle: title,
+<span id="L231" class="ln">   231  </span>			Body:     []byte(body),
+<span id="L232" class="ln">   232  </span>		})
+<span id="L233" class="ln">   233  </span>	})
+<span id="L234" class="ln">   234  </span>}
+<span id="L235" class="ln">   235  </span>
+<span id="L236" class="ln">   236  </span>func pathSplit(path string) []string {
+<span id="L237" class="ln">   237  </span>	return strings.Split(path, &#34;/&#34;)
+<span id="L238" class="ln">   238  </span>}
+<span id="L239" class="ln">   239  </span>
+<span id="L240" class="ln">   240  </span>func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePath, outputBasePath string) error {
+<span id="L241" class="ln">   241  </span>	outputComponents := append([]string{outputBasePath, &#34;pkg&#34;}, pathSplit(packagePath)...)
+<span id="L242" class="ln">   242  </span>	outputComponents = append(outputComponents, &#34;index.html&#34;)
+<span id="L243" class="ln">   243  </span>	outputPath := filepath.Join(outputComponents...)
+<span id="L244" class="ln">   244  </span>
+<span id="L245" class="ln">   245  </span>	var page []byte
+<span id="L246" class="ln">   246  </span>	return pipe.ChainFuncs(
+<span id="L247" class="ln">   247  </span>		func() error {
+<span id="L248" class="ln">   248  </span>			var err error
+<span id="L249" class="ln">   249  </span>			page, err = getPage(pres, path.Join(&#34;/pkg&#34;, packagePath)+&#34;/&#34;)
+<span id="L250" class="ln">   250  </span>			return err
+<span id="L251" class="ln">   251  </span>		},
+<span id="L252" class="ln">   252  </span>		func() error {
+<span id="L253" class="ln">   253  </span>			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
 <span id="L254" class="ln">   254  </span>		},
 <span id="L255" class="ln">   255  </span>		func() error {
-<span id="L256" class="ln">   256  </span>			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
+<span id="L256" class="ln">   256  </span>			return util.WriteFile(fs, outputPath, page, 0600)
 <span id="L257" class="ln">   257  </span>		},
-<span id="L258" class="ln">   258  </span>		func() error {
-<span id="L259" class="ln">   259  </span>			return util.WriteFile(fs, outputPath, page, 0600)
-<span id="L260" class="ln">   260  </span>		},
-<span id="L261" class="ln">   261  </span>	).Do()
-<span id="L262" class="ln">   262  </span>}
-<span id="L263" class="ln">   263  </span>
-<span id="L264" class="ln">   264  </span>func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string, linker source.Linker) error {
-<span id="L265" class="ln">   265  </span>	if scrapeLinker, ok := linker.(source.ScrapeChecker); ok &amp;&amp; !scrapeLinker.ShouldScrapePackage(packagePath) {
-<span id="L266" class="ln">   266  </span>		return nil
-<span id="L267" class="ln">   267  </span>	}
-<span id="L268" class="ln">   268  </span>
-<span id="L269" class="ln">   269  </span>	outputComponents := append([]string{outputBasePath, &#34;src&#34;}, pathSplit(packagePath)...)
-<span id="L270" class="ln">   270  </span>	outputComponents = append(outputComponents, fileName)
-<span id="L271" class="ln">   271  </span>	var pathSuffix string
-<span id="L272" class="ln">   272  </span>	if isDir {
-<span id="L273" class="ln">   273  </span>		outputComponents = append(outputComponents, &#34;index&#34;)
-<span id="L274" class="ln">   274  </span>		pathSuffix = &#34;/&#34;
-<span id="L275" class="ln">   275  </span>	}
-<span id="L276" class="ln">   276  </span>	outputPath := filepath.Join(outputComponents...) + &#34;.html&#34;
-<span id="L277" class="ln">   277  </span>
-<span id="L278" class="ln">   278  </span>	var page []byte
-<span id="L279" class="ln">   279  </span>	return pipe.ChainFuncs(
-<span id="L280" class="ln">   280  </span>		func() error {
-<span id="L281" class="ln">   281  </span>			var err error
-<span id="L282" class="ln">   282  </span>			page, err = getPage(pres, path.Join(&#34;/src&#34;, packagePath, fileName)+pathSuffix)
-<span id="L283" class="ln">   283  </span>			return err
-<span id="L284" class="ln">   284  </span>		},
-<span id="L285" class="ln">   285  </span>		func() error {
-<span id="L286" class="ln">   286  </span>			var err error
-<span id="L287" class="ln">   287  </span>			page, err = customizeSourceCodePage(baseURL, page)
-<span id="L288" class="ln">   288  </span>			return err
+<span id="L258" class="ln">   258  </span>	).Do()
+<span id="L259" class="ln">   259  </span>}
+<span id="L260" class="ln">   260  </span>
+<span id="L261" class="ln">   261  </span>func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string, linker source.Linker) error {
+<span id="L262" class="ln">   262  </span>	if scrapeLinker, ok := linker.(source.ScrapeChecker); ok &amp;&amp; !scrapeLinker.ShouldScrapePackage(packagePath) {
+<span id="L263" class="ln">   263  </span>		return nil
+<span id="L264" class="ln">   264  </span>	}
+<span id="L265" class="ln">   265  </span>
+<span id="L266" class="ln">   266  </span>	outputComponents := append([]string{outputBasePath, &#34;src&#34;}, pathSplit(packagePath)...)
+<span id="L267" class="ln">   267  </span>	outputComponents = append(outputComponents, fileName)
+<span id="L268" class="ln">   268  </span>	var pathSuffix string
+<span id="L269" class="ln">   269  </span>	if isDir {
+<span id="L270" class="ln">   270  </span>		outputComponents = append(outputComponents, &#34;index&#34;)
+<span id="L271" class="ln">   271  </span>		pathSuffix = &#34;/&#34;
+<span id="L272" class="ln">   272  </span>	}
+<span id="L273" class="ln">   273  </span>	outputPath := filepath.Join(outputComponents...) + &#34;.html&#34;
+<span id="L274" class="ln">   274  </span>
+<span id="L275" class="ln">   275  </span>	var page []byte
+<span id="L276" class="ln">   276  </span>	return pipe.ChainFuncs(
+<span id="L277" class="ln">   277  </span>		func() error {
+<span id="L278" class="ln">   278  </span>			var err error
+<span id="L279" class="ln">   279  </span>			page, err = getPage(pres, path.Join(&#34;/src&#34;, packagePath, fileName)+pathSuffix)
+<span id="L280" class="ln">   280  </span>			return err
+<span id="L281" class="ln">   281  </span>		},
+<span id="L282" class="ln">   282  </span>		func() error {
+<span id="L283" class="ln">   283  </span>			var err error
+<span id="L284" class="ln">   284  </span>			page, err = customizeSourceCodePage(baseURL, page)
+<span id="L285" class="ln">   285  </span>			return err
+<span id="L286" class="ln">   286  </span>		},
+<span id="L287" class="ln">   287  </span>		func() error {
+<span id="L288" class="ln">   288  </span>			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
 <span id="L289" class="ln">   289  </span>		},
 <span id="L290" class="ln">   290  </span>		func() error {
-<span id="L291" class="ln">   291  </span>			return fs.MkdirAll(filepath.Dir(outputPath), 0700)
+<span id="L291" class="ln">   291  </span>			return util.WriteFile(fs, outputPath, page, 0600)
 <span id="L292" class="ln">   292  </span>		},
-<span id="L293" class="ln">   293  </span>		func() error {
-<span id="L294" class="ln">   294  </span>			return util.WriteFile(fs, outputPath, page, 0600)
-<span id="L295" class="ln">   295  </span>		},
-<span id="L296" class="ln">   296  </span>	).Do()
-<span id="L297" class="ln">   297  </span>}
-<span id="L298" class="ln">   298  </span>
-<span id="L299" class="ln">   299  </span>func getPackagePaths(modulePackage string) ([]string, error) {
-<span id="L300" class="ln">   300  </span>	pkgs, err := packages.Load(&amp;packages.Config{
-<span id="L301" class="ln">   301  </span>		Mode: packages.NeedName,
-<span id="L302" class="ln">   302  </span>	}, modulePackage+&#34;/...&#34;)
-<span id="L303" class="ln">   303  </span>
-<span id="L304" class="ln">   304  </span>	paths := make([]string, len(pkgs))
-<span id="L305" class="ln">   305  </span>	for i, pkg := range pkgs {
-<span id="L306" class="ln">   306  </span>		paths[i] = pkg.PkgPath
-<span id="L307" class="ln">   307  </span>	}
-<span id="L308" class="ln">   308  </span>	return paths, err
-<span id="L309" class="ln">   309  </span>}
-<span id="L310" class="ln">   310  </span>
-<span id="L311" class="ln">   311  </span>func redirect(url string) string {
-<span id="L312" class="ln">   312  </span>	var buf bytes.Buffer
-<span id="L313" class="ln">   313  </span>	err := template.Must(template.New(&#34;&#34;).Parse(`&lt;!DOCTYPE html&gt;
-<span id="L314" class="ln">   314  </span>&lt;html&gt;
-<span id="L315" class="ln">   315  </span>&lt;head&gt;
-<span id="L316" class="ln">   316  </span>&lt;script&gt;
-<span id="L317" class="ln">   317  </span>window.location = {{.URL}}
-<span id="L318" class="ln">   318  </span>&lt;/script&gt;
-<span id="L319" class="ln">   319  </span>&lt;/head&gt;
-<span id="L320" class="ln">   320  </span>&lt;body&gt;
-<span id="L321" class="ln">   321  </span>	&lt;a href={{.URL}}&gt;Click here to see this module&#39;s documentation.&lt;/a&gt;
-<span id="L322" class="ln">   322  </span>&lt;/body&gt;
-<span id="L323" class="ln">   323  </span>&lt;/html&gt;
-<span id="L324" class="ln">   324  </span>`)).Execute(&amp;buf, map[string]interface{}{
-<span id="L325" class="ln">   325  </span>		&#34;URL&#34;: fmt.Sprintf(&#34;%q&#34;, url),
-<span id="L326" class="ln">   326  </span>	})
-<span id="L327" class="ln">   327  </span>	if err != nil {
-<span id="L328" class="ln">   328  </span>		panic(err)
-<span id="L329" class="ln">   329  </span>	}
-<span id="L330" class="ln">   330  </span>	return buf.String()
-<span id="L331" class="ln">   331  </span>}
-<span id="L332" class="ln">   332  </span>
-<span id="L333" class="ln">   333  </span>type filesystemOpener struct {
-<span id="L334" class="ln">   334  </span>	billy.Filesystem
-<span id="L335" class="ln">   335  </span>}
-<span id="L336" class="ln">   336  </span>
-<span id="L337" class="ln">   337  </span>func (f *filesystemOpener) Open(name string) (vfs.ReadSeekCloser, error) {
-<span id="L338" class="ln">   338  </span>	return f.OpenFile(name, 0, 0)
-<span id="L339" class="ln">   339  </span>}
-<span id="L340" class="ln">   340  </span>
-<span id="L341" class="ln">   341  </span>func (f *filesystemOpener) RootType(path string) vfs.RootType {
-<span id="L342" class="ln">   342  </span>	return &#34;&#34;
-<span id="L343" class="ln">   343  </span>}
-<span id="L344" class="ln">   344  </span>
-<span id="L345" class="ln">   345  </span>func (f *filesystemOpener) String() string {
-<span id="L346" class="ln">   346  </span>	return &#34;*filesystemOpener&#34;
-<span id="L347" class="ln">   347  </span>}
-<span id="L348" class="ln">   348  </span>
-<span id="L349" class="ln">   349  </span>func walkFiles(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
-<span id="L350" class="ln">   350  </span>	err := walkFilesFn(fs, path, visit)
-<span id="L351" class="ln">   351  </span>	return pipe.ErrIf(err != filepath.SkipDir, err)
-<span id="L352" class="ln">   352  </span>}
-<span id="L353" class="ln">   353  </span>
-<span id="L354" class="ln">   354  </span>func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
-<span id="L355" class="ln">   355  </span>	info, err := fs.Lstat(path)
-<span id="L356" class="ln">   356  </span>	if err != nil {
-<span id="L357" class="ln">   357  </span>		return errors.Wrap(err, &#34;Error looking up file&#34;)
-<span id="L358" class="ln">   358  </span>	}
-<span id="L359" class="ln">   359  </span>
-<span id="L360" class="ln">   360  </span>	if info.Mode()&amp;os.ModeSymlink == os.ModeSymlink {
-<span id="L361" class="ln">   361  </span>		<span class="comment">// ignore symlinks to avoid infinite recursion</span>
-<span id="L362" class="ln">   362  </span>		return nil
-<span id="L363" class="ln">   363  </span>	}
-<span id="L364" class="ln">   364  </span>
-<span id="L365" class="ln">   365  </span>	isDir := info.IsDir()
-<span id="L366" class="ln">   366  </span>	if err := visit(path, isDir); err != nil {
-<span id="L367" class="ln">   367  </span>		return err
-<span id="L368" class="ln">   368  </span>	}
-<span id="L369" class="ln">   369  </span>
-<span id="L370" class="ln">   370  </span>	if !isDir {
-<span id="L371" class="ln">   371  </span>		return nil
-<span id="L372" class="ln">   372  </span>	}
-<span id="L373" class="ln">   373  </span>
-<span id="L374" class="ln">   374  </span>	dir, err := fs.ReadDir(path)
-<span id="L375" class="ln">   375  </span>	if err != nil {
-<span id="L376" class="ln">   376  </span>		return errors.Wrapf(err, &#34;Error reading directory %q&#34;, path)
-<span id="L377" class="ln">   377  </span>	}
-<span id="L378" class="ln">   378  </span>	for _, info = range dir {
-<span id="L379" class="ln">   379  </span>		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
-<span id="L380" class="ln">   380  </span>		if err == filepath.SkipDir {
-<span id="L381" class="ln">   381  </span>			if !info.IsDir() {
-<span id="L382" class="ln">   382  </span>				break <span class="comment">// for SkipDir on a file, skip remaining files in directory</span>
-<span id="L383" class="ln">   383  </span>			}
-<span id="L384" class="ln">   384  </span>			<span class="comment">// otherwise continue recursing other files in this dir</span>
-<span id="L385" class="ln">   385  </span>		} else if err != nil {
-<span id="L386" class="ln">   386  </span>			return err
-<span id="L387" class="ln">   387  </span>		}
-<span id="L388" class="ln">   388  </span>	}
-<span id="L389" class="ln">   389  </span>	return nil
-<span id="L390" class="ln">   390  </span>}
-<span id="L391" class="ln">   391  </span>
-<span id="L392" class="ln">   392  </span>func makePath(path string) billy.Filesystem {
-<span id="L393" class="ln">   393  </span>	fs := safememfs.New()
-<span id="L394" class="ln">   394  </span>	err := fs.MkdirAll(path, 0600)
-<span id="L395" class="ln">   395  </span>	if err != nil {
-<span id="L396" class="ln">   396  </span>		panic(err)
-<span id="L397" class="ln">   397  </span>	}
-<span id="L398" class="ln">   398  </span>	return fs
-<span id="L399" class="ln">   399  </span>}
-<span id="L400" class="ln">   400  </span>
+<span id="L293" class="ln">   293  </span>	).Do()
+<span id="L294" class="ln">   294  </span>}
+<span id="L295" class="ln">   295  </span>
+<span id="L296" class="ln">   296  </span>func getPackagePaths(modulePackage string) ([]string, error) {
+<span id="L297" class="ln">   297  </span>	pkgs, err := packages.Load(&amp;packages.Config{
+<span id="L298" class="ln">   298  </span>		Mode: packages.NeedName,
+<span id="L299" class="ln">   299  </span>	}, modulePackage+&#34;/...&#34;)
+<span id="L300" class="ln">   300  </span>
+<span id="L301" class="ln">   301  </span>	paths := make([]string, len(pkgs))
+<span id="L302" class="ln">   302  </span>	for i, pkg := range pkgs {
+<span id="L303" class="ln">   303  </span>		paths[i] = pkg.PkgPath
+<span id="L304" class="ln">   304  </span>	}
+<span id="L305" class="ln">   305  </span>	return paths, err
+<span id="L306" class="ln">   306  </span>}
+<span id="L307" class="ln">   307  </span>
+<span id="L308" class="ln">   308  </span>func redirect(url string) string {
+<span id="L309" class="ln">   309  </span>	var buf bytes.Buffer
+<span id="L310" class="ln">   310  </span>	err := template.Must(template.New(&#34;&#34;).Parse(`&lt;!DOCTYPE html&gt;
+<span id="L311" class="ln">   311  </span>&lt;html&gt;
+<span id="L312" class="ln">   312  </span>&lt;head&gt;
+<span id="L313" class="ln">   313  </span>&lt;script&gt;
+<span id="L314" class="ln">   314  </span>window.location = {{.URL}}
+<span id="L315" class="ln">   315  </span>&lt;/script&gt;
+<span id="L316" class="ln">   316  </span>&lt;/head&gt;
+<span id="L317" class="ln">   317  </span>&lt;body&gt;
+<span id="L318" class="ln">   318  </span>	&lt;a href={{.URL}}&gt;Click here to see this module&#39;s documentation.&lt;/a&gt;
+<span id="L319" class="ln">   319  </span>&lt;/body&gt;
+<span id="L320" class="ln">   320  </span>&lt;/html&gt;
+<span id="L321" class="ln">   321  </span>`)).Execute(&amp;buf, map[string]interface{}{
+<span id="L322" class="ln">   322  </span>		&#34;URL&#34;: fmt.Sprintf(&#34;%q&#34;, url),
+<span id="L323" class="ln">   323  </span>	})
+<span id="L324" class="ln">   324  </span>	if err != nil {
+<span id="L325" class="ln">   325  </span>		panic(err)
+<span id="L326" class="ln">   326  </span>	}
+<span id="L327" class="ln">   327  </span>	return buf.String()
+<span id="L328" class="ln">   328  </span>}
+<span id="L329" class="ln">   329  </span>
+<span id="L330" class="ln">   330  </span>type filesystemOpener struct {
+<span id="L331" class="ln">   331  </span>	billy.Filesystem
+<span id="L332" class="ln">   332  </span>}
+<span id="L333" class="ln">   333  </span>
+<span id="L334" class="ln">   334  </span>func (f *filesystemOpener) Open(name string) (vfs.ReadSeekCloser, error) {
+<span id="L335" class="ln">   335  </span>	return f.OpenFile(name, 0, 0)
+<span id="L336" class="ln">   336  </span>}
+<span id="L337" class="ln">   337  </span>
+<span id="L338" class="ln">   338  </span>func (f *filesystemOpener) RootType(path string) vfs.RootType {
+<span id="L339" class="ln">   339  </span>	return &#34;&#34;
+<span id="L340" class="ln">   340  </span>}
+<span id="L341" class="ln">   341  </span>
+<span id="L342" class="ln">   342  </span>func (f *filesystemOpener) String() string {
+<span id="L343" class="ln">   343  </span>	return &#34;*filesystemOpener&#34;
+<span id="L344" class="ln">   344  </span>}
+<span id="L345" class="ln">   345  </span>
+<span id="L346" class="ln">   346  </span>func walkFiles(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
+<span id="L347" class="ln">   347  </span>	err := walkFilesFn(fs, path, visit)
+<span id="L348" class="ln">   348  </span>	return pipe.ErrIf(err != filepath.SkipDir, err)
+<span id="L349" class="ln">   349  </span>}
+<span id="L350" class="ln">   350  </span>
+<span id="L351" class="ln">   351  </span>func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
+<span id="L352" class="ln">   352  </span>	info, err := fs.Lstat(path)
+<span id="L353" class="ln">   353  </span>	if err != nil {
+<span id="L354" class="ln">   354  </span>		return errors.Wrap(err, &#34;Error looking up file&#34;)
+<span id="L355" class="ln">   355  </span>	}
+<span id="L356" class="ln">   356  </span>
+<span id="L357" class="ln">   357  </span>	if info.Mode()&amp;os.ModeSymlink == os.ModeSymlink {
+<span id="L358" class="ln">   358  </span>		<span class="comment">// ignore symlinks to avoid infinite recursion</span>
+<span id="L359" class="ln">   359  </span>		return nil
+<span id="L360" class="ln">   360  </span>	}
+<span id="L361" class="ln">   361  </span>
+<span id="L362" class="ln">   362  </span>	isDir := info.IsDir()
+<span id="L363" class="ln">   363  </span>	if err := visit(path, isDir); err != nil {
+<span id="L364" class="ln">   364  </span>		return err
+<span id="L365" class="ln">   365  </span>	}
+<span id="L366" class="ln">   366  </span>
+<span id="L367" class="ln">   367  </span>	if !isDir {
+<span id="L368" class="ln">   368  </span>		return nil
+<span id="L369" class="ln">   369  </span>	}
+<span id="L370" class="ln">   370  </span>
+<span id="L371" class="ln">   371  </span>	dir, err := fs.ReadDir(path)
+<span id="L372" class="ln">   372  </span>	if err != nil {
+<span id="L373" class="ln">   373  </span>		return errors.Wrapf(err, &#34;Error reading directory %q&#34;, path)
+<span id="L374" class="ln">   374  </span>	}
+<span id="L375" class="ln">   375  </span>	for _, info = range dir {
+<span id="L376" class="ln">   376  </span>		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
+<span id="L377" class="ln">   377  </span>		if err == filepath.SkipDir {
+<span id="L378" class="ln">   378  </span>			if !info.IsDir() {
+<span id="L379" class="ln">   379  </span>				break <span class="comment">// for SkipDir on a file, skip remaining files in directory</span>
+<span id="L380" class="ln">   380  </span>			}
+<span id="L381" class="ln">   381  </span>			<span class="comment">// otherwise continue recursing other files in this dir</span>
+<span id="L382" class="ln">   382  </span>		} else if err != nil {
+<span id="L383" class="ln">   383  </span>			return err
+<span id="L384" class="ln">   384  </span>		}
+<span id="L385" class="ln">   385  </span>	}
+<span id="L386" class="ln">   386  </span>	return nil
+<span id="L387" class="ln">   387  </span>}
+<span id="L388" class="ln">   388  </span>
+<span id="L389" class="ln">   389  </span>func makePath(path string) billy.Filesystem {
+<span id="L390" class="ln">   390  </span>	fs := safememfs.New()
+<span id="L391" class="ln">   391  </span>	err := fs.MkdirAll(path, 0600)
+<span id="L392" class="ln">   392  </span>	if err != nil {
+<span id="L393" class="ln">   393  </span>		panic(err)
+<span id="L394" class="ln">   394  </span>	}
+<span id="L395" class="ln">   395  </span>	return fs
+<span id="L396" class="ln">   396  </span>}
+<span id="L397" class="ln">   397  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.15.12.<br/>
+Build version go1.15.15.<br/>
 </div>
 
 </div><!-- .container -->
