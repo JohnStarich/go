@@ -196,3 +196,55 @@ func TestPipeReuse(t *testing.T) {
 		t.Error("Unexpected p2 output:", out2)
 	}
 }
+
+func TestPipeConcat(t *testing.T) {
+	t.Run("empty pipes", func(t *testing.T) {
+		empty := New().Concat(New())
+		if !reflect.DeepEqual(New(), empty) {
+			t.Error("Empty pipe concat with empty pipe should be equivalent")
+		}
+	})
+
+	t.Run("data flows", func(t *testing.T) {
+		p1 := New().
+			Append(func(args []interface{}) int {
+				arg0 := args[0].(int)
+				return arg0 + 1
+			})
+		p2 := New().
+			Append(func(args []interface{}) int {
+				arg0 := args[0].(int)
+				return arg0 + 1
+			})
+		p := p1.Concat(p2)
+		out, err := p.Do(0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual([]interface{}{2}, out) {
+			t.Error("Out must equal 2, got:", out)
+		}
+	})
+
+	t.Run("stops on first pipe err", func(t *testing.T) {
+		p1 := New().
+			Append(func(args []interface{}) (int, error) {
+				return 0, fmt.Errorf("failed")
+			})
+		p2 := New().
+			Append(func(args []interface{}) int {
+				return 0
+			})
+		p := p1.Concat(p2)
+		out, err := p.Do(0)
+		if err == nil {
+			t.Fatal("Expected error")
+		}
+		if err.Error() != "failed" {
+			t.Error("Unexpected error:", err)
+		}
+		if out != nil {
+			t.Error("Out must be nil")
+		}
+	})
+}
