@@ -5,6 +5,11 @@ import (
 	"reflect"
 )
 
+var (
+	interfaceSliceType = reflect.TypeOf([]interface{}{})
+	errType            = reflect.TypeOf((*error)(nil)).Elem()
+)
+
 type Pipe struct {
 	ops []reflect.Value
 }
@@ -39,7 +44,29 @@ func (p Pipe) Append(fn interface{}) Pipe {
 	return p
 }
 
-var interfaceSliceType = reflect.TypeOf([]interface{}{})
+func (p Pipe) Concat(other Pipe) Pipe {
+	if len(p.ops) == 0 {
+		return other
+	}
+
+	lastOp := p.ops[len(p.ops)-1].Type()
+	out := make([]reflect.Type, lastOp.NumOut())
+	for i := range out {
+		out[i] = lastOp.Out(i)
+	}
+	bridgeType := reflect.FuncOf(out, []reflect.Type{interfaceSliceType}, false)
+	bridgeFn := func(argVals []reflect.Value) (results []reflect.Value) {
+		args := make([]interface{}, len(argVals))
+		for i := range args {
+			args[i] = argVals[i].Interface()
+		}
+		return []reflect.Value{reflect.ValueOf(args)}
+	}
+
+	p = p.Append(reflect.MakeFunc(bridgeType, bridgeFn).Interface())
+	p.ops = append(p.ops, other.ops...)
+	return p
+}
 
 func (p Pipe) appendFunc(fn interface{}) (Pipe, error) {
 	op := reflect.ValueOf(fn)
@@ -77,8 +104,6 @@ func splitErrValue(args []reflect.Value) ([]reflect.Value, error) {
 	}
 	return args[:len(args)-1], err
 }
-
-var errType = reflect.TypeOf((*error)(nil)).Elem()
 
 func isErr(v reflect.Type) bool {
 	return v.Implements(errType)
