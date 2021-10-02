@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// CheckError returns 'err' if 'cond' is true, nil otherwise
 func CheckError(cond bool, err error) error {
 	if cond {
 		return err
@@ -13,6 +14,7 @@ func CheckError(cond bool, err error) error {
 	return nil
 }
 
+// CheckErrorf returns a new formatted error if 'cond' is true, nil otherwise
 func CheckErrorf(cond bool, format string, args ...interface{}) error {
 	if cond {
 		return fmt.Errorf(format, args...)
@@ -20,10 +22,13 @@ func CheckErrorf(cond bool, format string, args ...interface{}) error {
 	return nil
 }
 
+// Error is an error returned from Pipe.Do().
+// Can contain 1 or more errors. Conforms to the standard library's errors package interfaces like errors.As().
 type Error struct {
 	errs []error
 }
 
+// Error implements the builtin error interface
 func (e Error) Error() string {
 	if len(e.errs) == 1 {
 		return fmt.Sprintf("pipe: %v", e.errs[0])
