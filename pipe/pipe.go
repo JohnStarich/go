@@ -10,23 +10,31 @@ var (
 	errType            = reflect.TypeOf((*error)(nil)).Elem()
 )
 
+// Pipe combines several functions together into a pipeline.
+// Each appended function's return values are passed as parameters to the next function.
+//
+// If a function returns an error, then the pipe's execution is halted and immediately returns.
+// See Options for modifications to this behavior.
 type Pipe struct {
 	options Options
 	ops     []reflect.Value
 }
 
+// Options defines all available options to configure a Pipe
 type Options struct {
-	// KeepGoing continues running later stages in a Pipe after an error is encountered.
+	// KeepGoing continues running later functions in a Pipe after an error is encountered.
 	// The errors are collected into an Error and returned at the end.
 	KeepGoing bool
 }
 
+// New returns a Pipe with the provided options, ready to Append new functions
 func New(options Options) Pipe {
 	return Pipe{
 		options: options,
 	}
 }
 
+// Do executes this Pipe, running each appended function in-order and handling any errors
 func (p Pipe) Do(args ...interface{}) ([]interface{}, error) {
 	argVals := []reflect.Value{reflect.ValueOf(args)}
 	var errs []error
@@ -52,6 +60,10 @@ func (p Pipe) Do(args ...interface{}) ([]interface{}, error) {
 	return results, nil
 }
 
+// Append returns a new Pipe with the fn function appended to its operations.
+//
+// The very first function in a Pipe must accept []interface{} as it's only parameter.
+// The return types of a function must match the parameter types of the next appended function, panicking otherwise.
 func (p Pipe) Append(fn interface{}) Pipe {
 	p, err := p.appendFunc(fn)
 	if err != nil {
@@ -60,6 +72,7 @@ func (p Pipe) Append(fn interface{}) Pipe {
 	return p
 }
 
+// Concat returns a new Pipe with the functions in 'other' appended to its operations
 func (p Pipe) Concat(other Pipe) Pipe {
 	if len(p.ops) == 0 {
 		return other
