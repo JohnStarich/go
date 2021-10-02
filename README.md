@@ -5,6 +5,7 @@ This is a collection of my Go utilities in one easy-to-import and easy-to-share 
 * [dns](./dns): Implements a drop-in replacement for DNS, since Go's DNS on macOS doesn't always work
 * [gopages](./gopages): Generates static Go documentation, includes a GitHub Pages integration
 * [datasize](./datasize): Parse, format, and convert to differents units in bytes
+* [pipe](./pipe): Simplify error handling while keeping the original intent clear
 * [regext](./regext): Ignore whitespace and in-line comments in your regular expressions
 
 #### Questions? Concerns?
