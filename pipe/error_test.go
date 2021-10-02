@@ -1,7 +1,10 @@
 package pipe
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"reflect"
 	"testing"
 )
 
@@ -17,7 +20,7 @@ func TestCheckError(t *testing.T) {
 }
 
 func ExampleCheckError() {
-	isPositive := New().
+	isPositive := New(Options{}).
 		Append(func(args []interface{}) (int, error) {
 			in, ok := args[0].(int)
 			return in + 1, CheckError(!ok, fmt.Errorf("not an int!"))
@@ -28,7 +31,7 @@ func ExampleCheckError() {
 
 	_, err := isPositive.Do([]interface{}{"some string"})
 	fmt.Println(err)
-	// Output: not an int!
+	// Output: pipe: not an int!
 }
 
 func TestCheckErrorf(t *testing.T) {
@@ -42,5 +45,50 @@ func TestCheckErrorf(t *testing.T) {
 
 	if CheckErrorf(false, "some error %d", 1) != nil {
 		t.Fatal("Expected no error when cond is false")
+	}
+}
+
+func TestError(t *testing.T) {
+	e := Error{errs: []error{
+		os.ErrClosed,
+	}}
+
+	if e.Error() != "pipe: file already closed" {
+		t.Error("Unexpected single error message:", e)
+	}
+}
+
+func TestErrorMulti(t *testing.T) {
+	e := Error{errs: []error{
+		fmt.Errorf("error 1"),
+		fmt.Errorf("error 2"),
+		&os.PathError{Op: "create", Path: "foo", Err: os.ErrExist},
+	}}
+
+	if expect := "pipe: multiple errors: error 1; error 2; create foo: file already exists"; e.Error() != expect {
+		t.Errorf("Error() must equal %q, but found: %q", expect, e.Error())
+	}
+
+	if errors.Unwrap(e) != e.errs[0] {
+		t.Error("errors.Unwrap() must return the first error")
+	}
+
+	if !errors.Is(e, os.ErrExist) {
+		t.Error("errors.Is(e, target) must be true when matching child error")
+	}
+	if errors.Is(e, os.ErrClosed) {
+		t.Error("errors.Is(e, target) must be false when no matching child error")
+	}
+
+	var linkErr *os.LinkError
+	if errors.As(e, &linkErr) {
+		t.Error("errors.As(e, target) must be false when no matching child error")
+	}
+	var pathErr *os.PathError
+	if !errors.As(e, &pathErr) {
+		t.Error("errors.As(e, target) must be true when matching child error")
+	}
+	if !reflect.DeepEqual(pathErr, e.errs[2]) {
+		t.Error("Path error from errors.As() should be set")
 	}
 }

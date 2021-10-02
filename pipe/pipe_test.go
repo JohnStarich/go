@@ -8,7 +8,7 @@ import (
 )
 
 func TestPipeData(t *testing.T) {
-	p := New().
+	p := New(Options{}).
 		Append(func([]interface{}) []int {
 			return []int{1, 2, 3}
 		}).
@@ -34,7 +34,7 @@ func TestPipeData(t *testing.T) {
 
 func TestPipeErr(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
-		p := New().
+		p := New(Options{}).
 			Append(func([]interface{}) ([]int, error) {
 				return nil, fmt.Errorf("failed")
 			}).
@@ -50,13 +50,13 @@ func TestPipeErr(t *testing.T) {
 		if out != nil {
 			t.Error("Out must be unset")
 		}
-		if err.Error() != "failed" {
+		if err.Error() != "pipe: failed" {
 			t.Error("Unexpected error message:", err.Error())
 		}
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		p := New().
+		p := New(Options{}).
 			Append(func([]interface{}) []int {
 				return []int{1, 2, 3}
 			}).
@@ -89,7 +89,7 @@ func TestPipeInvalid(t *testing.T) {
 		assertPanics(t,
 			fmt.Errorf("new function's parameter type bool does not match the expected return type []int"),
 			func() {
-				New().
+				New(Options{}).
 					Append(func([]interface{}) []int {
 						return nil
 					}).
@@ -103,7 +103,7 @@ func TestPipeInvalid(t *testing.T) {
 		assertPanics(t,
 			fmt.Errorf("new function's parameter types do not match output function's return types: [[]int] != []"),
 			func() {
-				New().
+				New(Options{}).
 					Append(func([]interface{}) []int {
 						return nil
 					}).
@@ -114,7 +114,7 @@ func TestPipeInvalid(t *testing.T) {
 	})
 
 	t.Run("zero return values and zero params", func(t *testing.T) {
-		p := New().
+		p := New(Options{}).
 			Append(func([]interface{}) {}).
 			Append(func() bool {
 				return false
@@ -132,7 +132,7 @@ func TestPipeInvalid(t *testing.T) {
 		assertPanics(t,
 			fmt.Errorf("pipe value must a function, got: string"),
 			func() {
-				New().
+				New(Options{}).
 					Append("not a func")
 			})
 	})
@@ -141,7 +141,7 @@ func TestPipeInvalid(t *testing.T) {
 		assertPanics(t,
 			fmt.Errorf("first pipe must accept 1 parameter of type []interface{}"),
 			func() {
-				New().
+				New(Options{}).
 					Append(func() {})
 			})
 	})
@@ -167,7 +167,7 @@ func assertPanics(t *testing.T, value interface{}, fn func()) {
 }
 
 func TestPipeReuse(t *testing.T) {
-	p := New().
+	p := New(Options{}).
 		Append(func([]interface{}) string {
 			return "hello"
 		})
@@ -199,19 +199,19 @@ func TestPipeReuse(t *testing.T) {
 
 func TestPipeConcat(t *testing.T) {
 	t.Run("empty pipes", func(t *testing.T) {
-		empty := New().Concat(New())
-		if !reflect.DeepEqual(New(), empty) {
+		empty := New(Options{}).Concat(New(Options{}))
+		if !reflect.DeepEqual(New(Options{}), empty) {
 			t.Error("Empty pipe concat with empty pipe should be equivalent")
 		}
 	})
 
 	t.Run("data flows", func(t *testing.T) {
-		p1 := New().
+		p1 := New(Options{}).
 			Append(func(args []interface{}) int {
 				arg0 := args[0].(int)
 				return arg0 + 1
 			})
-		p2 := New().
+		p2 := New(Options{}).
 			Append(func(args []interface{}) int {
 				arg0 := args[0].(int)
 				return arg0 + 1
@@ -227,11 +227,11 @@ func TestPipeConcat(t *testing.T) {
 	})
 
 	t.Run("stops on first pipe err", func(t *testing.T) {
-		p1 := New().
+		p1 := New(Options{}).
 			Append(func(args []interface{}) (int, error) {
 				return 0, fmt.Errorf("failed")
 			})
-		p2 := New().
+		p2 := New(Options{}).
 			Append(func(args []interface{}) int {
 				return 0
 			})
@@ -240,11 +240,34 @@ func TestPipeConcat(t *testing.T) {
 		if err == nil {
 			t.Fatal("Expected error")
 		}
-		if err.Error() != "failed" {
+		if err.Error() != "pipe: failed" {
 			t.Error("Unexpected error:", err)
 		}
 		if out != nil {
 			t.Error("Out must be nil")
 		}
 	})
+}
+
+func ExamplePipe() {
+	isPositive := New(Options{}).
+		Append(func(args []interface{}) (int, error) {
+			i, ok := args[0].(int)
+			return i, CheckErrorf(!ok, "invalid int: %v", args[0])
+		}).
+		Append(func(i int) bool {
+			return i > 0
+		})
+
+	_, err := isPositive.Do("string")
+	fmt.Println(err)
+
+	out, err := isPositive.Do(1)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(out[0])
+	// Output:
+	// pipe: invalid int: string
+	// true
 }

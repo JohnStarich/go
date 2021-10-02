@@ -11,21 +11,37 @@ var (
 )
 
 type Pipe struct {
-	ops []reflect.Value
+	options Options
+	ops     []reflect.Value
 }
 
-func New() Pipe {
-	return Pipe{}
+type Options struct {
+	// KeepGoing continues running later stages in a Pipe after an error is encountered.
+	// The errors are collected into an Error and returned at the end.
+	KeepGoing bool
+}
+
+func New(options Options) Pipe {
+	return Pipe{
+		options: options,
+	}
 }
 
 func (p Pipe) Do(args ...interface{}) ([]interface{}, error) {
 	argVals := []reflect.Value{reflect.ValueOf(args)}
+	var errs []error
 	for _, op := range p.ops {
 		var err error
 		argVals, err = splitErrValue(op.Call(argVals))
 		if err != nil {
-			return nil, err
+			errs = append(errs, err)
+			if !p.options.KeepGoing {
+				break
+			}
 		}
+	}
+	if len(errs) > 0 {
+		return nil, Error{errs: errs}
 	}
 
 	resultVals := argVals
