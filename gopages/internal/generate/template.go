@@ -8,10 +8,32 @@ import (
 	"time"
 
 	"github.com/johnstarich/go/gopages/internal/flags"
-	"github.com/johnstarich/go/gopages/internal/pipe"
+	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/godoc"
 	"golang.org/x/tools/godoc/vfs"
+)
+
+var (
+	errTemplateValueEmpty  = fmt.Errorf("empty template value")
+	goPagesTemplateVarPipe = pipe.New(pipe.Options{}).
+				Append(func(args []interface{}) (string, interface{}, bool) {
+			templateKey := args[0].(string)
+			templateValue := args[1]
+			templateValueExists := args[2].(bool)
+			return templateKey, templateValue, templateValueExists
+		}).
+		Append(func(key string, value interface{}, exists bool) (string, interface{}, error) {
+			return key, value, pipe.CheckErrorf(!exists, "Unknown gopages key: %q", key)
+		}).
+		Append(func(key string, value interface{}) (string, error) {
+			valueStr, isString := value.(string)
+			return valueStr, pipe.CheckErrorf(!isString, "gopages key %q is not a string", key)
+		}).
+		Append(func(value string) (string, error) {
+			return value, pipe.CheckError(value == "", errTemplateValueEmpty)
+		}).
+		Append(template.HTMLEscapeString)
 )
 
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
@@ -29,24 +51,20 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 	}
 	funcs["gopages"] = func(defaultValue, firstKey string, keys ...string) (string, error) {
 		keys = append([]string{firstKey}, keys...) // require at least one key
-		for _, key := range keys {
+		multiArgs := make([][]interface{}, len(keys))
+		for i, key := range keys {
 			value, ok := values[key]
-			var valueStr string
-			err := pipe.ChainFuncs(
-				func() error {
-					return pipe.ErrIf(!ok, errors.Errorf("Unknown gopages key: %q", key))
-				},
-				func() error {
-					var isString bool
-					valueStr, isString = value.(string)
-					return pipe.ErrIf(!isString, errors.Errorf("gopages key %q is not a string", key))
-				},
-			).Do()
-			if err != nil || valueStr != "" {
-				return template.HTMLEscapeString(valueStr), err
-			}
+			multiArgs[i] = []interface{}{key, value, ok, defaultValue}
 		}
-		return defaultValue, nil
+		out, err := pipe.Filter(goPagesTemplateVarPipe, multiArgs)
+		result := defaultValue
+		if err == nil {
+			result = out[0][0].(string)
+		}
+		if errors.Is(err, errTemplateValueEmpty) {
+			err = nil
+		}
+		return result, err
 	}
 	funcs["gopagesWatchScript"] = func() string {
 		script := fmt.Sprintf(`

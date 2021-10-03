@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
@@ -23,7 +24,7 @@ import (
 	"github.com/johnstarich/go/gopages/internal/generate"
 	"github.com/johnstarich/go/gopages/internal/generate/source"
 	"github.com/johnstarich/go/gopages/internal/module"
-	"github.com/johnstarich/go/gopages/internal/pipe"
+	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
 )
 
@@ -64,24 +65,102 @@ func mainArgs(
 	}
 }
 
+var makeLinkerPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) (flags.Args, string) {
+		flagArgs := args[0].(flags.Args)
+		modulePath := args[1].(string)
+		return flagArgs, modulePath
+	}).
+	Append(func(args flags.Args, modulePath string) (flags.Args, string, error) {
+		modulePackage, err := module.Package(modulePath)
+		return args, modulePackage, err
+	}).
+	Append(func(args flags.Args, modulePackage string) (string, source.Linker, error) {
+		linker, err := args.Linker(modulePackage)
+		return modulePackage, linker, err
+	})
+
+var findOutputPathPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) (flags.Args, string) {
+		flagArgs := args[0].(flags.Args)
+		modulePath := args[1].(string)
+		return flagArgs, modulePath
+	}).
+	Append(func(args flags.Args, modulePath string) (flags.Args, string, string, error) {
+		repoRoot, remote, err := getCurrentPathAndRemote(modulePath)
+		return args, repoRoot, remote, err
+	}).
+	Append(func(args flags.Args, repoRoot, remote string) (flags.Args, string, string, string, error) {
+		absOutputPath, err := filepath.Abs(args.OutputPath)
+		return args, repoRoot, absOutputPath, remote, errors.Wrap(err, "Failed to get absolute path of output directory")
+	}).
+	Append(func(args flags.Args, repoRoot, absOutputPath, remote string) (flags.Args, string, error) {
+		var err error
+		args.OutputPath, err = filepath.Rel(repoRoot, absOutputPath)
+		return args, remote, errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
+	})
+
+type memfsDocsArgs struct {
+	Flags         flags.Args
+	Linker        source.Linker
+	ModulePackage string
+	ModulePath    string
+	Remote        string
+	SrcFS, FS     billy.Filesystem
+}
+
+var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) memfsDocsArgs {
+		return args[0].(memfsDocsArgs)
+	}).
+	Append(func(args memfsDocsArgs) (memfsDocsArgs, *git.Repository, error) {
+		repo, err := git.Clone(memory.NewStorage(), args.FS, &git.CloneOptions{
+			URL:           args.Remote,
+			ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
+			SingleBranch:  true,
+		})
+		return args, repo, errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+		workTree, err := repo.Worktree()
+		return args, repo, workTree, err
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+		_, _ = workTree.Remove(args.Flags.OutputPath) // remove old files on a best-effort basis. if the path doesn't exist, it could error
+		err := generate.Docs(args.ModulePath, args.ModulePackage, args.SrcFS, args.FS, args.Flags, args.Linker)
+		return args, repo, workTree, err
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+		fmt.Println("Committing and pushing changes to gh-pages branch...")
+		_, err := workTree.Add(args.Flags.OutputPath)
+		return args, repo, workTree, errors.Wrap(err, "Failed to add output dir to git")
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, error) {
+		commitMessage := "Update GoPages"
+		if args.Flags.SiteTitle != "" {
+			commitMessage += ": " + args.Flags.SiteTitle
+		}
+		_, err := workTree.Commit(commitMessage, &git.CommitOptions{
+			Author: commitAuthor(),
+		})
+		return args, repo, errors.Wrap(err, "Failed to commit gopages files")
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository) error {
+		pushOpts := &git.PushOptions{}
+		if args.Flags.GitHubPagesUser != "" || args.Flags.GitHubPagesToken != "" {
+			pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.Flags.GitHubPagesUser, Password: args.Flags.GitHubPagesToken}
+		}
+		err := repo.Push(pushOpts)
+		return errors.Wrap(err, "Failed to push gopages commit")
+	})
+
 func run(modulePath string, args flags.Args) error {
-	var modulePackage string
-	var linker source.Linker
-	err := pipe.ChainFuncs(
-		func() error {
-			var err error
-			modulePackage, err = module.Package(modulePath)
-			return err
-		},
-		func() error {
-			var err error
-			linker, err = args.Linker(modulePackage)
-			return err
-		},
-	).Do()
+	out, err := makeLinkerPipe.Do(args, modulePath)
 	if err != nil {
 		return err
 	}
+	modulePackage := out[0].(string)
+	linker := out[1].(source.Linker)
 
 	fmt.Println("Generating godoc static pages for module...", modulePackage)
 	if !args.GitHubPages {
@@ -89,118 +168,56 @@ func run(modulePath string, args flags.Args) error {
 		return generate.Docs(modulePath, modulePackage, fs, fs, args, linker)
 	}
 
-	var repoRoot, remote string
-	var absOutputPath string
-	err = pipe.ChainFuncs(
-		func() error {
-			var err error
-			repoRoot, remote, err = getCurrentPathAndRemote(modulePath)
-			return err
-		},
-		func() error {
-			var err error
-			absOutputPath, err = filepath.Abs(args.OutputPath)
-			return errors.Wrap(err, "Failed to get absolute path of output directory")
-		},
-		func() error {
-			var err error
-			args.OutputPath, err = filepath.Rel(repoRoot, absOutputPath)
-			return errors.Wrap(err, "Output path must be inside repository for gh-pages integration")
-		},
-	).Do()
+	out, err = findOutputPathPipe.Do(args, modulePath)
 	if err != nil {
 		return err
 	}
+	args = out[0].(flags.Args)
+	remote := out[1].(string)
 
-	src := osfs.New("")
-	fs := memfs.New()
-
-	var repo *git.Repository
-	var workTree *git.Worktree
-	err = pipe.ChainFuncs(
-		func() error {
-			var err error
-			repo, err = git.Clone(memory.NewStorage(), fs, &git.CloneOptions{
-				URL:           remote,
-				ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
-				SingleBranch:  true,
-			})
-			return errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
-		},
-		func() error {
-			var err error
-			workTree, err = repo.Worktree()
-			return err
-		},
-		func() error {
-			_, _ = workTree.Remove(args.OutputPath) // remove old files on a best-effort basis. if the path doesn't exist, it could error
-			return nil
-		},
-		func() error {
-			return generate.Docs(modulePath, modulePackage, src, fs, args, linker)
-		},
-	).Do()
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Committing and pushing changes to gh-pages branch...")
-
-	return pipe.ChainFuncs(
-		func() error {
-			_, err := workTree.Add(args.OutputPath)
-			return errors.Wrap(err, "Failed to add output dir to git")
-		},
-		func() error {
-			commitMessage := "Update GoPages"
-			if args.SiteTitle != "" {
-				commitMessage += ": " + args.SiteTitle
-			}
-			_, err := workTree.Commit(commitMessage, &git.CommitOptions{
-				Author: commitAuthor(),
-			})
-			return errors.Wrap(err, "Failed to commit gopages files")
-		},
-		func() error {
-			pushOpts := &git.PushOptions{}
-			if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
-				pushOpts.Auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
-			}
-			err = repo.Push(pushOpts)
-			return errors.Wrap(err, "Failed to push gopages commit")
-		},
-	).Do()
+	_, err = generateMemfsDocsPipe.Do(memfsDocsArgs{
+		Flags:         args,
+		Linker:        linker,
+		ModulePackage: modulePackage,
+		ModulePath:    modulePath,
+		Remote:        remote,
+		SrcFS:         osfs.New(""),
+		FS:            memfs.New(),
+	})
+	return err
 }
 
+var currentPathAndRemotePipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) string {
+		return args[0].(string)
+	}).
+	Append(func(repoPath string) (*git.Repository, error) {
+		repo, err := git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{
+			DetectDotGit: true,
+		})
+		return repo, errors.Wrapf(err, "Failed to open repo at %q", repoPath)
+	}).
+	Append(func(repo *git.Repository) (*git.Repository, *git.Worktree, error) {
+		workTree, err := repo.Worktree()
+		return repo, workTree, errors.Wrap(err, "Failed to set up work tree for repo")
+	}).
+	Append(func(repo *git.Repository, workTree *git.Worktree) (*git.Repository, string, error) {
+		repoRoot, err := filepath.EvalSymlinks(workTree.Filesystem.Root())
+		return repo, repoRoot, err
+	}).
+	Append(func(repo *git.Repository, repoRoot string) (string, string, error) {
+		remote, err := repo.Remote(git.DefaultRemoteName)
+		remoteURL := remote.Config().URLs[0]
+		return repoRoot, remoteURL, errors.Wrap(err, "Failed to get repo remote")
+	})
+
 func getCurrentPathAndRemote(repoPath string) (string, string, error) {
-	var repo *git.Repository
-	var fs *git.Worktree
-	var repoRoot string
-	var remoteURL string
-	err := pipe.ChainFuncs(
-		func() error {
-			var err error
-			repo, err = git.PlainOpenWithOptions(repoPath, &git.PlainOpenOptions{
-				DetectDotGit: true,
-			})
-			return errors.Wrapf(err, "Failed to open repo at %q", repoPath)
-		},
-		func() error {
-			var err error
-			fs, err = repo.Worktree()
-			return errors.Wrap(err, "Failed to set up work tree for repo")
-		},
-		func() error {
-			var err error
-			repoRoot, err = filepath.EvalSymlinks(fs.Filesystem.Root())
-			return err
-		},
-		func() error {
-			remote, err := repo.Remote(git.DefaultRemoteName)
-			remoteURL = remote.Config().URLs[0]
-			return errors.Wrap(err, "Failed to get repo remote")
-		},
-	).Do()
+	out, err := currentPathAndRemotePipe.Do(repoPath)
+	var repoRoot, remoteURL string
+	if err == nil {
+		repoRoot = out[0].(string)
+		remoteURL = out[1].(string)
+	}
 	return repoRoot, remoteURL, err
 }
 

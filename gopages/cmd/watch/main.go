@@ -8,7 +8,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,9 +22,7 @@ import (
 	"github.com/johnstarich/go/gopages/internal/generate"
 	"github.com/johnstarich/go/gopages/internal/generate/source"
 	"github.com/johnstarich/go/gopages/internal/module"
-	"github.com/johnstarich/go/gopages/internal/pipe"
-	"github.com/pkg/errors"
-	"golang.org/x/mod/modfile"
+	"github.com/johnstarich/go/pipe"
 )
 
 const (
@@ -98,41 +95,50 @@ func main() {
 	_ = server.ListenAndServe()
 }
 
+type pagesFSArgs struct {
+	flags.Args
+	Ctx        context.Context
+	ModulePath string
+	UpdateTime *string
+	Linker     source.Linker
+}
+
+var pagesFSPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) pagesFSArgs {
+		return args[0].(pagesFSArgs)
+	}).
+	Append(func(args pagesFSArgs) (pagesFSArgs, string, error) {
+		modulePackage, err := module.Package(args.ModulePath)
+		return args, modulePackage, err
+	}).
+	Append(func(args pagesFSArgs, modulePackage string) (pagesFSArgs, billy.Filesystem, error) {
+		src := osfs.New("")
+		fs := memfs.New()
+		err := watch(args.Ctx, args.ModulePath, func() error {
+			err := generate.Docs(args.ModulePath, modulePackage, src, fs, args.Args, args.Linker)
+			*args.UpdateTime = time.Now().Format(time.RFC3339)
+			return err
+		})
+		return args, fs, err
+	}).
+	Append(func(args pagesFSArgs, fs billy.Filesystem) (http.FileSystem, error) {
+		rootedFS, err := fs.Chroot(args.OutputPath)
+		return &httpFSWrapper{base: args.BaseURL, Filesystem: rootedFS}, err
+	})
+
 func pagesFileSystem(ctx context.Context, modulePath string, updateTime *string, args flags.Args, linker source.Linker) (http.FileSystem, error) {
-	src := osfs.New("")
-	fs := memfs.New()
-
-	goMod := filepath.Join(modulePath, "go.mod")
-	var modulePackage string
-	var rootedFS billy.Filesystem
-	err := pipe.ChainFuncs(
-		func() error {
-			_, err := os.Stat(goMod)
-			return pipe.ErrIf(os.IsNotExist(err), errors.New("go.mod not found in the current directory"))
-		},
-		func() error {
-			buf, err := ioutil.ReadFile(goMod)
-			modulePackage = modfile.ModulePath(buf)
-			return err
-		},
-		func() error {
-			return pipe.ErrIf(modulePackage == "", errors.Errorf("Unable to find module package name in go.mod file: %s", goMod))
-		},
-		func() error {
-			return watch(ctx, modulePath, func() error {
-				err := generate.Docs(modulePath, modulePackage, src, fs, args, linker)
-				*updateTime = time.Now().Format(time.RFC3339)
-				return err
-			})
-		},
-		func() error {
-			var err error
-			rootedFS, err = fs.Chroot(args.OutputPath)
-			return err
-		},
-	).Do()
-
-	return &httpFSWrapper{base: args.BaseURL, Filesystem: rootedFS}, err
+	out, err := pagesFSPipe.Do(pagesFSArgs{
+		Args:       args,
+		Ctx:        ctx,
+		ModulePath: modulePath,
+		UpdateTime: updateTime,
+		Linker:     linker,
+	})
+	var fs http.FileSystem
+	if err == nil {
+		fs = out[0].(http.FileSystem)
+	}
+	return fs, err
 }
 
 type httpFSWrapper struct {

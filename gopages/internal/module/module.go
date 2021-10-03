@@ -5,27 +5,34 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/johnstarich/go/gopages/internal/pipe"
-	"github.com/pkg/errors"
+	"github.com/johnstarich/go/pipe"
 	"golang.org/x/mod/modfile"
 )
 
+var packagePipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) string {
+		modulePath := args[0].(string)
+		return modulePath
+	}).
+	Append(func(modulePath string) (string, error) {
+		goMod := filepath.Join(modulePath, "go.mod")
+		_, err := os.Stat(goMod)
+		return goMod, pipe.CheckErrorf(os.IsNotExist(err), "go.mod not found in the current directory")
+	}).
+	Append(func(goMod string) (string, string, error) {
+		buf, err := ioutil.ReadFile(goMod)
+		modulePackage := modfile.ModulePath(buf)
+		return goMod, modulePackage, err
+	}).
+	Append(func(goMod, modulePackage string) (string, error) {
+		return modulePackage, pipe.CheckErrorf(modulePackage == "", "Unable to find module package name in go.mod file: %s", goMod)
+	})
+
 func Package(modulePath string) (string, error) {
-	goMod := filepath.Join(modulePath, "go.mod")
+	out, err := packagePipe.Do(modulePath)
 	var modulePackage string
-	err := pipe.ChainFuncs(
-		func() error {
-			_, err := os.Stat(goMod)
-			return pipe.ErrIf(os.IsNotExist(err), errors.New("go.mod not found in the current directory"))
-		},
-		func() error {
-			buf, err := ioutil.ReadFile(goMod)
-			modulePackage = modfile.ModulePath(buf)
-			return err
-		},
-		func() error {
-			return pipe.ErrIf(modulePackage == "", errors.Errorf("Unable to find module package name in go.mod file: %s", goMod))
-		},
-	).Do()
+	if err == nil {
+		modulePackage = out[0].(string)
+	}
 	return modulePackage, err
 }
