@@ -1,0 +1,83 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/pipe/funnel.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/pipe/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/pipe/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.15.15";</script>
+<script src="/go/pipe/lib/godoc/godocs.js" defer=""></script>
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/pipe/pkg/github.com/johnstarich/go/pipe/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/pipe/pkg/github.com/johnstarich/go/pipe/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/pipe/src">src</a>/<a href="/go/pipe/src/github.com">github.com</a>/<a href="/go/pipe/src/github.com/johnstarich">johnstarich</a>/<a href="/go/pipe/src/github.com/johnstarich/go">go</a>/<a href="/go/pipe/src/github.com/johnstarich/go/pipe">pipe</a>/<span class="text-muted">funnel.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/pipe/pkg/github.com/johnstarich/go/pipe">github.com/johnstarich/go/pipe</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package pipe
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span><span class="comment">// DoFunnel runs Do() for each provided slice of args.</span>
+<span id="L4" class="ln">     4  </span><span class="comment">// Returns a slice of all output slices, or the first error encountered.</span>
+<span id="L5" class="ln">     5  </span>func (p Pipe) DoFunnel(multiArgs [][]interface{}) ([][]interface{}, error) {
+<span id="L6" class="ln">     6  </span>	results := make([][]interface{}, len(multiArgs))
+<span id="L7" class="ln">     7  </span>	for i, args := range multiArgs {
+<span id="L8" class="ln">     8  </span>		out, err := p.Do(args...)
+<span id="L9" class="ln">     9  </span>		if err != nil {
+<span id="L10" class="ln">    10  </span>			return nil, err
+<span id="L11" class="ln">    11  </span>		}
+<span id="L12" class="ln">    12  </span>		results[i] = out
+<span id="L13" class="ln">    13  </span>	}
+<span id="L14" class="ln">    14  </span>	return results, nil
+<span id="L15" class="ln">    15  </span>}
+<span id="L16" class="ln">    16  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.15.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>
