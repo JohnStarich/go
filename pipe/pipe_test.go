@@ -226,6 +226,29 @@ func TestPipeConcat(t *testing.T) {
 		}
 	})
 
+	t.Run("previous error type dropped from bridge func", func(t *testing.T) {
+		p1 := New(Options{}).
+			Append(func(args []interface{}) (int, error) {
+				return 1, nil
+			})
+		p2 := New(Options{}).
+			Append(func(args []interface{}) int {
+				input := args[0].(int)
+				return input
+			}).
+			Append(func(i int) int {
+				return i + 1
+			})
+		p := p1.Concat(p2)
+		out, err := p.Do()
+		if err != nil {
+			t.Fatal("Unexpected error:", err)
+		}
+		if !reflect.DeepEqual([]interface{}{2}, out) {
+			t.Error("Unexpected result:", out)
+		}
+	})
+
 	t.Run("stops on first pipe err", func(t *testing.T) {
 		p1 := New(Options{}).
 			Append(func(args []interface{}) (int, error) {

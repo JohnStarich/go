@@ -83,6 +83,10 @@ func (p Pipe) Concat(other Pipe) Pipe {
 	for i := range out {
 		out[i] = lastOp.Out(i)
 	}
+	if len(out) > 0 && isErr(out[len(out)-1]) {
+		// trim off last error return type, if present
+		out = out[:len(out)-1]
+	}
 	bridgeType := reflect.FuncOf(out, []reflect.Type{interfaceSliceType}, false)
 	bridgeFn := func(argVals []reflect.Value) (results []reflect.Value) {
 		args := make([]interface{}, len(argVals))
