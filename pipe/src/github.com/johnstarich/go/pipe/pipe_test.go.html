@@ -282,52 +282,75 @@
 <span id="L226" class="ln">   226  </span>		}
 <span id="L227" class="ln">   227  </span>	})
 <span id="L228" class="ln">   228  </span>
-<span id="L229" class="ln">   229  </span>	t.Run(&#34;stops on first pipe err&#34;, func(t *testing.T) {
+<span id="L229" class="ln">   229  </span>	t.Run(&#34;previous error type dropped from bridge func&#34;, func(t *testing.T) {
 <span id="L230" class="ln">   230  </span>		p1 := New(Options{}).
 <span id="L231" class="ln">   231  </span>			Append(func(args []interface{}) (int, error) {
-<span id="L232" class="ln">   232  </span>				return 0, fmt.Errorf(&#34;failed&#34;)
+<span id="L232" class="ln">   232  </span>				return 1, nil
 <span id="L233" class="ln">   233  </span>			})
 <span id="L234" class="ln">   234  </span>		p2 := New(Options{}).
 <span id="L235" class="ln">   235  </span>			Append(func(args []interface{}) int {
-<span id="L236" class="ln">   236  </span>				return 0
-<span id="L237" class="ln">   237  </span>			})
-<span id="L238" class="ln">   238  </span>		p := p1.Concat(p2)
-<span id="L239" class="ln">   239  </span>		out, err := p.Do(0)
-<span id="L240" class="ln">   240  </span>		if err == nil {
-<span id="L241" class="ln">   241  </span>			t.Fatal(&#34;Expected error&#34;)
-<span id="L242" class="ln">   242  </span>		}
-<span id="L243" class="ln">   243  </span>		if err.Error() != &#34;pipe: failed&#34; {
-<span id="L244" class="ln">   244  </span>			t.Error(&#34;Unexpected error:&#34;, err)
-<span id="L245" class="ln">   245  </span>		}
-<span id="L246" class="ln">   246  </span>		if out != nil {
-<span id="L247" class="ln">   247  </span>			t.Error(&#34;Out must be nil&#34;)
-<span id="L248" class="ln">   248  </span>		}
-<span id="L249" class="ln">   249  </span>	})
-<span id="L250" class="ln">   250  </span>}
+<span id="L236" class="ln">   236  </span>				input := args[0].(int)
+<span id="L237" class="ln">   237  </span>				return input
+<span id="L238" class="ln">   238  </span>			}).
+<span id="L239" class="ln">   239  </span>			Append(func(i int) int {
+<span id="L240" class="ln">   240  </span>				return i + 1
+<span id="L241" class="ln">   241  </span>			})
+<span id="L242" class="ln">   242  </span>		p := p1.Concat(p2)
+<span id="L243" class="ln">   243  </span>		out, err := p.Do()
+<span id="L244" class="ln">   244  </span>		if err != nil {
+<span id="L245" class="ln">   245  </span>			t.Fatal(&#34;Unexpected error:&#34;, err)
+<span id="L246" class="ln">   246  </span>		}
+<span id="L247" class="ln">   247  </span>		if !reflect.DeepEqual([]interface{}{2}, out) {
+<span id="L248" class="ln">   248  </span>			t.Error(&#34;Unexpected result:&#34;, out)
+<span id="L249" class="ln">   249  </span>		}
+<span id="L250" class="ln">   250  </span>	})
 <span id="L251" class="ln">   251  </span>
-<span id="L252" class="ln">   252  </span>func ExamplePipe() {
-<span id="L253" class="ln">   253  </span>	isPositive := New(Options{}).
-<span id="L254" class="ln">   254  </span>		Append(func(args []interface{}) (int, error) {
-<span id="L255" class="ln">   255  </span>			i, ok := args[0].(int)
-<span id="L256" class="ln">   256  </span>			return i, CheckErrorf(!ok, &#34;invalid int: %v&#34;, args[0])
-<span id="L257" class="ln">   257  </span>		}).
-<span id="L258" class="ln">   258  </span>		Append(func(i int) bool {
-<span id="L259" class="ln">   259  </span>			return i &gt; 0
-<span id="L260" class="ln">   260  </span>		})
-<span id="L261" class="ln">   261  </span>
-<span id="L262" class="ln">   262  </span>	_, err := isPositive.Do(&#34;string&#34;)
-<span id="L263" class="ln">   263  </span>	fmt.Println(err)
-<span id="L264" class="ln">   264  </span>
-<span id="L265" class="ln">   265  </span>	out, err := isPositive.Do(1)
-<span id="L266" class="ln">   266  </span>	if err != nil {
-<span id="L267" class="ln">   267  </span>		panic(err)
-<span id="L268" class="ln">   268  </span>	}
-<span id="L269" class="ln">   269  </span>	fmt.Println(out[0])
-<span id="L270" class="ln">   270  </span>	<span class="comment">// Output:</span>
-<span id="L271" class="ln">   271  </span>	<span class="comment">// pipe: invalid int: string</span>
-<span id="L272" class="ln">   272  </span>	<span class="comment">// true</span>
+<span id="L252" class="ln">   252  </span>	t.Run(&#34;stops on first pipe err&#34;, func(t *testing.T) {
+<span id="L253" class="ln">   253  </span>		p1 := New(Options{}).
+<span id="L254" class="ln">   254  </span>			Append(func(args []interface{}) (int, error) {
+<span id="L255" class="ln">   255  </span>				return 0, fmt.Errorf(&#34;failed&#34;)
+<span id="L256" class="ln">   256  </span>			})
+<span id="L257" class="ln">   257  </span>		p2 := New(Options{}).
+<span id="L258" class="ln">   258  </span>			Append(func(args []interface{}) int {
+<span id="L259" class="ln">   259  </span>				return 0
+<span id="L260" class="ln">   260  </span>			})
+<span id="L261" class="ln">   261  </span>		p := p1.Concat(p2)
+<span id="L262" class="ln">   262  </span>		out, err := p.Do(0)
+<span id="L263" class="ln">   263  </span>		if err == nil {
+<span id="L264" class="ln">   264  </span>			t.Fatal(&#34;Expected error&#34;)
+<span id="L265" class="ln">   265  </span>		}
+<span id="L266" class="ln">   266  </span>		if err.Error() != &#34;pipe: failed&#34; {
+<span id="L267" class="ln">   267  </span>			t.Error(&#34;Unexpected error:&#34;, err)
+<span id="L268" class="ln">   268  </span>		}
+<span id="L269" class="ln">   269  </span>		if out != nil {
+<span id="L270" class="ln">   270  </span>			t.Error(&#34;Out must be nil&#34;)
+<span id="L271" class="ln">   271  </span>		}
+<span id="L272" class="ln">   272  </span>	})
 <span id="L273" class="ln">   273  </span>}
 <span id="L274" class="ln">   274  </span>
+<span id="L275" class="ln">   275  </span>func ExamplePipe() {
+<span id="L276" class="ln">   276  </span>	isPositive := New(Options{}).
+<span id="L277" class="ln">   277  </span>		Append(func(args []interface{}) (int, error) {
+<span id="L278" class="ln">   278  </span>			i, ok := args[0].(int)
+<span id="L279" class="ln">   279  </span>			return i, CheckErrorf(!ok, &#34;invalid int: %v&#34;, args[0])
+<span id="L280" class="ln">   280  </span>		}).
+<span id="L281" class="ln">   281  </span>		Append(func(i int) bool {
+<span id="L282" class="ln">   282  </span>			return i &gt; 0
+<span id="L283" class="ln">   283  </span>		})
+<span id="L284" class="ln">   284  </span>
+<span id="L285" class="ln">   285  </span>	_, err := isPositive.Do(&#34;string&#34;)
+<span id="L286" class="ln">   286  </span>	fmt.Println(err)
+<span id="L287" class="ln">   287  </span>
+<span id="L288" class="ln">   288  </span>	out, err := isPositive.Do(1)
+<span id="L289" class="ln">   289  </span>	if err != nil {
+<span id="L290" class="ln">   290  </span>		panic(err)
+<span id="L291" class="ln">   291  </span>	}
+<span id="L292" class="ln">   292  </span>	fmt.Println(out[0])
+<span id="L293" class="ln">   293  </span>	<span class="comment">// Output:</span>
+<span id="L294" class="ln">   294  </span>	<span class="comment">// pipe: invalid int: string</span>
+<span id="L295" class="ln">   295  </span>	<span class="comment">// true</span>
+<span id="L296" class="ln">   296  </span>}
+<span id="L297" class="ln">   297  </span>
 </pre><p></p>
 
 <div id="footer">
