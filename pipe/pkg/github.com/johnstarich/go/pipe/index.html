@@ -289,7 +289,7 @@ Can contain 1 or more errors. Conforms to the standard library&#39;s errors pack
 
 			
 				
-				<h3 id="Error.As">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L49">As</a>
+				<h3 id="Error.As">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L54">As</a>
 					<a class="permalink" href="#Error.As">&#xb6;</a>
 					
 					
@@ -319,7 +319,7 @@ Error implements the builtin error interface
 				
 			
 				
-				<h3 id="Error.Is">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L59">Is</a>
+				<h3 id="Error.Is">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L68">Is</a>
 					<a class="permalink" href="#Error.Is">&#xb6;</a>
 					
 					
@@ -334,14 +334,15 @@ Is implements errors.Is() defined interface
 				
 			
 				
-				<h3 id="Error.Unwrap">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L44">Unwrap</a>
+				<h3 id="Error.Unwrap">func (Error) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go#L45">Unwrap</a>
 					<a class="permalink" href="#Error.Unwrap">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (e <a href="#Error">Error</a>) Unwrap() <a href="/go/pipe/pkg/builtin/#error">error</a></pre>
 				<p>
-Unwrap implements errors.Unwrap() defined interface. Returns the first error only.
+Unwrap implements errors.Unwrap() defined interface.
+Returns the first error. If there was not exactly 1 error, returns nil.
 </p>
 
 				

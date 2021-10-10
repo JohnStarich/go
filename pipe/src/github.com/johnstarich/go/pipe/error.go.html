@@ -96,31 +96,44 @@
 <span id="L40" class="ln">    40  </span>	return fmt.Sprintf(&#34;pipe: multiple errors: %s&#34;, strings.Join(errStrs, &#34;; &#34;))
 <span id="L41" class="ln">    41  </span>}
 <span id="L42" class="ln">    42  </span>
-<span id="L43" class="ln">    43  </span><span class="comment">// Unwrap implements errors.Unwrap() defined interface. Returns the first error only.</span>
-<span id="L44" class="ln">    44  </span>func (e Error) Unwrap() error {
-<span id="L45" class="ln">    45  </span>	return e.errs[0]
-<span id="L46" class="ln">    46  </span>}
-<span id="L47" class="ln">    47  </span>
-<span id="L48" class="ln">    48  </span><span class="comment">// As implements errors.As() defined interface</span>
-<span id="L49" class="ln">    49  </span>func (e Error) As(target interface{}) bool {
-<span id="L50" class="ln">    50  </span>	for _, candidate := range e.errs {
-<span id="L51" class="ln">    51  </span>		if errors.As(candidate, target) {
-<span id="L52" class="ln">    52  </span>			return true
-<span id="L53" class="ln">    53  </span>		}
-<span id="L54" class="ln">    54  </span>	}
-<span id="L55" class="ln">    55  </span>	return false
-<span id="L56" class="ln">    56  </span>}
-<span id="L57" class="ln">    57  </span>
-<span id="L58" class="ln">    58  </span><span class="comment">// Is implements errors.Is() defined interface</span>
-<span id="L59" class="ln">    59  </span>func (e Error) Is(target error) bool {
-<span id="L60" class="ln">    60  </span>	for _, candidate := range e.errs {
-<span id="L61" class="ln">    61  </span>		if errors.Is(candidate, target) {
-<span id="L62" class="ln">    62  </span>			return true
-<span id="L63" class="ln">    63  </span>		}
-<span id="L64" class="ln">    64  </span>	}
-<span id="L65" class="ln">    65  </span>	return false
-<span id="L66" class="ln">    66  </span>}
-<span id="L67" class="ln">    67  </span>
+<span id="L43" class="ln">    43  </span><span class="comment">// Unwrap implements errors.Unwrap() defined interface.</span>
+<span id="L44" class="ln">    44  </span><span class="comment">// Returns the first error. If there was not exactly 1 error, returns nil.</span>
+<span id="L45" class="ln">    45  </span>func (e Error) Unwrap() error {
+<span id="L46" class="ln">    46  </span>	if len(e.errs) != 1 {
+<span id="L47" class="ln">    47  </span>		<span class="comment">// if there&#39;s not exactly 1 error, unwrapping no longer makes sense</span>
+<span id="L48" class="ln">    48  </span>		return nil
+<span id="L49" class="ln">    49  </span>	}
+<span id="L50" class="ln">    50  </span>	return e.errs[0]
+<span id="L51" class="ln">    51  </span>}
+<span id="L52" class="ln">    52  </span>
+<span id="L53" class="ln">    53  </span><span class="comment">// As implements errors.As() defined interface</span>
+<span id="L54" class="ln">    54  </span>func (e Error) As(target interface{}) bool {
+<span id="L55" class="ln">    55  </span>	if len(e.errs) != 1 {
+<span id="L56" class="ln">    56  </span>		<span class="comment">// if this error can&#39;t be effectively unwrapped to only 1 error, then fail error equivalence</span>
+<span id="L57" class="ln">    57  </span>		return false
+<span id="L58" class="ln">    58  </span>	}
+<span id="L59" class="ln">    59  </span>	for _, candidate := range e.errs {
+<span id="L60" class="ln">    60  </span>		if errors.As(candidate, target) {
+<span id="L61" class="ln">    61  </span>			return true
+<span id="L62" class="ln">    62  </span>		}
+<span id="L63" class="ln">    63  </span>	}
+<span id="L64" class="ln">    64  </span>	return false
+<span id="L65" class="ln">    65  </span>}
+<span id="L66" class="ln">    66  </span>
+<span id="L67" class="ln">    67  </span><span class="comment">// Is implements errors.Is() defined interface</span>
+<span id="L68" class="ln">    68  </span>func (e Error) Is(target error) bool {
+<span id="L69" class="ln">    69  </span>	if len(e.errs) != 1 {
+<span id="L70" class="ln">    70  </span>		<span class="comment">// if this error can&#39;t be effectively unwrapped to only 1 error, then fail error equivalence</span>
+<span id="L71" class="ln">    71  </span>		return false
+<span id="L72" class="ln">    72  </span>	}
+<span id="L73" class="ln">    73  </span>	for _, candidate := range e.errs {
+<span id="L74" class="ln">    74  </span>		if errors.Is(candidate, target) {
+<span id="L75" class="ln">    75  </span>			return true
+<span id="L76" class="ln">    76  </span>		}
+<span id="L77" class="ln">    77  </span>	}
+<span id="L78" class="ln">    78  </span>	return false
+<span id="L79" class="ln">    79  </span>}
+<span id="L80" class="ln">    80  </span>
 </pre><p></p>
 
 <div id="footer">
