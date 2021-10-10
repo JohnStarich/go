@@ -40,13 +40,22 @@ func (e Error) Error() string {
 	return fmt.Sprintf("pipe: multiple errors: %s", strings.Join(errStrs, "; "))
 }
 
-// Unwrap implements errors.Unwrap() defined interface. Returns the first error only.
+// Unwrap implements errors.Unwrap() defined interface.
+// Returns the first error. If there was not exactly 1 error, returns nil.
 func (e Error) Unwrap() error {
+	if len(e.errs) != 1 {
+		// if there's not exactly 1 error, unwrapping no longer makes sense
+		return nil
+	}
 	return e.errs[0]
 }
 
 // As implements errors.As() defined interface
 func (e Error) As(target interface{}) bool {
+	if len(e.errs) != 1 {
+		// if this error can't be effectively unwrapped to only 1 error, then fail error equivalence
+		return false
+	}
 	for _, candidate := range e.errs {
 		if errors.As(candidate, target) {
 			return true
@@ -57,6 +66,10 @@ func (e Error) As(target interface{}) bool {
 
 // Is implements errors.Is() defined interface
 func (e Error) Is(target error) bool {
+	if len(e.errs) != 1 {
+		// if this error can't be effectively unwrapped to only 1 error, then fail error equivalence
+		return false
+	}
 	for _, candidate := range e.errs {
 		if errors.Is(candidate, target) {
 			return true
