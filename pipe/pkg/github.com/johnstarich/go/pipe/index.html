@@ -114,6 +114,12 @@
 				
 				<dd><a href="#CheckErrorf">func CheckErrorf(cond bool, format string, args ...interface{}) error</a></dd>
 			
+				
+				<dd><a href="#Filter">func Filter(p Pipe, multiArgs [][]interface{}) ([][]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#Map">func Map(p Pipe, multiArgs [][]interface{}) ([][]interface{}, error)</a></dd>
+			
 			
 				
 				<dd><a href="#Error">type Error</a></dd>
@@ -153,9 +159,6 @@
 					
 					<dd>&nbsp; &nbsp; <a href="#Pipe.Do">func (p Pipe) Do(args ...interface{}) ([]interface{}, error)</a></dd>
 				
-					
-					<dd>&nbsp; &nbsp; <a href="#Pipe.DoFunnel">func (p Pipe) DoFunnel(multiArgs [][]interface{}) ([][]interface{}, error)</a></dd>
-				
 			
 			
 			</dl>
@@ -182,7 +185,7 @@
 			
 				<a href="/go/pipe/src/github.com/johnstarich/go/pipe/error.go">error.go</a>
 			
-				<a href="/go/pipe/src/github.com/johnstarich/go/pipe/funnel.go">funnel.go</a>
+				<a href="/go/pipe/src/github.com/johnstarich/go/pipe/monad.go">monad.go</a>
 			
 				<a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go">pipe.go</a>
 			
@@ -253,6 +256,41 @@ fmt.Println(err)
 			<pre>func CheckErrorf(cond <a href="/go/pipe/pkg/builtin/#bool">bool</a>, format <a href="/go/pipe/pkg/builtin/#string">string</a>, args ...interface{}) <a href="/go/pipe/pkg/builtin/#error">error</a></pre>
 			<p>
 CheckErrorf returns a new formatted error if &#39;cond&#39; is true, nil otherwise
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Filter">func <a href="/go/pipe/src/github.com/johnstarich/go/pipe/monad.go#L20">Filter</a>
+				<a class="permalink" href="#Filter">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Filter(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Filter runs p.Do() for each provided slice of args.
+Returns a slice of all successful output results.
+If none are successful, returns the last error.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Map">func <a href="/go/pipe/src/github.com/johnstarich/go/pipe/monad.go#L5">Map</a>
+				<a class="permalink" href="#Map">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Map(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Map runs p.Do() for each provided slice of args.
+Returns a slice of all output slices, or the first error encountered.
 </p>
 
 			
@@ -506,22 +544,6 @@ Concat returns a new Pipe with the functions in &#39;other&#39; appended to its 
 				<pre>func (p <a href="#Pipe">Pipe</a>) Do(args ...interface{}) ([]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
 				<p>
 Do executes this Pipe, running each appended function in-order and handling any errors
-</p>
-
-				
-				
-				
-			
-				
-				<h3 id="Pipe.DoFunnel">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/funnel.go#L5">DoFunnel</a>
-					<a class="permalink" href="#Pipe.DoFunnel">&#xb6;</a>
-					
-					
-				</h3>
-				<pre>func (p <a href="#Pipe">Pipe</a>) DoFunnel(multiArgs [][]interface{}) ([][]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
-				<p>
-DoFunnel runs Do() for each provided slice of args.
-Returns a slice of all output slices, or the first error encountered.
 </p>
 
 				

@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="theme-color" content="#375EAB"/>
 
-  <title>src/github.com/johnstarich/go/pipe/funnel.go - GoPages</title>
+  <title>src/github.com/johnstarich/go/pipe/monad.go - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/pipe/lib/godoc/style.css"/>
 
@@ -37,7 +37,7 @@
 
   <h1>
     Source file
-    <a href="/go/pipe/src">src</a>/<a href="/go/pipe/src/github.com">github.com</a>/<a href="/go/pipe/src/github.com/johnstarich">johnstarich</a>/<a href="/go/pipe/src/github.com/johnstarich/go">go</a>/<a href="/go/pipe/src/github.com/johnstarich/go/pipe">pipe</a>/<span class="text-muted">funnel.go</span>
+    <a href="/go/pipe/src">src</a>/<a href="/go/pipe/src/github.com">github.com</a>/<a href="/go/pipe/src/github.com/johnstarich">johnstarich</a>/<a href="/go/pipe/src/github.com/johnstarich/go">go</a>/<a href="/go/pipe/src/github.com/johnstarich/go/pipe">pipe</a>/<span class="text-muted">monad.go</span>
   </h1>
 
 
@@ -56,9 +56,9 @@
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
 <pre><span id="L1" class="ln">     1  </span>package pipe
 <span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span><span class="comment">// DoFunnel runs Do() for each provided slice of args.</span>
+<span id="L3" class="ln">     3  </span><span class="comment">// Map runs p.Do() for each provided slice of args.</span>
 <span id="L4" class="ln">     4  </span><span class="comment">// Returns a slice of all output slices, or the first error encountered.</span>
-<span id="L5" class="ln">     5  </span>func (p Pipe) DoFunnel(multiArgs [][]interface{}) ([][]interface{}, error) {
+<span id="L5" class="ln">     5  </span>func Map(p Pipe, multiArgs [][]interface{}) ([][]interface{}, error) {
 <span id="L6" class="ln">     6  </span>	results := make([][]interface{}, len(multiArgs))
 <span id="L7" class="ln">     7  </span>	for i, args := range multiArgs {
 <span id="L8" class="ln">     8  </span>		out, err := p.Do(args...)
@@ -70,6 +70,26 @@
 <span id="L14" class="ln">    14  </span>	return results, nil
 <span id="L15" class="ln">    15  </span>}
 <span id="L16" class="ln">    16  </span>
+<span id="L17" class="ln">    17  </span><span class="comment">// Filter runs p.Do() for each provided slice of args.</span>
+<span id="L18" class="ln">    18  </span><span class="comment">// Returns a slice of all successful output results.</span>
+<span id="L19" class="ln">    19  </span><span class="comment">// If none are successful, returns the last error.</span>
+<span id="L20" class="ln">    20  </span>func Filter(p Pipe, multiArgs [][]interface{}) ([][]interface{}, error) {
+<span id="L21" class="ln">    21  </span>	var lastErr error
+<span id="L22" class="ln">    22  </span>	results := make([][]interface{}, 0, len(multiArgs))
+<span id="L23" class="ln">    23  </span>	for _, args := range multiArgs {
+<span id="L24" class="ln">    24  </span>		out, err := p.Do(args...)
+<span id="L25" class="ln">    25  </span>		if err != nil {
+<span id="L26" class="ln">    26  </span>			lastErr = err
+<span id="L27" class="ln">    27  </span>		} else {
+<span id="L28" class="ln">    28  </span>			results = append(results, out)
+<span id="L29" class="ln">    29  </span>		}
+<span id="L30" class="ln">    30  </span>	}
+<span id="L31" class="ln">    31  </span>	if len(results) == 0 {
+<span id="L32" class="ln">    32  </span>		return nil, lastErr
+<span id="L33" class="ln">    33  </span>	}
+<span id="L34" class="ln">    34  </span>	return results, nil
+<span id="L35" class="ln">    35  </span>}
+<span id="L36" class="ln">    36  </span>
 </pre><p></p>
 
 <div id="footer">

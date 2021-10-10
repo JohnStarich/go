@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="theme-color" content="#375EAB"/>
 
-  <title>src/github.com/johnstarich/go/pipe/funnel_test.go - GoPages</title>
+  <title>src/github.com/johnstarich/go/pipe/monad_test.go - GoPages</title>
 
 <link type="text/css" rel="stylesheet" href="/go/pipe/lib/godoc/style.css"/>
 
@@ -37,7 +37,7 @@
 
   <h1>
     Source file
-    <a href="/go/pipe/src">src</a>/<a href="/go/pipe/src/github.com">github.com</a>/<a href="/go/pipe/src/github.com/johnstarich">johnstarich</a>/<a href="/go/pipe/src/github.com/johnstarich/go">go</a>/<a href="/go/pipe/src/github.com/johnstarich/go/pipe">pipe</a>/<span class="text-muted">funnel_test.go</span>
+    <a href="/go/pipe/src">src</a>/<a href="/go/pipe/src/github.com">github.com</a>/<a href="/go/pipe/src/github.com/johnstarich">johnstarich</a>/<a href="/go/pipe/src/github.com/johnstarich/go">go</a>/<a href="/go/pipe/src/github.com/johnstarich/go/pipe">pipe</a>/<span class="text-muted">monad_test.go</span>
   </h1>
 
 
@@ -61,7 +61,7 @@
 <span id="L5" class="ln">     5  </span>	&#34;testing&#34;
 <span id="L6" class="ln">     6  </span>)
 <span id="L7" class="ln">     7  </span>
-<span id="L8" class="ln">     8  </span>func TestFunnel(t *testing.T) {
+<span id="L8" class="ln">     8  </span>func TestMap(t *testing.T) {
 <span id="L9" class="ln">     9  </span>	p := New(Options{}).Append(func(args []interface{}) (int, error) {
 <span id="L10" class="ln">    10  </span>		in := args[0].(int)
 <span id="L11" class="ln">    11  </span>		return in, CheckErrorf(in == 5, &#34;input was 5&#34;)
@@ -75,7 +75,7 @@
 <span id="L19" class="ln">    19  </span>	}
 <span id="L20" class="ln">    20  </span>
 <span id="L21" class="ln">    21  </span>	t.Run(&#34;success&#34;, func(t *testing.T) {
-<span id="L22" class="ln">    22  </span>		results, err := p.DoFunnel(multiArgs[:5])
+<span id="L22" class="ln">    22  </span>		results, err := Map(p, multiArgs[:5])
 <span id="L23" class="ln">    23  </span>		if err != nil {
 <span id="L24" class="ln">    24  </span>			t.Error(&#34;Unexpected error:&#34;, err)
 <span id="L25" class="ln">    25  </span>		}
@@ -92,7 +92,7 @@
 <span id="L36" class="ln">    36  </span>	})
 <span id="L37" class="ln">    37  </span>
 <span id="L38" class="ln">    38  </span>	t.Run(&#34;failed&#34;, func(t *testing.T) {
-<span id="L39" class="ln">    39  </span>		results, err := p.DoFunnel(multiArgs)
+<span id="L39" class="ln">    39  </span>		results, err := Map(p, multiArgs)
 <span id="L40" class="ln">    40  </span>		if err == nil || err.Error() != &#34;pipe: input was 5&#34; {
 <span id="L41" class="ln">    41  </span>			t.Error(&#34;Expected error to be &#39;input was 5&#39;, got:&#34;, err)
 <span id="L42" class="ln">    42  </span>		}
@@ -102,6 +102,43 @@
 <span id="L46" class="ln">    46  </span>	})
 <span id="L47" class="ln">    47  </span>}
 <span id="L48" class="ln">    48  </span>
+<span id="L49" class="ln">    49  </span>func TestFilter(t *testing.T) {
+<span id="L50" class="ln">    50  </span>	p := New(Options{}).Append(func(args []interface{}) (int, error) {
+<span id="L51" class="ln">    51  </span>		in := args[0].(int)
+<span id="L52" class="ln">    52  </span>		return in, CheckErrorf(in != 5, &#34;input was not 5&#34;)
+<span id="L53" class="ln">    53  </span>	})
+<span id="L54" class="ln">    54  </span>
+<span id="L55" class="ln">    55  </span>	var multiArgs [][]interface{}
+<span id="L56" class="ln">    56  </span>	for i := 0; i &lt; 10; i++ {
+<span id="L57" class="ln">    57  </span>		multiArgs = append(multiArgs, []interface{}{
+<span id="L58" class="ln">    58  </span>			i,
+<span id="L59" class="ln">    59  </span>		})
+<span id="L60" class="ln">    60  </span>	}
+<span id="L61" class="ln">    61  </span>
+<span id="L62" class="ln">    62  </span>	t.Run(&#34;success&#34;, func(t *testing.T) {
+<span id="L63" class="ln">    63  </span>		results, err := Filter(p, multiArgs)
+<span id="L64" class="ln">    64  </span>		if err != nil {
+<span id="L65" class="ln">    65  </span>			t.Error(&#34;Unexpected error:&#34;, err)
+<span id="L66" class="ln">    66  </span>		}
+<span id="L67" class="ln">    67  </span>		expect := [][]interface{}{
+<span id="L68" class="ln">    68  </span>			{5},
+<span id="L69" class="ln">    69  </span>		}
+<span id="L70" class="ln">    70  </span>		if !reflect.DeepEqual(expect, results) {
+<span id="L71" class="ln">    71  </span>			t.Errorf(&#34;%v != %v&#34;, expect, results)
+<span id="L72" class="ln">    72  </span>		}
+<span id="L73" class="ln">    73  </span>	})
+<span id="L74" class="ln">    74  </span>
+<span id="L75" class="ln">    75  </span>	t.Run(&#34;failed&#34;, func(t *testing.T) {
+<span id="L76" class="ln">    76  </span>		results, err := Filter(p, multiArgs[:5])
+<span id="L77" class="ln">    77  </span>		if err == nil || err.Error() != &#34;pipe: input was not 5&#34; {
+<span id="L78" class="ln">    78  </span>			t.Error(&#34;Expected error to be &#39;input was 5&#39;, got:&#34;, err)
+<span id="L79" class="ln">    79  </span>		}
+<span id="L80" class="ln">    80  </span>		if results != nil {
+<span id="L81" class="ln">    81  </span>			t.Error(&#34;Expected nil results, got:&#34;, results)
+<span id="L82" class="ln">    82  </span>		}
+<span id="L83" class="ln">    83  </span>	})
+<span id="L84" class="ln">    84  </span>}
+<span id="L85" class="ln">    85  </span>
 </pre><p></p>
 
 <div id="footer">
