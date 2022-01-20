@@ -15,8 +15,9 @@
 
 
 
-<script>var goVersion = "go1.15.15";</script>
+<script>var goVersion = "go1.16.13";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
+
 </head>
 <body>
 
@@ -119,6 +120,20 @@
 				
 			
 				
+				<dd><a href="#FilePathContents">type FilePathContents</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#FilePathContents.Contents">func (f *FilePathContents) Contents() []byte</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#FilePathContents.Set">func (f *FilePathContents) Set(s string) error</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#FilePathContents.String">func (f *FilePathContents) String() string</a></dd>
+				
+			
+				
 				<dd><a href="#GoPagesLinker">type GoPagesLinker</a></dd>
 				
 				
@@ -147,6 +162,8 @@
 			<h3>Package files</h3>
 			<p>
 			<span style="font-size:90%">
+			
+				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go">file.go</a>
 			
 				<a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go">flags.go</a>
 			
@@ -180,6 +197,7 @@ Args contains all command-line options for gopages
 <span id="Args.GitHubPages"></span>    GitHubPages        <a href="/go/gopages/pkg/builtin/#bool">bool</a>
 <span id="Args.GitHubPagesToken"></span>    GitHubPagesToken   <a href="/go/gopages/pkg/builtin/#string">string</a>
 <span id="Args.GitHubPagesUser"></span>    GitHubPagesUser    <a href="/go/gopages/pkg/builtin/#string">string</a>
+<span id="Args.IncludeInHead"></span>    IncludeInHead      <a href="#FilePathContents">FilePathContents</a>
 <span id="Args.SourceLinkTemplate"></span>    SourceLinkTemplate <a href="/go/gopages/pkg/builtin/#string">string</a>
 <span id="Args.OutputPath"></span>    OutputPath         <a href="/go/gopages/pkg/builtin/#string">string</a>
 <span id="Args.SiteDescription"></span>    SiteDescription    <a href="/go/gopages/pkg/builtin/#string">string</a>
@@ -198,7 +216,7 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L23">Parse</a>
+				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L24">Parse</a>
 					<a class="permalink" href="#Parse">&#xb6;</a>
 					
 					
@@ -211,12 +229,73 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L40">Linker</a>
+				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L43">Linker</a>
 					<a class="permalink" href="#Args.Linker">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (a <a href="#Args">Args</a>) Linker(modulePackage <a href="/go/gopages/pkg/builtin/#string">string</a>) (<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#Linker">Linker</a>, <a href="/go/gopages/pkg/builtin/#error">error</a>)</pre>
+				
+				
+				
+				
+			
+		
+			
+			
+			<h2 id="FilePathContents">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L5">FilePathContents</a>
+				<a class="permalink" href="#FilePathContents">&#xb6;</a>
+				
+				
+			</h2>
+			
+			<pre>type FilePathContents struct {
+    <span class="comment">// contains filtered or unexported fields</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="FilePathContents.Contents">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L9">Contents</a>
+					<a class="permalink" href="#FilePathContents.Contents">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Contents() []<a href="/go/gopages/pkg/builtin/#byte">byte</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="FilePathContents.Set">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L20">Set</a>
+					<a class="permalink" href="#FilePathContents.Set">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Set(s <a href="/go/gopages/pkg/builtin/#string">string</a>) <a href="/go/gopages/pkg/builtin/#error">error</a></pre>
+				
+				
+				
+				
+			
+				
+				<h3 id="FilePathContents.String">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L13">String</a>
+					<a class="permalink" href="#FilePathContents.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) String() <a href="/go/gopages/pkg/builtin/#string">string</a></pre>
 				
 				
 				
@@ -320,7 +399,7 @@ Args contains all command-line options for gopages
 
 
 <div id="footer">
-Build version go1.15.15.<br>
+Build version go1.16.13.<br>
 </div>
 
 </div><!-- .container -->

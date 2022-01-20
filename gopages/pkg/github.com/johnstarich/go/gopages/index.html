@@ -15,8 +15,9 @@
 
 
 
-<script>var goVersion = "go1.15.15";</script>
+<script>var goVersion = "go1.16.13";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
+
 </head>
 <body>
 
@@ -103,6 +104,9 @@ Usage of gopages:
   	The Git token to push with. Usually this is an API key.
 -gh-pages-user string
   	The Git username to push with
+-include-head value
+  	Includes the given HTML file&#39;s contents in every page&#39;s &#39;&lt;head&gt;&lt;/head&gt;&#39;. Useful
+  	for including custom analytics scripts. Must be valid HTML.
 -out string
   	Output path for static files (default &#34;dist&#34;)
 -source-link string
@@ -177,7 +181,7 @@ Usage of gopages:
 
 
 <div id="footer">
-Build version go1.15.15.<br>
+Build version go1.16.13.<br>
 </div>
 
 </div><!-- .container -->
