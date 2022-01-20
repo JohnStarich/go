@@ -1,6 +1,8 @@
 package generate
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"path"
 	"strings"
@@ -15,6 +17,11 @@ import (
 )
 
 var (
+	//go:embed godoc.html
+	godocHTML string
+	//go:embed watch-changes.html
+	watchChangesHTML string
+
 	errTemplateValueEmpty  = fmt.Errorf("empty template value")
 	goPagesTemplateVarPipe = pipe.New(pipe.Options{}).
 				Append(func(args []interface{}) (string, interface{}, bool) {
@@ -67,21 +74,11 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 		return result, err
 	}
 	funcs["gopagesWatchScript"] = func() string {
-		script := fmt.Sprintf(`
-<script>
-const startDate = %q
-const timeoutMillis = 2000
-const poll = () => {
-	fetch(window.location).then(resp => {
-		const newDate = resp.headers.get("GoPages-Last-Updated")
-		if (newDate != startDate) {
-			window.location.reload()
-		}
-	})
-}
-window.setInterval(poll, timeoutMillis)
-</script>
-`, time.Now().Format(time.RFC3339))
+		var buf bytes.Buffer
+		_ = template.Must(template.New("").Parse(watchChangesHTML)).Execute(&buf, map[string]interface{}{
+			"StartDate": time.Now().Format(time.RFC3339),
+		})
+		script := buf.String()
 		if !args.Watch {
 			script = ""
 		}

@@ -2,6 +2,7 @@ package generate
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -24,6 +25,13 @@ import (
 	"golang.org/x/tools/godoc/static"
 	"golang.org/x/tools/godoc/vfs"
 	"golang.org/x/tools/godoc/vfs/mapfs"
+)
+
+var (
+	//go:embed redirect.html
+	redirectHTML string
+	//go:embed not-found.html
+	notFoundHTML string
 )
 
 type docsArgs struct {
@@ -126,14 +134,7 @@ var crawlerStaticPipe = pipe.New(pipe.Options{}).
 	}).
 	Append(func(args docsArgs) (docsArgs, []byte, error) {
 		// Generate a custom 404 page as a catch-all
-		custom404, err := genericPage(args.Presentation, "Page not found", `
-<p>
-<span class="alert" style="font-size:120%">
-Oops, this page doesn't exist.
-</span>
-</p>
-<p>If something should be here, <a href="https://github.com/JohnStarich/go/issues/new" target="_blank">open an issue</a>.</p>
-`)
+		custom404, err := genericPage(args.Presentation, "Page not found", notFoundHTML)
 		return args, custom404, err
 	}).
 	Append(func(args docsArgs, custom404 []byte) (docsArgs, error) {
@@ -415,18 +416,7 @@ func getPackagePaths(modulePackage string) ([]string, error) {
 
 func redirect(url string) string {
 	var buf bytes.Buffer
-	err := template.Must(template.New("").Parse(`<!DOCTYPE html>
-<html>
-<head>
-<script>
-window.location = {{.URL}}
-</script>
-</head>
-<body>
-	<a href={{.URL}}>Click here to see this module's documentation.</a>
-</body>
-</html>
-`)).Execute(&buf, map[string]interface{}{
+	err := template.Must(template.New("").Parse(redirectHTML)).Execute(&buf, map[string]interface{}{
 		"URL": fmt.Sprintf("%q", url),
 	})
 	if err != nil {

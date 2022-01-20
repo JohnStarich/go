@@ -1,0 +1,13 @@
+<script>
+const startDate = "{{.StartDate}}"
+const timeoutMillis = 2000
+const poll = () => {
+	fetch(window.location).then(resp => {
+		const newDate = resp.headers.get("GoPages-Last-Updated")
+		if (newDate != startDate) {
+			window.location.reload()
+		}
+	})
+}
+window.setInterval(poll, timeoutMillis)
+</script>
