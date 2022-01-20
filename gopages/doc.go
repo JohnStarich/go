@@ -23,6 +23,9 @@
 //     	The Git token to push with. Usually this is an API key.
 //   -gh-pages-user string
 //     	The Git username to push with
+//   -include-head value
+//     	Includes the given HTML file's contents in every page's '<head></head>'. Useful
+//     	for including custom analytics scripts. Must be valid HTML.
 //   -out string
 //     	Output path for static files (default "dist")
 //   -source-link string

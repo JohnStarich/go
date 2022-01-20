@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	htmltemplate "html/template"
 	"path"
 	"strings"
 	"text/template"
@@ -12,6 +13,7 @@ import (
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
+	"golang.org/x/net/html"
 	"golang.org/x/tools/godoc"
 	"golang.org/x/tools/godoc/vfs"
 )
@@ -40,7 +42,7 @@ var (
 		Append(func(value string) (string, error) {
 			return value, pipe.CheckError(value == "", errTemplateValueEmpty)
 		}).
-		Append(template.HTMLEscapeString)
+		Append(html.EscapeString)
 )
 
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
@@ -55,6 +57,7 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 		"ModuleURL":     path.Join(args.BaseURL, "/pkg", modulePackage) + "/",
 		"SiteTitle":     args.SiteTitle,
 		"SiteTitleLong": longTitle,
+		"IncludeInHead": string(args.IncludeInHead.Contents()),
 	}
 	funcs["gopages"] = func(defaultValue, firstKey string, keys ...string) (string, error) {
 		keys = append([]string{firstKey}, keys...) // require at least one key
@@ -83,6 +86,11 @@ func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Ar
 			script = ""
 		}
 		return script
+	}
+	funcs["gopagesHTML"] = func(s string) (htmltemplate.HTML, error) {
+		s = html.UnescapeString(s)
+		_, err := html.Parse(strings.NewReader(s))
+		return htmltemplate.HTML(s), err
 	}
 }
 

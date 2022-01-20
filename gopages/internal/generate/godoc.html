@@ -26,6 +26,7 @@
 {{end}}
 {{with .Version}}<script>var goVersion = {{printf "%q" .}};</script>{{end}}
 <script src="{{gopages "" "BaseURL"}}/lib/godoc/godocs.js" defer></script>
+{{gopages "" "IncludeInHead" | gopagesHTML}}
 </head>
 <body>
 
