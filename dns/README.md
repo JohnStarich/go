@@ -15,3 +15,10 @@ On non-macOS builds a normal resolver is used, so this is safe to use for multi-
 Thoughts or questions? Please [open an issue](https://github.com/JohnStarich/go/issues/new) to discuss.
 
 [golang-issue]: https://github.com/golang/go/issues/12524
+
+## Debugging
+
+Sometimes correct DNS results depends on nameservers being tried in a very specific order.
+If you see the wrong nameserver's results, try tuning the `Config`'s timing settings.
+
+For example, if the first nameserver is likely correct but is slow to respond, then increase the `InitialNameserverDelay` to compensate.
