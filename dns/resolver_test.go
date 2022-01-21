@@ -68,7 +68,10 @@ func TestNewMacOSDialer(t *testing.T) {
 func TestEnsureNameservers(t *testing.T) {
 	someConfig := scutil.Config{
 		Resolvers: []scutil.Resolver{
-			{Nameservers: []string{"1.2.3.4"}},
+			{Nameservers: []string{
+				"1.2.3.4",                      // IPv4
+				"fe80::8c86:1eff:fe8b:cc64%5d", // IPv6 with zone ID suffix
+			}},
 		},
 	}
 	someError := errors.New("some error")
@@ -79,9 +82,9 @@ func TestEnsureNameservers(t *testing.T) {
 		assert.Less(t, callCount, 2, "Read should not be called more than once")
 		return someConfig, someError
 	}
-	var expectedNameservers []string
-	for _, ns := range someConfig.Resolvers[0].Nameservers {
-		expectedNameservers = append(expectedNameservers, ns+":53")
+	expectedNameservers := []string{
+		"1.2.3.4:53",
+		"[fe80::8c86:1eff:fe8b:cc64%5d]:53",
 	}
 	nameservers, err := dialer.ensureNameservers()
 	assert.Equal(t, someError, err)
@@ -190,6 +193,35 @@ func TestDNSLookupHost(t *testing.T) {
 			assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		})
 	}
+}
+
+func TestDNSLookupHostIPv6(t *testing.T) {
+	t.Parallel()
+	workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+		ResponseDelay: 1 * time.Second,
+		Hostnames: map[string][]string{
+			"hi.local.": []string{"5.6.7.8"},
+		},
+		Network: "udp6",
+	})
+	defer cancel()
+
+	dialer := testDialer(t)
+	dialer.nameservers = []string{workingDNS}
+
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	conn, err := dialer.DialContext(ctx, "ignored", "ignored")
+	require.NoError(t, err)
+	assert.Implements(t, (*staggercast.Conn)(nil), conn)
+	conn.Close()
+
+	res := &net.Resolver{PreferGo: true, Dial: dialer.DialContext}
+
+	addrs, err := res.LookupHost(ctx, "hi.local")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"5.6.7.8"}, addrs)
 }
 
 func TestReorderNameservers(t *testing.T) {

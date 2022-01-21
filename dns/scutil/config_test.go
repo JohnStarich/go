@@ -41,7 +41,7 @@ func TestReadMacOSDNS(t *testing.T) {
 			expectErr:   true,
 		},
 		{
-			description: "one namespace",
+			description: "one nameserver",
 			scutilOutput: `
 resolver #1
   nameserver[0] : 1.2.3.4
@@ -94,6 +94,27 @@ resolver #1
 					reachable:      true,
 					SearchDomain:   []string{"search1", "search2"},
 					Timeout:        5 * time.Second,
+				},
+			},
+		},
+		{
+			description: "one full IPv6 nameserver",
+			scutilOutput: `
+resolver #1
+  nameserver[0] : fe80::8c86:1eff:fe8b:cc64%5d
+  nameserver[1] : 172.20.10.1
+  if_index : 5 (en0)
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00020002 (Reachable,Directly Reachable Address)
+			`,
+			expectResolvers: []Resolver{
+				{
+					Flags:          []Flag{RequestARecords, RequestAAAARecords},
+					Nameservers:    []string{"fe80::8c86:1eff:fe8b:cc64%5d", "172.20.10.1"},
+					InterfaceIndex: 5,
+					InterfaceName:  "en0",
+					Reach:          []Reach{Reachable, DirectlyReachableAddress},
+					reachable:      true,
 				},
 			},
 		},

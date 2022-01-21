@@ -3,9 +3,11 @@ package dns
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -92,7 +94,7 @@ func (m *macOSDialer) ensureNameservers() ([]string, error) {
 	cfg, err := m.readResolvers(ctx)
 	for _, resolver := range cfg.Resolvers {
 		for _, nameserver := range resolver.Nameservers {
-			m.nameservers = append(m.nameservers, nameserver+":53")
+			m.nameservers = append(m.nameservers, dialableNameserver(nameserver)+":53")
 		}
 	}
 	m.Logger.Info("Finished reading macOS DNS config from 'scutil'", zap.Error(err))
@@ -228,4 +230,17 @@ func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.C
 	newNS = append(newNS, m.nameservers[stats.FastestRemoteIndex+1:]...)
 	m.nameservers = newNS
 	m.Logger.Debug("Reordering fastest nameserver to the front", zap.Strings("nameservers", newNS))
+}
+
+func dialableNameserver(nameserver string) string {
+	ipStr := nameserver
+	if i := strings.IndexRune(nameserver, '%'); i != -1 {
+		// remove optional IPv6 zone ID suffix to parse IP
+		ipStr = nameserver[:i]
+	}
+	isIPv4 := net.ParseIP(ipStr).To4() != nil
+	if !isIPv4 {
+		return fmt.Sprintf("[%s]", nameserver)
+	}
+	return nameserver
 }

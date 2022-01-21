@@ -48,18 +48,28 @@ type DNSConfig struct {
 	ResponseDelay time.Duration
 	Hostnames     map[string][]string
 	Port          int
+	Network       string // e.g. udp4, udp6
 }
 
 func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel context.CancelFunc) {
+	t.Helper()
+	if config.Network == "" {
+		config.Network = "udp4"
+	}
+	switch config.Network {
+	case "udp4", "udp6":
+	default:
+		t.Fatal("Unsupported network for DNS:", config.Network)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	mux := dns.NewServeMux()
 	mux.HandleFunc("local.", hostnamesHandler(t, ctx, config.ResponseDelay, config.Hostnames))
 
-	const network = "udp4"
-	packetConn, err := net.ListenUDP(network, &net.UDPAddr{Port: config.Port})
+	packetConn, err := net.ListenUDP(config.Network, &net.UDPAddr{Port: config.Port})
 	require.NoError(t, err)
 	server := &dns.Server{
-		Net:        network,
+		Net:        config.Network,
 		PacketConn: packetConn,
 		Handler:    mux,
 	}
@@ -74,6 +84,11 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 	localAddr := server.PacketConn.LocalAddr().String()
 	_, port, err := net.SplitHostPort(localAddr)
 	require.NoError(t, err)
-	localAddr = "127.0.0.1:" + port
+	switch config.Network {
+	case "udp4":
+		localAddr = "127.0.0.1:" + port
+	case "udp6":
+		localAddr = "[::1]:" + port
+	}
 	return localAddr, cancel
 }

@@ -6,5 +6,6 @@ const (
 	// Scoped requires a resolver to only send queries on the specified interface
 	Scoped Flag = "Scoped"
 
-	RequestARecords Flag = "Request A records"
+	RequestARecords    Flag = "Request A records"
+	RequestAAAARecords Flag = "Request AAAA records"
 )
