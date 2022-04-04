@@ -24,6 +24,7 @@ type Resolver struct {
 	MulticastDNS   bool
 	Nameservers    []string
 	Order          int
+	Port           string
 	Reach          []Reach
 	reachable      bool // cached status from Reach
 	SearchDomain   []string
@@ -81,6 +82,8 @@ func readMacOSDNS(ctx context.Context, getSCUtilDNS scutilExecutor) (Config, err
 			}
 		case strings.Contains(key, "options"):
 			currentResolver.MulticastDNS = strings.Contains(value, "mdns")
+		case strings.Contains(key, "port"):
+			currentResolver.Port = value
 		case strings.Contains(key, "nameserver"):
 			currentResolver.Nameservers = append(currentResolver.Nameservers, value)
 		case strings.Contains(key, "order"):

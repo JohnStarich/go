@@ -146,6 +146,14 @@ resolver #3
   reach    : 0x00000000 (Not Reachable)
   order    : 300600
 
+resolver #4
+  domain   : 10.in-addr.arpa
+  nameserver[0] : 127.0.0.1
+  port     : 8600
+  timeout  : 5
+  flags    : Request A records, Request AAAA records
+  reach    : 0x00030002 (Reachable,Local Address,Directly Reachable Address)
+
 DNS configuration (for scoped queries)
 
 resolver #1
@@ -186,6 +194,15 @@ resolver #2
 					Flags:        []Flag{RequestARecords},
 					Reach:        []Reach{NotReachable},
 					Order:        300600,
+				},
+				{
+					Domain:      "10.in-addr.arpa",
+					Port:        "8600",
+					Nameservers: []string{"127.0.0.1"},
+					Timeout:     5 * time.Second,
+					Flags:       []Flag{RequestARecords, RequestAAAARecords},
+					Reach:       []Reach{Reachable, LocalAddress, DirectlyReachableAddress},
+					reachable:   true,
 				},
 				{
 					Nameservers:    []string{"8.8.8.8", "8.8.4.4"},
