@@ -197,7 +197,7 @@ resolver #2
 				},
 				{
 					Domain:      "10.in-addr.arpa",
-					Port:        "8600",
+					Port:        8600,
 					Nameservers: []string{"127.0.0.1"},
 					Timeout:     5 * time.Second,
 					Flags:       []Flag{RequestARecords, RequestAAAARecords},
