@@ -93,8 +93,12 @@ func (m *macOSDialer) ensureNameservers() ([]string, error) {
 	m.Logger.Info("Reading macOS DNS config from 'scutil'...")
 	cfg, err := m.readResolvers(ctx)
 	for _, resolver := range cfg.Resolvers {
+		port := resolver.Port
+		if port == 0 {
+			port = 53
+		}
 		for _, nameserver := range resolver.Nameservers {
-			m.nameservers = append(m.nameservers, dialableNameserver(nameserver)+":53")
+			m.nameservers = append(m.nameservers, dialableNameserver(nameserver)+":"+fmt.Sprint(port))
 		}
 	}
 	m.Logger.Info("Finished reading macOS DNS config from 'scutil'", zap.Error(err))
