@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.16.14";</script>
+<script>var goVersion = "go1.16.15";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -203,92 +203,109 @@
 <span id="L146" class="ln">   146  </span>  reach    : 0x00000000 (Not Reachable)
 <span id="L147" class="ln">   147  </span>  order    : 300600
 <span id="L148" class="ln">   148  </span>
-<span id="L149" class="ln">   149  </span>DNS configuration (for scoped queries)
-<span id="L150" class="ln">   150  </span>
-<span id="L151" class="ln">   151  </span>resolver #1
-<span id="L152" class="ln">   152  </span>  nameserver[0] : 8.8.8.8
-<span id="L153" class="ln">   153  </span>  nameserver[1] : 8.8.4.4
-<span id="L154" class="ln">   154  </span>  if_index : 5 (en0)
-<span id="L155" class="ln">   155  </span>  flags    : Scoped, Request A records
-<span id="L156" class="ln">   156  </span>  reach    : 0x00020002 (Reachable,Directly Reachable Address)
-<span id="L157" class="ln">   157  </span>
-<span id="L158" class="ln">   158  </span>resolver #2
-<span id="L159" class="ln">   159  </span>  nameserver[0] : 8.8.8.8
-<span id="L160" class="ln">   160  </span>  nameserver[1] : 8.8.4.4
-<span id="L161" class="ln">   161  </span>  if_index : 10 (en10)
-<span id="L162" class="ln">   162  </span>  flags    : Scoped, Request A records
-<span id="L163" class="ln">   163  </span>  reach    : 0x00020002 (Reachable,Directly Reachable Address)
-<span id="L164" class="ln">   164  </span>			`,
-<span id="L165" class="ln">   165  </span>			expectResolvers: []Resolver{
-<span id="L166" class="ln">   166  </span>				{
-<span id="L167" class="ln">   167  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
-<span id="L168" class="ln">   168  </span>					InterfaceIndex: 5,
-<span id="L169" class="ln">   169  </span>					InterfaceName:  &#34;en0&#34;,
-<span id="L170" class="ln">   170  </span>					Flags:          []Flag{RequestARecords},
-<span id="L171" class="ln">   171  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
-<span id="L172" class="ln">   172  </span>					reachable:      true,
-<span id="L173" class="ln">   173  </span>				},
+<span id="L149" class="ln">   149  </span>resolver #4
+<span id="L150" class="ln">   150  </span>  domain   : 10.in-addr.arpa
+<span id="L151" class="ln">   151  </span>  nameserver[0] : 127.0.0.1
+<span id="L152" class="ln">   152  </span>  port     : 8600
+<span id="L153" class="ln">   153  </span>  timeout  : 5
+<span id="L154" class="ln">   154  </span>  flags    : Request A records, Request AAAA records
+<span id="L155" class="ln">   155  </span>  reach    : 0x00030002 (Reachable,Local Address,Directly Reachable Address)
+<span id="L156" class="ln">   156  </span>
+<span id="L157" class="ln">   157  </span>DNS configuration (for scoped queries)
+<span id="L158" class="ln">   158  </span>
+<span id="L159" class="ln">   159  </span>resolver #1
+<span id="L160" class="ln">   160  </span>  nameserver[0] : 8.8.8.8
+<span id="L161" class="ln">   161  </span>  nameserver[1] : 8.8.4.4
+<span id="L162" class="ln">   162  </span>  if_index : 5 (en0)
+<span id="L163" class="ln">   163  </span>  flags    : Scoped, Request A records
+<span id="L164" class="ln">   164  </span>  reach    : 0x00020002 (Reachable,Directly Reachable Address)
+<span id="L165" class="ln">   165  </span>
+<span id="L166" class="ln">   166  </span>resolver #2
+<span id="L167" class="ln">   167  </span>  nameserver[0] : 8.8.8.8
+<span id="L168" class="ln">   168  </span>  nameserver[1] : 8.8.4.4
+<span id="L169" class="ln">   169  </span>  if_index : 10 (en10)
+<span id="L170" class="ln">   170  </span>  flags    : Scoped, Request A records
+<span id="L171" class="ln">   171  </span>  reach    : 0x00020002 (Reachable,Directly Reachable Address)
+<span id="L172" class="ln">   172  </span>			`,
+<span id="L173" class="ln">   173  </span>			expectResolvers: []Resolver{
 <span id="L174" class="ln">   174  </span>				{
-<span id="L175" class="ln">   175  </span>					Domain:       &#34;local&#34;,
-<span id="L176" class="ln">   176  </span>					MulticastDNS: true,
-<span id="L177" class="ln">   177  </span>					Timeout:      5 * time.Second,
-<span id="L178" class="ln">   178  </span>					Flags:        []Flag{RequestARecords},
-<span id="L179" class="ln">   179  </span>					Reach:        []Reach{NotReachable},
-<span id="L180" class="ln">   180  </span>					Order:        300000,
+<span id="L175" class="ln">   175  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
+<span id="L176" class="ln">   176  </span>					InterfaceIndex: 5,
+<span id="L177" class="ln">   177  </span>					InterfaceName:  &#34;en0&#34;,
+<span id="L178" class="ln">   178  </span>					Flags:          []Flag{RequestARecords},
+<span id="L179" class="ln">   179  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
+<span id="L180" class="ln">   180  </span>					reachable:      true,
 <span id="L181" class="ln">   181  </span>				},
 <span id="L182" class="ln">   182  </span>				{
-<span id="L183" class="ln">   183  </span>					Domain:       &#34;9.e.f.ip6.arpa&#34;,
+<span id="L183" class="ln">   183  </span>					Domain:       &#34;local&#34;,
 <span id="L184" class="ln">   184  </span>					MulticastDNS: true,
 <span id="L185" class="ln">   185  </span>					Timeout:      5 * time.Second,
 <span id="L186" class="ln">   186  </span>					Flags:        []Flag{RequestARecords},
 <span id="L187" class="ln">   187  </span>					Reach:        []Reach{NotReachable},
-<span id="L188" class="ln">   188  </span>					Order:        300600,
+<span id="L188" class="ln">   188  </span>					Order:        300000,
 <span id="L189" class="ln">   189  </span>				},
 <span id="L190" class="ln">   190  </span>				{
-<span id="L191" class="ln">   191  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
-<span id="L192" class="ln">   192  </span>					InterfaceIndex: 5,
-<span id="L193" class="ln">   193  </span>					InterfaceName:  &#34;en0&#34;,
-<span id="L194" class="ln">   194  </span>					Flags:          []Flag{Scoped, RequestARecords},
-<span id="L195" class="ln">   195  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
-<span id="L196" class="ln">   196  </span>					reachable:      true,
+<span id="L191" class="ln">   191  </span>					Domain:       &#34;9.e.f.ip6.arpa&#34;,
+<span id="L192" class="ln">   192  </span>					MulticastDNS: true,
+<span id="L193" class="ln">   193  </span>					Timeout:      5 * time.Second,
+<span id="L194" class="ln">   194  </span>					Flags:        []Flag{RequestARecords},
+<span id="L195" class="ln">   195  </span>					Reach:        []Reach{NotReachable},
+<span id="L196" class="ln">   196  </span>					Order:        300600,
 <span id="L197" class="ln">   197  </span>				},
 <span id="L198" class="ln">   198  </span>				{
-<span id="L199" class="ln">   199  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
-<span id="L200" class="ln">   200  </span>					InterfaceIndex: 10,
-<span id="L201" class="ln">   201  </span>					InterfaceName:  &#34;en10&#34;,
-<span id="L202" class="ln">   202  </span>					Flags:          []Flag{Scoped, RequestARecords},
-<span id="L203" class="ln">   203  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
-<span id="L204" class="ln">   204  </span>					reachable:      true,
-<span id="L205" class="ln">   205  </span>				},
-<span id="L206" class="ln">   206  </span>			},
-<span id="L207" class="ln">   207  </span>		},
-<span id="L208" class="ln">   208  </span>	} {
-<span id="L209" class="ln">   209  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L210" class="ln">   210  </span>			ctx := context.Background()
-<span id="L211" class="ln">   211  </span>			getSCUtilDNS := func(ctx context.Context) ([]byte, error) {
-<span id="L212" class="ln">   212  </span>				return []byte(tc.scutilOutput), tc.scutilErr
-<span id="L213" class="ln">   213  </span>			}
-<span id="L214" class="ln">   214  </span>			cfg, err := readMacOSDNS(ctx, getSCUtilDNS)
-<span id="L215" class="ln">   215  </span>			if tc.expectErr {
-<span id="L216" class="ln">   216  </span>				assert.Equal(t, tc.scutilErr, err)
-<span id="L217" class="ln">   217  </span>				return
-<span id="L218" class="ln">   218  </span>			}
-<span id="L219" class="ln">   219  </span>			require.NoError(t, err)
-<span id="L220" class="ln">   220  </span>
-<span id="L221" class="ln">   221  </span>			assert.Equal(t, tc.expectResolvers, cfg.Resolvers)
-<span id="L222" class="ln">   222  </span>		})
-<span id="L223" class="ln">   223  </span>	}
-<span id="L224" class="ln">   224  </span>}
-<span id="L225" class="ln">   225  </span>
-<span id="L226" class="ln">   226  </span>func TestReachable(t *testing.T) {
-<span id="L227" class="ln">   227  </span>	assert.False(t, Resolver{reachable: false}.Reachable())
-<span id="L228" class="ln">   228  </span>	assert.True(t, Resolver{reachable: true}.Reachable())
-<span id="L229" class="ln">   229  </span>}
-<span id="L230" class="ln">   230  </span>
+<span id="L199" class="ln">   199  </span>					Domain:      &#34;10.in-addr.arpa&#34;,
+<span id="L200" class="ln">   200  </span>					Port:        8600,
+<span id="L201" class="ln">   201  </span>					Nameservers: []string{&#34;127.0.0.1&#34;},
+<span id="L202" class="ln">   202  </span>					Timeout:     5 * time.Second,
+<span id="L203" class="ln">   203  </span>					Flags:       []Flag{RequestARecords, RequestAAAARecords},
+<span id="L204" class="ln">   204  </span>					Reach:       []Reach{Reachable, LocalAddress, DirectlyReachableAddress},
+<span id="L205" class="ln">   205  </span>					reachable:   true,
+<span id="L206" class="ln">   206  </span>				},
+<span id="L207" class="ln">   207  </span>				{
+<span id="L208" class="ln">   208  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
+<span id="L209" class="ln">   209  </span>					InterfaceIndex: 5,
+<span id="L210" class="ln">   210  </span>					InterfaceName:  &#34;en0&#34;,
+<span id="L211" class="ln">   211  </span>					Flags:          []Flag{Scoped, RequestARecords},
+<span id="L212" class="ln">   212  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
+<span id="L213" class="ln">   213  </span>					reachable:      true,
+<span id="L214" class="ln">   214  </span>				},
+<span id="L215" class="ln">   215  </span>				{
+<span id="L216" class="ln">   216  </span>					Nameservers:    []string{&#34;8.8.8.8&#34;, &#34;8.8.4.4&#34;},
+<span id="L217" class="ln">   217  </span>					InterfaceIndex: 10,
+<span id="L218" class="ln">   218  </span>					InterfaceName:  &#34;en10&#34;,
+<span id="L219" class="ln">   219  </span>					Flags:          []Flag{Scoped, RequestARecords},
+<span id="L220" class="ln">   220  </span>					Reach:          []Reach{Reachable, DirectlyReachableAddress},
+<span id="L221" class="ln">   221  </span>					reachable:      true,
+<span id="L222" class="ln">   222  </span>				},
+<span id="L223" class="ln">   223  </span>			},
+<span id="L224" class="ln">   224  </span>		},
+<span id="L225" class="ln">   225  </span>	} {
+<span id="L226" class="ln">   226  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L227" class="ln">   227  </span>			ctx := context.Background()
+<span id="L228" class="ln">   228  </span>			getSCUtilDNS := func(ctx context.Context) ([]byte, error) {
+<span id="L229" class="ln">   229  </span>				return []byte(tc.scutilOutput), tc.scutilErr
+<span id="L230" class="ln">   230  </span>			}
+<span id="L231" class="ln">   231  </span>			cfg, err := readMacOSDNS(ctx, getSCUtilDNS)
+<span id="L232" class="ln">   232  </span>			if tc.expectErr {
+<span id="L233" class="ln">   233  </span>				assert.Equal(t, tc.scutilErr, err)
+<span id="L234" class="ln">   234  </span>				return
+<span id="L235" class="ln">   235  </span>			}
+<span id="L236" class="ln">   236  </span>			require.NoError(t, err)
+<span id="L237" class="ln">   237  </span>
+<span id="L238" class="ln">   238  </span>			assert.Equal(t, tc.expectResolvers, cfg.Resolvers)
+<span id="L239" class="ln">   239  </span>		})
+<span id="L240" class="ln">   240  </span>	}
+<span id="L241" class="ln">   241  </span>}
+<span id="L242" class="ln">   242  </span>
+<span id="L243" class="ln">   243  </span>func TestReachable(t *testing.T) {
+<span id="L244" class="ln">   244  </span>	assert.False(t, Resolver{reachable: false}.Reachable())
+<span id="L245" class="ln">   245  </span>	assert.True(t, Resolver{reachable: true}.Reachable())
+<span id="L246" class="ln">   246  </span>}
+<span id="L247" class="ln">   247  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.16.14.<br/>
+Build version go1.16.15.<br/>
 </div>
 
 </div><!-- .container -->
