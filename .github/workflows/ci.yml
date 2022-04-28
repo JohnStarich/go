@@ -7,8 +7,8 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
     name: Lint
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
@@ -18,35 +18,44 @@ jobs:
       run: make lint
 
   test-coverage:
+    name: Test with Go ${{ matrix.go }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     strategy:
       matrix:
         go:
           - 1.16.x
-    name: Test with Go ${{ matrix.go }}
     steps:
     - uses: actions/checkout@v3
+    - name: checkout
+      run: |
+        commits=${{ github.event.pull_request.commits }}
+        if [[ -n "$commits" ]]; then
+          # Prepare enough depth for diffs with master
+          git fetch --depth="$(( commits + 1 ))"
+        fi
     - uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
     - name: Test
       run: make test
       env:
-        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
+    name: Test with Go ${{ matrix.go }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
           - 1.17.x
           - ^1.18  # Latest version of Go
-    name: Test with Go ${{ matrix.go }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
-        check_latest: true
+        check-latest: true
     - name: Test
       run: make test
