@@ -68,7 +68,7 @@ func diffcoverSummary(uncoveredFiles []diffcover.File, targetCoverage uint, form
 	}
 
 	var sb strings.Builder
-	sb.WriteString("Diff coverage summary:\n")
+	sb.WriteString("Diff coverage is below target. Add tests for these files:\n")
 	tbl := table.NewWriter()
 	tbl.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 2, Align: text.AlignCenter},
