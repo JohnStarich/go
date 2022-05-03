@@ -15,7 +15,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/johnstarich/go/diffcover"
 	"github.com/johnstarich/go/diffcover/internal/span"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -40,18 +39,7 @@ type Args struct {
 }
 
 func main() {
-	var args Args
-	flag.StringVar(&args.DiffFile, "diff-file", "", "Path to a diff file. Use '-' for stdin.")
-	flag.StringVar(&args.GoCoverageFile, "cover-go", "", "Path to a Go coverage profile.")
-	flag.BoolVar(&args.ShowCoverage, "show-coverage", false, "Show the coverage diff in addition to the summary.")
-	flag.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", 90, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
-	flag.StringVar(&args.GitHubToken, "gh-token", "", "GitHub access token to post and update a PR comment. If running in GitHub Actions, a comment may not be necessary.")
-	flag.StringVar(&args.GitHubEndpoint, "gh-api", "https://api.github.com", "GitHub API endpoint. Required for GitHub Enterprise.")
-	flag.StringVar(&args.GitHubIssue, "gh-issue", "", "GitHub issue or pull request URL. Example: github.com/org/repo/pull/123. Typically inside a CI environment variable.")
-	flag.Parse()
-	args.TargetDiffCoverage = clampPercent(args.TargetDiffCoverage)
-
-	err := run(args)
+	err := run(os.Args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -59,10 +47,33 @@ func main() {
 	}
 }
 
-func run(args Args) error {
-	if args.DiffFile == "" {
-		return errors.New("-diff-file is required")
+func run(strArgs []string) error {
+	var args Args
+	set := flag.NewFlagSet("diffcover", flag.ContinueOnError)
+	set.StringVar(&args.DiffFile, "diff-file", "", "Required. Path to a diff file. Use '-' for stdin.")
+	set.StringVar(&args.GoCoverageFile, "cover-go", "", "Required. Path to a Go coverage profile.")
+	set.BoolVar(&args.ShowCoverage, "show-coverage", false, "Show the coverage diff in addition to the summary.")
+	set.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", 90, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
+	set.StringVar(&args.GitHubToken, "gh-token", "", "GitHub access token to post and update a PR comment. If running in GitHub Actions, a comment may not be necessary.")
+	set.StringVar(&args.GitHubEndpoint, "gh-api", "https://api.github.com", "GitHub API endpoint. Required for GitHub Enterprise.")
+	set.StringVar(&args.GitHubIssue, "gh-issue", "", "GitHub issue or pull request URL. Example: github.com/org/repo/pull/123. Typically inside a CI environment variable.")
+	err := set.Parse(strArgs)
+	if err == flag.ErrHelp {
+		return nil
 	}
+	if err != nil {
+		return err
+	}
+
+	set.VisitAll(func(f *flag.Flag) {
+		if err == nil && strings.HasPrefix(f.Usage, "Required.") && f.Value.String() == "" {
+			err = fmt.Errorf("flag -%s is required", f.Name)
+		}
+	})
+	if err != nil {
+		return err
+	}
+
 	var diffFile io.Reader
 	if args.DiffFile == "-" {
 		diffFile = os.Stdin
@@ -75,9 +86,6 @@ func run(args Args) error {
 		diffFile = f
 	}
 
-	if args.GoCoverageFile == "" {
-		return errors.New("-cover-go is required")
-	}
 	coverageFile, err := os.Open(args.GoCoverageFile)
 	if err != nil {
 		return err

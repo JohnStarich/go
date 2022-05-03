@@ -6,6 +6,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRun(t *testing.T) {
+	for _, tc := range []struct {
+		description string
+		args        []string
+		expectErr   string
+	}{
+		{
+			description: "missing required args",
+			args:        nil,
+			expectErr:   "flag -cover-go is required",
+		},
+		{
+			description: "help",
+			args:        []string{"-help"},
+		},
+		{
+			description: "wrong flag type",
+			args:        []string{"-target-diff-coverage", "-1"},
+			expectErr:   `invalid value "-1" for flag -target-diff-coverage: parse error`,
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			err := run(tc.args)
+			if tc.expectErr != "" {
+				assert.EqualError(t, err, tc.expectErr)
+				return
+			}
+			assert.NoError(t, err)
+		})
+	}
+}
+
 func TestParseIssueURL(t *testing.T) {
 	for _, tc := range []struct {
 		url          string
