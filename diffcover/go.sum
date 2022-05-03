@@ -136,6 +136,9 @@ github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm4
 github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+vpHVxEJEs9eg=
 github.com/googleapis/gax-go/v2 v2.0.5 h1:sjZBwGj9Jlw33ImPtvFviGYvseOtDM7hkSKB7+Tv3SM=
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
+github.com/hack-pad/go-indexeddb v0.1.0/go.mod h1:NH8CaojufPNcKYDhy5JkjfyBXE/72oJPeiywlabN/lM=
+github.com/hack-pad/hackpadfs v0.1.2 h1:ZsHfvrNAMNNBVLMKprOiN2rLD37x+YGj3QPJrhUdRF4=
+github.com/hack-pad/hackpadfs v0.1.2/go.mod h1:8bsINHOQhQUioUUiCzCyZZNLfEXjs0RwBIf3lTG+CEg=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1 h1:0hERBMJE1eitiLkihrMvRVBYAkpHzc/J3QdDN+dAcgU=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
