@@ -15,6 +15,7 @@ import (
 	"github.com/hack-pad/hackpadfs"
 	"github.com/johnstarich/go/diffcover"
 	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -87,7 +88,9 @@ type Deps struct {
 	FS     hackpadfs.FS
 }
 
-func runArgs(args Args, deps Deps) error {
+func runArgs(args Args, deps Deps) (err error) {
+	defer func() { err = errors.WithStack(err) }()
+
 	var diffFile io.Reader
 	if args.DiffFile == "-" {
 		diffFile = deps.Stdin

@@ -1,13 +1,17 @@
 package diffcover
 
 import (
+	"fmt"
 	"io"
+	"path"
 	"path/filepath"
 	"sort"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/pkg/errors"
 	"golang.org/x/tools/cover"
+	"golang.org/x/tools/go/packages"
 )
 
 // DiffCoverage generates reports for a diff and coverage combination
@@ -26,7 +30,9 @@ type Options struct {
 }
 
 // Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
-func Parse(options Options) (*DiffCoverage, error) {
+func Parse(options Options) (_ *DiffCoverage, err error) {
+	defer func() { err = errors.WithStack(err) }()
+
 	diffFiles, _, err := gitdiff.Parse(options.Diff)
 	if err != nil {
 		return nil, err
@@ -42,17 +48,25 @@ func Parse(options Options) (*DiffCoverage, error) {
 		coveredLines:   make(map[string][]span.Span),
 		uncoveredLines: make(map[string][]span.Span),
 	}
-	diffcov.addDiff(diffFiles)
-	diffcov.addCoverage(coverageFiles)
-
+	if err := diffcov.addDiff(diffFiles); err != nil {
+		return nil, err
+	}
+	if err := diffcov.addCoverage(coverageFiles); err != nil {
+		return nil, err
+	}
 	return diffcov, nil
 }
 
-func (c *DiffCoverage) addDiff(diffFiles []*gitdiff.File) {
+func (c *DiffCoverage) addDiff(diffFiles []*gitdiff.File) error {
 	for _, file := range diffFiles {
 		spans := findDiffAddSpans(file.TextFragments)
-		c.addedLines[file.NewName] = append(c.addedLines[file.NewName], spans...)
+		fileName, err := filepath.Abs(file.NewName)
+		if err != nil {
+			return err
+		}
+		c.addedLines[fileName] = append(c.addedLines[fileName], spans...)
 	}
+	return nil
 }
 
 func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
@@ -75,37 +89,60 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	return spans
 }
 
-func (c *DiffCoverage) addCoverage(coverageFiles []*cover.Profile) {
+func (c *DiffCoverage) addCoverage(coverageFiles []*cover.Profile) error {
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
-			coverageFile := filepath.Clean(file.FileName)
+			pkgs, err := packages.Load(&packages.Config{
+				Mode: packages.LoadFiles,
+			}, path.Dir(file.FileName))
+			if err != nil {
+				return fmt.Errorf("package not found: %w", err)
+			}
+			if len(pkgs) == 0 {
+				return fmt.Errorf("no package found for pattern: %s", file.FileName)
+			}
+			var pkgFile string
+			for _, fullPath := range pkgs[0].GoFiles {
+				if filepath.Base(fullPath) == path.Base(file.FileName) {
+					pkgFile = fullPath
+					break
+				}
+			}
+			if pkgFile == "" {
+				return fmt.Errorf("package %s does not container file %s", path.Dir(file.FileName), path.Base(file.FileName))
+			}
+			coverageFile := filepath.Clean(pkgFile)
 			if block.Count > 0 {
 				c.coveredLines[coverageFile] = append(c.coveredLines[coverageFile], span.Span{
 					Start: int64(block.StartLine),
-					End:   int64(block.EndLine),
+					End:   int64(block.EndLine + 1),
 				})
 			} else {
 				c.uncoveredLines[coverageFile] = append(c.uncoveredLines[coverageFile], span.Span{
 					Start: int64(block.StartLine),
-					End:   int64(block.EndLine),
+					End:   int64(block.EndLine + 1),
 				})
 			}
 		}
 	}
+	return nil
 }
 
-func (c *DiffCoverage) coveredAndUncovered() (coveredDiff, uncoveredDiff map[string][]span.Span) {
+func (c *DiffCoverage) coveredAndUncovered() (fileNames map[string]bool, coveredDiff, uncoveredDiff map[string][]span.Span) {
+	fileNames = make(map[string]bool)
 	coveredDiff = make(map[string][]span.Span)
 	uncoveredDiff = make(map[string][]span.Span)
 	for file := range c.addedLines {
 		for _, added := range c.addedLines[file] {
 			for _, covered := range c.coveredLines[file] {
 				if intersection, ok := added.Intersection(covered); ok {
+					fileNames[file] = true
 					coveredDiff[file] = append(coveredDiff[file], intersection)
 				}
 			}
 			for _, uncovered := range c.uncoveredLines[file] {
 				if intersection, ok := added.Intersection(uncovered); ok {
+					fileNames[file] = true
 					uncoveredDiff[file] = append(uncoveredDiff[file], intersection)
 				}
 			}
@@ -116,7 +153,7 @@ func (c *DiffCoverage) coveredAndUncovered() (coveredDiff, uncoveredDiff map[str
 
 // Covered returns the percentage of covered lines in the diff.
 func (c *DiffCoverage) Covered() float64 {
-	coveredSpans, uncoveredSpans := c.coveredAndUncovered()
+	_, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
 	var coveredTotal, uncoveredTotal float64
 	for _, spans := range coveredSpans {
 		for _, s := range spans {
@@ -133,8 +170,8 @@ func (c *DiffCoverage) Covered() float64 {
 
 func (c *DiffCoverage) Files() []File {
 	var coveredFiles []File
-	coveredSpans, uncoveredSpans := c.coveredAndUncovered()
-	for file := range coveredSpans {
+	fileNames, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
+	for file := range fileNames {
 		covered := coveredSpans[file]
 		uncovered := uncoveredSpans[file]
 

@@ -82,7 +82,7 @@ func TestRunArgs(t *testing.T) {
 		expectErr   string
 	}{
 		{
-			description: "print diffcover summary",
+			description: "print empty diffcover summary",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "cover.out",
@@ -95,6 +95,39 @@ func TestRunArgs(t *testing.T) {
 No coverage information intersects with diff.
 `,
 		},
+		{
+			description: "print diffcover summary",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "cover.out",
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/diffcover.go b/diffcover.go
+index 0000000..1111111 100644
+--- a/run.go
++++ b/run.go
+@@ -0,0 +1,2 @@
++added 1
++added 2
+`,
+				"cover.out": `
+mode: atomic
+github.com/johnstarich/go/diffcover/cmd/diffcover/run.go:1.1,1.7 1 1
+github.com/johnstarich/go/diffcover/cmd/diffcover/run.go:2.1,2.7 1 0
+`,
+			},
+			expectOut: `
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬────────────────────────┐
+│ LINES │ COVERAGE     │ FILE                   │
+├───────┼──────────────┼────────────────────────┤
+│  1/2  │  50.0% ██▌   │ ./cmd/diffcover/run.go │
+└───────┴──────────────┴────────────────────────┘
+`,
+		},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
@@ -105,7 +138,7 @@ No coverage information intersects with diff.
 				require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(name), 0700))
 				f, err := hackpadfs.Create(fs, name)
 				require.NoError(t, err)
-				_, err = hackpadfs.WriteFile(f, []byte(contents))
+				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(contents)))
 				require.NoError(t, err)
 				require.NoError(t, f.Close())
 			}
