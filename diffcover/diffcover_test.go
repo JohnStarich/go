@@ -3,22 +3,25 @@ package diffcover
 import (
 	"errors"
 	"io"
+	"path"
 	"strings"
 	"testing"
 	"testing/iotest"
 
+	"github.com/hack-pad/hackpadfs"
+	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParse(t *testing.T) {
 	for _, tc := range []struct {
-		description    string
-		diff           string
-		diffReader     io.Reader
-		coverage       string
-		coverageReader io.Reader
-		expectCovered  float64
-		expectErr      string
+		description   string
+		diff          string
+		diffReader    io.Reader
+		coverage      string
+		expectCovered float64
+		expectErr     string
 	}{
 		{
 			description: "half covered",
@@ -67,7 +70,7 @@ github.com/johnstarich/go/diffcover/diffcover.go:2.1,2.7 1 0
 			expectErr: "some error",
 		},
 		{
-			description: "bad coverage reader",
+			description: "malformed coverage file",
 			diff: `
 diff --git a/diffcover.go b/diffcover.go
 index 0000000..1111111 100644
@@ -77,26 +80,38 @@ index 0000000..1111111 100644
 +added 1
 +added 2
 `,
-			coverageReader: iotest.ErrReader(errors.New("some error")),
-			expectErr:      "some error",
+			coverage: `
+foo
+`,
+			expectErr: "bad mode line: foo",
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			if tc.diffReader == nil {
 				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
 			}
-			if tc.coverageReader == nil {
-				tc.coverageReader = strings.NewReader(strings.TrimSpace(tc.coverage))
+			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
+
+			coverFile := path.Join(tmpDir, "cover.out")
+			{
+				f, err := hackpadfs.OpenFile(fs, coverFile, hackpadfs.FlagWriteOnly|hackpadfs.FlagCreate, 0600)
+				require.NoError(t, err)
+				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(tc.coverage)))
+				require.NoError(t, err)
+				require.NoError(t, f.Close())
 			}
+
 			diffcover, err := Parse(Options{
-				Diff:       tc.diffReader,
-				GoCoverage: tc.coverageReader,
+				FS:             fs,
+				Diff:           tc.diffReader,
+				DiffBaseDir:    wd,
+				GoCoveragePath: coverFile,
 			})
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			files := diffcover.Files()
 			assert.NotEmpty(t, files)

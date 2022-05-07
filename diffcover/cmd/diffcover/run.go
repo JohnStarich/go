@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -24,6 +25,7 @@ var (
 
 type Args struct {
 	DiffFile           string
+	DiffBaseDir        string
 	GoCoverageFile     string
 	ShowCoverage       bool
 	TargetDiffCoverage uint
@@ -60,6 +62,7 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 	set := flag.NewFlagSet("diffcover", flag.ContinueOnError)
 	set.SetOutput(output)
 	set.StringVar(&args.DiffFile, "diff-file", "", "Required. Path to a diff file. Use '-' for stdin.")
+	set.StringVar(&args.DiffBaseDir, "diff-base-dir", ".", "Path to the diff's base directory. Defaults to the current directory.")
 	set.StringVar(&args.GoCoverageFile, "cover-go", "", "Required. Path to a Go coverage profile.")
 	set.BoolVar(&args.ShowCoverage, "show-coverage", false, "Show the coverage diff in addition to the summary.")
 	set.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", 90, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
@@ -78,8 +81,34 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 	})
 	if err != nil {
 		set.Usage()
+		return Args{}, err
 	}
-	return args, err
+
+	if args.DiffFile != "-" {
+		args.DiffFile, err = toFSPath(args.DiffFile)
+		if err != nil {
+			return Args{}, err
+		}
+	}
+	args.DiffBaseDir, err = toFSPath(args.DiffBaseDir)
+	if err != nil {
+		return Args{}, err
+	}
+	args.GoCoverageFile, err = toFSPath(args.GoCoverageFile)
+	if err != nil {
+		return Args{}, err
+	}
+	return args, nil
+}
+
+func toFSPath(p string) (string, error) {
+	p, err := filepath.Abs(p)
+	if err != nil {
+		return "", err
+	}
+	p = filepath.ToSlash(p)
+	p = strings.TrimPrefix(p, "/")
+	return p, nil
 }
 
 type Deps struct {
@@ -103,15 +132,11 @@ func runArgs(args Args, deps Deps) (err error) {
 		diffFile = f
 	}
 
-	coverageFile, err := deps.FS.Open(args.GoCoverageFile)
-	if err != nil {
-		return err
-	}
-	defer coverageFile.Close()
-
 	diffcov, err := diffcover.Parse(diffcover.Options{
-		Diff:       diffFile,
-		GoCoverage: coverageFile,
+		FS:             deps.FS,
+		Diff:           diffFile,
+		DiffBaseDir:    args.DiffBaseDir,
+		GoCoveragePath: args.GoCoverageFile,
 	})
 	if err != nil {
 		return err
@@ -198,7 +223,7 @@ func coveredFile(f diffcover.File) float64 {
 }
 
 func openFile(fs hackpadfs.FS, name, covPath string) (io.ReadCloser, error) {
-	name = filepath.Join(filepath.Dir(covPath), name)
+	name = path.Join(path.Dir(covPath), name)
 	return fs.Open(name)
 }
 

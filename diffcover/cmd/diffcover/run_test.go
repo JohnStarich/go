@@ -8,6 +8,7 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/mem"
+	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -45,7 +46,7 @@ func TestRun(t *testing.T) {
 				"-cover-go", "/does/not/exist",
 			},
 			expectOut: "",
-			expectErr: "open /does/not/exist: invalid argument",
+			expectErr: "open does/not/exist: file does not exist",
 		},
 	} {
 		tc := tc // enable parallel sub-tests
@@ -132,9 +133,10 @@ Diff coverage is below target. Add tests for these files:
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			fs, err := mem.NewFS()
-			require.NoError(t, err)
+			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
+
 			for name, contents := range tc.files {
+				name = path.Join(tmpDir, name)
 				require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(name), 0700))
 				f, err := hackpadfs.Create(fs, name)
 				require.NoError(t, err)
@@ -148,8 +150,12 @@ Diff coverage is below target. Add tests for these files:
 				Stdout: &output,
 				FS:     fs,
 			}
+			args := tc.args
+			args.DiffBaseDir = wd
+			args.DiffFile = path.Join(tmpDir, args.DiffFile)
+			args.GoCoverageFile = path.Join(tmpDir, args.GoCoverageFile)
 
-			err = runArgs(tc.args, deps)
+			err := runArgs(args, deps)
 			assert.Equal(t, strings.TrimSpace(tc.expectOut), strings.TrimSpace(output.String()))
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)

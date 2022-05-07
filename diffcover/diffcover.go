@@ -6,8 +6,11 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
+	"github.com/hack-pad/hackpadfs"
+	"github.com/johnstarich/go/diffcover/internal/fspath"
 	"github.com/johnstarich/go/diffcover/internal/span"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/cover"
@@ -23,23 +26,26 @@ type DiffCoverage struct {
 
 // Options contains parse options
 type Options struct {
+	// FS is the file system to use when reading the coverage file and generating path names. Only os.NewFS() from hackpadfs is compatible for now, see below note.
+	//
+	// NOTE: Coverage parsing still uses the native file system to load package file names. In a future release, hopefully this can use the FS instead.
+	FS hackpadfs.FS
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
-	// DiffBaseDir is the file path to the repo's root directory. Defaults to the current working directory '.'.
+	// DiffBaseDir is the FS path to the repo's root directory
 	DiffBaseDir string
-	// GoCoverage is a reader with Go coverage formatted contents
-	GoCoverage io.Reader
+	// GoCoverage is the FS path to a Go coverage file
+	GoCoveragePath string
 }
 
 // Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
 func Parse(options Options) (_ *DiffCoverage, err error) {
 	defer func() { err = errors.WithStack(err) }()
-	if options.DiffBaseDir == "" {
-		options.DiffBaseDir = "."
+	if !hackpadfs.ValidPath(options.DiffBaseDir) {
+		return nil, errors.Errorf("invalid diff base dir FS path: %s", options.DiffBaseDir)
 	}
-	options.DiffBaseDir, err = filepath.Abs(options.DiffBaseDir)
-	if err != nil {
-		return nil, err
+	if !hackpadfs.ValidPath(options.GoCoveragePath) {
+		return nil, errors.Errorf("invalid coverage FS path: %s", options.GoCoveragePath)
 	}
 
 	diffFiles, _, err := gitdiff.Parse(options.Diff)
@@ -47,7 +53,12 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 		return nil, err
 	}
 
-	coverageFiles, err := cover.ParseProfilesFromReader(options.GoCoverage)
+	coverageFile, err := options.FS.Open(options.GoCoveragePath)
+	if err != nil {
+		return nil, err
+	}
+	coverageFiles, err := cover.ParseProfilesFromReader(coverageFile)
+	coverageFile.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +71,7 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 	if err := diffcov.addDiff(diffFiles); err != nil {
 		return nil, err
 	}
-	if err := diffcov.addCoverage(options.DiffBaseDir, coverageFiles); err != nil {
+	if err := diffcov.addCoverage(options.GoCoveragePath, options.DiffBaseDir, coverageFiles); err != nil {
 		return nil, err
 	}
 	return diffcov, nil
@@ -94,31 +105,67 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	return spans
 }
 
-func (c *DiffCoverage) addCoverage(baseDir string, coverageFiles []*cover.Profile) error {
+func (c *DiffCoverage) addCoverage(coveragePath, baseDir string, coverageFiles []*cover.Profile) error {
+	coverageDir := path.Dir(coveragePath)
+	toCoveragePath := func(coverageEntry string) string {
+		switch {
+		case filepath.IsAbs(coverageEntry):
+			return filepath.Dir(coverageEntry)
+		case strings.HasPrefix(coverageEntry, "./"):
+			filePath := path.Join(coverageDir, coverageEntry)
+			fileAbsPath := fspath.FromFSPath(filePath)
+			dir := filepath.Dir(fileAbsPath)
+			return dir
+		default: // not a file path
+			return path.Dir(coverageEntry)
+		}
+	}
+	pkgCache := make(map[string]*packages.Package)
+	getPackage := func(fileName string) (*packages.Package, error) {
+		packagePath := toCoveragePath(fileName)
+		if pkg, ok := pkgCache[packagePath]; ok {
+			return pkg, nil
+		}
+		var dir string
+		if filepath.IsAbs(packagePath) {
+			dir = packagePath
+		}
+		pkgs, err := packages.Load(&packages.Config{
+			Mode: packages.NeedFiles,
+			Dir:  dir,
+		}, packagePath)
+		if err != nil {
+			return nil, fmt.Errorf("package not found: %w", err)
+		}
+		if len(pkgs) == 0 {
+			return nil, fmt.Errorf("no package found for pattern: %s", fileName)
+		}
+		if len(pkgs[0].Errors) > 0 {
+			return nil, errors.Wrapf(pkgs[0].Errors[0], "loading package %s failed", fileName)
+		}
+		pkgCache[dir] = pkgs[0]
+		return pkgs[0], nil
+	}
+
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
-			pkgs, err := packages.Load(&packages.Config{
-				Mode: packages.NeedFiles,
-			}, path.Dir(file.FileName))
+			pkg, err := getPackage(file.FileName)
 			if err != nil {
-				return fmt.Errorf("package not found: %w", err)
-			}
-			if len(pkgs) == 0 {
-				return fmt.Errorf("no package found for pattern: %s", file.FileName)
+				return err
 			}
 			var pkgFile string
-			for _, fullPath := range pkgs[0].GoFiles {
+			for _, fullPath := range pkg.GoFiles {
 				if filepath.Base(fullPath) == path.Base(file.FileName) {
 					pkgFile = fullPath
 					break
 				}
 			}
 			if pkgFile == "" {
-				return fmt.Errorf("package %s does not container file %s", path.Dir(file.FileName), path.Base(file.FileName))
+				return fmt.Errorf("package %s does not contain file %s", path.Dir(file.FileName), path.Base(file.FileName))
 			}
-			coverageFile, err := filepath.Rel(baseDir, pkgFile)
+			coverageFile, err := filepath.Rel(fspath.FromFSPath(baseDir), pkgFile)
 			if err != nil {
-				coverageFile = pkgFile
+				return err
 			}
 			coverageFile = filepath.ToSlash(coverageFile)
 			if block.Count > 0 {
