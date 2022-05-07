@@ -103,7 +103,7 @@ No coverage information intersects with diff.
 			},
 			files: map[string]string{
 				"my.patch": `
-diff --git a/diffcover.go b/diffcover.go
+diff --git a/run.go b/run.go
 index 0000000..1111111 100644
 --- a/run.go
 +++ b/run.go
@@ -121,11 +121,11 @@ github.com/johnstarich/go/diffcover/cmd/diffcover/run.go:2.1,2.7 1 0
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬────────────────────────┐
-│ LINES │ COVERAGE     │ FILE                   │
-├───────┼──────────────┼────────────────────────┤
-│  1/2  │  50.0% ██▌   │ ./cmd/diffcover/run.go │
-└───────┴──────────────┴────────────────────────┘
+┌───────┬──────────────┬────────┐
+│ LINES │ COVERAGE     │ FILE   │
+├───────┼──────────────┼────────┤
+│  1/2  │  50.0% ██▌   │ run.go │
+└───────┴──────────────┴────────┘
 `,
 		},
 	} {

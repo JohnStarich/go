@@ -25,6 +25,8 @@ type DiffCoverage struct {
 type Options struct {
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
+	// DiffBaseDir is the file path to the repo's root directory. Defaults to the current working directory '.'.
+	DiffBaseDir string
 	// GoCoverage is a reader with Go coverage formatted contents
 	GoCoverage io.Reader
 }
@@ -32,6 +34,13 @@ type Options struct {
 // Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
 func Parse(options Options) (_ *DiffCoverage, err error) {
 	defer func() { err = errors.WithStack(err) }()
+	if options.DiffBaseDir == "" {
+		options.DiffBaseDir = "."
+	}
+	options.DiffBaseDir, err = filepath.Abs(options.DiffBaseDir)
+	if err != nil {
+		return nil, err
+	}
 
 	diffFiles, _, err := gitdiff.Parse(options.Diff)
 	if err != nil {
@@ -51,7 +60,7 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 	if err := diffcov.addDiff(diffFiles); err != nil {
 		return nil, err
 	}
-	if err := diffcov.addCoverage(coverageFiles); err != nil {
+	if err := diffcov.addCoverage(options.DiffBaseDir, coverageFiles); err != nil {
 		return nil, err
 	}
 	return diffcov, nil
@@ -60,11 +69,7 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 func (c *DiffCoverage) addDiff(diffFiles []*gitdiff.File) error {
 	for _, file := range diffFiles {
 		spans := findDiffAddSpans(file.TextFragments)
-		fileName, err := filepath.Abs(file.NewName)
-		if err != nil {
-			return err
-		}
-		c.addedLines[fileName] = append(c.addedLines[fileName], spans...)
+		c.addedLines[file.NewName] = append(c.addedLines[file.NewName], spans...)
 	}
 	return nil
 }
@@ -89,11 +94,11 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	return spans
 }
 
-func (c *DiffCoverage) addCoverage(coverageFiles []*cover.Profile) error {
+func (c *DiffCoverage) addCoverage(baseDir string, coverageFiles []*cover.Profile) error {
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
 			pkgs, err := packages.Load(&packages.Config{
-				Mode: packages.LoadFiles,
+				Mode: packages.NeedFiles,
 			}, path.Dir(file.FileName))
 			if err != nil {
 				return fmt.Errorf("package not found: %w", err)
@@ -111,7 +116,11 @@ func (c *DiffCoverage) addCoverage(coverageFiles []*cover.Profile) error {
 			if pkgFile == "" {
 				return fmt.Errorf("package %s does not container file %s", path.Dir(file.FileName), path.Base(file.FileName))
 			}
-			coverageFile := filepath.Clean(pkgFile)
+			coverageFile, err := filepath.Rel(baseDir, pkgFile)
+			if err != nil {
+				coverageFile = pkgFile
+			}
+			coverageFile = filepath.ToSlash(coverageFile)
 			if block.Count > 0 {
 				c.coveredLines[coverageFile] = append(c.coveredLines[coverageFile], span.Span{
 					Start: int64(block.StartLine),
