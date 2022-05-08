@@ -259,13 +259,6 @@ func findFirstUncoveredLines(lines []diffcover.Line) span.Span {
 	return uncovered
 }
 
-func clampPercent(n uint) uint {
-	if n > 100 {
-		n = 100
-	}
-	return n
-}
-
 func findReportableUncoveredFiles(coveredFiles []diffcover.File, target, current float64) []diffcover.File {
 	// sort by highest uncovered line count
 	sort.Slice(coveredFiles, func(aIndex, bIndex int) bool {
