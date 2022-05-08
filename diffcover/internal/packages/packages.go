@@ -81,7 +81,8 @@ func FilePath(fs hackpadfs.FS, workingDirectory, filePattern string, options Opt
 		if err != nil {
 			return "", err
 		}
-		workDirSubPath := strings.TrimPrefix(workingDirectory, moduleDir+"/")
+		workDirSubPath := strings.TrimPrefix(workingDirectory, moduleDir)
+		workDirSubPath = strings.TrimPrefix(workDirSubPath, "/")
 		trimDir = path.Join(tempDir, moduleGoPath, workDirSubPath)
 	}
 

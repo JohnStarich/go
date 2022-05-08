@@ -2,6 +2,8 @@ package testhelpers
 
 import (
 	goos "os"
+	"path"
+	"strings"
 	"testing"
 
 	"github.com/hack-pad/hackpadfs"
@@ -28,4 +30,18 @@ func OSFSWithTemp(t *testing.T) (_ hackpadfs.FS, workingDirectory, tempDirectory
 	wd = fspath.ToFSPath(wd)
 
 	return fs, wd, tmpDir
+}
+
+func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS {
+	t.Helper()
+	fs, err := mem.NewFS()
+	require.NoError(t, err)
+	for name, contents := range files {
+		require.NoError(t, fs.MkdirAll(path.Dir(name), 0700))
+		f, err := hackpadfs.Create(fs, name)
+		require.NoError(t, err)
+		_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(contents)+"\n"))
+		require.NoError(t, err)
+	}
+	return fs
 }
