@@ -54,6 +54,7 @@ func TestRun(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()
 			require.NoError(t, err)
+			require.NoError(t, fs.Mkdir("tmp", 0700))
 			var output bytes.Buffer
 			err = run(
 				tc.args,
@@ -61,6 +62,7 @@ func TestRun(t *testing.T) {
 				&output,
 				&output,
 				fs,
+				"tmp",
 			)
 			assert.Contains(t, output.String(), tc.expectOut)
 			if tc.expectErr != "" {
@@ -146,9 +148,10 @@ Diff coverage is below target. Add tests for these files:
 			}
 			var output bytes.Buffer
 			deps := Deps{
-				Stdin:  strings.NewReader(tc.stdin),
-				Stdout: &output,
-				FS:     fs,
+				Stdin:   strings.NewReader(tc.stdin),
+				Stdout:  &output,
+				FS:      fs,
+				TempDir: tmpDir,
 			}
 			args := tc.args
 			args.DiffBaseDir = wd

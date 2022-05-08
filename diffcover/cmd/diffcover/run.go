@@ -41,6 +41,7 @@ func run(
 	stdout,
 	stderr io.Writer,
 	fs hackpadfs.FS,
+	tempDir string,
 ) error {
 	args, err := parseArgs(strArgs, stderr)
 	if err != nil {
@@ -50,9 +51,10 @@ func run(
 		return err
 	}
 	deps := Deps{
-		Stdin:  stdin,
-		Stdout: stdout,
-		FS:     fs,
+		Stdin:   stdin,
+		Stdout:  stdout,
+		FS:      fs,
+		TempDir: tempDir,
 	}
 	return runArgs(args, deps)
 }
@@ -112,9 +114,10 @@ func toFSPath(p string) (string, error) {
 }
 
 type Deps struct {
-	Stdin  io.Reader
-	Stdout io.Writer
-	FS     hackpadfs.FS
+	Stdin   io.Reader
+	Stdout  io.Writer
+	FS      hackpadfs.FS
+	TempDir string
 }
 
 func runArgs(args Args, deps Deps) (err error) {
@@ -134,6 +137,7 @@ func runArgs(args Args, deps Deps) (err error) {
 
 	diffcov, err := diffcover.Parse(diffcover.Options{
 		FS:             deps.FS,
+		TempDir:        deps.TempDir,
 		Diff:           diffFile,
 		DiffBaseDir:    args.DiffBaseDir,
 		GoCoveragePath: args.GoCoverageFile,
