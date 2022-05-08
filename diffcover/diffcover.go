@@ -102,7 +102,7 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 func (c *DiffCoverage) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string, coverageFiles []*cover.Profile) error {
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
-			coverageFile, err := packages.FilePath(fs, baseDir, file.FileName)
+			coverageFile, err := packages.FilePath(fs, baseDir, file.FileName, packages.Options{})
 			if err != nil {
 				return err
 			}
