@@ -62,7 +62,6 @@ func TestRun(t *testing.T) {
 				&output,
 				&output,
 				fs,
-				"tmp",
 			)
 			assert.Contains(t, output.String(), tc.expectOut)
 			if tc.expectErr != "" {
@@ -148,10 +147,9 @@ Diff coverage is below target. Add tests for these files:
 			}
 			var output bytes.Buffer
 			deps := Deps{
-				Stdin:   strings.NewReader(tc.stdin),
-				Stdout:  &output,
-				FS:      fs,
-				TempDir: tmpDir,
+				Stdin:  strings.NewReader(tc.stdin),
+				Stdout: &output,
+				FS:     fs,
 			}
 			args := tc.args
 			args.DiffBaseDir = wd

@@ -31,8 +31,6 @@ type Options struct {
 	// FS is the file system to read files, Go package information, and more.
 	// If you're not sure which FS to use, pass hackpadfs's os.NewFS().
 	FS hackpadfs.FS
-	// TempDir is a temporary directory path in FS where diffcover can mount an in-memory working directory. No file operations are run on the directory.
-	TempDir string
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
 	// DiffBaseDir is the FS path to the repo's root directory
@@ -44,22 +42,44 @@ type Options struct {
 // Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
 func Parse(options Options) (_ *DiffCoverage, err error) {
 	defer func() { err = errors.WithStack(err) }()
-	if !hackpadfs.ValidPath(options.TempDir) {
-		return nil, errors.Errorf("invalid temp dir FS path: %s", options.TempDir)
+	memFS, err := mem.NewFS()
+	if err != nil {
+		return nil, err
 	}
+	const (
+		dirPerm = 0700
+		workDir = "work"
+		tempDir = "tmp"
+	)
+	fs, err := mount.NewFS(memFS)
+	if err != nil {
+		return nil, err
+	}
+	if err := memFS.Mkdir(workDir, dirPerm); err != nil {
+		return nil, err
+	}
+	if err := fs.AddMount(workDir, options.FS); err != nil {
+		return nil, err
+	}
+	if err := memFS.Mkdir(tempDir, dirPerm); err != nil {
+		return nil, err
+	}
+
 	if !hackpadfs.ValidPath(options.DiffBaseDir) {
 		return nil, errors.Errorf("invalid diff base dir FS path: %s", options.DiffBaseDir)
 	}
+	options.DiffBaseDir = path.Join(workDir, options.DiffBaseDir)
 	if !hackpadfs.ValidPath(options.GoCoveragePath) {
 		return nil, errors.Errorf("invalid coverage FS path: %s", options.GoCoveragePath)
 	}
+	options.GoCoveragePath = path.Join(workDir, options.GoCoveragePath)
 
 	diffFiles, _, err := gitdiff.Parse(options.Diff)
 	if err != nil {
 		return nil, err
 	}
 
-	coverageFile, err := options.FS.Open(options.GoCoveragePath)
+	coverageFile, err := fs.Open(options.GoCoveragePath)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +97,7 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 	if err := diffcov.addDiff(diffFiles); err != nil {
 		return nil, err
 	}
-	if err := diffcov.addCoverage(options.FS, options.GoCoveragePath, options.DiffBaseDir, options.TempDir, coverageFiles); err != nil {
+	if err := diffcov.addCoverage(fs, options.GoCoveragePath, options.DiffBaseDir, tempDir, coverageFiles); err != nil {
 		return nil, err
 	}
 	return diffcov, nil

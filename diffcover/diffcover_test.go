@@ -3,14 +3,12 @@ package diffcover
 import (
 	"errors"
 	"io"
-	"os"
 	"path"
 	"strings"
 	"testing"
 	"testing/iotest"
 
 	"github.com/hack-pad/hackpadfs"
-	"github.com/johnstarich/go/diffcover/internal/fspath"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -105,7 +103,6 @@ foo
 
 			diffcover, err := Parse(Options{
 				FS:             fs,
-				TempDir:        path.Clean(fspath.ToFSPath(os.TempDir())),
 				Diff:           tc.diffReader,
 				DiffBaseDir:    wd,
 				GoCoveragePath: coverFile,
