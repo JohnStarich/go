@@ -121,6 +121,10 @@ func formatGraph(f float64, format summaryFormat) string {
 	)
 	total := graphWidth
 	var graph strings.Builder
+	if f == 0 {
+		graph.WriteRune(percentRune(0))
+		total--
+	}
 	for f > 0 {
 		graph.WriteRune(percentRune(f / graphTickSize))
 		f -= graphTickSize
