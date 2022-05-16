@@ -2,11 +2,9 @@ package main
 
 import (
 	"bytes"
-	"path"
 	"strings"
 	"testing"
 
-	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
@@ -90,8 +88,10 @@ func TestRunArgs(t *testing.T) {
 				GoCoverageFile: "cover.out",
 			},
 			files: map[string]string{
-				"my.patch":  ``,
-				"cover.out": ``,
+				"my.patch": ``,
+				"cover.out": `
+mode: atomic
+`,
 			},
 			expectOut: `
 No coverage information intersects with diff.
@@ -107,44 +107,49 @@ No coverage information intersects with diff.
 				"my.patch": `
 diff --git a/run.go b/run.go
 index 0000000..1111111 100644
---- a/run.go
-+++ b/run.go
-@@ -0,0 +1,2 @@
-+added 1
-+added 2
+--- a/cmd/diffcover/main.go
++++ b/cmd/diffcover/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
 `,
 				"cover.out": `
 mode: atomic
-github.com/johnstarich/go/diffcover/cmd/diffcover/run.go:1.1,1.7 1 1
-github.com/johnstarich/go/diffcover/cmd/diffcover/run.go:2.1,2.7 1 0
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+`,
+				"go.mod": `
+module github.com/johnstarich/go/diffcover
+`,
+				"cmd/diffcover/run.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
 `,
 			},
 			expectOut: `
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬────────┐
-│ LINES │ COVERAGE     │ FILE   │
-├───────┼──────────────┼────────┤
-│  1/2  │  50.0% ██▌   │ run.go │
-└───────┴──────────────┴────────┘
+┌───────┬──────────────┬───────────────────────┐
+│ LINES │ COVERAGE     │ FILE                  │
+├───────┼──────────────┼───────────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
+└───────┴──────────────┴───────────────────────┘
 `,
 		},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
-
-			for name, contents := range tc.files {
-				name = path.Join(tmpDir, name)
-				require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(name), 0700))
-				f, err := hackpadfs.Create(fs, name)
-				require.NoError(t, err)
-				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(contents)))
-				require.NoError(t, err)
-				require.NoError(t, f.Close())
-			}
+			fs := testhelpers.FSWithFiles(t, tc.files)
 			var output bytes.Buffer
 			deps := Deps{
 				Stdin:  strings.NewReader(tc.stdin),
@@ -152,9 +157,7 @@ Diff coverage is below target. Add tests for these files:
 				FS:     fs,
 			}
 			args := tc.args
-			args.DiffBaseDir = wd
-			args.DiffFile = path.Join(tmpDir, args.DiffFile)
-			args.GoCoverageFile = path.Join(tmpDir, args.GoCoverageFile)
+			args.DiffBaseDir = "."
 
 			err := runArgs(args, deps)
 			assert.Equal(t, strings.TrimSpace(tc.expectOut), strings.TrimSpace(output.String()))

@@ -2,10 +2,12 @@ package diffcover
 
 import (
 	"io"
+	"path"
 	"sort"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	"github.com/hack-pad/hackpadfs"
+	"github.com/johnstarich/go/diffcover/internal/fspath"
 	"github.com/johnstarich/go/diffcover/internal/packages"
 	"github.com/johnstarich/go/diffcover/internal/span"
 	"github.com/pkg/errors"
@@ -14,6 +16,7 @@ import (
 
 // DiffCoverage generates reports for a diff and coverage combination
 type DiffCoverage struct {
+	options Options
 	addedLines,
 	coveredLines,
 	uncoveredLines map[string][]span.Span
@@ -30,16 +33,24 @@ type Options struct {
 	DiffBaseDir string
 	// GoCoverage is the FS path to a Go coverage file
 	GoCoveragePath string
+	// GoCoverageBaseDir is the FS path to the coverage file's module. Defaults to the coverage file's directory.
+	GoCoverageBaseDir string
 }
 
 // Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
 func Parse(options Options) (_ *DiffCoverage, err error) {
 	defer func() { err = errors.WithStack(err) }()
 	if !hackpadfs.ValidPath(options.DiffBaseDir) {
-		return nil, errors.Errorf("invalid diff base dir FS path: %s", options.DiffBaseDir)
+		return nil, errors.Errorf("invalid diff base directory FS path: %s", options.DiffBaseDir)
 	}
 	if !hackpadfs.ValidPath(options.GoCoveragePath) {
 		return nil, errors.Errorf("invalid coverage FS path: %s", options.GoCoveragePath)
+	}
+	if options.GoCoverageBaseDir == "" {
+		options.GoCoverageBaseDir = path.Dir(options.GoCoveragePath)
+	}
+	if !hackpadfs.ValidPath(options.GoCoverageBaseDir) {
+		return nil, errors.Errorf("invalid coverage base directory FS path: %s", options.GoCoverageBaseDir)
 	}
 
 	diffFiles, _, err := gitdiff.Parse(options.Diff)
@@ -58,14 +69,20 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 	}
 
 	diffcov := &DiffCoverage{
+		options:        options,
 		addedLines:     make(map[string][]span.Span),
 		coveredLines:   make(map[string][]span.Span),
 		uncoveredLines: make(map[string][]span.Span),
 	}
+	_, err = diffcov.coverageToDiffRel()
+	if err != nil {
+		return nil, err
+	}
+
 	if err := diffcov.addDiff(diffFiles); err != nil {
 		return nil, err
 	}
-	if err := diffcov.addCoverage(options.FS, options.GoCoveragePath, options.DiffBaseDir, coverageFiles); err != nil {
+	if err := diffcov.addCoverage(options.FS, options.GoCoveragePath, options.GoCoverageBaseDir, coverageFiles); err != nil {
 		return nil, err
 	}
 	return diffcov, nil
@@ -122,12 +139,18 @@ func (c *DiffCoverage) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string
 	return nil
 }
 
+func (c *DiffCoverage) coverageToDiffRel() (string, error) {
+	return fspath.Rel(c.options.DiffBaseDir, c.options.GoCoverageBaseDir)
+}
+
 func (c *DiffCoverage) coveredAndUncovered() (fileNames map[string]bool, coveredDiff, uncoveredDiff map[string][]span.Span) {
+	covToDiffRel, _ := c.coverageToDiffRel() // ignore error since it's checked during setup
 	fileNames = make(map[string]bool)
 	coveredDiff = make(map[string][]span.Span)
 	uncoveredDiff = make(map[string][]span.Span)
 	for file := range c.addedLines {
 		for _, added := range c.addedLines[file] {
+			file := path.Join(covToDiffRel, file)
 			for _, covered := range c.coveredLines[file] {
 				if intersection, ok := added.Intersection(covered); ok {
 					fileNames[file] = true

@@ -14,22 +14,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func OSFSWithTemp(t *testing.T) (_ hackpadfs.FS, workingDirectory, tempDirectory string) {
+func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, workingDirectory, tempDirectory string) {
 	t.Helper()
 
-	fs, err := mount.NewFS(os.NewFS())
+	wd, err := goos.Getwd()
+	require.NoError(t, err)
+	wdPath := path.Join(fspath.ToFSPath(wd), relPathToModuleDir)
+	osFS, err := os.NewFS().Sub(wdPath)
 	require.NoError(t, err)
 
 	memFS, err := mem.NewFS()
 	require.NoError(t, err)
-	tmpDir := fspath.ToFSPath(t.TempDir())
-	require.NoError(t, fs.AddMount(tmpDir, memFS))
-
-	wd, err := goos.Getwd()
+	fs, err := mount.NewFS(memFS)
 	require.NoError(t, err)
-	wd = fspath.ToFSPath(wd)
 
-	return fs, wd, tmpDir
+	workingDirectory = "work"
+	require.NoError(t, hackpadfs.MkdirAll(fs, workingDirectory, 0700))
+	require.NoError(t, fs.AddMount(workingDirectory, osFS))
+
+	tempDirectory = "tmp"
+	require.NoError(t, hackpadfs.MkdirAll(fs, tempDirectory, 0700))
+	return fs, workingDirectory, tempDirectory
 }
 
 func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS {

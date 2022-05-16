@@ -90,7 +90,7 @@ foo
 			if tc.diffReader == nil {
 				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
 			}
-			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
+			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t, "")
 
 			coverFile := path.Join(tmpDir, "cover.out")
 			{
@@ -102,10 +102,11 @@ foo
 			}
 
 			diffcover, err := Parse(Options{
-				FS:             fs,
-				Diff:           tc.diffReader,
-				DiffBaseDir:    wd,
-				GoCoveragePath: coverFile,
+				FS:                fs,
+				Diff:              tc.diffReader,
+				DiffBaseDir:       wd,
+				GoCoveragePath:    coverFile,
+				GoCoverageBaseDir: wd,
 			})
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)
