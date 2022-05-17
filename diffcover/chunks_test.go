@@ -6,6 +6,7 @@ import (
 
 	"github.com/johnstarich/go/diffcover/internal/span"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFileFindContextSpans(t *testing.T) {
@@ -128,4 +129,34 @@ func TestDiffChunks(t *testing.T) {
 			},
 		},
 	}, chunks)
+}
+
+func TestLineIterator(t *testing.T) {
+	const threeLines = `line 1
+line 2
+line 3
+`
+	t.Run("skip and next", func(t *testing.T) {
+		li := newLineIterator(strings.NewReader(threeLines))
+		require.NoError(t, li.SkipLines(1))
+		lines, err := li.NextLines(1)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"line 2"}, lines)
+	})
+
+	t.Run("skip past end", func(t *testing.T) {
+		li := newLineIterator(strings.NewReader(threeLines))
+		assert.NoError(t, li.SkipLines(4))
+	})
+
+	t.Run("read past end", func(t *testing.T) {
+		li := newLineIterator(strings.NewReader(threeLines))
+		lines, err := li.NextLines(4)
+		assert.NoError(t, err)
+		assert.Equal(t, []string{
+			"line 1",
+			"line 2",
+			"line 3",
+		}, lines)
+	})
 }

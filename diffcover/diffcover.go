@@ -7,6 +7,7 @@ import (
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/diffcover/internal/fspath"
 	"github.com/johnstarich/go/diffcover/internal/packages"
 	"github.com/johnstarich/go/diffcover/internal/span"
@@ -25,7 +26,7 @@ type DiffCoverage struct {
 // Options contains parse options
 type Options struct {
 	// FS is the file system to read files, Go package information, and more.
-	// If you're not sure which FS to use, pass hackpadfs's os.NewFS().
+	// Defaults to hackpadfs's os.NewFS().
 	FS hackpadfs.FS
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
@@ -51,6 +52,12 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 	}
 	if !hackpadfs.ValidPath(options.GoCoverageBaseDir) {
 		return nil, errors.Errorf("invalid coverage base directory FS path: %s", options.GoCoverageBaseDir)
+	}
+	if options.FS == nil {
+		options.FS = os.NewFS()
+	}
+	if options.Diff == nil {
+		return nil, errors.New("diff reader must not be nil")
 	}
 
 	diffFiles, _, err := gitdiff.Parse(options.Diff)

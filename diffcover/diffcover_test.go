@@ -1,14 +1,18 @@
 package diffcover
 
 import (
+	"bytes"
 	"errors"
 	"io"
+	goos "os"
 	"path"
 	"strings"
 	"testing"
 	"testing/iotest"
 
 	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/os"
+	"github.com/johnstarich/go/diffcover/internal/fspath"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -119,6 +123,88 @@ foo
 
 			covered := diffcover.Covered()
 			assert.Equal(t, tc.expectCovered, covered)
+		})
+	}
+}
+
+func TestParseInvalidOptions(t *testing.T) {
+	wd, err := goos.Getwd()
+	require.NoError(t, err)
+	var (
+		workingDirectory = fspath.ToFSPath(wd)
+		baseDir          = path.Join(workingDirectory, "testdata")
+		coverFile        = path.Join(baseDir, "add2.out")
+		//diffFile         = path.Join(baseDir, "add2.diff")
+	)
+	for _, tc := range []struct {
+		description string
+		options     Options
+		expectErr   string
+	}{
+		{
+			description: "invalid diff base dir",
+			options: Options{
+				DiffBaseDir: "/os-path/not/ok",
+			},
+			expectErr: "invalid diff base directory FS path: /os-path/not/ok",
+		},
+		{
+			description: "invalid go coverage file path",
+			options: Options{
+				DiffBaseDir:    ".",
+				GoCoveragePath: "/os-path/not/ok",
+			},
+			expectErr: "invalid coverage FS path: /os-path/not/ok",
+		},
+		{
+			description: "fs is optional",
+			options: Options{
+				FS:             nil,
+				Diff:           bytes.NewReader(nil),
+				DiffBaseDir:    baseDir,
+				GoCoveragePath: coverFile,
+			},
+		},
+		{
+			description: "go coverage base dir is optional",
+			options: Options{
+				FS:                os.NewFS(),
+				Diff:              bytes.NewReader(nil),
+				DiffBaseDir:       ".",
+				GoCoveragePath:    coverFile,
+				GoCoverageBaseDir: "",
+			},
+		},
+		{
+			description: "invalid go coverage base dir",
+			options: Options{
+				FS:                os.NewFS(),
+				Diff:              bytes.NewReader(nil),
+				DiffBaseDir:       ".",
+				GoCoveragePath:    coverFile,
+				GoCoverageBaseDir: "/os-path/not/ok",
+			},
+			expectErr: "invalid coverage base directory FS path: /os-path/not/ok",
+		},
+		{
+			description: "diff is required",
+			options: Options{
+				FS:                os.NewFS(),
+				Diff:              nil,
+				DiffBaseDir:       ".",
+				GoCoveragePath:    coverFile,
+				GoCoverageBaseDir: baseDir,
+			},
+			expectErr: "diff reader must not be nil",
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			_, err := Parse(tc.options)
+			if tc.expectErr != "" {
+				assert.EqualError(t, err, tc.expectErr)
+				return
+			}
+			assert.NoError(t, err)
 		})
 	}
 }
