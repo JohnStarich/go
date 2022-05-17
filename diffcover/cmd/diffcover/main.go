@@ -8,6 +8,8 @@ import (
 	osfs "github.com/hack-pad/hackpadfs/os"
 )
 
+var osExiter = os.Exit
+
 func main() {
 	if os.Getenv("CI") == "true" {
 		color.NoColor = false
@@ -21,7 +23,7 @@ func main() {
 	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		osExiter(1)
 		return
 	}
 }
