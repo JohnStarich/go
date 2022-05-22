@@ -157,7 +157,10 @@ func (c *DiffCoverage) coveredAndUncovered() (fileNames map[string]bool, covered
 	uncoveredDiff = make(map[string][]span.Span)
 	for file := range c.addedLines {
 		for _, added := range c.addedLines[file] {
-			file := path.Join(covToDiffRel, file)
+			file, err := fspath.Rel(covToDiffRel, file)
+			if err != nil {
+				panic(err)
+			}
 			for _, covered := range c.coveredLines[file] {
 				if intersection, ok := added.Intersection(covered); ok {
 					fileNames[file] = true

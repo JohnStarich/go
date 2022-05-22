@@ -125,7 +125,7 @@ github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
 				"go.mod": `
 module github.com/johnstarich/go/diffcover
 `,
-				"cmd/diffcover/run.go": `
+				"cmd/diffcover/main.go": `
 package main
 
 func main() {
@@ -143,6 +143,102 @@ Diff coverage is below target. Add tests for these files:
 ├───────┼──────────────┼───────────────────────┤
 │  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
 └───────┴──────────────┴───────────────────────┘
+`,
+		},
+		{
+			description: "print diffcover summary subdirectory",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "mypkg/cover.out",
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/run.go b/run.go
+index 0000000..1111111 100644
+--- a/mypkg/main.go
++++ b/mypkg/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
+`,
+				"mypkg/cover.out": `
+mode: atomic
+mymodule/main.go:4.1,4.9 1 1
+mymodule/main.go:5.1,5.9 1 0
+`,
+				"mypkg/go.mod": `
+module mymodule
+`,
+				"mypkg/main.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
+`,
+			},
+			expectOut: `
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬─────────┐
+│ LINES │ COVERAGE     │ FILE    │
+├───────┼──────────────┼─────────┤
+│  1/2  │  50.0% ██▌   │ main.go │
+└───────┴──────────────┴─────────┘
+`,
+		},
+		{
+			description: "print diffcover summary parent directory",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "cover.out",
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/run.go b/run.go
+index 0000000..1111111 100644
+--- a/mypkg/main.go
++++ b/mypkg/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
+`,
+				"cover.out": `
+mode: atomic
+mymodule/mypkg/main.go:4.1,4.9 1 1
+mymodule/mypkg/main.go:5.1,5.9 1 0
+`,
+				"go.mod": `
+module mymodule
+`,
+				"mypkg/main.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
+`,
+			},
+			expectOut: `
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬───────────────┐
+│ LINES │ COVERAGE     │ FILE          │
+├───────┼──────────────┼───────────────┤
+│  1/2  │  50.0% ██▌   │ mypkg/main.go │
+└───────┴──────────────┴───────────────┘
 `,
 		},
 	} {
