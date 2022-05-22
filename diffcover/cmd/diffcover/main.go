@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/fatih/color"
 	osfs "github.com/hack-pad/hackpadfs/os"
 )
 
-var osExiter = os.Exit
+var (
+	osExiter           = os.Exit
+	osErr    io.Writer = os.Stderr
+)
 
 func main() {
 	if os.Getenv("CI") == "true" {
@@ -18,11 +22,11 @@ func main() {
 		os.Args[1:],
 		os.Stdin,
 		os.Stdout,
-		os.Stderr,
+		osErr,
 		osfs.NewFS(),
 	)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(osErr, err)
 		osExiter(1)
 		return
 	}
