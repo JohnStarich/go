@@ -2,11 +2,16 @@ package main
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"path"
 	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -241,6 +246,167 @@ Diff coverage is below target. Add tests for these files:
 └───────┴──────────────┴───────────────┘
 `,
 		},
+		{
+			description: "print diffcover",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "cover.out",
+				ShowCoverage:   true,
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/run.go b/run.go
+index 0000000..1111111 100644
+--- a/cmd/diffcover/main.go
++++ b/cmd/diffcover/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
+`,
+				"cover.out": `
+mode: atomic
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+`,
+				"go.mod": `
+module github.com/johnstarich/go/diffcover
+`,
+				"cmd/diffcover/main.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
+`,
+			},
+			expectOut: `
+Coverage diff: cmd/diffcover/main.go
+Coverage: 2 to 6
+ 
+ func main() {
++	println(1)
+-	println(2)
+ }
+
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬───────────────────────┐
+│ LINES │ COVERAGE     │ FILE                  │
+├───────┼──────────────┼───────────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
+└───────┴──────────────┴───────────────────────┘
+`,
+		},
+		{
+			description: "post to github comment - bad status does not fail command",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "cover.out",
+				GitHubEndpoint: "replace-me",
+				GitHubToken:    "some-gh-token",
+				GitHubIssue:    "github.com/org/repo/pull/123",
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/run.go b/run.go
+index 0000000..1111111 100644
+--- a/cmd/diffcover/main.go
++++ b/cmd/diffcover/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
+`,
+				"cover.out": `
+mode: atomic
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+`,
+				"go.mod": `
+module github.com/johnstarich/go/diffcover
+`,
+				"cmd/diffcover/main.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
+`,
+			},
+			expectOut: `
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬───────────────────────┐
+│ LINES │ COVERAGE     │ FILE                  │
+├───────┼──────────────┼───────────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
+└───────┴──────────────┴───────────────────────┘
+
+Failed to update GitHub comment, skipping. Error: GET {{.ServerURL}}/api/v3/repos/org/repo/issues/123/comments?sort=created: 500  []
+`,
+		},
+		{
+			description: "post to github comment - bad issue URL",
+			args: Args{
+				DiffFile:       "my.patch",
+				GoCoverageFile: "cover.out",
+				GitHubToken:    "some-gh-token",
+				GitHubIssue:    "foo",
+			},
+			files: map[string]string{
+				"my.patch": `
+diff --git a/run.go b/run.go
+index 0000000..1111111 100644
+--- a/cmd/diffcover/main.go
++++ b/cmd/diffcover/main.go
+@@ -1,4 +1,6 @@
+ package main
+
+ func main() {
++	println(1)
++	println(2)
+ }
+`,
+				"cover.out": `
+mode: atomic
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+`,
+				"go.mod": `
+module github.com/johnstarich/go/diffcover
+`,
+				"cmd/diffcover/main.go": `
+package main
+
+func main() {
+	println(1)
+	println(2)
+}
+`,
+			},
+			expectOut: `
+Total diff coverage:  50.0%
+
+Diff coverage is below target. Add tests for these files:
+┌───────┬──────────────┬───────────────────────┐
+│ LINES │ COVERAGE     │ FILE                  │
+├───────┼──────────────┼───────────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
+└───────┴──────────────┴───────────────────────┘
+`,
+			expectErr: "malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123",
+		},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
@@ -255,8 +421,21 @@ Diff coverage is below target. Add tests for these files:
 			args := tc.args
 			args.DiffBaseDir = "."
 
+			if args.GitHubEndpoint == "replace-me" {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusInternalServerError)
+				}))
+				args.GitHubEndpoint = server.URL
+				t.Cleanup(server.Close)
+			}
+
+			var expectOut bytes.Buffer
+			require.NoError(t, template.Must(template.New("").Parse(tc.expectOut)).Execute(&expectOut, map[string]interface{}{
+				"ServerURL": args.GitHubEndpoint,
+			}))
+
 			err := runArgs(args, deps)
-			assert.Equal(t, strings.TrimSpace(tc.expectOut), strings.TrimSpace(output.String()))
+			assert.Equal(t, strings.TrimSpace(expectOut.String()), strings.TrimSpace(output.String()))
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)
 				return
@@ -311,4 +490,56 @@ func TestParseIssueURL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseArgs(t *testing.T) {
+	t.Parallel()
+
+	t.Run("missing required param", func(t *testing.T) {
+		var buf bytes.Buffer
+		_, err := parseArgs([]string{}, &buf)
+		assert.EqualError(t, err, "flag -cover-go is required")
+	})
+
+	t.Run("invalid flags", func(t *testing.T) {
+		var buf bytes.Buffer
+		_, err := parseArgs([]string{
+			"-target-diff-coverage", "not-a-number",
+		}, &buf)
+		assert.EqualError(t, err, `invalid value "not-a-number" for flag -target-diff-coverage: parse error`)
+	})
+
+	t.Run("set fs paths", func(t *testing.T) {
+		const (
+			someCoverPath = "some-cover-path"
+			someDiffPath  = "mydiff.patch"
+		)
+		var buf bytes.Buffer
+		args, err := parseArgs([]string{
+			"-cover-go", someCoverPath,
+			"-diff-file", someDiffPath,
+		}, &buf)
+		assert.NoError(t, err)
+
+		workingDir, err := toFSPath("")
+		require.NoError(t, err)
+
+		assert.Equal(t, Args{
+			DiffFile:           path.Join(workingDir, someDiffPath),
+			DiffBaseDir:        workingDir,
+			GoCoverageFile:     path.Join(workingDir, someCoverPath),
+			TargetDiffCoverage: 90,
+			GitHubEndpoint:     "https://api.github.com",
+		}, args)
+	})
+}
+
+func TestSetErr(t *testing.T) {
+	someError := errors.New("some error")
+	var err error
+	setErr(nil, &err)
+	assert.NoError(t, err)
+
+	setErr(someError, &err)
+	assert.Same(t, someError, err)
 }

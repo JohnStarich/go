@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"path"
 	"path/filepath"
@@ -85,30 +86,30 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 	}
 
 	if args.DiffFile != "-" {
-		args.DiffFile, err = toFSPath(args.DiffFile)
-		if err != nil {
-			return Args{}, err
-		}
+		args.DiffFile = toFSPathSetErr(args.DiffFile, &err)
 	}
-	args.DiffBaseDir, err = toFSPath(args.DiffBaseDir)
-	if err != nil {
-		return Args{}, err
+	args.DiffBaseDir = toFSPathSetErr(args.DiffBaseDir, &err)
+	args.GoCoverageFile = toFSPathSetErr(args.GoCoverageFile, &err)
+	return args, err
+}
+
+func toFSPathSetErr(p string, err *error) string {
+	p, pathErr := toFSPath(p)
+	setErr(pathErr, err)
+	return p
+}
+
+func setErr(err error, setErr *error) {
+	if err != nil && *setErr == nil {
+		*setErr = err
 	}
-	args.GoCoverageFile, err = toFSPath(args.GoCoverageFile)
-	if err != nil {
-		return Args{}, err
-	}
-	return args, nil
 }
 
 func toFSPath(p string) (string, error) {
 	p, err := filepath.Abs(p)
-	if err != nil {
-		return "", err
-	}
 	p = filepath.ToSlash(p)
 	p = strings.TrimPrefix(p, "/")
-	return p, nil
+	return p, err
 }
 
 type Deps struct {
@@ -116,6 +117,8 @@ type Deps struct {
 	Stdout io.Writer
 	FS     hackpadfs.FS
 }
+
+type doHTTPRequestFunc func(*http.Request) (*http.Response, error)
 
 func runArgs(args Args, deps Deps) (err error) {
 	defer func() { err = errors.WithStack(err) }()
@@ -186,7 +189,7 @@ func runArgs(args Args, deps Deps) (err error) {
 			Body:           diffcoverSummary(uncoveredFiles, args.TargetDiffCoverage, summaryMarkdown),
 		})
 		if err != nil {
-			fmt.Fprintln(deps.Stdout, "Failed to update GitHub comment, skipping. Error:", err)
+			fmt.Fprintln(deps.Stdout, "\nFailed to update GitHub comment, skipping. Error:", err)
 		}
 	}
 	return nil
