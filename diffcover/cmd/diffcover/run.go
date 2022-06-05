@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"path"
 	"path/filepath"
@@ -117,8 +116,6 @@ type Deps struct {
 	Stdout io.Writer
 	FS     hackpadfs.FS
 }
-
-type doHTTPRequestFunc func(*http.Request) (*http.Response, error)
 
 func runArgs(args Args, deps Deps) (err error) {
 	defer func() { err = errors.WithStack(err) }()
