@@ -6,7 +6,7 @@ require (
 	github.com/bluekeyes/go-gitdiff v0.6.1
 	github.com/fatih/color v1.13.0
 	github.com/google/go-github/v44 v44.0.0
-	github.com/hack-pad/hackpadfs v0.1.2
+	github.com/hack-pad/hackpadfs v0.1.3
 	github.com/jedib0t/go-pretty/v6 v6.3.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
