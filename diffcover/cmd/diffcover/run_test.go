@@ -9,12 +9,17 @@ import (
 	"testing"
 	"text/template"
 
+	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	color.NoColor = true // prevent color from interfering with test output
+}
 
 func TestRun(t *testing.T) {
 	t.Parallel()
