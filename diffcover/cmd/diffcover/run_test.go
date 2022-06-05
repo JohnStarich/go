@@ -9,7 +9,6 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/pkg/errors"
@@ -18,7 +17,7 @@ import (
 )
 
 func init() {
-	color.NoColor = true // prevent color from interfering with test output
+	setColorOnce(false)
 }
 
 func TestRun(t *testing.T) {

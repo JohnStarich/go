@@ -4,19 +4,27 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/fatih/color"
 	osfs "github.com/hack-pad/hackpadfs/os"
 )
 
 var (
-	osExiter           = os.Exit
-	osErr    io.Writer = os.Stderr
+	osExiter            = os.Exit
+	osErr     io.Writer = os.Stderr
+	colorOnce sync.Once
 )
+
+func setColorOnce(shouldColor bool) {
+	colorOnce.Do(func() {
+		color.NoColor = !shouldColor
+	})
+}
 
 func main() {
 	if os.Getenv("CI") == "true" {
-		color.NoColor = false
+		setColorOnce(true)
 	}
 	err := run(
 		os.Args[1:],
