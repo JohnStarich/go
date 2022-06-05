@@ -134,7 +134,6 @@ func TestParseInvalidOptions(t *testing.T) {
 		workingDirectory = fspath.ToFSPath(wd)
 		baseDir          = path.Join(workingDirectory, "testdata")
 		coverFile        = path.Join(baseDir, "add2.out")
-		//diffFile         = path.Join(baseDir, "add2.diff")
 	)
 	for _, tc := range []struct {
 		description string
