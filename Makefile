@@ -45,7 +45,7 @@ test: $(MODULES:=-test)
 			covet \
 				-diff-file - \
 				-cover-go ./cover.out \
-				-show-coverage \
+				-show-diff-coverage \
 				-gh-token "$$GITHUB_TOKEN" \
 				-gh-issue "github.com/$${GITHUB_REPOSITORY}/pull/$${ISSUE_NUMBER}" \
 				; \
