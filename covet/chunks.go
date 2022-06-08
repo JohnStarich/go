@@ -53,14 +53,14 @@ func (l Line) diffOpPrefix() string {
 	return "-"
 }
 
-type Chunk struct {
+type DiffChunk struct {
 	FirstLine, LastLine uint
 	Lines               []string
 }
 
 // DiffChunks return diff-like Chunks from a covet.File and the file contents' Reader.
-func DiffChunks(file File, fileReader io.Reader) ([]Chunk, error) {
-	var chunks []Chunk
+func DiffChunks(file File, fileReader io.Reader) ([]DiffChunk, error) {
+	var chunks []DiffChunk
 	iter := newLineIterator(fileReader)
 	const contextLines = 2
 	var lineNumber int64 = 1
@@ -89,7 +89,7 @@ func DiffChunks(file File, fileReader io.Reader) ([]Chunk, error) {
 			lines[i] = op + lines[i]
 			lineNumber++
 		}
-		chunks = append(chunks, Chunk{
+		chunks = append(chunks, DiffChunk{
 			FirstLine: uint(s.Start),
 			LastLine:  uint(lineNumber - 1),
 			Lines:     lines,

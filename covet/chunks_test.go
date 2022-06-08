@@ -115,7 +115,7 @@ func TestDiffChunks(t *testing.T) {
 	}
 	chunks, err := DiffChunks(file, strings.NewReader(diff))
 	assert.NoError(t, err)
-	assert.Equal(t, []Chunk{
+	assert.Equal(t, []DiffChunk{
 		{
 			FirstLine: 3,
 			LastLine:  8,
