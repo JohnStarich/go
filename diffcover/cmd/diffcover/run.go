@@ -229,34 +229,45 @@ func openFile(fs hackpadfs.FS, name, covPath string) (io.ReadCloser, error) {
 
 func findUncoveredLines(f diffcover.File) []span.Span {
 	var uncoveredLines []span.Span
-	var uncovered span.Span
-	for uncovered.End < int64(len(f.Lines)) {
-		uncovered = findFirstUncoveredLines(f.Lines[uncovered.End:])
-		uncoveredLines = append(uncoveredLines, uncovered)
+	ok := true
+	var nextLineIndex int
+	for ok {
+		var uncovered span.Span
+		uncovered, ok, nextLineIndex = findFirstUncoveredLines(f.Lines, nextLineIndex)
+		if ok {
+			uncoveredLines = append(uncoveredLines, uncovered)
+		}
 	}
-	sort.Slice(uncoveredLines, func(a, b int) bool {
+	sort.SliceStable(uncoveredLines, func(a, b int) bool {
 		return uncoveredLines[a].Len() > uncoveredLines[b].Len()
 	})
 	return uncoveredLines
 }
 
-func findFirstUncoveredLines(lines []diffcover.Line) span.Span {
-	var uncovered span.Span
-	for _, l := range lines {
-		if uncovered.Start == 0 && !l.Covered {
-			uncovered.Start = int64(l.LineNumber)
-		} else if uncovered.Start != 0 && l.Covered {
-			uncovered.End = int64(l.LineNumber + 1)
+func findFirstUncoveredLines(lines []diffcover.Line, startIndex int) (uncovered span.Span, ok bool, nextLineIndex int) {
+	// find start
+	nextLineIndex = startIndex
+	for _, l := range lines[nextLineIndex:] {
+		nextLineIndex++
+		if !l.Covered {
+			n := int64(l.LineNumber)
+			uncovered = span.Span{
+				Start: n,
+				End:   n + 1,
+			}
+			ok = true
 			break
 		}
 	}
-	if uncovered.Start == 0 {
-		uncovered.Start = int64(lines[0].LineNumber)
+	// find next line number jump or covered line
+	for _, l := range lines[nextLineIndex:] {
+		if l.Covered || int64(l.LineNumber) != uncovered.End {
+			break
+		}
+		nextLineIndex++
+		uncovered.End++
 	}
-	if uncovered.End == 0 {
-		uncovered.End = int64(lines[len(lines)-1].LineNumber + 1)
-	}
-	return uncovered
+	return
 }
 
 func findReportableUncoveredFiles(coveredFiles []diffcover.File, target, current float64) []diffcover.File {

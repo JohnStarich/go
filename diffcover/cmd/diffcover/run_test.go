@@ -10,6 +10,8 @@ import (
 	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
+	"github.com/johnstarich/go/diffcover"
+	"github.com/johnstarich/go/diffcover/internal/span"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -546,4 +548,134 @@ func TestSetErr(t *testing.T) {
 
 	setErr(someError, &err)
 	assert.Same(t, someError, err)
+}
+
+func TestFindUncoveredLines(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		description string
+		lines       []diffcover.Line
+		expect      []span.Span
+	}{
+		{
+			description: "no lines",
+			lines:       []diffcover.Line{},
+			expect:      nil,
+		},
+		{
+			description: "1 covered line",
+			lines: []diffcover.Line{
+				{Covered: true, LineNumber: 1},
+			},
+			expect: nil,
+		},
+		{
+			description: "1 uncovered line",
+			lines: []diffcover.Line{
+				{Covered: false, LineNumber: 1},
+			},
+			expect: []span.Span{
+				{Start: 1, End: 2},
+			},
+		},
+		{
+			description: "2 small spans",
+			lines: []diffcover.Line{
+				{Covered: false, LineNumber: 1},
+				{Covered: true, LineNumber: 2},
+				{Covered: false, LineNumber: 3},
+			},
+			expect: []span.Span{
+				{Start: 1, End: 2},
+				{Start: 3, End: 4},
+			},
+		},
+		{
+			description: "2 sparse spans",
+			lines: []diffcover.Line{
+				{Covered: false, LineNumber: 1},
+				{Covered: false, LineNumber: 3},
+			},
+			expect: []span.Span{
+				{Start: 1, End: 2},
+				{Start: 3, End: 4},
+			},
+		},
+		{
+			description: "2 spans with 1 larger span",
+			lines: []diffcover.Line{
+				{Covered: false, LineNumber: 1},
+				{Covered: false, LineNumber: 3},
+				{Covered: false, LineNumber: 4},
+			},
+			expect: []span.Span{
+				{Start: 3, End: 5},
+				{Start: 1, End: 2},
+			},
+		},
+		{
+			description: "multiple spans",
+			lines: []diffcover.Line{
+				{Covered: false, LineNumber: 1},
+
+				{Covered: true, LineNumber: 3},
+				{Covered: false, LineNumber: 4},
+
+				{Covered: true, LineNumber: 7},
+				{Covered: true, LineNumber: 8},
+
+				{Covered: false, LineNumber: 10},
+				{Covered: false, LineNumber: 11},
+				{Covered: false, LineNumber: 12},
+				{Covered: false, LineNumber: 13},
+			},
+			expect: []span.Span{
+				{Start: 10, End: 14},
+				{Start: 1, End: 2},
+				{Start: 4, End: 5},
+			},
+		},
+	} {
+		tc := tc // enable parallel sub-tests
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			spans := findUncoveredLines(diffcover.File{
+				Lines: tc.lines,
+			})
+			assert.Equal(t, tc.expect, spans)
+		})
+	}
+}
+
+func TestFindReportableUncoveredFiles(t *testing.T) {
+	t.Run("sort and filter just enough files", func(t *testing.T) {
+		files := []diffcover.File{
+			{Name: "foo", Covered: 2, Uncovered: 0},
+			{Name: "bar", Covered: 1, Uncovered: 2},
+			{Name: "baz", Covered: 1, Uncovered: 2},
+			{Name: "biff", Covered: 0, Uncovered: 2},
+		}
+		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
+		assert.Equal(t, []diffcover.File{
+			{Name: "bar", Covered: 1, Uncovered: 2},
+			{Name: "baz", Covered: 1, Uncovered: 2},
+			{Name: "biff", Covered: 0, Uncovered: 2},
+		}, reportable)
+	})
+
+	t.Run("include more small files if the biggest chunks are not close enough to target", func(t *testing.T) {
+		files := []diffcover.File{
+			{Name: "foo", Covered: 0, Uncovered: 1},
+			{Name: "bar", Covered: 0, Uncovered: 1},
+			{Name: "baz", Covered: 0, Uncovered: 1},
+			{Name: "biff", Covered: 0, Uncovered: 7},
+		}
+		reportable := findReportableUncoveredFiles(files, 0.8, 0)
+		assert.Equal(t, []diffcover.File{
+			{Name: "biff", Covered: 0, Uncovered: 7},
+			{Name: "bar", Covered: 0, Uncovered: 1},
+			{Name: "baz", Covered: 0, Uncovered: 1},
+			{Name: "foo", Covered: 0, Uncovered: 1},
+		}, reportable)
+	})
 }
