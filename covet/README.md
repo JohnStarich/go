@@ -29,3 +29,52 @@ covet -diff-file my.diff -cover-go cover.out
 Still experimental: Future releases may contain breaking changes.
 
 Thoughts or questions? Please [open an issue](https://github.com/JohnStarich/go/issues/new) to discuss.
+
+
+## Integrate with GitHub
+
+Covet includes an automatic GitHub Actions integration and opt-in GitHub comment summary reports.
+
+To enable comment summaries, you need to set a few additional flags.
+
+Here's an example using GitHub Actions:
+```yaml
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v3
+    - name: checkout
+      run: |
+        commits=${{ github.event.pull_request.commits }}
+        if [[ -n "$commits" ]]; then
+          # Prepare enough depth for diffs with master
+          git fetch --depth="$(( commits + 1 ))"
+        fi
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.16.x
+    - name: Test
+      run: |
+	git diff origin/master | \
+	    covet \
+		-diff-file - \
+		-cover-go ./cover.out \
+		-show-diff-coverage \
+		-gh-token "$GITHUB_TOKEN" \
+		-gh-issue "github.com/${GITHUB_REPOSITORY}/pull/${ISSUE_NUMBER}" 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+And here's an example using environment variables from Travis CI:
+```bash
+git diff origin/master | \
+    covet \
+        -diff-file - \
+        -cover-go ./cover.out \
+        -show-diff-coverage \
+        -gh-token "$GITHUB_TOKEN" \
+        -gh-issue "github.com/${TRAVIS_PULL_REQUEST_SLUG}/pull/${TRAVIS_PULL_REQUEST}"
+```
