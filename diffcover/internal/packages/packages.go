@@ -119,7 +119,17 @@ func newFSBuildContext(fs hackpadfs.FS, workingDirectory string, options Options
 		}
 		return dir[len(root):], true
 	}
-	ctx.ReadDir = func(dir string) ([]hackpadfs.FileInfo, error) {
+	ctx.ReadDir = fsReadDir(fs)
+	ctx.OpenFile = func(path string) (io.ReadCloser, error) {
+		return fs.Open(path)
+	}
+	return ctx
+}
+
+// fsReadDir is not used by the FS context at time of writing, but x/packages may begin using it later.
+// Extracted for more thorough testing.
+func fsReadDir(fs hackpadfs.FS) func(dir string) ([]hackpadfs.FileInfo, error) {
+	return func(dir string) ([]hackpadfs.FileInfo, error) {
 		dirEntries, err := hackpadfs.ReadDir(fs, dir)
 		if err != nil {
 			return nil, err
@@ -134,10 +144,6 @@ func newFSBuildContext(fs hackpadfs.FS, workingDirectory string, options Options
 		}
 		return infos, nil
 	}
-	ctx.OpenFile = func(path string) (io.ReadCloser, error) {
-		return fs.Open(path)
-	}
-	return ctx
 }
 
 func findModule(fs hackpadfs.FS, dir string) (moduleName, moduleDir string, err error) {

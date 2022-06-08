@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/hack-pad/hackpadfs"
 	"github.com/johnstarich/go/diffcover/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -180,6 +181,71 @@ func TestFindModule(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectModuleName, moduleName)
 			assert.Equal(t, tc.expectModuleDir, moduleDir)
+		})
+	}
+}
+
+type quickInfo struct {
+	name string
+	size int64
+	mode string
+}
+
+func toQuickInfo(info hackpadfs.FileInfo) quickInfo {
+	return quickInfo{
+		name: info.Name(),
+		size: info.Size(),
+		mode: info.Mode().String(),
+	}
+}
+
+func toQuickInfos(infos []hackpadfs.FileInfo) []quickInfo {
+	var quick []quickInfo
+	for _, i := range infos {
+		quick = append(quick, toQuickInfo(i))
+	}
+	return quick
+}
+
+func TestFSReadDirectory(t *testing.T) {
+	for _, tc := range []struct {
+		description     string
+		files           map[string]string
+		dir             string
+		expectFileInfos []quickInfo
+		expectErr       error
+	}{
+		{
+			description:     "read root",
+			dir:             ".",
+			expectFileInfos: nil,
+		},
+		{
+			description: "read subdir",
+			files: map[string]string{
+				"foo/bar": "bar",
+			},
+			dir: "foo",
+			expectFileInfos: []quickInfo{
+				{name: "bar", size: 4, mode: "-rw-rw-rw-"},
+			},
+		},
+		{
+			description: "does not exist",
+			dir:         "foo",
+			expectErr:   hackpadfs.ErrNotExist,
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			fs := testhelpers.FSWithFiles(t, tc.files)
+			readDir := fsReadDir(fs)
+			fileInfos, err := readDir(tc.dir)
+			if tc.expectErr != nil {
+				assert.ErrorIs(t, err, tc.expectErr)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectFileInfos, toQuickInfos(fileInfos))
 		})
 	}
 }
