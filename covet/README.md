@@ -12,12 +12,18 @@ covet -help
 git diff HEAD~10...HEAD > my.diff
 go test -coverprofile=cover.out ./...
 
-covet -diff-file my.diff -go-cover cover.out
-# covet
-# Covered:    97.4%
-# Uncovered:   2.6%
-#  97.2%,   6 lines not covered | gopages/internal/generate/generate.go
+covet -diff-file my.diff -cover-go cover.out
 #  ... includes diff and coverage intersection ...
+# Total diff coverage:  84.1%
+#
+# Diff coverage is below target. Add tests for these files:
+#
+# ┌─────────┬──────────────┬────────────────────────────────────────────┐
+# │ LINES   │ COVERAGE     │ FILE                                       │
+# ├─────────┼──────────────┼────────────────────────────────────────────┤
+# │ 239/279 │  85.7% ████▎ │ diffcover/cmd/diffcover/run.go             │
+# │  16/42  │  38.1% █▉    │ diffcover/cmd/diffcover/coverage_status.go │
+# └─────────┴──────────────┴────────────────────────────────────────────┘
 ```
 
 Still experimental: Future releases may contain breaking changes.
