@@ -27,7 +27,7 @@ func TestEnsureAppGitHubComment(t *testing.T) {
 			var comment github.IssueComment
 			require.NoError(t, json.NewDecoder(r.Body).Decode(&comment))
 			assert.Equal(t, github.IssueComment{
-				Body: stringPtr(`<!-- diffcover -->
+				Body: stringPtr(`<!-- covet -->
 
 some body`),
 			}, comment)
@@ -38,7 +38,7 @@ some body`),
 			require.NoError(t, json.NewEncoder(w).Encode([]*github.IssueComment{
 				{
 					ID: &someCommentID,
-					Body: stringPtr(`<!-- diffcover -->
+					Body: stringPtr(`<!-- covet -->
 
 some body`),
 				},
@@ -48,7 +48,7 @@ some body`),
 			var comment github.IssueComment
 			require.NoError(t, json.NewDecoder(r.Body).Decode(&comment))
 			assert.Equal(t, github.IssueComment{
-				Body: stringPtr(`<!-- diffcover -->
+				Body: stringPtr(`<!-- covet -->
 
 some other body`),
 			}, comment)

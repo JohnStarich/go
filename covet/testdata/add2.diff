@@ -1,0 +1,7 @@
+diff --git a/covet.go b/covet.go
+index 0000000..1111111 100644
+--- a/covet.go
++++ b/covet.go
+@@ -0,0 +1,2 @@
++added 1
++added 2

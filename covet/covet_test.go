@@ -1,4 +1,4 @@
-package diffcover
+package covet
 
 import (
 	"bytes"
@@ -12,8 +12,8 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/johnstarich/go/diffcover/internal/fspath"
-	"github.com/johnstarich/go/diffcover/internal/testhelpers"
+	"github.com/johnstarich/go/covet/internal/fspath"
+	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,36 +30,36 @@ func TestParse(t *testing.T) {
 		{
 			description: "half covered",
 			diff: `
-diff --git a/diffcover.go b/diffcover.go
+diff --git a/covet.go b/covet.go
 index 0000000..1111111 100644
---- a/diffcover.go
-+++ b/diffcover.go
+--- a/covet.go
++++ b/covet.go
 @@ -0,0 +1,2 @@
 +added 1
 +added 2
 `,
 			coverage: `
 mode: atomic
-github.com/johnstarich/go/diffcover/diffcover.go:1.1,1.7 1 1
-github.com/johnstarich/go/diffcover/diffcover.go:2.1,2.7 1 0
+github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 1
+github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
 `,
 			expectCovered: 0.5,
 		},
 		{
 			description: "no coverage hits",
 			diff: `
-diff --git a/diffcover.go b/diffcover.go
+diff --git a/covet.go b/covet.go
 index 0000000..1111111 100644
---- a/diffcover.go
-+++ b/diffcover.go
+--- a/covet.go
++++ b/covet.go
 @@ -0,0 +1,2 @@
 +added 1
 +added 2
 `,
 			coverage: `
 mode: atomic
-github.com/johnstarich/go/diffcover/diffcover.go:1.1,1.7 1 0
-github.com/johnstarich/go/diffcover/diffcover.go:2.1,2.7 1 0
+github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 0
+github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
 `,
 			expectCovered: 0,
 		},
@@ -68,18 +68,18 @@ github.com/johnstarich/go/diffcover/diffcover.go:2.1,2.7 1 0
 			diffReader:  iotest.ErrReader(errors.New("some error")),
 			coverage: `
 mode: atomic
-github.com/johnstarich/go/diffcover/diffcover.go:1.1,1.7 1 1
-github.com/johnstarich/go/diffcover/diffcover.go:2.1,2.7 1 0
+github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 1
+github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
 `,
 			expectErr: "some error",
 		},
 		{
 			description: "malformed coverage file",
 			diff: `
-diff --git a/diffcover.go b/diffcover.go
+diff --git a/covet.go b/covet.go
 index 0000000..1111111 100644
---- a/diffcover.go
-+++ b/diffcover.go
+--- a/covet.go
++++ b/covet.go
 @@ -0,0 +1,2 @@
 +added 1
 +added 2
@@ -105,7 +105,7 @@ foo
 				require.NoError(t, f.Close())
 			}
 
-			diffcover, err := Parse(Options{
+			covet, err := Parse(Options{
 				FS:                fs,
 				Diff:              tc.diffReader,
 				DiffBaseDir:       wd,
@@ -118,10 +118,10 @@ foo
 			}
 			require.NoError(t, err)
 
-			files := diffcover.Files()
+			files := covet.Files()
 			assert.NotEmpty(t, files)
 
-			covered := diffcover.Covered()
+			covered := covet.Covered()
 			assert.Equal(t, tc.expectCovered, covered)
 		})
 	}

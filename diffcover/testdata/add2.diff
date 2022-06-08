@@ -1,7 +1,0 @@
-diff --git a/diffcover.go b/diffcover.go
-index 0000000..1111111 100644
---- a/diffcover.go
-+++ b/diffcover.go
-@@ -0,0 +1,2 @@
-+added 1
-+added 2

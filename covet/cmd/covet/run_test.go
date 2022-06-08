@@ -10,9 +10,9 @@ import (
 	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
-	"github.com/johnstarich/go/diffcover"
-	"github.com/johnstarich/go/diffcover/internal/span"
-	"github.com/johnstarich/go/diffcover/internal/testhelpers"
+	"github.com/johnstarich/go/covet"
+	"github.com/johnstarich/go/covet/internal/span"
+	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,18 +34,18 @@ func TestRun(t *testing.T) {
 		{
 			description: "missing required args",
 			args:        nil,
-			expectOut:   "Usage of diffcover:",
+			expectOut:   "Usage of covet:",
 			expectErr:   "flag -cover-go is required",
 		},
 		{
 			description: "help",
 			args:        []string{"-help"},
-			expectOut:   "Usage of diffcover:",
+			expectOut:   "Usage of covet:",
 		},
 		{
 			description: "wrong flag type",
 			args:        []string{"-target-diff-coverage", "-1"},
-			expectOut:   "Usage of diffcover:",
+			expectOut:   "Usage of covet:",
 			expectErr:   `invalid value "-1" for flag -target-diff-coverage: parse error`,
 		},
 		{
@@ -93,7 +93,7 @@ func TestRunArgs(t *testing.T) {
 		expectErr   string
 	}{
 		{
-			description: "print empty diffcover summary",
+			description: "print empty covet summary",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "cover.out",
@@ -109,7 +109,7 @@ No coverage information intersects with diff.
 `,
 		},
 		{
-			description: "print diffcover summary",
+			description: "print covet summary",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "cover.out",
@@ -118,8 +118,8 @@ No coverage information intersects with diff.
 				"my.patch": `
 diff --git a/run.go b/run.go
 index 0000000..1111111 100644
---- a/cmd/diffcover/main.go
-+++ b/cmd/diffcover/main.go
+--- a/cmd/covet/main.go
++++ b/cmd/covet/main.go
 @@ -1,4 +1,6 @@
  package main
 
@@ -130,13 +130,13 @@ index 0000000..1111111 100644
 `,
 				"cover.out": `
 mode: atomic
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
 `,
 				"go.mod": `
-module github.com/johnstarich/go/diffcover
+module github.com/johnstarich/go/covet
 `,
-				"cmd/diffcover/main.go": `
+				"cmd/covet/main.go": `
 package main
 
 func main() {
@@ -149,15 +149,15 @@ func main() {
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬───────────────────────┐
-│ LINES │ COVERAGE     │ FILE                  │
-├───────┼──────────────┼───────────────────────┤
-│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
-└───────┴──────────────┴───────────────────────┘
+┌───────┬──────────────┬───────────────────┐
+│ LINES │ COVERAGE     │ FILE              │
+├───────┼──────────────┼───────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+└───────┴──────────────┴───────────────────┘
 `,
 		},
 		{
-			description: "print diffcover summary subdirectory",
+			description: "print covet summary subdirectory",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "mypkg/cover.out",
@@ -205,7 +205,7 @@ Diff coverage is below target. Add tests for these files:
 `,
 		},
 		{
-			description: "print diffcover summary parent directory",
+			description: "print covet summary parent directory",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "cover.out",
@@ -253,7 +253,7 @@ Diff coverage is below target. Add tests for these files:
 `,
 		},
 		{
-			description: "print diffcover",
+			description: "print covet",
 			args: Args{
 				DiffFile:       "my.patch",
 				GoCoverageFile: "cover.out",
@@ -263,8 +263,8 @@ Diff coverage is below target. Add tests for these files:
 				"my.patch": `
 diff --git a/run.go b/run.go
 index 0000000..1111111 100644
---- a/cmd/diffcover/main.go
-+++ b/cmd/diffcover/main.go
+--- a/cmd/covet/main.go
++++ b/cmd/covet/main.go
 @@ -1,4 +1,6 @@
  package main
 
@@ -275,13 +275,13 @@ index 0000000..1111111 100644
 `,
 				"cover.out": `
 mode: atomic
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
 `,
 				"go.mod": `
-module github.com/johnstarich/go/diffcover
+module github.com/johnstarich/go/covet
 `,
-				"cmd/diffcover/main.go": `
+				"cmd/covet/main.go": `
 package main
 
 func main() {
@@ -291,7 +291,7 @@ func main() {
 `,
 			},
 			expectOut: `
-Coverage diff: cmd/diffcover/main.go
+Coverage diff: cmd/covet/main.go
 Coverage: 2 to 6
  
  func main() {
@@ -302,11 +302,11 @@ Coverage: 2 to 6
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬───────────────────────┐
-│ LINES │ COVERAGE     │ FILE                  │
-├───────┼──────────────┼───────────────────────┤
-│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
-└───────┴──────────────┴───────────────────────┘
+┌───────┬──────────────┬───────────────────┐
+│ LINES │ COVERAGE     │ FILE              │
+├───────┼──────────────┼───────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+└───────┴──────────────┴───────────────────┘
 `,
 		},
 		{
@@ -322,8 +322,8 @@ Diff coverage is below target. Add tests for these files:
 				"my.patch": `
 diff --git a/run.go b/run.go
 index 0000000..1111111 100644
---- a/cmd/diffcover/main.go
-+++ b/cmd/diffcover/main.go
+--- a/cmd/covet/main.go
++++ b/cmd/covet/main.go
 @@ -1,4 +1,6 @@
  package main
 
@@ -334,13 +334,13 @@ index 0000000..1111111 100644
 `,
 				"cover.out": `
 mode: atomic
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
 `,
 				"go.mod": `
-module github.com/johnstarich/go/diffcover
+module github.com/johnstarich/go/covet
 `,
-				"cmd/diffcover/main.go": `
+				"cmd/covet/main.go": `
 package main
 
 func main() {
@@ -353,11 +353,11 @@ func main() {
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬───────────────────────┐
-│ LINES │ COVERAGE     │ FILE                  │
-├───────┼──────────────┼───────────────────────┤
-│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
-└───────┴──────────────┴───────────────────────┘
+┌───────┬──────────────┬───────────────────┐
+│ LINES │ COVERAGE     │ FILE              │
+├───────┼──────────────┼───────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+└───────┴──────────────┴───────────────────┘
 
 Failed to update GitHub comment, skipping. Error: GET {{.ServerURL}}/api/v3/repos/org/repo/issues/123/comments?sort=created: 500  []
 `,
@@ -374,8 +374,8 @@ Failed to update GitHub comment, skipping. Error: GET {{.ServerURL}}/api/v3/repo
 				"my.patch": `
 diff --git a/run.go b/run.go
 index 0000000..1111111 100644
---- a/cmd/diffcover/main.go
-+++ b/cmd/diffcover/main.go
+--- a/cmd/covet/main.go
++++ b/cmd/covet/main.go
 @@ -1,4 +1,6 @@
  package main
 
@@ -386,13 +386,13 @@ index 0000000..1111111 100644
 `,
 				"cover.out": `
 mode: atomic
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:4.1,4.9 1 1
-github.com/johnstarich/go/diffcover/cmd/diffcover/main.go:5.1,5.9 1 0
+github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
 `,
 				"go.mod": `
-module github.com/johnstarich/go/diffcover
+module github.com/johnstarich/go/covet
 `,
-				"cmd/diffcover/main.go": `
+				"cmd/covet/main.go": `
 package main
 
 func main() {
@@ -405,11 +405,11 @@ func main() {
 Total diff coverage:  50.0%
 
 Diff coverage is below target. Add tests for these files:
-┌───────┬──────────────┬───────────────────────┐
-│ LINES │ COVERAGE     │ FILE                  │
-├───────┼──────────────┼───────────────────────┤
-│  1/2  │  50.0% ██▌   │ cmd/diffcover/main.go │
-└───────┴──────────────┴───────────────────────┘
+┌───────┬──────────────┬───────────────────┐
+│ LINES │ COVERAGE     │ FILE              │
+├───────┼──────────────┼───────────────────┤
+│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+└───────┴──────────────┴───────────────────┘
 `,
 			expectErr: "malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123",
 		},
@@ -557,24 +557,24 @@ func TestFindUncoveredLines(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
 		description string
-		lines       []diffcover.Line
+		lines       []covet.Line
 		expect      []span.Span
 	}{
 		{
 			description: "no lines",
-			lines:       []diffcover.Line{},
+			lines:       []covet.Line{},
 			expect:      nil,
 		},
 		{
 			description: "1 covered line",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: true, LineNumber: 1},
 			},
 			expect: nil,
 		},
 		{
 			description: "1 uncovered line",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: false, LineNumber: 1},
 			},
 			expect: []span.Span{
@@ -583,7 +583,7 @@ func TestFindUncoveredLines(t *testing.T) {
 		},
 		{
 			description: "2 small spans",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: false, LineNumber: 1},
 				{Covered: true, LineNumber: 2},
 				{Covered: false, LineNumber: 3},
@@ -595,7 +595,7 @@ func TestFindUncoveredLines(t *testing.T) {
 		},
 		{
 			description: "2 sparse spans",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: false, LineNumber: 1},
 				{Covered: false, LineNumber: 3},
 			},
@@ -606,7 +606,7 @@ func TestFindUncoveredLines(t *testing.T) {
 		},
 		{
 			description: "2 spans with 1 larger span",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: false, LineNumber: 1},
 				{Covered: false, LineNumber: 3},
 				{Covered: false, LineNumber: 4},
@@ -618,7 +618,7 @@ func TestFindUncoveredLines(t *testing.T) {
 		},
 		{
 			description: "multiple spans",
-			lines: []diffcover.Line{
+			lines: []covet.Line{
 				{Covered: false, LineNumber: 1},
 
 				{Covered: true, LineNumber: 3},
@@ -642,7 +642,7 @@ func TestFindUncoveredLines(t *testing.T) {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			spans := findUncoveredLines(diffcover.File{
+			spans := findUncoveredLines(covet.File{
 				Lines: tc.lines,
 			})
 			assert.Equal(t, tc.expect, spans)
@@ -652,14 +652,14 @@ func TestFindUncoveredLines(t *testing.T) {
 
 func TestFindReportableUncoveredFiles(t *testing.T) {
 	t.Run("sort and filter just enough files", func(t *testing.T) {
-		files := []diffcover.File{
+		files := []covet.File{
 			{Name: "foo", Covered: 2, Uncovered: 0},
 			{Name: "bar", Covered: 1, Uncovered: 2},
 			{Name: "baz", Covered: 1, Uncovered: 2},
 			{Name: "biff", Covered: 0, Uncovered: 2},
 		}
 		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
-		assert.Equal(t, []diffcover.File{
+		assert.Equal(t, []covet.File{
 			{Name: "bar", Covered: 1, Uncovered: 2},
 			{Name: "baz", Covered: 1, Uncovered: 2},
 			{Name: "biff", Covered: 0, Uncovered: 2},
@@ -667,14 +667,14 @@ func TestFindReportableUncoveredFiles(t *testing.T) {
 	})
 
 	t.Run("include more small files if the biggest chunks are not close enough to target", func(t *testing.T) {
-		files := []diffcover.File{
+		files := []covet.File{
 			{Name: "foo", Covered: 0, Uncovered: 1},
 			{Name: "bar", Covered: 0, Uncovered: 1},
 			{Name: "baz", Covered: 0, Uncovered: 1},
 			{Name: "biff", Covered: 0, Uncovered: 7},
 		}
 		reportable := findReportableUncoveredFiles(files, 0.8, 0)
-		assert.Equal(t, []diffcover.File{
+		assert.Equal(t, []covet.File{
 			{Name: "biff", Covered: 0, Uncovered: 7},
 			{Name: "bar", Covered: 0, Uncovered: 1},
 			{Name: "baz", Covered: 0, Uncovered: 1},

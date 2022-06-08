@@ -18,7 +18,7 @@ type gitHubCommentOptions struct {
 }
 
 func ensureAppGitHubComment(ctx context.Context, options gitHubCommentOptions) error {
-	const appMarker = "<!-- diffcover -->\n\n"
+	const appMarker = "<!-- covet -->\n\n"
 	authClient := oauth2.NewClient(ctx, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: options.GitHubToken}))
 
 	client, err := github.NewEnterpriseClient(options.GitHubEndpoint, "", authClient)

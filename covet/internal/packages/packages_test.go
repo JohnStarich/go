@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hack-pad/hackpadfs"
-	"github.com/johnstarich/go/diffcover/internal/testhelpers"
+	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

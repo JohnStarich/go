@@ -1,10 +1,10 @@
-package diffcover
+package covet
 
 import (
 	"bufio"
 	"io"
 
-	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/johnstarich/go/covet/internal/span"
 )
 
 type File struct {
@@ -58,7 +58,7 @@ type Chunk struct {
 	Lines               []string
 }
 
-// DiffChunks return diff-like Chunks from a diffcover.File and the file contents' Reader.
+// DiffChunks return diff-like Chunks from a covet.File and the file contents' Reader.
 func DiffChunks(file File, fileReader io.Reader) ([]Chunk, error) {
 	var chunks []Chunk
 	iter := newLineIterator(fileReader)

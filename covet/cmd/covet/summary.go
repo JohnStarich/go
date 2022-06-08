@@ -7,8 +7,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/johnstarich/go/diffcover"
-	"github.com/johnstarich/go/diffcover/internal/minmax"
+	"github.com/johnstarich/go/covet"
+	"github.com/johnstarich/go/covet/internal/minmax"
 )
 
 type summaryFormat int
@@ -62,7 +62,7 @@ func (f summaryFormat) StatusIcon(status coverageStatus) string {
 	}
 }
 
-func diffcoverSummary(uncoveredFiles []diffcover.File, targetCoverage uint, format summaryFormat) string {
+func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summaryFormat) string {
 	if len(uncoveredFiles) == 0 {
 		return fmt.Sprintf("Successfully reached diff coverage target: >%d%%\n", targetCoverage)
 	}

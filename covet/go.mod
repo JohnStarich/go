@@ -1,4 +1,4 @@
-module github.com/johnstarich/go/diffcover
+module github.com/johnstarich/go/covet
 
 go 1.16
 

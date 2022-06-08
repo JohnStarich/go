@@ -3,7 +3,7 @@ package span
 import (
 	"fmt"
 
-	"github.com/johnstarich/go/diffcover/internal/minmax"
+	"github.com/johnstarich/go/covet/internal/minmax"
 )
 
 type Span struct {

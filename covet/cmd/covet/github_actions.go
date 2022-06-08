@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/johnstarich/go/covet/internal/span"
 )
 
 var inGitHubActions = os.Getenv("GITHUB_ACTIONS") == "true"
@@ -69,7 +69,7 @@ func coverageCommand(percent float64, file string, uncovered []span.Span) string
 	status := newCoverageStatus(percent)
 	message := fmt.Sprintf("Diff coverage is %.1f%%", 100*percent)
 	args := map[string]string{
-		"title": "diffcover",
+		"title": "covet",
 	}
 	if file != "" {
 		args["file"] = file

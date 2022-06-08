@@ -1,4 +1,4 @@
-package diffcover
+package covet
 
 import (
 	"io"
@@ -8,15 +8,15 @@ import (
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/johnstarich/go/diffcover/internal/fspath"
-	"github.com/johnstarich/go/diffcover/internal/packages"
-	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/johnstarich/go/covet/internal/fspath"
+	"github.com/johnstarich/go/covet/internal/packages"
+	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/cover"
 )
 
-// DiffCoverage generates reports for a diff and coverage combination
-type DiffCoverage struct {
+// Covet generates reports for a diff and coverage combination
+type Covet struct {
 	options Options
 	addedLines,
 	coveredLines,
@@ -38,8 +38,8 @@ type Options struct {
 	GoCoverageBaseDir string
 }
 
-// Parse reads and parses both a diff file and Go coverage file, then returns a DiffCoverage instance to render reports
-func Parse(options Options) (_ *DiffCoverage, err error) {
+// Parse reads and parses both a diff file and Go coverage file, then returns a Covet instance to render reports
+func Parse(options Options) (_ *Covet, err error) {
 	defer func() { err = errors.WithStack(err) }()
 	if !hackpadfs.ValidPath(options.DiffBaseDir) {
 		return nil, errors.Errorf("invalid diff base directory FS path: %s", options.DiffBaseDir)
@@ -75,27 +75,27 @@ func Parse(options Options) (_ *DiffCoverage, err error) {
 		return nil, err
 	}
 
-	diffcov := &DiffCoverage{
+	covet := &Covet{
 		options:        options,
 		addedLines:     make(map[string][]span.Span),
 		coveredLines:   make(map[string][]span.Span),
 		uncoveredLines: make(map[string][]span.Span),
 	}
-	_, err = diffcov.coverageToDiffRel()
+	_, err = covet.coverageToDiffRel()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := diffcov.addDiff(diffFiles); err != nil {
+	if err := covet.addDiff(diffFiles); err != nil {
 		return nil, err
 	}
-	if err := diffcov.addCoverage(options.FS, options.GoCoveragePath, options.GoCoverageBaseDir, coverageFiles); err != nil {
+	if err := covet.addCoverage(options.FS, options.GoCoveragePath, options.GoCoverageBaseDir, coverageFiles); err != nil {
 		return nil, err
 	}
-	return diffcov, nil
+	return covet, nil
 }
 
-func (c *DiffCoverage) addDiff(diffFiles []*gitdiff.File) error {
+func (c *Covet) addDiff(diffFiles []*gitdiff.File) error {
 	for _, file := range diffFiles {
 		spans := findDiffAddSpans(file.TextFragments)
 		c.addedLines[file.NewName] = append(c.addedLines[file.NewName], spans...)
@@ -123,7 +123,7 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	return spans
 }
 
-func (c *DiffCoverage) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string, coverageFiles []*cover.Profile) error {
+func (c *Covet) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string, coverageFiles []*cover.Profile) error {
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
 			coverageFile, err := packages.FilePath(fs, baseDir, file.FileName, packages.Options{})
@@ -146,11 +146,11 @@ func (c *DiffCoverage) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string
 	return nil
 }
 
-func (c *DiffCoverage) coverageToDiffRel() (string, error) {
+func (c *Covet) coverageToDiffRel() (string, error) {
 	return fspath.Rel(c.options.DiffBaseDir, c.options.GoCoverageBaseDir)
 }
 
-func (c *DiffCoverage) coveredAndUncovered() (fileNames map[string]bool, coveredDiff, uncoveredDiff map[string][]span.Span) {
+func (c *Covet) coveredAndUncovered() (fileNames map[string]bool, coveredDiff, uncoveredDiff map[string][]span.Span) {
 	covToDiffRel, _ := c.coverageToDiffRel() // ignore error since it's checked during setup
 	fileNames = make(map[string]bool)
 	coveredDiff = make(map[string][]span.Span)
@@ -179,7 +179,7 @@ func (c *DiffCoverage) coveredAndUncovered() (fileNames map[string]bool, covered
 }
 
 // Covered returns the percentage of covered lines in the diff.
-func (c *DiffCoverage) Covered() float64 {
+func (c *Covet) Covered() float64 {
 	_, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
 	var coveredTotal, uncoveredTotal float64
 	for _, spans := range coveredSpans {
@@ -195,7 +195,7 @@ func (c *DiffCoverage) Covered() float64 {
 	return coveredTotal / (coveredTotal + uncoveredTotal)
 }
 
-func (c *DiffCoverage) Files() []File {
+func (c *Covet) Files() []File {
 	var coveredFiles []File
 	fileNames, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
 	for file := range fileNames {

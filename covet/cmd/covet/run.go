@@ -14,8 +14,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs"
-	"github.com/johnstarich/go/diffcover"
-	"github.com/johnstarich/go/diffcover/internal/span"
+	"github.com/johnstarich/go/covet"
+	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/pkg/errors"
 )
 
@@ -59,12 +59,12 @@ func run(
 
 func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 	var args Args
-	set := flag.NewFlagSet("diffcover", flag.ContinueOnError)
+	set := flag.NewFlagSet("covet", flag.ContinueOnError)
 	set.SetOutput(output)
 	set.StringVar(&args.DiffFile, "diff-file", "", "Required. Path to a diff file. Use '-' for stdin.")
 	set.StringVar(&args.DiffBaseDir, "diff-base-dir", ".", "Path to the diff's base directory. Defaults to the current directory.")
 	set.StringVar(&args.GoCoverageFile, "cover-go", "", "Required. Path to a Go coverage profile.")
-	set.BoolVar(&args.ShowCoverage, "show-coverage", false, "Show the coverage diff in addition to the summary.")
+	set.BoolVar(&args.ShowCoverage, "show-diff-coverage", false, "Show the coverage diff in addition to the summary.")
 	set.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", 90, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
 	set.StringVar(&args.GitHubToken, "gh-token", "", "GitHub access token to post and update a PR comment. If running in GitHub Actions, a comment may not be necessary.")
 	set.StringVar(&args.GitHubEndpoint, "gh-api", "https://api.github.com", "GitHub API endpoint. Required for GitHub Enterprise.")
@@ -132,7 +132,7 @@ func runArgs(args Args, deps Deps) (err error) {
 		diffFile = f
 	}
 
-	diffcov, err := diffcover.Parse(diffcover.Options{
+	diffcov, err := covet.Parse(covet.Options{
 		FS:             deps.FS,
 		Diff:           diffFile,
 		DiffBaseDir:    args.DiffBaseDir,
@@ -153,7 +153,7 @@ func runArgs(args Args, deps Deps) (err error) {
 	if args.ShowCoverage {
 		for _, f := range uncoveredFiles {
 			fmt.Fprintln(deps.Stdout, "Coverage diff:", f.Name)
-			err := printDiffCover(deps.Stdout, deps.FS, f, args.GoCoverageFile)
+			err := printCovet(deps.Stdout, deps.FS, f, args.GoCoverageFile)
 			if err != nil {
 				return err
 			}
@@ -164,7 +164,7 @@ func runArgs(args Args, deps Deps) (err error) {
 	totalCoveredStatus := newCoverageStatus(totalCovered)
 	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(formatPercent(totalCovered)))
 	fmt.Fprintln(deps.Stdout)
-	summary := diffcoverSummary(uncoveredFiles, args.TargetDiffCoverage, summaryTable)
+	summary := covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryTable)
 	fmt.Fprint(deps.Stdout, summary)
 
 	runWorkflow(coverageCommand(totalCovered, "", nil))
@@ -183,7 +183,7 @@ func runArgs(args Args, deps Deps) (err error) {
 			RepoOwner:      org,
 			Repo:           repo,
 			IssueNumber:    number,
-			Body:           diffcoverSummary(uncoveredFiles, args.TargetDiffCoverage, summaryMarkdown),
+			Body:           covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryMarkdown),
 		})
 		if err != nil {
 			fmt.Fprintln(deps.Stdout, "\nFailed to update GitHub comment, skipping. Error:", err)
@@ -192,14 +192,14 @@ func runArgs(args Args, deps Deps) (err error) {
 	return nil
 }
 
-func printDiffCover(w io.Writer, fs hackpadfs.FS, f diffcover.File, covPath string) error {
+func printCovet(w io.Writer, fs hackpadfs.FS, f covet.File, covPath string) error {
 	r, err := openFile(fs, f.Name, covPath)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
 
-	chunks, err := diffcover.DiffChunks(f, r)
+	chunks, err := covet.DiffChunks(f, r)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func printDiffCover(w io.Writer, fs hackpadfs.FS, f diffcover.File, covPath stri
 	return nil
 }
 
-func coveredFile(f diffcover.File) float64 {
+func coveredFile(f covet.File) float64 {
 	return float64(f.Covered) / float64(f.Covered+f.Uncovered)
 }
 
@@ -227,7 +227,7 @@ func openFile(fs hackpadfs.FS, name, covPath string) (io.ReadCloser, error) {
 	return fs.Open(name)
 }
 
-func findUncoveredLines(f diffcover.File) []span.Span {
+func findUncoveredLines(f covet.File) []span.Span {
 	var uncoveredLines []span.Span
 	ok := true
 	var nextLineIndex int
@@ -244,7 +244,7 @@ func findUncoveredLines(f diffcover.File) []span.Span {
 	return uncoveredLines
 }
 
-func findFirstUncoveredLines(lines []diffcover.Line, startIndex int) (uncovered span.Span, ok bool, nextLineIndex int) {
+func findFirstUncoveredLines(lines []covet.Line, startIndex int) (uncovered span.Span, ok bool, nextLineIndex int) {
 	// find start
 	nextLineIndex = startIndex
 	for _, l := range lines[nextLineIndex:] {
@@ -270,7 +270,7 @@ func findFirstUncoveredLines(lines []diffcover.Line, startIndex int) (uncovered 
 	return
 }
 
-func findReportableUncoveredFiles(coveredFiles []diffcover.File, target, current float64) []diffcover.File {
+func findReportableUncoveredFiles(coveredFiles []covet.File, target, current float64) []covet.File {
 	// sort by highest uncovered line count
 	sort.Slice(coveredFiles, func(aIndex, bIndex int) bool {
 		a, b := coveredFiles[aIndex], coveredFiles[bIndex]
@@ -282,7 +282,7 @@ func findReportableUncoveredFiles(coveredFiles []diffcover.File, target, current
 		}
 	})
 
-	var uncoveredFiles []diffcover.File
+	var uncoveredFiles []covet.File
 	// find minimum number of covered lines required to hit target
 	targetMissingLines := 0
 	totalLines := uint(0)
