@@ -34,10 +34,21 @@ test: $(MODULES:=-test)
 		printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
 		printf '##########################\n' >&2; \
 		echo "$$coverage"
-	@if [[ -n "${COVERALLS_TOKEN}" ]]; then \
+	@if [[ -n "$$GITHUB_TOKEN" ]]; then \
 		set -ex; \
-		(cd /tmp; go get github.com/mattn/goveralls); \
-		goveralls -coverprofile="cover.out" -service=github; \
+		set -o pipefail; \
+		go install github.com/mattn/goveralls@v0.0.11; \
+		COVERALLS_TOKEN=$$GITHUB_TOKEN goveralls -coverprofile="cover.out" -service=github; \
+		(cd covet; go install ./cmd/covet); \
+		[[ "$$GITHUB_REF" =~ [0-9]+ ]] && ISSUE_NUMBER=$${BASH_REMATCH[0]}; \
+		git diff origin/master | \
+			covet \
+				-diff-file - \
+				-cover-go ./cover.out \
+				-show-diff-coverage \
+				-gh-token "$$GITHUB_TOKEN" \
+				-gh-issue "github.com/$${GITHUB_REPOSITORY}/pull/$${ISSUE_NUMBER}" \
+				; \
 	fi
 
 .PHONY: %-test
