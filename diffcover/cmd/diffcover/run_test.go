@@ -426,6 +426,9 @@ Diff coverage is below target. Add tests for these files:
 			}
 			args := tc.args
 			args.DiffBaseDir = "."
+			if args.TargetDiffCoverage == 0 {
+				args.TargetDiffCoverage = 90
+			}
 
 			if args.GitHubEndpoint == "replace-me" {
 				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

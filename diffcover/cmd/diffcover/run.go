@@ -291,6 +291,8 @@ func findReportableUncoveredFiles(coveredFiles []diffcover.File, target, current
 	}
 	if percentDiff := target - current; percentDiff > 0 {
 		targetMissingLines = int(percentDiff * float64(totalLines))
+	} else {
+		return nil // target is met
 	}
 	// next, collect the biggest uncovered files until we'd hit the target
 	for _, f := range coveredFiles {
