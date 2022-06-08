@@ -3,6 +3,7 @@ package covet
 
 import (
 	"io"
+	"io/fs"
 	"path"
 	"sort"
 
@@ -28,7 +29,7 @@ type Covet struct {
 type Options struct {
 	// FS is the file system to read files, Go package information, and more.
 	// Defaults to hackpadfs's os.NewFS().
-	FS hackpadfs.FS
+	FS fs.FS
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
 	// DiffBaseDir is the FS path to the repo's root directory
