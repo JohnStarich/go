@@ -39,8 +39,8 @@ type Options struct {
 }
 
 // Parse reads and parses both a diff file and Go coverage file, then returns a Covet instance to render reports
-func Parse(options Options) (_ *Covet, err error) {
-	defer func() { err = errors.WithStack(err) }()
+func Parse(options Options) (covet *Covet, err error) {
+	defer func() { err = errors.Wrap(err, "covet") }()
 	if !hackpadfs.ValidPath(options.DiffBaseDir) {
 		return nil, errors.Errorf("invalid diff base directory FS path: %s", options.DiffBaseDir)
 	}
@@ -75,7 +75,7 @@ func Parse(options Options) (_ *Covet, err error) {
 		return nil, err
 	}
 
-	covet := &Covet{
+	covet = &Covet{
 		options:        options,
 		addedLines:     make(map[string][]span.Span),
 		coveredLines:   make(map[string][]span.Span),
@@ -178,8 +178,8 @@ func (c *Covet) coveredAndUncovered() (fileNames map[string]bool, coveredDiff, u
 	return
 }
 
-// Covered returns the percentage of covered lines in the diff.
-func (c *Covet) Covered() float64 {
+// DiffCovered returns the percentage of covered lines in the diff.
+func (c *Covet) DiffCovered() float64 {
 	_, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
 	var coveredTotal, uncoveredTotal float64
 	for _, spans := range coveredSpans {
@@ -195,7 +195,7 @@ func (c *Covet) Covered() float64 {
 	return coveredTotal / (coveredTotal + uncoveredTotal)
 }
 
-func (c *Covet) Files() []File {
+func (c *Covet) DiffCoverageFiles() []File {
 	var coveredFiles []File
 	fileNames, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
 	for file := range fileNames {

@@ -55,7 +55,7 @@ func TestRun(t *testing.T) {
 				"-cover-go", "/does/not/exist",
 			},
 			expectOut: "",
-			expectErr: "open does/not/exist: file does not exist",
+			expectErr: "covet: open does/not/exist: file does not exist",
 		},
 	} {
 		tc := tc // enable parallel sub-tests

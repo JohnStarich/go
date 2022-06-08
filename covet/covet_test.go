@@ -20,12 +20,12 @@ import (
 
 func TestParse(t *testing.T) {
 	for _, tc := range []struct {
-		description   string
-		diff          string
-		diffReader    io.Reader
-		coverage      string
-		expectCovered float64
-		expectErr     string
+		description       string
+		diff              string
+		diffReader        io.Reader
+		coverage          string
+		expectDiffCovered float64
+		expectErr         string
 	}{
 		{
 			description: "half covered",
@@ -43,7 +43,7 @@ mode: atomic
 github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 1
 github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
 `,
-			expectCovered: 0.5,
+			expectDiffCovered: 0.5,
 		},
 		{
 			description: "no coverage hits",
@@ -61,7 +61,7 @@ mode: atomic
 github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 0
 github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
 `,
-			expectCovered: 0,
+			expectDiffCovered: 0,
 		},
 		{
 			description: "bad diff reader",
@@ -113,16 +113,16 @@ foo
 				GoCoverageBaseDir: wd,
 			})
 			if tc.expectErr != "" {
-				assert.EqualError(t, err, tc.expectErr)
+				assert.EqualError(t, err, "covet: "+tc.expectErr)
 				return
 			}
 			require.NoError(t, err)
 
-			files := covet.Files()
+			files := covet.DiffCoverageFiles()
 			assert.NotEmpty(t, files)
 
-			covered := covet.Covered()
-			assert.Equal(t, tc.expectCovered, covered)
+			covered := covet.DiffCovered()
+			assert.Equal(t, tc.expectDiffCovered, covered)
 		})
 	}
 }
@@ -200,7 +200,7 @@ func TestParseInvalidOptions(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			_, err := Parse(tc.options)
 			if tc.expectErr != "" {
-				assert.EqualError(t, err, tc.expectErr)
+				assert.EqualError(t, err, "covet: "+tc.expectErr)
 				return
 			}
 			assert.NoError(t, err)

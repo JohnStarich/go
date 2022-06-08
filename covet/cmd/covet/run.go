@@ -132,7 +132,7 @@ func runArgs(args Args, deps Deps) (err error) {
 		diffFile = f
 	}
 
-	diffcov, err := covet.Parse(covet.Options{
+	covet, err := covet.Parse(covet.Options{
 		FS:             deps.FS,
 		Diff:           diffFile,
 		DiffBaseDir:    args.DiffBaseDir,
@@ -141,14 +141,14 @@ func runArgs(args Args, deps Deps) (err error) {
 	if err != nil {
 		return err
 	}
-	if len(diffcov.Files()) == 0 {
+	if len(covet.DiffCoverageFiles()) == 0 {
 		fmt.Fprintln(deps.Stdout, "No coverage information intersects with diff.")
 		return nil
 	}
 
-	totalCovered := diffcov.Covered()
+	totalCovered := covet.DiffCovered()
 
-	uncoveredFiles := findReportableUncoveredFiles(diffcov.Files(), float64(args.TargetDiffCoverage)/100, totalCovered)
+	uncoveredFiles := findReportableUncoveredFiles(covet.DiffCoverageFiles(), float64(args.TargetDiffCoverage)/100, totalCovered)
 
 	if args.ShowCoverage {
 		for _, f := range uncoveredFiles {
