@@ -1,3 +1,4 @@
+// Package covet reads version control diffs and Go coverage files to generate reports on their intersection.
 package covet
 
 import (

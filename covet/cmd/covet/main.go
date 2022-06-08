@@ -1,3 +1,4 @@
+// Command covet reads version control diffs and Go coverage files to generate reports on their intersection.
 package main
 
 import (
