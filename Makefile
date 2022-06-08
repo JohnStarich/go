@@ -39,10 +39,10 @@ test: $(MODULES:=-test)
 		set -o pipefail; \
 		go install github.com/mattn/goveralls@v0.0.11; \
 		COVERALLS_TOKEN=$$GITHUB_TOKEN goveralls -coverprofile="cover.out" -service=github; \
-		(cd diffcover; go install ./cmd/diffcover); \
+		(cd covet; go install ./cmd/covet); \
 		[[ "$$GITHUB_REF" =~ [0-9]+ ]] && ISSUE_NUMBER=$${BASH_REMATCH[0]}; \
 		git diff origin/master | \
-			diffcover \
+			covet \
 				-diff-file - \
 				-cover-go ./cover.out \
 				-show-coverage \
