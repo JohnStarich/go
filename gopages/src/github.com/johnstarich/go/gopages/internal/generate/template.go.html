@@ -103,7 +103,7 @@
 <span id="L46" class="ln">    46  </span>)
 <span id="L47" class="ln">    47  </span>
 <span id="L48" class="ln">    48  </span>func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
-<span id="L49" class="ln">    49  </span>	funcs[&#34;node_html&#34;] = nodeHTML(funcs[&#34;node_html&#34;].(node_htmlFunc), args.BaseURL)
+<span id="L49" class="ln">    49  </span>	funcs[&#34;node_html&#34;] = nodeHTML(funcs[&#34;node_html&#34;].(nodeHTMLFunc), args.BaseURL)
 <span id="L50" class="ln">    50  </span>
 <span id="L51" class="ln">    51  </span>	longTitle := fmt.Sprintf(&#34;%s | %s&#34;, args.SiteTitle, args.SiteDescription)
 <span id="L52" class="ln">    52  </span>	if args.SiteTitle == &#34;&#34; || args.SiteDescription == &#34;&#34; {
@@ -177,10 +177,10 @@
 <span id="L120" class="ln">   120  </span>	return template.Must(template.New(name).Funcs(funcs).Parse(data))
 <span id="L121" class="ln">   121  </span>}
 <span id="L122" class="ln">   122  </span>
-<span id="L123" class="ln">   123  </span>type node_htmlFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
+<span id="L123" class="ln">   123  </span>type nodeHTMLFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
 <span id="L124" class="ln">   124  </span>
 <span id="L125" class="ln">   125  </span><span class="comment">// nodeHTML runs the original &#39;node_html&#39; template func, then rewrites any links inside it</span>
-<span id="L126" class="ln">   126  </span>func nodeHTML(original node_htmlFunc, baseURL string) node_htmlFunc {
+<span id="L126" class="ln">   126  </span>func nodeHTML(original nodeHTMLFunc, baseURL string) nodeHTMLFunc {
 <span id="L127" class="ln">   127  </span>	pkgURL := path.Join(baseURL, &#34;/pkg&#34;)
 <span id="L128" class="ln">   128  </span>	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
 <span id="L129" class="ln">   129  </span>		s := original(info, node, linkify)

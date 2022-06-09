@@ -216,26 +216,32 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L24">Parse</a>
+				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L25">Parse</a>
 					<a class="permalink" href="#Parse">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Parse(osArgs ...<a href="/go/gopages/pkg/builtin/#string">string</a>) (<a href="#Args">Args</a>, <a href="/go/gopages/pkg/builtin/#string">string</a>, <a href="/go/gopages/pkg/builtin/#error">error</a>)</pre>
-				
+				<p>
+Parse parses the given command line arguments into Args values and returns any output to send to the user
+</p>
+
 				
 				
 			
 
 			
 				
-				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L43">Linker</a>
+				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go#L45">Linker</a>
 					<a class="permalink" href="#Args.Linker">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (a <a href="#Args">Args</a>) Linker(modulePackage <a href="/go/gopages/pkg/builtin/#string">string</a>) (<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#Linker">Linker</a>, <a href="/go/gopages/pkg/builtin/#error">error</a>)</pre>
-				
+				<p>
+Linker returns an appropriate source.Linker for the given command line args
+</p>
+
 				
 				
 				
@@ -243,12 +249,15 @@ Args contains all command-line options for gopages
 		
 			
 			
-			<h2 id="FilePathContents">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L5">FilePathContents</a>
+			<h2 id="FilePathContents">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L6">FilePathContents</a>
 				<a class="permalink" href="#FilePathContents">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+FilePathContents is a flag that reads a file by the passed in path and contains its contents
+</p>
+
 			<pre>type FilePathContents struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }
@@ -266,31 +275,37 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="FilePathContents.Contents">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L9">Contents</a>
+				<h3 id="FilePathContents.Contents">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L11">Contents</a>
 					<a class="permalink" href="#FilePathContents.Contents">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Contents() []<a href="/go/gopages/pkg/builtin/#byte">byte</a></pre>
-				
+				<p>
+Contents returns the contents of this flag&#39;s file
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="FilePathContents.Set">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L20">Set</a>
+				<h3 id="FilePathContents.Set">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L23">Set</a>
 					<a class="permalink" href="#FilePathContents.Set">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Set(s <a href="/go/gopages/pkg/builtin/#string">string</a>) <a href="/go/gopages/pkg/builtin/#error">error</a></pre>
-				
+				<p>
+Set implements flag.Value
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="FilePathContents.String">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L13">String</a>
+				<h3 id="FilePathContents.String">func (*FilePathContents) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/file.go#L15">String</a>
 					<a class="permalink" href="#FilePathContents.String">&#xb6;</a>
 					
 					
@@ -304,12 +319,15 @@ Args contains all command-line options for gopages
 		
 			
 			
-			<h2 id="GoPagesLinker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L14">GoPagesLinker</a>
+			<h2 id="GoPagesLinker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L15">GoPagesLinker</a>
 				<a class="permalink" href="#GoPagesLinker">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc source pages
+</p>
+
 			<pre>type GoPagesLinker struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }
@@ -327,13 +345,16 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="GoPagesLinker.LinkToSource">func (*GoPagesLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L24">LinkToSource</a>
+				<h3 id="GoPagesLinker.LinkToSource">func (*GoPagesLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L26">LinkToSource</a>
 					<a class="permalink" href="#GoPagesLinker.LinkToSource">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (l *<a href="#GoPagesLinker">GoPagesLinker</a>) LinkToSource(packagePath <a href="/go/gopages/pkg/builtin/#string">string</a>, options <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#LinkOptions">LinkOptions</a>) <a href="/go/gopages/pkg/net/url/">url</a>.<a href="/go/gopages/pkg/net/url/#URL">URL</a></pre>
-				
+				<p>
+LinkToSource implements source.Linker
+</p>
+
 				
 				
 				
@@ -341,12 +362,15 @@ Args contains all command-line options for gopages
 		
 			
 			
-			<h2 id="TemplateLinker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L34">TemplateLinker</a>
+			<h2 id="TemplateLinker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L37">TemplateLinker</a>
 				<a class="permalink" href="#TemplateLinker">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+TemplateLinker is a custom template-based source.Linker, which links to external source pages
+</p>
+
 			<pre>type TemplateLinker struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }
@@ -364,25 +388,31 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="TemplateLinker.LinkToSource">func (*TemplateLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L52">LinkToSource</a>
+				<h3 id="TemplateLinker.LinkToSource">func (*TemplateLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L56">LinkToSource</a>
 					<a class="permalink" href="#TemplateLinker.LinkToSource">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (l *<a href="#TemplateLinker">TemplateLinker</a>) LinkToSource(packagePath <a href="/go/gopages/pkg/builtin/#string">string</a>, options <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#LinkOptions">LinkOptions</a>) <a href="/go/gopages/pkg/net/url/">url</a>.<a href="/go/gopages/pkg/net/url/#URL">URL</a></pre>
-				
+				<p>
+LinkToSource implements source.Linker
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="TemplateLinker.ShouldScrapePackage">func (*TemplateLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L74">ShouldScrapePackage</a>
+				<h3 id="TemplateLinker.ShouldScrapePackage">func (*TemplateLinker) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/linker.go#L79">ShouldScrapePackage</a>
 					<a class="permalink" href="#TemplateLinker.ShouldScrapePackage">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (l *<a href="#TemplateLinker">TemplateLinker</a>) ShouldScrapePackage(packagePath <a href="/go/gopages/pkg/builtin/#string">string</a>) <a href="/go/gopages/pkg/builtin/#bool">bool</a></pre>
-				
+				<p>
+ShouldScrapePackage implements source.ScrapeChecker
+</p>
+
 				
 				
 				

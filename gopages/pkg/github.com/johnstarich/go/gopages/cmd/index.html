@@ -142,26 +142,32 @@
 		
 			
 			
-			<h2 id="Exit">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/cmd/exiter.go#L12">Exit</a>
+			<h2 id="Exit">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/cmd/exiter.go#L13">Exit</a>
 				<a class="permalink" href="#Exit">&#xb6;</a>
 				
 				
 			</h2>
 			<pre>func Exit(code <a href="/go/gopages/pkg/builtin/#int">int</a>)</pre>
-			
+			<p>
+Exit runs os.Exit(). If SetupTestExiter() has been called, it panics instead.
+</p>
+
 			
 			
 
 		
 			
 			
-			<h2 id="SetupTestExiter">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/cmd/exiter.go#L16">SetupTestExiter</a>
+			<h2 id="SetupTestExiter">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/cmd/exiter.go#L18">SetupTestExiter</a>
 				<a class="permalink" href="#SetupTestExiter">&#xb6;</a>
 				
 				
 			</h2>
 			<pre>func SetupTestExiter(t *<a href="/go/gopages/pkg/testing/">testing</a>.<a href="/go/gopages/pkg/testing/#T">T</a>)</pre>
-			
+			<p>
+SetupTestExiter changes the exiter to panic instead of exiting
+</p>
+
 			
 			
 

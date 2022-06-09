@@ -150,12 +150,15 @@
 		
 			
 			
-			<h2 id="LinkOptions">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L7">LinkOptions</a>
+			<h2 id="LinkOptions">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L8">LinkOptions</a>
 				<a class="permalink" href="#LinkOptions">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+LinkOptions contains options for configuring hyperlinks to source files
+</p>
+
 			<pre>type LinkOptions struct {
 <span id="LinkOptions.Line"></span>    Line <a href="/go/gopages/pkg/builtin/#int">int</a>
 }
@@ -175,12 +178,15 @@
 		
 			
 			
-			<h2 id="Linker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L11">Linker</a>
+			<h2 id="Linker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L13">Linker</a>
 				<a class="permalink" href="#Linker">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Linker can generate hyperlinks for any given package&#39;s file
+</p>
+
 			<pre>type Linker interface {
     LinkToSource(packagePath <a href="/go/gopages/pkg/builtin/#string">string</a>, options <a href="#LinkOptions">LinkOptions</a>) <a href="/go/gopages/pkg/net/url/">url</a>.<a href="/go/gopages/pkg/net/url/#URL">URL</a>
 }</pre>
@@ -199,12 +205,15 @@
 		
 			
 			
-			<h2 id="ScrapeChecker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L15">ScrapeChecker</a>
+			<h2 id="ScrapeChecker">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/generate/source/link.go#L18">ScrapeChecker</a>
 				<a class="permalink" href="#ScrapeChecker">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+ScrapeChecker returns whether or not a given package&#39;s path should be scraped and included in the output
+</p>
+
 			<pre>type ScrapeChecker interface {
     ShouldScrapePackage(packagePath <a href="/go/gopages/pkg/builtin/#string">string</a>) <a href="/go/gopages/pkg/builtin/#bool">bool</a>
 }</pre>
