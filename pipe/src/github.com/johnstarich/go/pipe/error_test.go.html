@@ -114,8 +114,8 @@
 <span id="L57" class="ln">    57  </span>		t.Error(&#34;Unexpected single error message:&#34;, e)
 <span id="L58" class="ln">    58  </span>	}
 <span id="L59" class="ln">    59  </span>
-<span id="L60" class="ln">    60  </span>	if errors.Unwrap(e) != e.errs[0] {
-<span id="L61" class="ln">    61  </span>		t.Error(&#34;errors.Unwrap() must return the first error&#34;)
+<span id="L60" class="ln">    60  </span>	if !errors.Is(e, e.errs[0]) {
+<span id="L61" class="ln">    61  </span>		t.Error(&#34;errors.Is() must match the first error&#34;)
 <span id="L62" class="ln">    62  </span>	}
 <span id="L63" class="ln">    63  </span>
 <span id="L64" class="ln">    64  </span>	if !errors.Is(e, os.ErrExist) {
