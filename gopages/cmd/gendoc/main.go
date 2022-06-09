@@ -65,7 +65,7 @@ func genDoc(templateBytes []byte, w io.Writer) error {
 func funcMap() template.FuncMap {
 	return map[string]interface{}{
 		"comment": func(s string) string {
-			return strings.ReplaceAll(s, "\n", "\n// ")
+			return strings.TrimSpace(strings.ReplaceAll(s, "\n", "\n// "))
 		},
 		"wordWrap": wordWrapLines,
 	}
