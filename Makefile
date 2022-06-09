@@ -13,7 +13,7 @@ all: lint test
 .PHONY: lint-deps
 lint-deps:
 	@if ! which golangci-lint >/dev/null || [[ "$$(golangci-lint version 2>&1)" != *${LINT_VERSION}* ]]; then \
-		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v${LINT_VERSION}; \
+		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v${LINT_VERSION}; \
 	fi
 
 .PHONY: lint
