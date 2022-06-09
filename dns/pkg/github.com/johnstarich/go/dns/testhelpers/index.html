@@ -142,13 +142,16 @@
 		
 			
 			
-			<h2 id="StartDNSServer">func <a href="/go/dns/src/github.com/johnstarich/go/dns/testhelpers/dns.go#L54">StartDNSServer</a>
+			<h2 id="StartDNSServer">func <a href="/go/dns/src/github.com/johnstarich/go/dns/testhelpers/dns.go#L56">StartDNSServer</a>
 				<a class="permalink" href="#StartDNSServer">&#xb6;</a>
 				
 				
 			</h2>
 			<pre>func StartDNSServer(t *<a href="/go/dns/pkg/testing/">testing</a>.<a href="/go/dns/pkg/testing/#T">T</a>, config <a href="#DNSConfig">DNSConfig</a>) (address <a href="/go/dns/pkg/builtin/#string">string</a>, cancel <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#CancelFunc">CancelFunc</a>)</pre>
-			
+			<p>
+StartDNSServer starts a DNS server with the given configuration
+</p>
+
 			
 			
 
@@ -156,12 +159,15 @@
 		
 			
 			
-			<h2 id="DNSConfig">type <a href="/go/dns/src/github.com/johnstarich/go/dns/testhelpers/dns.go#L47">DNSConfig</a>
+			<h2 id="DNSConfig">type <a href="/go/dns/src/github.com/johnstarich/go/dns/testhelpers/dns.go#L48">DNSConfig</a>
 				<a class="permalink" href="#DNSConfig">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+DNSConfig contains options to configure a test DNS server from StartDNSServer()
+</p>
+
 			<pre>type DNSConfig struct {
 <span id="DNSConfig.ResponseDelay"></span>    ResponseDelay <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Duration">Duration</a>
 <span id="DNSConfig.Hostnames"></span>    Hostnames     map[<a href="/go/dns/pkg/builtin/#string">string</a>][]<a href="/go/dns/pkg/builtin/#string">string</a>

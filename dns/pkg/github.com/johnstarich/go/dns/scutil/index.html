@@ -89,7 +89,10 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				
+				<p>
+Package scutil provides a complete model and parser for &#39;scutil --dns&#39; output.
+</p>
+
 				
 			</div>
 		</div>
@@ -170,7 +173,10 @@
 				
 				
 			</h2>
-			
+			<p>
+Config is a parsed scutil DNS config
+</p>
+
 			<pre>type Config struct {
 <span id="Config.Resolvers"></span>    Resolvers []<a href="#Resolver">Resolver</a>
 }
@@ -186,13 +192,16 @@
 
 			
 				
-				<h3 id="ReadMacOSDNS">func <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L34">ReadMacOSDNS</a>
+				<h3 id="ReadMacOSDNS">func <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L36">ReadMacOSDNS</a>
 					<a class="permalink" href="#ReadMacOSDNS">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func ReadMacOSDNS(ctx <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
-				
+				<p>
+ReadMacOSDNS reads and parses the current macOS scutil DNS settings
+</p>
+
 				
 				
 			
@@ -201,16 +210,22 @@
 		
 			
 			
-			<h2 id="Flag">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/flag.go#L3">Flag</a>
+			<h2 id="Flag">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/flag.go#L4">Flag</a>
 				<a class="permalink" href="#Flag">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Flag is an scutil flag value. See possible Flag enum values for examples.
+</p>
+
 			<pre>type Flag <a href="/go/dns/pkg/builtin/#string">string</a></pre>
 
 			
-				
+				<p>
+Common flag values for convenient comparisons
+</p>
+
 				<pre>const (
     <span class="comment">// Scoped requires a resolver to only send queries on the specified interface</span>
     <span id="Scoped">Scoped</span> <a href="#Flag">Flag</a> = &#34;Scoped&#34;
@@ -232,12 +247,15 @@
 		
 			
 			
-			<h2 id="Reach">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/reach.go#L3">Reach</a>
+			<h2 id="Reach">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/reach.go#L4">Reach</a>
 				<a class="permalink" href="#Reach">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Reach is an scutil &#34;reach&#34; value. See possible Reach enum values for examples.
+</p>
+
 			<pre>type Reach <a href="/go/dns/pkg/builtin/#string">string</a></pre>
 
 			
@@ -284,12 +302,15 @@
 		
 			
 			
-			<h2 id="Resolver">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L19">Resolver</a>
+			<h2 id="Resolver">type <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L20">Resolver</a>
 				<a class="permalink" href="#Resolver">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Resolver is an scutil resolver entry
+</p>
+
 			<pre>type Resolver struct {
 <span id="Resolver.Domain"></span>    Domain         <a href="/go/dns/pkg/builtin/#string">string</a>
 <span id="Resolver.Flags"></span>    Flags          []<a href="#Flag">Flag</a>
@@ -319,13 +340,19 @@
 
 			
 				
-				<h3 id="Resolver.Reachable">func (Resolver) <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L130">Reachable</a>
+				<h3 id="Resolver.Reachable">func (Resolver) <a href="/go/dns/src/github.com/johnstarich/go/dns/scutil/config.go#L135">Reachable</a>
 					<a class="permalink" href="#Resolver.Reachable">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (r <a href="#Resolver">Resolver</a>) Reachable() <a href="/go/dns/pkg/builtin/#bool">bool</a></pre>
-				
+				<p>
+Reachable returns whether this resolver is reachable.
+</p>
+<p>
+scutil defines it as: The specified nodename/address can be reached using the current network configuration.
+</p>
+
 				
 				
 				

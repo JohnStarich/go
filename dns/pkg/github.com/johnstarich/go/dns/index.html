@@ -121,11 +121,6 @@
 				
 				
 			
-				
-				<dd><a href="#Dialer">type Dialer</a></dd>
-				
-				
-			
 			
 			</dl>
 			</div><!-- #manual-nav -->
@@ -152,26 +147,32 @@
 		
 			
 			
-			<h2 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L27">New</a>
+			<h2 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L30">New</a>
 				<a class="permalink" href="#New">&#xb6;</a>
 				
 				
 			</h2>
 			<pre>func New() *<a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Resolver">Resolver</a></pre>
-			
+			<p>
+New returns a default DNS resolver for this runtime
+</p>
+
 			
 			
 
 		
 			
 			
-			<h2 id="NewWithConfig">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L31">NewWithConfig</a>
+			<h2 id="NewWithConfig">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L35">NewWithConfig</a>
 				<a class="permalink" href="#NewWithConfig">&#xb6;</a>
 				
 				
 			</h2>
 			<pre>func NewWithConfig(config <a href="#Config">Config</a>) *<a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Resolver">Resolver</a></pre>
-			
+			<p>
+NewWithConfig returns a DNS resolver with the given config for this runtime
+</p>
+
 			
 			
 
@@ -179,42 +180,22 @@
 		
 			
 			
-			<h2 id="Config">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L19">Config</a>
+			<h2 id="Config">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L21">Config</a>
 				<a class="permalink" href="#Config">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Config contains options for configuring a DNS resolver.
+Currently has no effect on non-macOS runtimes.
+</p>
+
 			<pre>type Config struct {
 <span id="Config.Logger"></span>    Logger                 *<a href="/go/dns/pkg/go.uber.org/zap/">zap</a>.<a href="/go/dns/pkg/go.uber.org/zap/#Logger">Logger</a>
 <span id="Config.InitialNameserverDelay"></span>    InitialNameserverDelay <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Duration">Duration</a>
 <span id="Config.NextNameserverInterval"></span>    NextNameserverInterval <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Duration">Duration</a>
 }
 </pre>
-
-			
-
-			
-
-			
-			
-			
-
-			
-
-			
-		
-			
-			
-			<h2 id="Dialer">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L47">Dialer</a>
-				<a class="permalink" href="#Dialer">&#xb6;</a>
-				
-				
-			</h2>
-			
-			<pre>type Dialer interface {
-    DialContext(ctx <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#Context">Context</a>, network, address <a href="/go/dns/pkg/builtin/#string">string</a>) (<a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Conn">Conn</a>, <a href="/go/dns/pkg/builtin/#error">error</a>)
-}</pre>
 
 			
 
@@ -272,7 +253,7 @@
 					</td>
 				
 					<td class="pkg-synopsis">
-						
+						Package scutil provides a complete model and parser for &#39;scutil --dns&#39; output.
 					</td>
 				</tr>
 			

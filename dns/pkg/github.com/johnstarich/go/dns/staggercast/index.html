@@ -153,12 +153,15 @@
 		
 			
 			
-			<h2 id="Conn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L17">Conn</a>
+			<h2 id="Conn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L18">Conn</a>
 				<a class="permalink" href="#Conn">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Conn is a staggerable packet connection
+</p>
+
 			<pre>type Conn interface {
     <a href="#PacketConn">PacketConn</a>
     Stagger(ticker &lt;-chan struct{}, cancel <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#CancelFunc">CancelFunc</a>)
@@ -175,13 +178,16 @@
 
 			
 				
-				<h3 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L55">New</a>
+				<h3 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L58">New</a>
 					<a class="permalink" href="#New">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func New(conns []<a href="#PacketConn">PacketConn</a>) <a href="#Conn">Conn</a></pre>
-				
+				<p>
+New combines multiple packet connections (net.Conn or net.PacketConn) and returns a single, staggerable connection
+</p>
+
 				
 				
 			
@@ -190,7 +196,7 @@
 		
 			
 			
-			<h2 id="PacketConn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L24">PacketConn</a>
+			<h2 id="PacketConn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L25">PacketConn</a>
 				<a class="permalink" href="#PacketConn">&#xb6;</a>
 				
 				
@@ -220,12 +226,15 @@ PacketConn implements both net.Conn and net.PacketConn
 		
 			
 			
-			<h2 id="Stats">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L31">Stats</a>
+			<h2 id="Stats">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L33">Stats</a>
 				<a class="permalink" href="#Stats">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Stats contains statistics from a staggercast execution
+</p>
+
 			<pre>type Stats struct {
 <span id="Stats.FastestRemoteIndex"></span>    FastestRemoteIndex <a href="/go/dns/pkg/builtin/#int">int</a>
 <span id="Stats.FastestRemote"></span>    FastestRemote      <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a>
