@@ -39,7 +39,7 @@ func main() {
 		return
 	default:
 		fmt.Print(usageOutput)
-		cmd.Exit(2)
+		cmd.Exit(cmd.ExitCodeInvalidUsage)
 	}
 	args.Watch = true
 	var updatedTime string

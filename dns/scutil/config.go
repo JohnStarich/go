@@ -70,6 +70,10 @@ func readMacOSDNS(ctx context.Context, getSCUtilDNS scutilExecutor) (Config, err
 }
 
 func parseAndApplyResolverKey(r *Resolver, key, value string) {
+	const (
+		decimalBase = 10
+		maxIntBits  = 64
+	)
 	switch {
 	case strings.Contains(key, "search domain"):
 		r.SearchDomain = append(r.SearchDomain, value)
@@ -80,32 +84,34 @@ func parseAndApplyResolverKey(r *Resolver, key, value string) {
 			r.Flags = append(r.Flags, Flag(strings.TrimSpace(flag)))
 		}
 	case strings.Contains(key, "if_index"):
-		tokens := strings.SplitN(value, " ", 2)
-		if len(tokens) == 2 {
+		tokens := strings.Fields(value)
+		const ifIndexTokenCount = 2
+		if len(tokens) == ifIndexTokenCount {
 			r.InterfaceName = strings.Trim(tokens[1], "()")
 		}
 
-		i, err := strconv.ParseInt(tokens[0], 10, 64)
+		i, err := strconv.ParseInt(tokens[0], decimalBase, maxIntBits)
 		if err == nil {
 			r.InterfaceIndex = int(i)
 		}
 	case strings.Contains(key, "options"):
 		r.MulticastDNS = strings.Contains(value, "mdns")
 	case strings.Contains(key, "port"):
-		i, err := strconv.ParseInt(value, 10, 64)
+		i, err := strconv.ParseInt(value, decimalBase, maxIntBits)
 		if err == nil {
 			r.Port = int(i)
 		}
 	case strings.Contains(key, "nameserver"):
 		r.Nameservers = append(r.Nameservers, value)
 	case strings.Contains(key, "order"):
-		i, err := strconv.ParseInt(value, 10, 64)
+		i, err := strconv.ParseInt(value, decimalBase, maxIntBits)
 		if err == nil {
 			r.Order = int(i)
 		}
 	case strings.Contains(key, "reach"):
-		tokens := strings.SplitN(value, " ", 2)
-		if len(tokens) == 2 {
+		tokens := strings.Fields(value)
+		const reachTokenCount = 2
+		if len(tokens) == reachTokenCount {
 			reach := strings.Trim(tokens[1], "()")
 			for _, statusStr := range strings.Split(reach, ",") {
 				status := Reach(statusStr)
@@ -116,7 +122,7 @@ func parseAndApplyResolverKey(r *Resolver, key, value string) {
 			}
 		}
 	case strings.Contains(key, "timeout"):
-		i, err := strconv.ParseInt(value, 10, 64)
+		i, err := strconv.ParseInt(value, decimalBase, maxIntBits)
 		if err == nil {
 			r.Timeout = time.Duration(i) * time.Second
 		}
@@ -124,7 +130,8 @@ func parseAndApplyResolverKey(r *Resolver, key, value string) {
 }
 
 func splitKeyValue(line string) (key, value string) {
-	tokens := strings.SplitN(line, ":", 2)
+	const keyValueSplits = 2
+	tokens := strings.SplitN(line, ":", keyValueSplits)
 	switch len(tokens) {
 	case 1:
 		return strings.TrimSpace(tokens[0]), ""

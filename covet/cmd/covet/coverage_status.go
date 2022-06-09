@@ -13,6 +13,7 @@ const (
 )
 
 func newCoverageStatus(f float64) coverageStatus {
+	// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
 	switch {
 	case f < 0.50:
 		return coverageError

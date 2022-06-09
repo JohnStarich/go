@@ -68,7 +68,8 @@ func (z breakZone) Contains(i int) bool {
 }
 
 func (z breakZone) BestBreak() int {
-	halfLength := (z.max - z.min) / 2
+	const halfDivisor = 2
+	halfLength := (z.max - z.min) / halfDivisor
 	if z.min > halfLength {
 		return z.min
 	}

@@ -19,6 +19,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const maxPercentInt = 100
+
 func boldColor() *color.Color { return color.New(color.Bold) }
 
 // Args contains all flag values for a covet run
@@ -57,6 +59,7 @@ func run(
 }
 
 func parseArgs(strArgs []string, output io.Writer) (Args, error) {
+	const defaultTargetDiffCov = 90
 	var args Args
 	set := flag.NewFlagSet("covet", flag.ContinueOnError)
 	set.SetOutput(output)
@@ -64,7 +67,7 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 	set.StringVar(&args.DiffBaseDir, "diff-base-dir", ".", "Path to the diff's base directory. Defaults to the current directory.")
 	set.StringVar(&args.GoCoverageFile, "cover-go", "", "Required. Path to a Go coverage profile.")
 	set.BoolVar(&args.ShowCoverage, "show-diff-coverage", false, "Show the coverage diff in addition to the summary.")
-	set.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", 90, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
+	set.UintVar(&args.TargetDiffCoverage, "target-diff-coverage", defaultTargetDiffCov, "Target total test coverage of new lines. Reports the biggest gaps needed to reach the target. Any number between 0 and 100.")
 	set.StringVar(&args.GitHubToken, "gh-token", "", "GitHub access token to post and update a PR comment. If running in GitHub Actions, a comment may not be necessary.")
 	set.StringVar(&args.GitHubEndpoint, "gh-api", "https://api.github.com", "GitHub API endpoint. Required for GitHub Enterprise.")
 	set.StringVar(&args.GitHubIssue, "gh-issue", "", "GitHub issue or pull request URL. Example: github.com/org/repo/pull/123. Typically inside a CI environment variable.")
@@ -148,7 +151,7 @@ func runArgs(args Args, deps Deps) (err error) {
 
 	totalCovered := covet.DiffCovered()
 
-	uncoveredFiles := findReportableUncoveredFiles(covet.DiffCoverageFiles(), float64(args.TargetDiffCoverage)/100, totalCovered)
+	uncoveredFiles := findReportableUncoveredFiles(covet.DiffCoverageFiles(), float64(args.TargetDiffCoverage)/maxPercentInt, totalCovered)
 
 	if args.ShowCoverage {
 		for _, f := range uncoveredFiles {
@@ -325,12 +328,17 @@ func parseIssueURL(s string) (org, repo string, number int, err error) {
 			return
 		}
 	}
-	tokens := strings.SplitN(strings.TrimPrefix(issueURL.Path, "/"), "/", 5)
-	if len(tokens) < 4 {
+	const minIssueURLPathComponents = 4
+	tokens := strings.SplitN(strings.TrimPrefix(issueURL.Path, "/"), "/", minIssueURLPathComponents+1)
+	if len(tokens) < minIssueURLPathComponents {
 		err = fmt.Errorf("malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123")
 		return
 	}
-	n, err := strconv.ParseInt(tokens[3], 10, 64)
+	const (
+		decimalBase = 10
+		maxIntBits  = 64
+	)
+	n, err := strconv.ParseInt(tokens[3], decimalBase, maxIntBits)
 	if err != nil {
 		return
 	}

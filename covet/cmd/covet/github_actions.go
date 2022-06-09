@@ -67,7 +67,7 @@ func runWorkflow(s string) {
 
 func coverageCommand(percent float64, file string, uncovered []span.Span) string {
 	status := newCoverageStatus(percent)
-	message := fmt.Sprintf("Diff coverage is %.1f%%", 100*percent)
+	message := fmt.Sprintf("Diff coverage is %.1f%%", maxPercentInt*percent)
 	args := map[string]string{
 		"title": "covet",
 	}
@@ -76,7 +76,7 @@ func coverageCommand(percent float64, file string, uncovered []span.Span) string
 	}
 	if len(uncovered) > 0 {
 		first := uncovered[0]
-		args["title"] = fmt.Sprintf("Not enough tests on %s. (-%.1f%%)", file, 100*(1-percent))
+		args["title"] = fmt.Sprintf("Not enough tests on %s. (-%.1f%%)", file, maxPercentInt*(1-percent))
 		args["line"] = fmt.Sprintf("%d", first.Start)
 		args["endLine"] = fmt.Sprintf("%d", first.End-1)
 		message = ""

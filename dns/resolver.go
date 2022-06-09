@@ -62,19 +62,24 @@ type macOSDialer struct {
 }
 
 func newMacOSDialer(config Config) netDialer {
+	const (
+		defaultInitialNameserverDelay = 150 * time.Millisecond
+		defaultNextNameserverInterval = 10 * time.Millisecond
+		maxTimeout                    = 30 * time.Second
+	)
 	if config.Logger == nil {
 		config.Logger = zap.NewNop()
 	}
 	if config.InitialNameserverDelay == 0 {
-		config.InitialNameserverDelay = 150 * time.Millisecond
+		config.InitialNameserverDelay = defaultInitialNameserverDelay
 	}
 	if config.NextNameserverInterval == 0 {
-		config.NextNameserverInterval = 10 * time.Millisecond
+		config.NextNameserverInterval = defaultNextNameserverInterval
 	}
 
 	return &macOSDialer{
 		Config:        config,
-		dialer:        &net.Dialer{Timeout: 30 * time.Second},
+		dialer:        &net.Dialer{Timeout: maxTimeout},
 		readResolvers: scutil.ReadMacOSDNS,
 	}
 }
@@ -92,7 +97,8 @@ func (m *macOSDialer) ensureNameservers() ([]string, error) {
 		return m.nameservers, nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	const maxTimeout = 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), maxTimeout)
 	defer cancel()
 	m.Logger.Info("Reading macOS DNS config from 'scutil'...")
 	cfg, err := m.readResolvers(ctx)

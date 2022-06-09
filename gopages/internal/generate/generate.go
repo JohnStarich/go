@@ -27,6 +27,11 @@ import (
 	"golang.org/x/tools/godoc/vfs/mapfs"
 )
 
+const (
+	scrapeDirPermission  = 0700
+	scrapeFilePermission = 0600
+)
+
 var (
 	//go:embed redirect.html
 	redirectHTML string
@@ -53,7 +58,7 @@ var makePresentationPipe = pipe.New(pipe.Options{}).
 		return args, errors.Wrap(util.RemoveAll(args.FS, args.OutputPath), "Failed to clean output directory")
 	}).
 	Append(func(args docsArgs) (docsArgs, error) {
-		return args, errors.Wrap(args.FS.MkdirAll(args.OutputPath, 0700), "Failed to create output directory")
+		return args, errors.Wrap(args.FS.MkdirAll(args.OutputPath, scrapeDirPermission), "Failed to create output directory")
 	}).
 	Append(func(args docsArgs) (docsArgs, vfs.NameSpace, error) {
 		ns := vfs.NewNameSpace()
@@ -118,10 +123,10 @@ var genStaticPipe = pipe.New(pipe.Options{}).
 	Append(func(fs billy.Filesystem, outputPath, name string) (billy.Filesystem, string, string, error) {
 		path := filepath.Join(outputPath, "lib", "godoc", name)
 		content := static.Files[name]
-		return fs, path, content, fs.MkdirAll(filepath.Dir(path), 0700)
+		return fs, path, content, fs.MkdirAll(filepath.Dir(path), scrapeDirPermission)
 	}).
 	Append(func(fs billy.Filesystem, path, content string) error {
-		return util.WriteFile(fs, path, []byte(content), 0600)
+		return util.WriteFile(fs, path, []byte(content), scrapeFilePermission)
 	})
 
 var crawlerStaticPipe = pipe.New(pipe.Options{}).
@@ -130,7 +135,7 @@ var crawlerStaticPipe = pipe.New(pipe.Options{}).
 	}).
 	Append(func(args docsArgs) (docsArgs, error) {
 		// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
-		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/"+args.ModulePackage)), 0600)
+		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/"+args.ModulePackage)), scrapeFilePermission)
 	}).
 	Append(func(args docsArgs) (docsArgs, []byte, error) {
 		// Generate a custom 404 page as a catch-all
@@ -138,7 +143,7 @@ var crawlerStaticPipe = pipe.New(pipe.Options{}).
 		return args, custom404, err
 	}).
 	Append(func(args docsArgs, custom404 []byte) (docsArgs, error) {
-		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "404.html"), custom404, 0600)
+		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "404.html"), custom404, scrapeFilePermission)
 	})
 
 var crawlerPipe = pipe.New(pipe.Options{}).
@@ -331,10 +336,10 @@ var writePackageIndexPipe = pipe.New(pipe.Options{}).
 		outputComponents := append([]string{outputBasePath, "pkg"}, pathSplit(packagePath)...)
 		outputComponents = append(outputComponents, "index.html")
 		outputPath := filepath.Join(outputComponents...)
-		return fs, outputPath, page, fs.MkdirAll(filepath.Dir(outputPath), 0700)
+		return fs, outputPath, page, fs.MkdirAll(filepath.Dir(outputPath), scrapeDirPermission)
 	}).
 	Append(func(fs billy.Filesystem, outputPath string, page []byte) error {
-		return util.WriteFile(fs, outputPath, page, 0600)
+		return util.WriteFile(fs, outputPath, page, scrapeFilePermission)
 	})
 
 func writePackageIndex(fs billy.Filesystem, pres *godoc.Presentation, packagePath, outputBasePath string) error {
@@ -385,10 +390,10 @@ var writeSourceFilePipe = pipe.New(pipe.Options{}).
 			outputComponents = append(outputComponents, "index")
 		}
 		outputPath := filepath.Join(outputComponents...) + ".html"
-		return args, page, outputPath, args.FS.MkdirAll(filepath.Dir(outputPath), 0700)
+		return args, page, outputPath, args.FS.MkdirAll(filepath.Dir(outputPath), scrapeDirPermission)
 	}).
 	Append(func(args writeSourceArgs, page []byte, outputPath string) error {
-		return util.WriteFile(args.FS, outputPath, page, 0600)
+		return util.WriteFile(args.FS, outputPath, page, scrapeFilePermission)
 	})
 
 func writeSourceFile(fs billy.Filesystem, pres *godoc.Presentation, baseURL, packagePath string, isDir bool, fileName, outputBasePath string, linker source.Linker) error {
@@ -489,7 +494,7 @@ func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir
 
 func makePath(path string) billy.Filesystem {
 	fs := safememfs.New()
-	err := fs.MkdirAll(path, 0600)
+	err := fs.MkdirAll(path, scrapeDirPermission)
 	if err != nil {
 		panic(err)
 	}

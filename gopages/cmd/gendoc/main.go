@@ -33,7 +33,8 @@ func run(templatePath, outPath string) error {
 		return err
 	}
 
-	f, err := os.OpenFile(outPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	const genDocPerm = 0644
+	f, err := os.OpenFile(outPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, genDocPerm)
 	if err != nil {
 		return err
 	}

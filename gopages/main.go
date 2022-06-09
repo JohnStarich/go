@@ -49,7 +49,7 @@ func mainArgs(
 		return
 	default:
 		fmt.Print(usageOutput)
-		cmd.Exit(2)
+		cmd.Exit(cmd.ExitCodeInvalidUsage)
 	}
 
 	log.SetOutput(ioutil.Discard) // disable godoc's internal logging

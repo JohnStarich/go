@@ -64,8 +64,9 @@ func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summa
 	var sb strings.Builder
 	sb.WriteString("Diff coverage is below target. Add tests for these files:\n")
 	tbl := table.NewWriter()
+	const coverageColumnIndex = 2
 	tbl.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 2, Align: text.AlignCenter},
+		{Number: coverageColumnIndex, Align: text.AlignCenter},
 	})
 	tbl.SuppressEmptyColumns()
 	bold := boldColor()
@@ -106,7 +107,7 @@ func formatFraction(numerator, denominator uint) string {
 }
 
 func formatPercent(f float64) string {
-	return fmt.Sprintf("%5.1f%%", 100*f)
+	return fmt.Sprintf("%5.1f%%", maxPercentInt*f)
 }
 
 func formatGraph(f float64, format summaryFormat) string {
