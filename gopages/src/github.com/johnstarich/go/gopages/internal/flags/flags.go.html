@@ -99,7 +99,7 @@
 <span id="L42" class="ln">    42  </span>}
 <span id="L43" class="ln">    43  </span>
 <span id="L44" class="ln">    44  </span><span class="comment">// Linker returns an appropriate source.Linker for the given command line args</span>
-<span id="L45" class="ln">    45  </span>func (a Args) Linker(modulePackage string) (source.Linker, error) {
+<span id="L45" class="ln">    45  </span>func (a Args) Linker(modulePackage string) (source.Linker, error) { <span class="comment">// nolint:ireturn // This method&#39;s purpose is to determine the correct implementation of source.Linker to return</span>
 <span id="L46" class="ln">    46  </span>	if a.SourceLinkTemplate != &#34;&#34; {
 <span id="L47" class="ln">    47  </span>		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)
 <span id="L48" class="ln">    48  </span>	}

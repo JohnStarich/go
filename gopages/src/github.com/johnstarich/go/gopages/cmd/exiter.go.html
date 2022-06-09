@@ -64,22 +64,27 @@
 <span id="L7" class="ln">     7  </span>	&#34;github.com/pkg/errors&#34;
 <span id="L8" class="ln">     8  </span>)
 <span id="L9" class="ln">     9  </span>
-<span id="L10" class="ln">    10  </span>var exiter = os.Exit
-<span id="L11" class="ln">    11  </span>
-<span id="L12" class="ln">    12  </span><span class="comment">// Exit runs os.Exit(). If SetupTestExiter() has been called, it panics instead.</span>
-<span id="L13" class="ln">    13  </span>func Exit(code int) {
-<span id="L14" class="ln">    14  </span>	exiter(code)
-<span id="L15" class="ln">    15  </span>}
+<span id="L10" class="ln">    10  </span>const (
+<span id="L11" class="ln">    11  </span>	<span class="comment">// ExitCodeInvalidUsage is an exit code indicating invalid command line arguments were provided</span>
+<span id="L12" class="ln">    12  </span>	ExitCodeInvalidUsage = 2
+<span id="L13" class="ln">    13  </span>)
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>var exiter = os.Exit <span class="comment">// nolint:gochecknoglobals // Enables os.Exit() to be swapped out in tests for a slightly safer variant. Required for sane test results in older Go versions.</span>
 <span id="L16" class="ln">    16  </span>
-<span id="L17" class="ln">    17  </span><span class="comment">// SetupTestExiter changes the exiter to panic instead of exiting</span>
-<span id="L18" class="ln">    18  </span>func SetupTestExiter(t *testing.T) {
-<span id="L19" class="ln">    19  </span>	<span class="comment">// require testing.T to ensure this is a test and not real code</span>
-<span id="L20" class="ln">    20  </span>	t.Log(&#34;Setting up exiter&#34;)
-<span id="L21" class="ln">    21  </span>	exiter = func(code int) {
-<span id="L22" class="ln">    22  </span>		panic(errors.Errorf(&#34;Attempted to exit with exit code %d&#34;, code))
-<span id="L23" class="ln">    23  </span>	}
-<span id="L24" class="ln">    24  </span>}
-<span id="L25" class="ln">    25  </span>
+<span id="L17" class="ln">    17  </span><span class="comment">// Exit runs os.Exit(). If SetupTestExiter() has been called, it panics instead.</span>
+<span id="L18" class="ln">    18  </span>func Exit(code int) {
+<span id="L19" class="ln">    19  </span>	exiter(code)
+<span id="L20" class="ln">    20  </span>}
+<span id="L21" class="ln">    21  </span>
+<span id="L22" class="ln">    22  </span><span class="comment">// SetupTestExiter changes the exiter to panic instead of exiting</span>
+<span id="L23" class="ln">    23  </span>func SetupTestExiter(t *testing.T) {
+<span id="L24" class="ln">    24  </span>	<span class="comment">// require testing.T to ensure this is a test and not real code</span>
+<span id="L25" class="ln">    25  </span>	t.Log(&#34;Setting up exiter&#34;)
+<span id="L26" class="ln">    26  </span>	exiter = func(code int) {
+<span id="L27" class="ln">    27  </span>		panic(errors.Errorf(&#34;Attempted to exit with exit code %d&#34;, code))
+<span id="L28" class="ln">    28  </span>	}
+<span id="L29" class="ln">    29  </span>}
+<span id="L30" class="ln">    30  </span>
 </pre><p></p>
 
 <div id="footer">

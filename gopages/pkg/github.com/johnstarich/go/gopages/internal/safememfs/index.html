@@ -110,9 +110,17 @@ Package safememfs wraps go-billy/memfs&#39;s Open to correctly handle opening di
 			
 			
 			
-				
-				<dd><a href="#New">func New() billy.Filesystem</a></dd>
 			
+				
+				<dd><a href="#SafeOpener">type SafeOpener</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#New">func New() *SafeOpener</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#SafeOpener.Open">func (s *SafeOpener) Open(name string) (billy.File, error)</a></dd>
+				
 			
 			
 			</dl>
@@ -138,22 +146,63 @@ Package safememfs wraps go-billy/memfs&#39;s Open to correctly handle opening di
 		
 		
 		
+		
 			
 			
-			<h2 id="New">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/safememfs/memfs.go#L10">New</a>
-				<a class="permalink" href="#New">&#xb6;</a>
+			<h2 id="SafeOpener">type <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/safememfs/memfs.go#L16">SafeOpener</a>
+				<a class="permalink" href="#SafeOpener">&#xb6;</a>
 				
 				
 			</h2>
-			<pre>func New() billy.<a href="#Filesystem">Filesystem</a></pre>
 			<p>
+SafeOpener is a billy.Filesystem that fixes Open() behavior on directories with a work-around
+</p>
+
+			<pre>type SafeOpener struct {
+    billy.<a href="#Filesystem">Filesystem</a>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+				
+				<h3 id="New">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/safememfs/memfs.go#L10">New</a>
+					<a class="permalink" href="#New">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func New() *<a href="#SafeOpener">SafeOpener</a></pre>
+				<p>
 New creates a new billy/memfs file system that can handle opening directories
 </p>
 
-			
+				
+				
 			
 
-		
+			
+				
+				<h3 id="SafeOpener.Open">func (*SafeOpener) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/safememfs/memfs.go#L21">Open</a>
+					<a class="permalink" href="#SafeOpener.Open">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s *<a href="#SafeOpener">SafeOpener</a>) Open(name <a href="/go/gopages/pkg/builtin/#string">string</a>) (billy.<a href="#File">File</a>, <a href="/go/gopages/pkg/builtin/#error">error</a>)</pre>
+				<p>
+Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
+</p>
+
+				
+				
+				
+			
 		
 	
 

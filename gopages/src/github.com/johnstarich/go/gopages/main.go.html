@@ -99,14 +99,14 @@
 <span id="L42" class="ln">    42  </span>	osArgs ...string,
 <span id="L43" class="ln">    43  </span>) {
 <span id="L44" class="ln">    44  </span>	args, usageOutput, err := flags.Parse(osArgs...)
-<span id="L45" class="ln">    45  </span>	switch err {
-<span id="L46" class="ln">    46  </span>	case nil:
-<span id="L47" class="ln">    47  </span>	case flag.ErrHelp:
+<span id="L45" class="ln">    45  </span>	switch {
+<span id="L46" class="ln">    46  </span>	case err == nil:
+<span id="L47" class="ln">    47  </span>	case errors.Is(err, flag.ErrHelp):
 <span id="L48" class="ln">    48  </span>		fmt.Print(usageOutput)
 <span id="L49" class="ln">    49  </span>		return
 <span id="L50" class="ln">    50  </span>	default:
 <span id="L51" class="ln">    51  </span>		fmt.Print(usageOutput)
-<span id="L52" class="ln">    52  </span>		cmd.Exit(2)
+<span id="L52" class="ln">    52  </span>		cmd.Exit(cmd.ExitCodeInvalidUsage)
 <span id="L53" class="ln">    53  </span>	}
 <span id="L54" class="ln">    54  </span>
 <span id="L55" class="ln">    55  </span>	log.SetOutput(ioutil.Discard) <span class="comment">// disable godoc&#39;s internal logging</span>
