@@ -48,7 +48,7 @@ func newWithConfig(runtimeName string, config Config) *net.Resolver {
 	}
 }
 
-type Dialer interface {
+type netDialer interface {
 	DialContext(ctx context.Context, network, address string) (net.Conn, error)
 }
 
@@ -61,7 +61,7 @@ type macOSDialer struct {
 	readResolvers func(context.Context) (scutil.Config, error)
 }
 
-func newMacOSDialer(config Config) Dialer {
+func newMacOSDialer(config Config) netDialer {
 	if config.Logger == nil {
 		config.Logger = zap.NewNop()
 	}
