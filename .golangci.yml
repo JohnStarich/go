@@ -14,6 +14,7 @@ linters:
     - gocritic
     - gofmt
     - gomnd
+    - gosec
     - revive
 
 issues:
