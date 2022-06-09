@@ -257,12 +257,15 @@
 		
 			
 			
-			<h2 id="Size">type <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L28">Size</a>
+			<h2 id="Size">type <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L29">Size</a>
 				<a class="permalink" href="#Size">&#xb6;</a>
 				
 				
 			</h2>
-			
+			<p>
+Size represents a quantity of bytes
+</p>
+
 			<pre>type Size struct {
     <span class="comment">// contains filtered or unexported fields</span>
 }
@@ -278,452 +281,569 @@
 
 			
 				
-				<h3 id="Bytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L40">Bytes</a>
+				<h3 id="Bytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L44">Bytes</a>
 					<a class="permalink" href="#Bytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Bytes(bytes <a href="/go/datasize/pkg/builtin/#int64">int64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Bytes returns a Size for the given number of bytes (B)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Exabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L64">Exabytes</a>
+				<h3 id="Exabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L74">Exabytes</a>
 					<a class="permalink" href="#Exabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Exabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Exabytes returns a Size for the given number of exabytes (EB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Exbibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L96">Exbibytes</a>
+				<h3 id="Exbibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L114">Exbibytes</a>
 					<a class="permalink" href="#Exbibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Exbibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Exbibytes returns a Size for the given number of exbibytes (EiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Gibibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L84">Gibibytes</a>
+				<h3 id="Gibibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L99">Gibibytes</a>
 					<a class="permalink" href="#Gibibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Gibibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Gibibytes returns a Size for the given number of gibibytes (GiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Gigabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L52">Gigabytes</a>
+				<h3 id="Gigabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L59">Gigabytes</a>
 					<a class="permalink" href="#Gigabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Gigabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Gigabytes returns a Size for the given number of gigabytes (GB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Kibibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L76">Kibibytes</a>
+				<h3 id="Kibibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L89">Kibibytes</a>
 					<a class="permalink" href="#Kibibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Kibibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Kibibytes returns a Size for the given number of kibibytes (KiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Kilobytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L44">Kilobytes</a>
+				<h3 id="Kilobytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L49">Kilobytes</a>
 					<a class="permalink" href="#Kilobytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Kilobytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Kilobytes returns a Size for the given number of kilobytes (kB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Mebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L80">Mebibytes</a>
+				<h3 id="Mebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L94">Mebibytes</a>
 					<a class="permalink" href="#Mebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Mebibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Mebibytes returns a Size for the given number of mebibytes (MiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Megabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L48">Megabytes</a>
+				<h3 id="Megabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L54">Megabytes</a>
 					<a class="permalink" href="#Megabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Megabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Megabytes returns a Size for the given number of megabytes (MB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="New">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L32">New</a>
+				<h3 id="New">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L34">New</a>
 					<a class="permalink" href="#New">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func New(bytes <a href="/go/datasize/pkg/builtin/#int64">int64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+New returns a Size for the given number of bytes
+</p>
+
 				
 				
 			
 				
-				<h3 id="NewFromInt">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L36">NewFromInt</a>
+				<h3 id="NewFromInt">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L39">NewFromInt</a>
 					<a class="permalink" href="#NewFromInt">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func NewFromInt(bytes *<a href="/go/datasize/pkg/math/big/">big</a>.<a href="/go/datasize/pkg/math/big/#Int">Int</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+NewFromInt returns a Size for the given number of bytes
+</p>
+
 				
 				
 			
 				
-				<h3 id="Pebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L92">Pebibytes</a>
+				<h3 id="Pebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L109">Pebibytes</a>
 					<a class="permalink" href="#Pebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Pebibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Pebibytes returns a Size for the given number of pebibytes (PiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Petabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L60">Petabytes</a>
+				<h3 id="Petabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L69">Petabytes</a>
 					<a class="permalink" href="#Petabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Petabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Petabytes returns a Size for the given number of petabytes (PB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Tebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L88">Tebibytes</a>
+				<h3 id="Tebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L104">Tebibytes</a>
 					<a class="permalink" href="#Tebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Tebibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Tebibytes returns a Size for the given number of tebibytes (TiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Terabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L56">Terabytes</a>
+				<h3 id="Terabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L64">Terabytes</a>
 					<a class="permalink" href="#Terabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Terabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Terabytes returns a Size for the given number of terabytes (TB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Yobibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L104">Yobibytes</a>
+				<h3 id="Yobibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L124">Yobibytes</a>
 					<a class="permalink" href="#Yobibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Yobibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Yobibytes returns a Size for the given number of yobibytes (YiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Yottabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L72">Yottabytes</a>
+				<h3 id="Yottabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L84">Yottabytes</a>
 					<a class="permalink" href="#Yottabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Yottabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Yottabytes returns a Size for the given number of yottabytes (YB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Zebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L100">Zebibytes</a>
+				<h3 id="Zebibytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L119">Zebibytes</a>
 					<a class="permalink" href="#Zebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Zebibytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Zebibytes returns a Size for the given number of zebibytes (ZiB)
+</p>
+
 				
 				
 			
 				
-				<h3 id="Zettabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L68">Zettabytes</a>
+				<h3 id="Zettabytes">func <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L79">Zettabytes</a>
 					<a class="permalink" href="#Zettabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func Zettabytes(b <a href="/go/datasize/pkg/builtin/#float64">float64</a>) <a href="#Size">Size</a></pre>
-				
+				<p>
+Zettabytes returns a Size for the given number of zettabytes (ZB)
+</p>
+
 				
 				
 			
 
 			
 				
-				<h3 id="Size.Bytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L108">Bytes</a>
+				<h3 id="Size.Bytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L129">Bytes</a>
 					<a class="permalink" href="#Size.Bytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Bytes() <a href="/go/datasize/pkg/builtin/#int64">int64</a></pre>
-				
+				<p>
+Bytes returns the number of bytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Exabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L145">Exabytes</a>
+				<h3 id="Size.Exabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L172">Exabytes</a>
 					<a class="permalink" href="#Size.Exabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Exabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Exabytes returns the number of exabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Exbibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L177">Exbibytes</a>
+				<h3 id="Size.Exbibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L212">Exbibytes</a>
 					<a class="permalink" href="#Size.Exbibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Exbibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Exbibytes returns the number of exbibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.FormatIEC">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L212">FormatIEC</a>
+				<h3 id="Size.FormatIEC">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L251">FormatIEC</a>
 					<a class="permalink" href="#Size.FormatIEC">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) FormatIEC() (value <a href="/go/datasize/pkg/builtin/#float64">float64</a>, unit <a href="/go/datasize/pkg/builtin/#string">string</a>)</pre>
-				
+				<p>
+FormatIEC formats s into a value and IEC unit for the next unit with a smaller magnitude
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.FormatSI">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L189">FormatSI</a>
+				<h3 id="Size.FormatSI">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L227">FormatSI</a>
 					<a class="permalink" href="#Size.FormatSI">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) FormatSI() (value <a href="/go/datasize/pkg/builtin/#float64">float64</a>, unit <a href="/go/datasize/pkg/builtin/#string">string</a>)</pre>
-				
+				<p>
+FormatSI formats s into a value and SI unit for the next unit with a smaller magnitude
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Gibibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L165">Gibibytes</a>
+				<h3 id="Size.Gibibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L197">Gibibytes</a>
 					<a class="permalink" href="#Size.Gibibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Gibibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Gibibytes returns the number of gibibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Gigabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L133">Gigabytes</a>
+				<h3 id="Size.Gigabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L157">Gigabytes</a>
 					<a class="permalink" href="#Size.Gigabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Gigabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Gigabytes returns the number of gigabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Kibibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L157">Kibibytes</a>
+				<h3 id="Size.Kibibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L187">Kibibytes</a>
 					<a class="permalink" href="#Size.Kibibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Kibibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Kibibytes returns the number of kibibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Kilobytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L125">Kilobytes</a>
+				<h3 id="Size.Kilobytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L147">Kilobytes</a>
 					<a class="permalink" href="#Size.Kilobytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Kilobytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Kilobytes returns the number of kilobytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Mebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L161">Mebibytes</a>
+				<h3 id="Size.Mebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L192">Mebibytes</a>
 					<a class="permalink" href="#Size.Mebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Mebibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Mebibytes returns the number of mebibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Megabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L129">Megabytes</a>
+				<h3 id="Size.Megabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L152">Megabytes</a>
 					<a class="permalink" href="#Size.Megabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Megabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Megabytes returns the number of megabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Pebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L173">Pebibytes</a>
+				<h3 id="Size.Pebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L207">Pebibytes</a>
 					<a class="permalink" href="#Size.Pebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Pebibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Pebibytes returns the number of pebibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Petabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L141">Petabytes</a>
+				<h3 id="Size.Petabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L167">Petabytes</a>
 					<a class="permalink" href="#Size.Petabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Petabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Petabytes returns the number of petabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.String">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L235">String</a>
+				<h3 id="Size.String">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L275">String</a>
 					<a class="permalink" href="#Size.String">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) String() <a href="/go/datasize/pkg/builtin/#string">string</a></pre>
-				
+				<p>
+String returns an SI formatted representation of s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Tebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L169">Tebibytes</a>
+				<h3 id="Size.Tebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L202">Tebibytes</a>
 					<a class="permalink" href="#Size.Tebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Tebibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Tebibytes returns the number of tebibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Terabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L137">Terabytes</a>
+				<h3 id="Size.Terabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L162">Terabytes</a>
 					<a class="permalink" href="#Size.Terabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Terabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Terabytes returns the number of terabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Yobibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L185">Yobibytes</a>
+				<h3 id="Size.Yobibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L222">Yobibytes</a>
 					<a class="permalink" href="#Size.Yobibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Yobibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Yobibytes returns the number of yobibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Yottabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L153">Yottabytes</a>
+				<h3 id="Size.Yottabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L182">Yottabytes</a>
 					<a class="permalink" href="#Size.Yottabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Yottabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Yottabytes returns the number of yottabytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Zebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L181">Zebibytes</a>
+				<h3 id="Size.Zebibytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L217">Zebibytes</a>
 					<a class="permalink" href="#Size.Zebibytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Zebibytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Zebibytes returns the number of zebibytes in s
+</p>
+
 				
 				
 				
 			
 				
-				<h3 id="Size.Zettabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L149">Zettabytes</a>
+				<h3 id="Size.Zettabytes">func (Size) <a href="/go/datasize/src/github.com/johnstarich/go/datasize/size.go#L177">Zettabytes</a>
 					<a class="permalink" href="#Size.Zettabytes">&#xb6;</a>
 					
 					
 				</h3>
 				<pre>func (s <a href="#Size">Size</a>) Zettabytes() <a href="/go/datasize/pkg/builtin/#float64">float64</a></pre>
-				
+				<p>
+Zettabytes returns the number of zettabytes in s
+</p>
+
 				
 				
 				
