@@ -158,7 +158,7 @@ func TestDNSLookupHost(t *testing.T) {
 			workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 				ResponseDelay: 1 * time.Second,
 				Hostnames: map[string][]string{
-					"hi.local.": []string{"5.6.7.8"},
+					"hi.local.": {"5.6.7.8"},
 				},
 			})
 			defer cancel()
@@ -200,7 +200,7 @@ func TestDNSLookupHostIPv6(t *testing.T) {
 	workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 		ResponseDelay: 1 * time.Second,
 		Hostnames: map[string][]string{
-			"hi.local.": []string{"5.6.7.8"},
+			"hi.local.": {"5.6.7.8"},
 		},
 		Network: "udp6",
 	})
@@ -228,7 +228,7 @@ func TestReorderNameservers(t *testing.T) {
 	t.Parallel()
 	addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 		Hostnames: map[string][]string{
-			"hi.local.": []string{"5.6.7.8"},
+			"hi.local.": {"5.6.7.8"},
 		},
 	})
 	defer cancel()
