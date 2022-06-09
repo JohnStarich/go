@@ -15,7 +15,7 @@ jobs:
       with:
         go-version: 1.16.x
     - name: Lint
-      run: make lint
+      run: make -k lint
 
   test-coverage:
     name: Test with Go ${{ matrix.go }}
