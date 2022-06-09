@@ -284,9 +284,11 @@ func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags
 func doRequest(do func(w http.ResponseWriter)) ([]byte, error) {
 	recorder := httptest.NewRecorder()
 	do(recorder)
+	result := recorder.Result()
+	defer result.Body.Close()
 	return recorder.Body.Bytes(), pipe.CheckErrorf(
-		recorder.Result().StatusCode != http.StatusOK,
-		"Error generating page: [%d]\n%s\n%s", recorder.Result().StatusCode, recorder.Header(), recorder.Body.String(),
+		result.StatusCode != http.StatusOK,
+		"Error generating page: [%d]\n%s\n%s", result.StatusCode, recorder.Header(), recorder.Body.String(),
 	)
 }
 

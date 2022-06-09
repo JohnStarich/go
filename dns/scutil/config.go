@@ -63,60 +63,64 @@ func readMacOSDNS(ctx context.Context, getSCUtilDNS scutilExecutor) (Config, err
 		}
 
 		currentResolver := &config.Resolvers[len(config.Resolvers)-1]
-		switch {
-		case strings.Contains(key, "search domain"):
-			currentResolver.SearchDomain = append(currentResolver.SearchDomain, value)
-		case strings.Contains(key, "domain"):
-			currentResolver.Domain = value
-		case strings.Contains(key, "flags"):
-			for _, flag := range strings.Split(value, ",") {
-				currentResolver.Flags = append(currentResolver.Flags, Flag(strings.TrimSpace(flag)))
-			}
-		case strings.Contains(key, "if_index"):
-			tokens := strings.SplitN(value, " ", 2)
-			if len(tokens) == 2 {
-				currentResolver.InterfaceName = strings.Trim(tokens[1], "()")
-			}
-
-			i, err := strconv.ParseInt(tokens[0], 10, 64)
-			if err == nil {
-				currentResolver.InterfaceIndex = int(i)
-			}
-		case strings.Contains(key, "options"):
-			currentResolver.MulticastDNS = strings.Contains(value, "mdns")
-		case strings.Contains(key, "port"):
-			i, err := strconv.ParseInt(value, 10, 64)
-			if err == nil {
-				currentResolver.Port = int(i)
-			}
-		case strings.Contains(key, "nameserver"):
-			currentResolver.Nameservers = append(currentResolver.Nameservers, value)
-		case strings.Contains(key, "order"):
-			i, err := strconv.ParseInt(value, 10, 64)
-			if err == nil {
-				currentResolver.Order = int(i)
-			}
-		case strings.Contains(key, "reach"):
-			tokens := strings.SplitN(value, " ", 2)
-			if len(tokens) == 2 {
-				reach := strings.Trim(tokens[1], "()")
-				for _, statusStr := range strings.Split(reach, ",") {
-					status := Reach(statusStr)
-					if status == Reachable {
-						currentResolver.reachable = true
-					}
-					currentResolver.Reach = append(currentResolver.Reach, status)
-				}
-			}
-		case strings.Contains(key, "timeout"):
-			i, err := strconv.ParseInt(value, 10, 64)
-			if err == nil {
-				currentResolver.Timeout = time.Duration(i) * time.Second
-			}
-		}
+		parseAndApplyResolverKey(currentResolver, key, value)
 	}
 
 	return config, nil
+}
+
+func parseAndApplyResolverKey(r *Resolver, key, value string) {
+	switch {
+	case strings.Contains(key, "search domain"):
+		r.SearchDomain = append(r.SearchDomain, value)
+	case strings.Contains(key, "domain"):
+		r.Domain = value
+	case strings.Contains(key, "flags"):
+		for _, flag := range strings.Split(value, ",") {
+			r.Flags = append(r.Flags, Flag(strings.TrimSpace(flag)))
+		}
+	case strings.Contains(key, "if_index"):
+		tokens := strings.SplitN(value, " ", 2)
+		if len(tokens) == 2 {
+			r.InterfaceName = strings.Trim(tokens[1], "()")
+		}
+
+		i, err := strconv.ParseInt(tokens[0], 10, 64)
+		if err == nil {
+			r.InterfaceIndex = int(i)
+		}
+	case strings.Contains(key, "options"):
+		r.MulticastDNS = strings.Contains(value, "mdns")
+	case strings.Contains(key, "port"):
+		i, err := strconv.ParseInt(value, 10, 64)
+		if err == nil {
+			r.Port = int(i)
+		}
+	case strings.Contains(key, "nameserver"):
+		r.Nameservers = append(r.Nameservers, value)
+	case strings.Contains(key, "order"):
+		i, err := strconv.ParseInt(value, 10, 64)
+		if err == nil {
+			r.Order = int(i)
+		}
+	case strings.Contains(key, "reach"):
+		tokens := strings.SplitN(value, " ", 2)
+		if len(tokens) == 2 {
+			reach := strings.Trim(tokens[1], "()")
+			for _, statusStr := range strings.Split(reach, ",") {
+				status := Reach(statusStr)
+				if status == Reachable {
+					r.reachable = true
+				}
+				r.Reach = append(r.Reach, status)
+			}
+		}
+	case strings.Contains(key, "timeout"):
+		i, err := strconv.ParseInt(value, 10, 64)
+		if err == nil {
+			r.Timeout = time.Duration(i) * time.Second
+		}
+	}
 }
 
 func splitKeyValue(line string) (key, value string) {
