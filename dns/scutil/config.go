@@ -84,8 +84,8 @@ func parseAndApplyResolverKey(r *Resolver, key, value string) {
 			r.Flags = append(r.Flags, Flag(strings.TrimSpace(flag)))
 		}
 	case strings.Contains(key, "if_index"):
-		tokens := strings.Fields(value)
 		const ifIndexTokenCount = 2
+		tokens := strings.SplitN(value, " ", ifIndexTokenCount)
 		if len(tokens) == ifIndexTokenCount {
 			r.InterfaceName = strings.Trim(tokens[1], "()")
 		}
@@ -109,8 +109,8 @@ func parseAndApplyResolverKey(r *Resolver, key, value string) {
 			r.Order = int(i)
 		}
 	case strings.Contains(key, "reach"):
-		tokens := strings.Fields(value)
 		const reachTokenCount = 2
+		tokens := strings.SplitN(value, " ", reachTokenCount)
 		if len(tokens) == reachTokenCount {
 			reach := strings.Trim(tokens[1], "()")
 			for _, statusStr := range strings.Split(reach, ",") {
