@@ -9,6 +9,7 @@ linters:
     - exportloopref
     - gochecknoglobals
     - gochecknoinits
+    - goconst
     - gocognit
     - revive
 
