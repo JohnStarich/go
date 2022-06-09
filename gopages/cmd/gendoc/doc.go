@@ -10,6 +10,6 @@
 //   gopages
 //
 // {{.Usage | wordWrap 80 | comment}}
-//{{/* Do not remove the blank line below, otherwise this template is incorrectly displayed for the cmd/gendoc package. */}}
+// {{- /* Do not remove the blank line below, otherwise this template is incorrectly displayed for the cmd/gendoc package. */}}
 
 package main

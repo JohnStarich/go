@@ -11,6 +11,7 @@ linters:
     - gochecknoinits
     - goconst
     - gocognit
+    - gocritic
     - revive
 
 issues:

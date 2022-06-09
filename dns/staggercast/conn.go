@@ -243,7 +243,7 @@ func (s *staggerConn) Read(b []byte) (n int, err error) {
 
 func (s *staggerConn) Write(b []byte) (n int, err error) {
 	s.replayMu.Lock()
-	s.lastWrite = b[:]
+	s.lastWrite = b
 	s.replayMu.Unlock()
 	success := make(chan int, len(s.conns))
 	failure := make(chan int, len(s.conns))
@@ -298,7 +298,7 @@ func (s *staggerConn) ReadFrom(b []byte) (n int, addr net.Addr, err error) {
 // WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
 func (s *staggerConn) WriteTo(b []byte, addr net.Addr) (n int, err error) {
 	s.replayMu.Lock()
-	s.lastWrite = b[:]
+	s.lastWrite = b
 	s.lastWriteAddr = addr
 	s.replayMu.Unlock()
 	success := make(chan int, len(s.conns))

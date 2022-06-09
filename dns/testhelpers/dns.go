@@ -25,8 +25,7 @@ func hostnamesHandler(ctx context.Context, t *testing.T, responseDelay time.Dura
 		var message dns.Msg
 		message.SetReply(r)
 
-		switch r.Question[0].Qtype {
-		case dns.TypeA:
+		if r.Question[0].Qtype == dns.TypeA {
 			hostname := r.Question[0].Name
 			for _, ip := range hostnames[hostname] {
 				message.Answer = append(message.Answer, &dns.A{
