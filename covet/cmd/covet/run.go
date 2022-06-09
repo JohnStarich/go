@@ -313,6 +313,11 @@ func findReportableUncoveredFiles(coveredFiles []covet.File, target, current flo
 	return uncoveredFiles
 }
 
+const (
+	decimalBase = 10
+	maxIntBits  = 64
+)
+
 func parseIssueURL(s string) (org, repo string, number int, err error) {
 	if s == "" {
 		err = fmt.Errorf("-gh-issue is required")
@@ -334,10 +339,6 @@ func parseIssueURL(s string) (org, repo string, number int, err error) {
 		err = fmt.Errorf("malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123")
 		return
 	}
-	const (
-		decimalBase = 10
-		maxIntBits  = 64
-	)
 	n, err := strconv.ParseInt(tokens[3], decimalBase, maxIntBits)
 	if err != nil {
 		return

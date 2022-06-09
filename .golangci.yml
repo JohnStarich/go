@@ -16,6 +16,12 @@ linters:
     - gomnd
     - gosec
     - ireturn
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - noctx
+    - nolintlint
     - revive
 
 issues:
