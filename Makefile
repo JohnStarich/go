@@ -1,7 +1,11 @@
 SHELL := /usr/bin/env bash
-LINT_VERSION=1.25.1
+LINT_VERSION=1.46.2
 
 MODULES = $(sort $(patsubst %/,%,$(dir $(wildcard */go.mod))))
+GOLANGCI_FLAGS =
+ifeq (${CI},true)
+	GOLANGCI_FLAGS = --out-format github-actions
+endif
 
 .PHONY: all
 all: lint test
@@ -16,7 +20,7 @@ lint-deps:
 lint: $(MODULES:=-lint)
 .PHONY: %-lint
 %-lint: lint-deps
-	cd $*; golangci-lint run
+	cd $*; golangci-lint run ${GOLANGCI_FLAGS}
 
 .PHONY: lint-fix
 lint-fix: $(MODULES:=-lint-fix)

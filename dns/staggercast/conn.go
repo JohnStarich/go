@@ -14,6 +14,7 @@ import (
 	"go.uber.org/atomic"
 )
 
+// Conn is a staggerable packet connection
 type Conn interface {
 	PacketConn
 	Stagger(ticker <-chan struct{}, cancel context.CancelFunc)
@@ -28,6 +29,7 @@ type PacketConn interface {
 	net.PacketConn
 }
 
+// Stats contains statistics from a staggercast execution
 type Stats struct {
 	FastestRemoteIndex int
 	FastestRemote      net.Addr
@@ -52,6 +54,7 @@ type staggerConn struct {
 	firstResponder *atomic.Int64
 }
 
+// New combines multiple packet connections (net.Conn or net.PacketConn) and returns a single, staggerable connection
 func New(conns []PacketConn) Conn {
 	if len(conns) == 0 {
 		panic("connection count must be non-zero")

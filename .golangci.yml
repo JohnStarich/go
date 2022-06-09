@@ -1,0 +1,12 @@
+linters:
+  enable:
+    # Default linters plus these:
+    - revive
+
+issues:
+  include:
+    # Re-enable revive's doc comment linters:
+    - EXC0012
+    - EXC0013
+    - EXC0014
+    - EXC0015

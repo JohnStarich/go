@@ -12,7 +12,7 @@ import (
 
 const dom = "dns.local."
 
-func hostnamesHandler(t *testing.T, ctx context.Context, responseDelay time.Duration, hostnames map[string][]string) dns.HandlerFunc {
+func hostnamesHandler(ctx context.Context, t *testing.T, responseDelay time.Duration, hostnames map[string][]string) dns.HandlerFunc {
 	return func(w dns.ResponseWriter, r *dns.Msg) {
 		timer := time.NewTimer(responseDelay)
 		defer timer.Stop()
@@ -44,6 +44,7 @@ func hostnamesHandler(t *testing.T, ctx context.Context, responseDelay time.Dura
 	}
 }
 
+// DNSConfig contains options to configure a test DNS server from StartDNSServer()
 type DNSConfig struct {
 	ResponseDelay time.Duration
 	Hostnames     map[string][]string
@@ -51,6 +52,7 @@ type DNSConfig struct {
 	Network       string // e.g. udp4, udp6
 }
 
+// StartDNSServer starts a DNS server with the given configuration
 func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel context.CancelFunc) {
 	t.Helper()
 	if config.Network == "" {
@@ -64,7 +66,7 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 
 	ctx, cancel := context.WithCancel(context.Background())
 	mux := dns.NewServeMux()
-	mux.HandleFunc("local.", hostnamesHandler(t, ctx, config.ResponseDelay, config.Hostnames))
+	mux.HandleFunc("local.", hostnamesHandler(ctx, t, config.ResponseDelay, config.Hostnames))
 
 	packetConn, err := net.ListenUDP(config.Network, &net.UDPAddr{Port: config.Port})
 	require.NoError(t, err)

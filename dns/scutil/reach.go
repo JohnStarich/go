@@ -1,5 +1,6 @@
 package scutil
 
+// Reach is an scutil "reach" value. See possible Reach enum values for examples.
 type Reach string
 
 // docs lifted from the 'scutil' man page

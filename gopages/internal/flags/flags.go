@@ -21,6 +21,7 @@ type Args struct {
 	Watch              bool // not added as a flag, only enabled when running from ./cmd/watch
 }
 
+// Parse parses the given command line arguments into Args values and returns any output to send to the user
 func Parse(osArgs ...string) (Args, string, error) {
 	var args Args
 	commandLine := flag.NewFlagSet("gopages", flag.ContinueOnError)
@@ -40,6 +41,7 @@ func Parse(osArgs ...string) (Args, string, error) {
 	return args, output.String(), err
 }
 
+// Linker returns an appropriate source.Linker for the given command line args
 func (a Args) Linker(modulePackage string) (source.Linker, error) {
 	if a.SourceLinkTemplate != "" {
 		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)

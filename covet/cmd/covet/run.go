@@ -23,6 +23,7 @@ var (
 	boldColor = color.New(color.Bold)
 )
 
+// Args contains all flag values for a covet run
 type Args struct {
 	DiffFile           string
 	DiffBaseDir        string
@@ -111,6 +112,7 @@ func toFSPath(p string) (string, error) {
 	return p, err
 }
 
+// Deps contains dependencies to inject into a covet run. Swapped out in tests.
 type Deps struct {
 	Stdin  io.Reader
 	Stdout io.Writer

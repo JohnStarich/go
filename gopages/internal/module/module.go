@@ -28,6 +28,7 @@ var packagePipe = pipe.New(pipe.Options{}).
 		return modulePackage, pipe.CheckErrorf(modulePackage == "", "Unable to find module package name in go.mod file: %s", goMod)
 	})
 
+// Package returns a module's package path for the given module file path
 func Package(modulePath string) (string, error) {
 	out, err := packagePipe.Do(modulePath)
 	var modulePackage string

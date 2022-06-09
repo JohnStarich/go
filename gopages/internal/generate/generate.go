@@ -243,6 +243,7 @@ var crawlerWalkPipe = pipe.New(pipe.Options{}).
 		return writeSourceFile(args.FS, args.Presentation, args.BaseURL, "", true, "", args.OutputPath, args.Linker)
 	})
 
+// Docs generates documentation pages for the given package
 func Docs(modulePath, modulePackage string, src, fs billy.Filesystem, args flags.Args, linker source.Linker) error {
 	dArgs := docsArgs{
 		Args:          args,

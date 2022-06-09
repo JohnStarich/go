@@ -25,86 +25,107 @@ var (
 	yobibytes = new(big.Int).Mul(big.NewInt(1<<60), big.NewInt(1<<20))
 )
 
+// Size represents a quantity of bytes
 type Size struct {
 	value *big.Int
 }
 
+// New returns a Size for the given number of bytes
 func New(bytes int64) Size {
 	return NewFromInt(big.NewInt(bytes))
 }
 
+// NewFromInt returns a Size for the given number of bytes
 func NewFromInt(bytes *big.Int) Size {
 	return Size{value: bytes}
 }
 
+// Bytes returns a Size for the given number of bytes (B)
 func Bytes(bytes int64) Size {
 	return New(bytes)
 }
 
+// Kilobytes returns a Size for the given number of kilobytes (kB)
 func Kilobytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, kilobytes))
 }
 
+// Megabytes returns a Size for the given number of megabytes (MB)
 func Megabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, megabytes))
 }
 
+// Gigabytes returns a Size for the given number of gigabytes (GB)
 func Gigabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, gigabytes))
 }
 
+// Terabytes returns a Size for the given number of terabytes (TB)
 func Terabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, terabytes))
 }
 
+// Petabytes returns a Size for the given number of petabytes (PB)
 func Petabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, petabytes))
 }
 
+// Exabytes returns a Size for the given number of exabytes (EB)
 func Exabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, exabytes))
 }
 
+// Zettabytes returns a Size for the given number of zettabytes (ZB)
 func Zettabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, zettabytes))
 }
 
+// Yottabytes returns a Size for the given number of yottabytes (YB)
 func Yottabytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, yottabytes))
 }
 
+// Kibibytes returns a Size for the given number of kibibytes (KiB)
 func Kibibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, kibibytes))
 }
 
+// Mebibytes returns a Size for the given number of mebibytes (MiB)
 func Mebibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, mebibytes))
 }
 
+// Gibibytes returns a Size for the given number of gibibytes (GiB)
 func Gibibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, gibibytes))
 }
 
+// Tebibytes returns a Size for the given number of tebibytes (TiB)
 func Tebibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, tebibytes))
 }
 
+// Pebibytes returns a Size for the given number of pebibytes (PiB)
 func Pebibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, pebibytes))
 }
 
+// Exbibytes returns a Size for the given number of exbibytes (EiB)
 func Exbibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, exbibytes))
 }
 
+// Zebibytes returns a Size for the given number of zebibytes (ZiB)
 func Zebibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, zebibytes))
 }
 
+// Yobibytes returns a Size for the given number of yobibytes (YiB)
 func Yobibytes(b float64) Size {
 	return NewFromInt(scaleBigInt(b, yobibytes))
 }
 
+// Bytes returns the number of bytes in s
 func (s Size) Bytes() int64 {
 	return s.value.Int64()
 }
@@ -122,70 +143,87 @@ func divideBigInt(numerator, denominator *big.Int) float64 {
 	return f
 }
 
+// Kilobytes returns the number of kilobytes in s
 func (s Size) Kilobytes() float64 {
 	return divideBigInt(s.value, kilobytes)
 }
 
+// Megabytes returns the number of megabytes in s
 func (s Size) Megabytes() float64 {
 	return divideBigInt(s.value, megabytes)
 }
 
+// Gigabytes returns the number of gigabytes in s
 func (s Size) Gigabytes() float64 {
 	return divideBigInt(s.value, gigabytes)
 }
 
+// Terabytes returns the number of terabytes in s
 func (s Size) Terabytes() float64 {
 	return divideBigInt(s.value, terabytes)
 }
 
+// Petabytes returns the number of petabytes in s
 func (s Size) Petabytes() float64 {
 	return divideBigInt(s.value, petabytes)
 }
 
+// Exabytes returns the number of exabytes in s
 func (s Size) Exabytes() float64 {
 	return divideBigInt(s.value, exabytes)
 }
 
+// Zettabytes returns the number of zettabytes in s
 func (s Size) Zettabytes() float64 {
 	return divideBigInt(s.value, zettabytes)
 }
 
+// Yottabytes returns the number of yottabytes in s
 func (s Size) Yottabytes() float64 {
 	return divideBigInt(s.value, yottabytes)
 }
 
+// Kibibytes returns the number of kibibytes in s
 func (s Size) Kibibytes() float64 {
 	return divideBigInt(s.value, kibibytes)
 }
 
+// Mebibytes returns the number of mebibytes in s
 func (s Size) Mebibytes() float64 {
 	return divideBigInt(s.value, mebibytes)
 }
 
+// Gibibytes returns the number of gibibytes in s
 func (s Size) Gibibytes() float64 {
 	return divideBigInt(s.value, gibibytes)
 }
 
+// Tebibytes returns the number of tebibytes in s
 func (s Size) Tebibytes() float64 {
 	return divideBigInt(s.value, tebibytes)
 }
 
+// Pebibytes returns the number of pebibytes in s
 func (s Size) Pebibytes() float64 {
 	return divideBigInt(s.value, pebibytes)
 }
 
+// Exbibytes returns the number of exbibytes in s
 func (s Size) Exbibytes() float64 {
 	return divideBigInt(s.value, exbibytes)
 }
 
+// Zebibytes returns the number of zebibytes in s
 func (s Size) Zebibytes() float64 {
 	return divideBigInt(s.value, zebibytes)
 }
 
+// Yobibytes returns the number of yobibytes in s
 func (s Size) Yobibytes() float64 {
 	return divideBigInt(s.value, yobibytes)
 }
 
+// FormatSI formats s into a value and SI unit for the next unit with a smaller magnitude
 func (s Size) FormatSI() (value float64, unit string) {
 	switch {
 	case s.value.CmpAbs(yottabytes) != -1:
@@ -209,6 +247,7 @@ func (s Size) FormatSI() (value float64, unit string) {
 	}
 }
 
+// FormatIEC formats s into a value and IEC unit for the next unit with a smaller magnitude
 func (s Size) FormatIEC() (value float64, unit string) {
 	switch {
 	case s.value.CmpAbs(yobibytes) != -1:
@@ -232,6 +271,7 @@ func (s Size) FormatIEC() (value float64, unit string) {
 	}
 }
 
+// String returns an SI formatted representation of s
 func (s Size) String() string {
 	value, unit := s.FormatSI()
 	return fmt.Sprintf("%g %s", value, unit)
