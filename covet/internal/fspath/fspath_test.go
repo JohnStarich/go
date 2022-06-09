@@ -13,6 +13,7 @@ func noSlashes(s string) string {
 }
 
 func TestCommonBase(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		a, b   string
 		expect string
@@ -38,13 +39,16 @@ func TestCommonBase(t *testing.T) {
 			expect: "a/b",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s --> %s", noSlashes(tc.a), noSlashes(tc.b)), func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tc.expect, CommonBase(tc.a, tc.b))
 		})
 	}
 }
 
 func TestRel(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		basePath   string
 		targetPath string
@@ -93,7 +97,9 @@ func TestRel(t *testing.T) {
 		},
 	} {
 		description := fmt.Sprintf("%s --> %s", noSlashes(tc.basePath), noSlashes(tc.targetPath))
+		tc := tc // enable parallel sub-tests
 		t.Run(description, func(t *testing.T) {
+			t.Parallel()
 			p, err := Rel(tc.basePath, tc.targetPath)
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)

@@ -11,12 +11,14 @@ import (
 )
 
 func TestNewGoPagesLinker(t *testing.T) {
+	t.Parallel()
 	const someBaseURL = "/some/base"
 	linker := newGoPagesLinker(someBaseURL)
 	assert.Equal(t, &GoPagesLinker{baseURL: someBaseURL}, linker)
 }
 
 func TestGoPagesLinkToSource(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		baseURL     string
@@ -42,7 +44,9 @@ func TestGoPagesLinkToSource(t *testing.T) {
 			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go#L10",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			linker := newGoPagesLinker(tc.baseURL)
 			url := linker.LinkToSource(tc.pkgPath, tc.options)
 			assert.Equal(t, tc.expectLink, url.String())
@@ -51,6 +55,7 @@ func TestGoPagesLinkToSource(t *testing.T) {
 }
 
 func TestNewTemplateLinker(t *testing.T) {
+	t.Parallel()
 	const (
 		someModulePkg = "https://github.com/johnstarich/go"
 		someTemplate  = "https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}"
@@ -64,6 +69,7 @@ func TestNewTemplateLinker(t *testing.T) {
 }
 
 func TestTemplateLinkToSource(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		modulePkg   string
@@ -95,7 +101,9 @@ func TestTemplateLinkToSource(t *testing.T) {
 			expectLink:  "",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			linker, err := newTemplateLinker(tc.modulePkg, tc.template)
 			require.NoError(t, err)
 			url := linker.LinkToSource(tc.pkgPath, tc.options)
@@ -105,6 +113,7 @@ func TestTemplateLinkToSource(t *testing.T) {
 }
 
 func TestTemplateShouldScrapePackage(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description  string
 		modulePkg    string
@@ -124,7 +133,9 @@ func TestTemplateShouldScrapePackage(t *testing.T) {
 			expectScrape: false,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			linker, err := newTemplateLinker(tc.modulePkg, "")
 			require.NoError(t, err)
 			shouldScrape := linker.ShouldScrapePackage(tc.pkgPath)
@@ -134,6 +145,7 @@ func TestTemplateShouldScrapePackage(t *testing.T) {
 }
 
 func TestPanicIfErr(t *testing.T) {
+	t.Parallel()
 	assert.PanicsWithError(t, "some error", func() {
 		panicIfErr(errors.New("some error"))
 	})

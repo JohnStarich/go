@@ -16,6 +16,7 @@ import (
 )
 
 func TestGenerateDocs(t *testing.T) {
+	t.Parallel()
 	// create a new package "thing" and generate docs for it
 	thing, err := ioutil.TempDir("", "")
 	require.NoError(t, err)

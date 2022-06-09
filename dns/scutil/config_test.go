@@ -11,12 +11,15 @@ import (
 )
 
 func TestRealSCUtilDNS(t *testing.T) {
+	t.Parallel()
 	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
 		// will fail on non-macOS runs, so just run it for a sanity check
 		_, _ = ReadMacOSDNS(context.Background())
 	})
 
 	t.Run("canceled context", func(t *testing.T) {
+		t.Parallel()
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 		_, err := ReadMacOSDNS(ctx)
@@ -25,6 +28,7 @@ func TestRealSCUtilDNS(t *testing.T) {
 }
 
 func TestReadMacOSDNS(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description     string
 		scutilOutput    string
@@ -223,7 +227,9 @@ resolver #2
 			},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			ctx := context.Background()
 			getSCUtilDNS := func(ctx context.Context) ([]byte, error) {
 				return []byte(tc.scutilOutput), tc.scutilErr
@@ -241,6 +247,7 @@ resolver #2
 }
 
 func TestReachable(t *testing.T) {
+	t.Parallel()
 	assert.False(t, Resolver{reachable: false}.Reachable())
 	assert.True(t, Resolver{reachable: true}.Reachable())
 }

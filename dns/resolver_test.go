@@ -19,15 +19,19 @@ import (
 const testTimeout = 5 * time.Second
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	assert.NotNil(t, New())
 }
 
 func TestNewWithConfig(t *testing.T) {
+	t.Parallel()
 	assert.NotNil(t, NewWithConfig(Config{}))
 }
 
 func TestNewWithConfigOS(t *testing.T) {
+	t.Parallel()
 	t.Run("macOS", func(t *testing.T) {
+		t.Parallel()
 		resolver := newWithConfig("darwin", Config{})
 		require.NotNil(t, resolver)
 
@@ -36,12 +40,15 @@ func TestNewWithConfigOS(t *testing.T) {
 	})
 
 	t.Run("other", func(t *testing.T) {
+		t.Parallel()
 		assert.Equal(t, &net.Resolver{}, newWithConfig("linux", Config{}))
 	})
 }
 
 func TestNewMacOSDialer(t *testing.T) {
+	t.Parallel()
 	t.Run("fill in defaults", func(t *testing.T) {
+		t.Parallel()
 		dialer := newMacOSDialer(Config{})
 		assert.Equal(t, zap.NewNop(), dialer.Config.Logger)
 		assert.Equal(t, 150*time.Millisecond, dialer.Config.InitialNameserverDelay)
@@ -50,6 +57,7 @@ func TestNewMacOSDialer(t *testing.T) {
 	})
 
 	t.Run("keep settings", func(t *testing.T) {
+		t.Parallel()
 		someLogger := zap.NewExample()
 		someDuration := 36 * time.Millisecond
 		dialer := newMacOSDialer(Config{
@@ -66,6 +74,7 @@ func TestNewMacOSDialer(t *testing.T) {
 }
 
 func TestEnsureNameservers(t *testing.T) {
+	t.Parallel()
 	someConfig := scutil.Config{
 		Resolvers: []scutil.Resolver{
 			{Nameservers: []string{
@@ -264,6 +273,7 @@ func TestReorderNameservers(t *testing.T) {
 }
 
 func TestReorderNameserversNoDeadline(t *testing.T) {
+	t.Parallel()
 	dialer := testDialer(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()

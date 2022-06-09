@@ -451,6 +451,7 @@ Diff coverage is below target. Add tests for these files:
 }
 
 func TestParseIssueURL(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		url          string
 		expectOrg    string
@@ -483,7 +484,9 @@ func TestParseIssueURL(t *testing.T) {
 			expectErr: `strconv.ParseInt: parsing "not-a-number": invalid syntax`,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.url, func(t *testing.T) {
+			t.Parallel()
 			org, repo, number, err := parseIssueURL(tc.url)
 			assert.Equal(t, tc.expectOrg, org)
 			assert.Equal(t, tc.expectRepo, repo)
@@ -501,12 +504,14 @@ func TestParseArgs(t *testing.T) {
 	t.Parallel()
 
 	t.Run("missing required param", func(t *testing.T) {
+		t.Parallel()
 		var buf bytes.Buffer
 		_, err := parseArgs([]string{}, &buf)
 		assert.EqualError(t, err, "flag -cover-go is required")
 	})
 
 	t.Run("invalid flags", func(t *testing.T) {
+		t.Parallel()
 		var buf bytes.Buffer
 		_, err := parseArgs([]string{
 			"-target-diff-coverage", "not-a-number",
@@ -515,6 +520,7 @@ func TestParseArgs(t *testing.T) {
 	})
 
 	t.Run("set fs paths", func(t *testing.T) {
+		t.Parallel()
 		const (
 			someCoverPath = "some-cover-path"
 			someDiffPath  = "mydiff.patch"
@@ -540,6 +546,7 @@ func TestParseArgs(t *testing.T) {
 }
 
 func TestSetErr(t *testing.T) {
+	t.Parallel()
 	someError := errors.New("some error")
 	var err error
 	setErr(nil, &err)
@@ -647,7 +654,9 @@ func TestFindUncoveredLines(t *testing.T) {
 }
 
 func TestFindReportableUncoveredFiles(t *testing.T) {
+	t.Parallel()
 	t.Run("sort and filter just enough files", func(t *testing.T) {
+		t.Parallel()
 		files := []covet.File{
 			{Name: "foo", Covered: 2, Uncovered: 0},
 			{Name: "bar", Covered: 1, Uncovered: 2},
@@ -663,6 +672,7 @@ func TestFindReportableUncoveredFiles(t *testing.T) {
 	})
 
 	t.Run("include more small files if the biggest chunks are not close enough to target", func(t *testing.T) {
+		t.Parallel()
 		files := []covet.File{
 			{Name: "foo", Covered: 0, Uncovered: 1},
 			{Name: "bar", Covered: 0, Uncovered: 1},

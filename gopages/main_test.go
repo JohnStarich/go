@@ -18,11 +18,13 @@ import (
 )
 
 func TestMain(t *testing.T) {
+	t.Parallel()
 	cmd.SetupTestExiter(t)
 	assert.Panics(t, main)
 }
 
 func TestMainArgs(t *testing.T) {
+	t.Parallel()
 	cmd.SetupTestExiter(t)
 	tmp, err := ioutil.TempDir("", "")
 	require.NoError(t, err)
@@ -55,7 +57,9 @@ func TestMainArgs(t *testing.T) {
 			expectErr:   "Attempted to exit with exit code 1",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			runner := func(string, flags.Args) error {
 				return tc.runnerErr
 			}
@@ -76,6 +80,7 @@ func TestMainArgs(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		args        []string
@@ -89,7 +94,9 @@ func TestRun(t *testing.T) {
 			args:        []string{"-gh-pages"},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			// create dummy repo to enable cloning
 			ghPagesDir, err := ioutil.TempDir("", "")
 			require.NoError(t, err)

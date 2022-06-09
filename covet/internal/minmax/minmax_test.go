@@ -7,6 +7,7 @@ import (
 )
 
 func TestMin(t *testing.T) {
+	t.Parallel()
 	testMin(t, "int64", func(a, b int) int {
 		return int(MinInt64(int64(a), int64(b)))
 	})
@@ -17,6 +18,7 @@ func TestMin(t *testing.T) {
 }
 
 func TestMax(t *testing.T) {
+	t.Parallel()
 	testMax(t, "int64", func(a, b int) int {
 		return int(MaxInt64(int64(a), int64(b)))
 	})

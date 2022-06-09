@@ -8,6 +8,7 @@ import (
 )
 
 func TestPipeData(t *testing.T) {
+	t.Parallel()
 	p := New(Options{}).
 		Append(func([]interface{}) []int {
 			return []int{1, 2, 3}
@@ -33,7 +34,9 @@ func TestPipeData(t *testing.T) {
 }
 
 func TestPipeErr(t *testing.T) {
+	t.Parallel()
 	t.Run("error", func(t *testing.T) {
+		t.Parallel()
 		p := New(Options{}).
 			Append(func([]interface{}) ([]int, error) {
 				return nil, fmt.Errorf("failed")
@@ -56,6 +59,7 @@ func TestPipeErr(t *testing.T) {
 	})
 
 	t.Run("no error", func(t *testing.T) {
+		t.Parallel()
 		p := New(Options{}).
 			Append(func([]interface{}) []int {
 				return []int{1, 2, 3}
@@ -85,7 +89,9 @@ func TestPipeErr(t *testing.T) {
 }
 
 func TestPipeInvalid(t *testing.T) {
+	t.Parallel()
 	t.Run("mismatched output and input types", func(t *testing.T) {
+		t.Parallel()
 		assertPanics(t,
 			fmt.Errorf("new function's parameter type bool does not match the expected return type []int"),
 			func() {
@@ -100,6 +106,7 @@ func TestPipeInvalid(t *testing.T) {
 	})
 
 	t.Run("missing input param", func(t *testing.T) {
+		t.Parallel()
 		assertPanics(t,
 			fmt.Errorf("new function's parameter types do not match output function's return types: [[]int] != []"),
 			func() {
@@ -114,6 +121,7 @@ func TestPipeInvalid(t *testing.T) {
 	})
 
 	t.Run("zero return values and zero params", func(t *testing.T) {
+		t.Parallel()
 		p := New(Options{}).
 			Append(func([]interface{}) {}).
 			Append(func() bool {
@@ -129,6 +137,7 @@ func TestPipeInvalid(t *testing.T) {
 	})
 
 	t.Run("not a function", func(t *testing.T) {
+		t.Parallel()
 		assertPanics(t,
 			fmt.Errorf("pipe value must a function, got: string"),
 			func() {
@@ -138,6 +147,7 @@ func TestPipeInvalid(t *testing.T) {
 	})
 
 	t.Run("first pipe must accept args", func(t *testing.T) {
+		t.Parallel()
 		assertPanics(t,
 			fmt.Errorf("first pipe must accept 1 parameter of type []interface{}"),
 			func() {
@@ -167,6 +177,7 @@ func assertPanics(t *testing.T, value interface{}, fn func()) {
 }
 
 func TestPipeReuse(t *testing.T) {
+	t.Parallel()
 	p := New(Options{}).
 		Append(func([]interface{}) string {
 			return "hello"
@@ -198,7 +209,9 @@ func TestPipeReuse(t *testing.T) {
 }
 
 func TestPipeConcat(t *testing.T) {
+	t.Parallel()
 	t.Run("empty pipes", func(t *testing.T) {
+		t.Parallel()
 		empty := New(Options{}).Concat(New(Options{}))
 		if !reflect.DeepEqual(New(Options{}), empty) {
 			t.Error("Empty pipe concat with empty pipe should be equivalent")
@@ -206,6 +219,7 @@ func TestPipeConcat(t *testing.T) {
 	})
 
 	t.Run("data flows", func(t *testing.T) {
+		t.Parallel()
 		p1 := New(Options{}).
 			Append(func(args []interface{}) int {
 				arg0 := args[0].(int)
@@ -227,6 +241,7 @@ func TestPipeConcat(t *testing.T) {
 	})
 
 	t.Run("previous error type dropped from bridge func", func(t *testing.T) {
+		t.Parallel()
 		p1 := New(Options{}).
 			Append(func(args []interface{}) (int, error) {
 				return 1, nil
@@ -250,6 +265,7 @@ func TestPipeConcat(t *testing.T) {
 	})
 
 	t.Run("stops on first pipe err", func(t *testing.T) {
+		t.Parallel()
 		p1 := New(Options{}).
 			Append(func(args []interface{}) (int, error) {
 				return 0, fmt.Errorf("failed")

@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRunMain(t *testing.T) {
+	t.Parallel()
 	handlePanic(t, main, func(v interface{}) {
 		require.Implements(t, (*error)(nil), v)
 		err := v.(error)

@@ -9,8 +9,8 @@ linters:
     - exportloopref
     - gochecknoglobals
     - gochecknoinits
-    - goconst
     - gocognit
+    - goconst
     - gocritic
     - gofmt
     - gomnd
@@ -22,6 +22,7 @@ linters:
     - nilerr
     - noctx
     - nolintlint
+    - paralleltest
     - revive
 
 issues:
@@ -41,6 +42,10 @@ issues:
       source: ".*Type = reflect.TypeOf\\(.*"
       linters:
         - gochecknoglobals
+    # False positive for paralleltest usage detection
+    - text: "Range statement for test Test.* does not use range value in test Run"
+      linters:
+        - paralleltest
 
 linters-settings:
   ireturn:

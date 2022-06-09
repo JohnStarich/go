@@ -8,6 +8,7 @@ import (
 )
 
 func TestPackage(t *testing.T) {
+	t.Parallel()
 	modulePackage, err := Package("../..")
 	require.NoError(t, err)
 	assert.Equal(t, "github.com/johnstarich/go/gopages", modulePackage)

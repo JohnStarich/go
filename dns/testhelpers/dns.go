@@ -73,10 +73,12 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 
 	packetConn, err := net.ListenUDP(config.Network, &net.UDPAddr{Port: config.Port})
 	require.NoError(t, err)
+	ready := make(chan struct{})
 	server := &dns.Server{
-		Net:        config.Network,
-		PacketConn: packetConn,
-		Handler:    mux,
+		Net:               config.Network,
+		PacketConn:        packetConn,
+		Handler:           mux,
+		NotifyStartedFunc: func() { close(ready) },
 	}
 	go func() {
 		err := server.ActivateAndServe()
@@ -86,6 +88,11 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 		<-ctx.Done()
 		_ = server.Shutdown()
 	}()
+	select {
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	case <-ready:
+	}
 	localAddr := server.PacketConn.LocalAddr().String()
 	_, port, err := net.SplitHostPort(localAddr)
 	require.NoError(t, err)

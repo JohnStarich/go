@@ -13,6 +13,7 @@ import (
 )
 
 func TestDocUpToDate(t *testing.T) {
+	t.Parallel()
 	templateBytes, err := ioutil.ReadFile("doc.go")
 	require.NoError(t, err)
 	var newDoc bytes.Buffer
@@ -27,19 +28,24 @@ func TestDocUpToDate(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
+	t.Parallel()
 	t.Run("no args", func(t *testing.T) {
+		t.Parallel()
 		assert.EqualError(t, run("", ""), "Provide doc template and output file paths")
 	})
 
 	t.Run("missing template file", func(t *testing.T) {
+		t.Parallel()
 		assert.Error(t, run("/does/not/exist", "unused"))
 	})
 
 	t.Run("can't open output file", func(t *testing.T) {
+		t.Parallel()
 		assert.Error(t, run("./doc.go", "/cannot/open/file"))
 	})
 
 	t.Run("invalid template", func(t *testing.T) {
+		t.Parallel()
 		tmpl, err := ioutil.TempFile("", "")
 		require.NoError(t, err)
 		defer os.Remove(tmpl.Name())
@@ -53,6 +59,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
 		file, err := ioutil.TempFile("", "")
 		require.NoError(t, err)
 		defer os.Remove(file.Name())
@@ -63,6 +70,7 @@ func TestRun(t *testing.T) {
 }
 
 func TestMain(t *testing.T) {
+	t.Parallel()
 	cmd.SetupTestExiter(t)
 	assert.PanicsWithError(t, "Attempted to exit with exit code 1", func() {
 		main()
@@ -70,6 +78,7 @@ func TestMain(t *testing.T) {
 }
 
 func TestSmallestNonNegative(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		input  []int
 		expect int
@@ -95,7 +104,9 @@ func TestSmallestNonNegative(t *testing.T) {
 			expect: 0,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintln(tc.input), func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tc.expect, smallestNonNegative(tc.input...))
 		})
 	}

@@ -9,6 +9,7 @@ import (
 )
 
 func TestRemoveComments(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		expr        string
@@ -49,13 +50,16 @@ func TestRemoveComments(t *testing.T) {
 			much `,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tc.expected, removeComments(tc.expr))
 		})
 	}
 }
 
 func TestRemoveWhitespace(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		expr        string
@@ -90,13 +94,16 @@ func TestRemoveWhitespace(t *testing.T) {
 			expected: `somelines\shereandhere`,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tc.expected, removeWhitespace(tc.expr))
 		})
 	}
 }
 
 func TestExtendedRegex(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description string
 		expr        string
@@ -132,13 +139,16 @@ func TestExtendedRegex(t *testing.T) {
 			expected: `some\s(\sexpr)?`,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			assert.Equal(t, tc.expected, extendedRegexp(tc.expr))
 		})
 	}
 }
 
 func TestCompile(t *testing.T) {
+	t.Parallel()
 	expr, err := Compile(`some
 		long #expr`)
 	require.NoError(t, err)
@@ -149,6 +159,7 @@ func TestCompile(t *testing.T) {
 }
 
 func TestMustCompile(t *testing.T) {
+	t.Parallel()
 	assert.NotPanics(t, func() {
 		expr := MustCompile(`some
 			long #expr`)

@@ -21,7 +21,9 @@ func testFile(t *testing.T, contents string) string {
 }
 
 func TestFilePathContents(t *testing.T) {
+	t.Parallel()
 	t.Run("no flag", func(t *testing.T) {
+		t.Parallel()
 		set := flag.NewFlagSet("", flag.ContinueOnError)
 		var f FilePathContents
 		set.Var(&f, "myflag", "")
@@ -31,6 +33,7 @@ func TestFilePathContents(t *testing.T) {
 	})
 
 	t.Run("valid file", func(t *testing.T) {
+		t.Parallel()
 		set := flag.NewFlagSet("", flag.ContinueOnError)
 		const someContents = "some contents"
 		tempFile := testFile(t, someContents)
@@ -44,6 +47,7 @@ func TestFilePathContents(t *testing.T) {
 	})
 
 	t.Run("invalid file", func(t *testing.T) {
+		t.Parallel()
 		set := flag.NewFlagSet("", flag.ContinueOnError)
 		var f FilePathContents
 		set.Var(&f, "myflag", "")

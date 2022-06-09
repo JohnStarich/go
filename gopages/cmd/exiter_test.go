@@ -7,6 +7,7 @@ import (
 )
 
 func TestExiter(t *testing.T) {
+	t.Parallel()
 	SetupTestExiter(t)
 	assert.PanicsWithError(t, "Attempted to exit with exit code 1", func() {
 		Exit(1)

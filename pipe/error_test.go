@@ -9,6 +9,7 @@ import (
 )
 
 func TestCheckError(t *testing.T) {
+	t.Parallel()
 	someErr := fmt.Errorf("some error")
 	if CheckError(true, someErr) == nil {
 		t.Error("Expected an error when cond is true")
@@ -35,6 +36,7 @@ func ExampleCheckError() {
 }
 
 func TestCheckErrorf(t *testing.T) {
+	t.Parallel()
 	err := CheckErrorf(true, "some error %d", 1)
 	if err == nil {
 		t.Error("Expected an error when cond is true")
@@ -49,6 +51,7 @@ func TestCheckErrorf(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
+	t.Parallel()
 	e := Error{errs: []error{
 		&os.PathError{Op: "create", Path: "foo", Err: os.ErrExist},
 	}}
@@ -82,6 +85,7 @@ func TestError(t *testing.T) {
 }
 
 func TestErrorMulti(t *testing.T) {
+	t.Parallel()
 	e := Error{errs: []error{
 		fmt.Errorf("error 1"),
 		fmt.Errorf("error 2"),
