@@ -9,7 +9,7 @@ import (
 	"github.com/johnstarich/go/covet/internal/span"
 )
 
-var inGitHubActions = os.Getenv("GITHUB_ACTIONS") == "true"
+func inGitHubActions() bool { return os.Getenv("GITHUB_ACTIONS") == "true" }
 
 func workflowCommand(command, message string, args map[string]string) string {
 	var sb strings.Builder
@@ -60,7 +60,7 @@ func githubActionsEncode(s string) string {
 }
 
 func runWorkflow(s string) {
-	if inGitHubActions {
+	if inGitHubActions() {
 		fmt.Println(s)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"math/big"
 )
 
+// nolint:gochecknoglobals // These are all effectively constants as big.Int types.
 var (
 	kilobytes  = big.NewInt(1e3)
 	megabytes  = big.NewInt(1e6)

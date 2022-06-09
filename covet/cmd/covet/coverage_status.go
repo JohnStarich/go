@@ -40,15 +40,13 @@ func (c coverageStatus) WorkflowCommand() string {
 	}
 }
 
-var (
-	boldGreen = color.New(color.Bold, color.FgGreen)
-	boldRed   = color.New(color.Bold, color.FgRed)
-)
+func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
+func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
 
 func (c coverageStatus) Colorize(s string) string {
 	switch c {
 	case coverageExcellent:
-		return boldGreen.Sprint(s)
+		return boldGreen().Sprint(s)
 	case coverageGood:
 		return color.GreenString(s)
 	case coverageOK:
@@ -56,9 +54,9 @@ func (c coverageStatus) Colorize(s string) string {
 	case coverageWarning:
 		return color.RedString(s)
 	case coverageError:
-		return boldRed.Sprint(s)
+		return boldRed().Sprint(s)
 	default:
-		return boldRed.Sprint(s)
+		return boldRed().Sprint(s)
 	}
 }
 

@@ -7,6 +7,7 @@ linters:
     - errorlint
     - exhaustive
     - exportloopref
+    - gochecknoglobals
     - gocognit
     - revive
 
@@ -17,3 +18,13 @@ issues:
     - EXC0013
     - EXC0014
     - EXC0015
+  exclude-rules:
+    # Pipes are best used as pre-compiled globals, much like regexp.Mustcompile()
+    - text: ".*Pipe is a global variable"
+      linters:
+        - gochecknoglobals
+    # Reflection is slow, so some global reflect types are ok
+    - text: ".*Type is a global variable"
+      source: ".*Type = reflect.TypeOf\\(.*"
+      linters:
+        - gochecknoglobals

@@ -19,9 +19,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	boldColor = color.New(color.Bold)
-)
+func boldColor() *color.Color { return color.New(color.Bold) }
 
 // Args contains all flag values for a covet run
 type Args struct {

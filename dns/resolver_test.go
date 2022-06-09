@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-var testTimeout = 5 * time.Second
+const testTimeout = 5 * time.Second
 
 func TestNew(t *testing.T) {
 	assert.NotNil(t, New())

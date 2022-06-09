@@ -68,11 +68,12 @@ func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summa
 		{Number: 2, Align: text.AlignCenter},
 	})
 	tbl.SuppressEmptyColumns()
+	bold := boldColor()
 	tbl.AppendHeader(table.Row{
 		"",
-		format.Colorize(boldColor, "Lines"),
-		format.Colorize(boldColor, "Coverage"),
-		format.Colorize(boldColor, "File"),
+		format.Colorize(bold, "Lines"),
+		format.Colorize(bold, "Coverage"),
+		format.Colorize(bold, "File"),
 	})
 	for _, f := range uncoveredFiles {
 		percent := coveredFile(f)
@@ -128,7 +129,7 @@ func formatGraph(f float64, format summaryFormat) string {
 		graph.WriteRune(' ')
 		total--
 	}
-	return format.Colorize(boldColor, graph.String())
+	return format.Colorize(boldColor(), graph.String())
 }
 
 func percentRune(f float64) rune {

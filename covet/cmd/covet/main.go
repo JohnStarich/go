@@ -11,6 +11,7 @@ import (
 	osfs "github.com/hack-pad/hackpadfs/os"
 )
 
+// nolint:gochecknoglobals // These globals are required to handle pre-existing globals in other libraries. Access to them is tightly controlled and minimized.
 var (
 	osExiter            = os.Exit
 	osErr     io.Writer = os.Stderr
