@@ -13,7 +13,7 @@ import (
 
 const testTimeout = 5 * time.Second
 
-func dialUDP(t *testing.T, address string) PacketConn {
+func dialUDP(t *testing.T, address string) PacketConn { // nolint:ireturn // Returned interface is a convenience wrapper for tests calling New()
 	conn, err := net.Dial("udp", address)
 	require.NoError(t, err)
 	require.Implements(t, (*PacketConn)(nil), conn)
@@ -27,9 +27,7 @@ func TestNew(t *testing.T) {
 		dialUDP(t, "1.2.3.4:53"),
 		dialUDP(t, "5.6.7.8:53"),
 	}
-	conn := New(conns)
-	require.IsType(t, &staggerConn{}, conn)
-	sConn := conn.(*staggerConn)
+	sConn := New(conns)
 
 	assert.Equal(t, conns, sConn.conns)
 	assert.Equal(t, uint64(2), sConn.connCount.Load())
@@ -342,7 +340,7 @@ func TestStats(t *testing.T) {
 
 	conn1, conn2 := &wrapperConn{}, &wrapperConn{remoteAddr: addr}
 
-	conn := New([]PacketConn{conn1, conn2}).(*staggerConn)
+	conn := New([]PacketConn{conn1, conn2})
 	conn.firstResponder.Store(1)
 	stats := conn.Stats()
 	assert.Equal(t, Stats{

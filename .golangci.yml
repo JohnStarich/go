@@ -15,6 +15,7 @@ linters:
     - gofmt
     - gomnd
     - gosec
+    - ireturn
     - revive
 
 issues:
@@ -34,3 +35,15 @@ issues:
       source: ".*Type = reflect.TypeOf\\(.*"
       linters:
         - gochecknoglobals
+
+linters-settings:
+  ireturn:
+    allow:
+      # Defaults:
+      - anon
+      - error
+      - empty
+      - stdlib
+      # Also allow these common interfaces:
+      - github\.com\/go-git\/go-billy\/v5
+      - golang\.org\/x\/tools\/godoc\/vfs

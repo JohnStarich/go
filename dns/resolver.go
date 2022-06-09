@@ -48,10 +48,6 @@ func newWithConfig(runtimeName string, config Config) *net.Resolver {
 	}
 }
 
-type netDialer interface {
-	DialContext(ctx context.Context, network, address string) (net.Conn, error)
-}
-
 type macOSDialer struct {
 	Config
 	dialer        *net.Dialer
@@ -61,7 +57,7 @@ type macOSDialer struct {
 	readResolvers func(context.Context) (scutil.Config, error)
 }
 
-func newMacOSDialer(config Config) netDialer {
+func newMacOSDialer(config Config) *macOSDialer {
 	const (
 		defaultInitialNameserverDelay = 150 * time.Millisecond
 		defaultNextNameserverInterval = 10 * time.Millisecond
@@ -217,7 +213,7 @@ func staggerTicker(initialDelay, d time.Duration, logger *zap.Logger) (<-chan st
 	return c, cancel
 }
 
-func (m *macOSDialer) reorderNameservers(ctx context.Context, conn staggercast.Conn) {
+func (m *macOSDialer) reorderNameservers(ctx context.Context, conn *staggercast.Conn) {
 	var zero time.Time
 	if deadline, ok := ctx.Deadline(); !ok || deadline == zero {
 		m.Logger.Debug("Skipping nameserver reorder, no deadline on context")
