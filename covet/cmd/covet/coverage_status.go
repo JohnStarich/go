@@ -33,6 +33,8 @@ func (c coverageStatus) WorkflowCommand() string {
 		return "notice"
 	case coverageOK, coverageWarning:
 		return "warning"
+	case coverageError:
+		return "error"
 	default:
 		return "error"
 	}
@@ -53,6 +55,8 @@ func (c coverageStatus) Colorize(s string) string {
 		return color.YellowString(s)
 	case coverageWarning:
 		return color.RedString(s)
+	case coverageError:
+		return boldRed.Sprint(s)
 	default:
 		return boldRed.Sprint(s)
 	}
@@ -66,6 +70,8 @@ func (c coverageStatus) Emoji() string {
 		return "🟡"
 	case coverageWarning:
 		return "🟠"
+	case coverageError:
+		return "🔴"
 	default:
 		return "🔴"
 	}

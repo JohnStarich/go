@@ -57,8 +57,8 @@ func TestError(t *testing.T) {
 		t.Error("Unexpected single error message:", e)
 	}
 
-	if errors.Unwrap(e) != e.errs[0] {
-		t.Error("errors.Unwrap() must return the first error")
+	if !errors.Is(e, e.errs[0]) {
+		t.Error("errors.Is() must match the first error")
 	}
 
 	if !errors.Is(e, os.ErrExist) {

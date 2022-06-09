@@ -53,7 +53,7 @@ func genDoc(templateBytes []byte, w io.Writer) error {
 	}
 
 	_, usageOutput, err := flags.Parse("-help")
-	if err != flag.ErrHelp {
+	if !errors.Is(err, flag.ErrHelp) {
 		return err
 	}
 

@@ -33,33 +33,27 @@ func (f summaryFormat) ColorizeStatus(status coverageStatus, s string) string {
 }
 
 func (f summaryFormat) FormatTable(tbl table.Writer) string {
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		return tbl.RenderMarkdown()
-	default:
-		tbl.SetStyle(table.StyleLight)
-		return tbl.Render()
 	}
+	tbl.SetStyle(table.StyleLight)
+	return tbl.Render()
 }
 
 func (f summaryFormat) Monospace(s string) string {
 	const nonBreakingSpace = " " // ASCII 255, non-breaking space
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		s = strings.ReplaceAll(s, " ", nonBreakingSpace)
 		return fmt.Sprintf("``%s``", s)
-	default:
-		return s
 	}
+	return s
 }
 
 func (f summaryFormat) StatusIcon(status coverageStatus) string {
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		return status.Emoji()
-	default:
-		return ""
 	}
+	return ""
 }
 
 func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summaryFormat) string {

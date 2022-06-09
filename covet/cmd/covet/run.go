@@ -45,7 +45,7 @@ func run(
 ) error {
 	args, err := parseArgs(strArgs, stderr)
 	if err != nil {
-		if err == flag.ErrHelp {
+		if errors.Is(err, flag.ErrHelp) {
 			err = nil
 		}
 		return err

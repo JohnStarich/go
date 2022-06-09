@@ -42,9 +42,9 @@ func mainArgs(
 	osArgs ...string,
 ) {
 	args, usageOutput, err := flags.Parse(osArgs...)
-	switch err {
-	case nil:
-	case flag.ErrHelp:
+	switch {
+	case err == nil:
+	case errors.Is(err, flag.ErrHelp):
 		fmt.Print(usageOutput)
 		return
 	default:

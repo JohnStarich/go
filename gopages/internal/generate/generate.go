@@ -475,7 +475,7 @@ func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir
 	}
 	for _, info = range dir {
 		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
-		if err == filepath.SkipDir {
+		if errors.Is(err, filepath.SkipDir) {
 			if !info.IsDir() {
 				break // for SkipDir on a file, skip remaining files in directory
 			}

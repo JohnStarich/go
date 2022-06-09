@@ -2,6 +2,11 @@ linters:
   enable:
     # Default linters plus these:
     - bodyclose
+    - durationcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
     - gocognit
     - revive
 

@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -31,9 +32,9 @@ const (
 
 func main() {
 	args, usageOutput, err := flags.Parse(os.Args[1:]...)
-	switch err {
-	case nil:
-	case flag.ErrHelp:
+	switch {
+	case err == nil:
+	case errors.Is(err, flag.ErrHelp):
 		fmt.Print(usageOutput)
 		return
 	default:
