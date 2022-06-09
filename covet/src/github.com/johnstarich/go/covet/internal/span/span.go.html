@@ -1,0 +1,117 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/covet/internal/span/span.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/covet/src">src</a>/<a href="/go/covet/src/github.com">github.com</a>/<a href="/go/covet/src/github.com/johnstarich">johnstarich</a>/<a href="/go/covet/src/github.com/johnstarich/go">go</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet">covet</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal">internal</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span">span</a>/<span class="text-muted">span.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/span">github.com/johnstarich/go/covet/internal/span</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package span
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;fmt&#34;
+<span id="L5" class="ln">     5  </span>
+<span id="L6" class="ln">     6  </span>	&#34;github.com/johnstarich/go/covet/internal/minmax&#34;
+<span id="L7" class="ln">     7  </span>)
+<span id="L8" class="ln">     8  </span>
+<span id="L9" class="ln">     9  </span><span class="comment">// Span is a numeric range with an inclusive Start and exclusive End index. i.e. [Start, End)</span>
+<span id="L10" class="ln">    10  </span>type Span struct {
+<span id="L11" class="ln">    11  </span>	Start int64 <span class="comment">// inclusive</span>
+<span id="L12" class="ln">    12  </span>	End   int64 <span class="comment">// exclusive</span>
+<span id="L13" class="ln">    13  </span>}
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span><span class="comment">// Intersection returns a Span representing the intersection of s and other.</span>
+<span id="L16" class="ln">    16  </span><span class="comment">// Returns false if they do not intersect.</span>
+<span id="L17" class="ln">    17  </span>func (s Span) Intersection(other Span) (Span, bool) {
+<span id="L18" class="ln">    18  </span>	intersection := Span{
+<span id="L19" class="ln">    19  </span>		Start: minmax.MaxInt64(s.Start, other.Start),
+<span id="L20" class="ln">    20  </span>		End:   minmax.MinInt64(s.End, other.End),
+<span id="L21" class="ln">    21  </span>	}
+<span id="L22" class="ln">    22  </span>	if intersection.Start &lt; intersection.End {
+<span id="L23" class="ln">    23  </span>		return intersection, true
+<span id="L24" class="ln">    24  </span>	}
+<span id="L25" class="ln">    25  </span>	return Span{}, false
+<span id="L26" class="ln">    26  </span>}
+<span id="L27" class="ln">    27  </span>
+<span id="L28" class="ln">    28  </span><span class="comment">// Len returns the distance between Start and End</span>
+<span id="L29" class="ln">    29  </span>func (s Span) Len() int64 {
+<span id="L30" class="ln">    30  </span>	return s.End - s.Start
+<span id="L31" class="ln">    31  </span>}
+<span id="L32" class="ln">    32  </span>
+<span id="L33" class="ln">    33  </span>func (s Span) String() string {
+<span id="L34" class="ln">    34  </span>	return fmt.Sprintf(&#34;[%d,%d)&#34;, s.Start, s.End)
+<span id="L35" class="ln">    35  </span>}
+<span id="L36" class="ln">    36  </span>
+<span id="L37" class="ln">    37  </span><span class="comment">// Merge attempts to combine s and other into a single, unified Span.</span>
+<span id="L38" class="ln">    38  </span><span class="comment">// Returns false if they do not intersect and cannot be merged.</span>
+<span id="L39" class="ln">    39  </span>func (s Span) Merge(other Span) (Span, bool) {
+<span id="L40" class="ln">    40  </span>	_, intersects := s.Intersection(other)
+<span id="L41" class="ln">    41  </span>	if !intersects {
+<span id="L42" class="ln">    42  </span>		return Span{}, false
+<span id="L43" class="ln">    43  </span>	}
+<span id="L44" class="ln">    44  </span>	return Span{
+<span id="L45" class="ln">    45  </span>		Start: minmax.MinInt64(s.Start, other.Start),
+<span id="L46" class="ln">    46  </span>		End:   minmax.MaxInt64(s.End, other.End),
+<span id="L47" class="ln">    47  </span>	}, true
+<span id="L48" class="ln">    48  </span>}
+<span id="L49" class="ln">    49  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

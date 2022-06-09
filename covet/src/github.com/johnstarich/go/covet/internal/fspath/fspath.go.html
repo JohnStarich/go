@@ -1,0 +1,143 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/covet/internal/fspath/fspath.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/covet/src">src</a>/<a href="/go/covet/src/github.com">github.com</a>/<a href="/go/covet/src/github.com/johnstarich">johnstarich</a>/<a href="/go/covet/src/github.com/johnstarich/go">go</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet">covet</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal">internal</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath">fspath</a>/<span class="text-muted">fspath.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/fspath">github.com/johnstarich/go/covet/internal/fspath</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package fspath
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;path&#34;
+<span id="L5" class="ln">     5  </span>	&#34;path/filepath&#34;
+<span id="L6" class="ln">     6  </span>	&#34;strings&#34;
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span>	&#34;github.com/pkg/errors&#34;
+<span id="L9" class="ln">     9  </span>)
+<span id="L10" class="ln">    10  </span>
+<span id="L11" class="ln">    11  </span>const separator = &#34;/&#34;
+<span id="L12" class="ln">    12  </span>
+<span id="L13" class="ln">    13  </span><span class="comment">// FromFSPath converts from an io/fs.FS compatible path to an os package compatible path</span>
+<span id="L14" class="ln">    14  </span>func FromFSPath(p string) string {
+<span id="L15" class="ln">    15  </span>	<span class="comment">// TODO fix for windows</span>
+<span id="L16" class="ln">    16  </span>	return filepath.FromSlash(path.Join(separator, p))
+<span id="L17" class="ln">    17  </span>}
+<span id="L18" class="ln">    18  </span>
+<span id="L19" class="ln">    19  </span><span class="comment">// ToFSPath converts from an os package compatible path to an io/fs.FS compatible path</span>
+<span id="L20" class="ln">    20  </span>func ToFSPath(p string) string {
+<span id="L21" class="ln">    21  </span>	<span class="comment">// TODO fix for windows</span>
+<span id="L22" class="ln">    22  </span>	return strings.TrimPrefix(filepath.ToSlash(p), separator)
+<span id="L23" class="ln">    23  </span>}
+<span id="L24" class="ln">    24  </span>
+<span id="L25" class="ln">    25  </span><span class="comment">// ToFSPathList converts list&#39;s path elements to os package compatible paths and rejoins them together</span>
+<span id="L26" class="ln">    26  </span>func ToFSPathList(list string) string {
+<span id="L27" class="ln">    27  </span>	items := filepath.SplitList(list)
+<span id="L28" class="ln">    28  </span>	for i, item := range items {
+<span id="L29" class="ln">    29  </span>		items[i] = ToFSPath(item)
+<span id="L30" class="ln">    30  </span>	}
+<span id="L31" class="ln">    31  </span>	return strings.Join(items, string(filepath.ListSeparator))
+<span id="L32" class="ln">    32  </span>}
+<span id="L33" class="ln">    33  </span>
+<span id="L34" class="ln">    34  </span><span class="comment">// CommonBase returns the common base path between a and b.</span>
+<span id="L35" class="ln">    35  </span><span class="comment">// Returns &#34;.&#34; if there are no common path elements.</span>
+<span id="L36" class="ln">    36  </span>func CommonBase(a, b string) string {
+<span id="L37" class="ln">    37  </span>	a = path.Clean(a)
+<span id="L38" class="ln">    38  </span>	b = path.Clean(b)
+<span id="L39" class="ln">    39  </span>	i := 0
+<span id="L40" class="ln">    40  </span>	for ; i &lt; len(a) &amp;&amp; i &lt; len(b); i++ {
+<span id="L41" class="ln">    41  </span>		if a[i] != b[i] {
+<span id="L42" class="ln">    42  </span>			break
+<span id="L43" class="ln">    43  </span>		}
+<span id="L44" class="ln">    44  </span>	}
+<span id="L45" class="ln">    45  </span>	return path.Clean(a[:i])
+<span id="L46" class="ln">    46  </span>}
+<span id="L47" class="ln">    47  </span>
+<span id="L48" class="ln">    48  </span><span class="comment">// Rel returns the relative FS path from basePath to targetPath.</span>
+<span id="L49" class="ln">    49  </span><span class="comment">// Similar to filepath.Rel without including OS-dependent behavior.</span>
+<span id="L50" class="ln">    50  </span>func Rel(basePath, targetPath string) (string, error) {
+<span id="L51" class="ln">    51  </span>	basePath = path.Clean(basePath)
+<span id="L52" class="ln">    52  </span>	targetPath = path.Clean(targetPath)
+<span id="L53" class="ln">    53  </span>
+<span id="L54" class="ln">    54  </span>	common := CommonBase(basePath, targetPath)
+<span id="L55" class="ln">    55  </span>	if common == &#34;&#34; {
+<span id="L56" class="ln">    56  </span>		return &#34;&#34;, errors.New(&#34;could not make relative path between basePath and targetPath&#34;)
+<span id="L57" class="ln">    57  </span>	}
+<span id="L58" class="ln">    58  </span>	base := basePath
+<span id="L59" class="ln">    59  </span>	base = strings.TrimPrefix(base, common)
+<span id="L60" class="ln">    60  </span>	base = strings.TrimPrefix(base, separator)
+<span id="L61" class="ln">    61  </span>	target := targetPath
+<span id="L62" class="ln">    62  </span>	target = strings.TrimPrefix(target, common)
+<span id="L63" class="ln">    63  </span>	target = strings.TrimPrefix(target, separator)
+<span id="L64" class="ln">    64  </span>
+<span id="L65" class="ln">    65  </span>	switch {
+<span id="L66" class="ln">    66  </span>	case base == &#34;&#34; &amp;&amp; target == &#34;&#34;:
+<span id="L67" class="ln">    67  </span>		return &#34;.&#34;, nil
+<span id="L68" class="ln">    68  </span>	case base == &#34;&#34;:
+<span id="L69" class="ln">    69  </span>		return target, nil
+<span id="L70" class="ln">    70  </span>	default:
+<span id="L71" class="ln">    71  </span>		p := strings.Repeat(&#34;../&#34;, strings.Count(base, separator)+1)
+<span id="L72" class="ln">    72  </span>		return path.Join(p, target), nil
+<span id="L73" class="ln">    73  </span>	}
+<span id="L74" class="ln">    74  </span>}
+<span id="L75" class="ln">    75  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

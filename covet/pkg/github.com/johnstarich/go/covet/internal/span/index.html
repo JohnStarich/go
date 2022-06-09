@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>span - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer></script>
+
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package span
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/johnstarich/go/covet/internal/span"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+			
+				
+				<dd><a href="#Span">type Span</a></dd>
+				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Span.Intersection">func (s Span) Intersection(other Span) (Span, bool)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Span.Len">func (s Span) Len() int64</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Span.Merge">func (s Span) Merge(other Span) (Span, bool)</a></dd>
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Span.String">func (s Span) String() string</a></dd>
+				
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go">span.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+		
+			
+			
+			<h2 id="Span">type <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go#L10">Span</a>
+				<a class="permalink" href="#Span">&#xb6;</a>
+				
+				
+			</h2>
+			<p>
+Span is a numeric range with an inclusive Start and exclusive End index. i.e. [Start, End)
+</p>
+
+			<pre>type Span struct {
+<span id="Span.Start"></span>    Start <a href="/go/covet/pkg/builtin/#int64">int64</a> <span class="comment">// inclusive</span>
+<span id="Span.End"></span>    End   <a href="/go/covet/pkg/builtin/#int64">int64</a> <span class="comment">// exclusive</span>
+}
+</pre>
+
+			
+
+			
+
+			
+			
+			
+
+			
+
+			
+				
+				<h3 id="Span.Intersection">func (Span) <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go#L17">Intersection</a>
+					<a class="permalink" href="#Span.Intersection">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Span">Span</a>) Intersection(other <a href="#Span">Span</a>) (<a href="#Span">Span</a>, <a href="/go/covet/pkg/builtin/#bool">bool</a>)</pre>
+				<p>
+Intersection returns a Span representing the intersection of s and other.
+Returns false if they do not intersect.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Span.Len">func (Span) <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go#L29">Len</a>
+					<a class="permalink" href="#Span.Len">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Span">Span</a>) Len() <a href="/go/covet/pkg/builtin/#int64">int64</a></pre>
+				<p>
+Len returns the distance between Start and End
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Span.Merge">func (Span) <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go#L39">Merge</a>
+					<a class="permalink" href="#Span.Merge">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Span">Span</a>) Merge(other <a href="#Span">Span</a>) (<a href="#Span">Span</a>, <a href="/go/covet/pkg/builtin/#bool">bool</a>)</pre>
+				<p>
+Merge attempts to combine s and other into a single, unified Span.
+Returns false if they do not intersect and cannot be merged.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Span.String">func (Span) <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/span/span.go#L33">String</a>
+					<a class="permalink" href="#Span.String">&#xb6;</a>
+					
+					
+				</h3>
+				<pre>func (s <a href="#Span">Span</a>) String() <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				
+				
+				
+				
+			
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.16.15.<br>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
