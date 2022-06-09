@@ -33,33 +33,27 @@ func (f summaryFormat) ColorizeStatus(status coverageStatus, s string) string {
 }
 
 func (f summaryFormat) FormatTable(tbl table.Writer) string {
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		return tbl.RenderMarkdown()
-	default:
-		tbl.SetStyle(table.StyleLight)
-		return tbl.Render()
 	}
+	tbl.SetStyle(table.StyleLight)
+	return tbl.Render()
 }
 
 func (f summaryFormat) Monospace(s string) string {
 	const nonBreakingSpace = " " // ASCII 255, non-breaking space
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		s = strings.ReplaceAll(s, " ", nonBreakingSpace)
 		return fmt.Sprintf("``%s``", s)
-	default:
-		return s
 	}
+	return s
 }
 
 func (f summaryFormat) StatusIcon(status coverageStatus) string {
-	switch f {
-	case summaryMarkdown:
+	if f == summaryMarkdown {
 		return status.Emoji()
-	default:
-		return ""
 	}
+	return ""
 }
 
 func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summaryFormat) string {
@@ -70,15 +64,17 @@ func covetSummary(uncoveredFiles []covet.File, targetCoverage uint, format summa
 	var sb strings.Builder
 	sb.WriteString("Diff coverage is below target. Add tests for these files:\n")
 	tbl := table.NewWriter()
+	const coverageColumnIndex = 2
 	tbl.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 2, Align: text.AlignCenter},
+		{Number: coverageColumnIndex, Align: text.AlignCenter},
 	})
 	tbl.SuppressEmptyColumns()
+	bold := boldColor()
 	tbl.AppendHeader(table.Row{
 		"",
-		format.Colorize(boldColor, "Lines"),
-		format.Colorize(boldColor, "Coverage"),
-		format.Colorize(boldColor, "File"),
+		format.Colorize(bold, "Lines"),
+		format.Colorize(bold, "Coverage"),
+		format.Colorize(bold, "File"),
 	})
 	for _, f := range uncoveredFiles {
 		percent := coveredFile(f)
@@ -111,7 +107,7 @@ func formatFraction(numerator, denominator uint) string {
 }
 
 func formatPercent(f float64) string {
-	return fmt.Sprintf("%5.1f%%", 100*f)
+	return fmt.Sprintf("%5.1f%%", maxPercentInt*f)
 }
 
 func formatGraph(f float64, format summaryFormat) string {
@@ -134,7 +130,7 @@ func formatGraph(f float64, format summaryFormat) string {
 		graph.WriteRune(' ')
 		total--
 	}
-	return format.Colorize(boldColor, graph.String())
+	return format.Colorize(boldColor(), graph.String())
 }
 
 func percentRune(f float64) rune {

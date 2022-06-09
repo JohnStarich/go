@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testDirPermission = 0700
+
 // OSFSWithTemp returns an os.FS instance with 1) the current module's directory and 2) a temporary directory mounted inside.
 // Returns the FS paths to both mounts.
 func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, workingDirectory, tempDirectory string) {
@@ -31,11 +33,11 @@ func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, work
 	require.NoError(t, err)
 
 	workingDirectory = "work"
-	require.NoError(t, hackpadfs.MkdirAll(fs, workingDirectory, 0700))
+	require.NoError(t, hackpadfs.MkdirAll(fs, workingDirectory, testDirPermission))
 	require.NoError(t, fs.AddMount(workingDirectory, osFS))
 
 	tempDirectory = "tmp"
-	require.NoError(t, hackpadfs.MkdirAll(fs, tempDirectory, 0700))
+	require.NoError(t, hackpadfs.MkdirAll(fs, tempDirectory, testDirPermission))
 	return fs, workingDirectory, tempDirectory
 }
 
@@ -46,7 +48,7 @@ func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS {
 	fs, err := mem.NewFS()
 	require.NoError(t, err)
 	for name, contents := range files {
-		require.NoError(t, fs.MkdirAll(path.Dir(name), 0700))
+		require.NoError(t, fs.MkdirAll(path.Dir(name), testDirPermission))
 		f, err := hackpadfs.Create(fs, name)
 		require.NoError(t, err)
 		_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(contents)+"\n"))

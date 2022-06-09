@@ -54,7 +54,8 @@ func FilePath(fs hackpadfs.FS, workingDirectory, filePattern string, options Opt
 		panicIfErr(err)
 		setErr(mountFS.AddMount(tempDir, memFS), &sErr)
 		moduleGoPath := path.Join("src", moduleName)
-		setErr(memFS.MkdirAll(moduleGoPath, 0700), &sErr)
+		const dirPermission = 0700
+		setErr(memFS.MkdirAll(moduleGoPath, dirPermission), &sErr)
 		moduleFS, err := hackpadfs.Sub(mountFS, moduleDir)
 		if err != nil {
 			return "", err

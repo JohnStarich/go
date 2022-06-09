@@ -7,16 +7,18 @@ import (
 )
 
 // New creates a new billy/memfs file system that can handle opening directories
-func New() billy.Filesystem {
+func New() *SafeOpener {
 	fs := memfs.New()
-	return &safeOpener{fs}
+	return &SafeOpener{fs}
 }
 
-type safeOpener struct {
+// SafeOpener is a billy.Filesystem that fixes Open() behavior on directories with a work-around
+type SafeOpener struct {
 	billy.Filesystem
 }
 
-func (s *safeOpener) Open(name string) (billy.File, error) {
+// Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
+func (s *SafeOpener) Open(name string) (billy.File, error) {
 	info, err := s.Filesystem.Stat(name)
 	if err != nil {
 		return nil, err

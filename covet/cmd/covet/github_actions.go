@@ -9,7 +9,7 @@ import (
 	"github.com/johnstarich/go/covet/internal/span"
 )
 
-var inGitHubActions = os.Getenv("GITHUB_ACTIONS") == "true"
+func inGitHubActions() bool { return os.Getenv("GITHUB_ACTIONS") == "true" }
 
 func workflowCommand(command, message string, args map[string]string) string {
 	var sb strings.Builder
@@ -60,14 +60,14 @@ func githubActionsEncode(s string) string {
 }
 
 func runWorkflow(s string) {
-	if inGitHubActions {
+	if inGitHubActions() {
 		fmt.Println(s)
 	}
 }
 
 func coverageCommand(percent float64, file string, uncovered []span.Span) string {
 	status := newCoverageStatus(percent)
-	message := fmt.Sprintf("Diff coverage is %.1f%%", 100*percent)
+	message := fmt.Sprintf("Diff coverage is %.1f%%", maxPercentInt*percent)
 	args := map[string]string{
 		"title": "covet",
 	}
@@ -76,7 +76,7 @@ func coverageCommand(percent float64, file string, uncovered []span.Span) string
 	}
 	if len(uncovered) > 0 {
 		first := uncovered[0]
-		args["title"] = fmt.Sprintf("Not enough tests on %s. (-%.1f%%)", file, 100*(1-percent))
+		args["title"] = fmt.Sprintf("Not enough tests on %s. (-%.1f%%)", file, maxPercentInt*(1-percent))
 		args["line"] = fmt.Sprintf("%d", first.Start)
 		args["endLine"] = fmt.Sprintf("%d", first.End-1)
 		message = ""

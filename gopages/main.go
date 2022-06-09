@@ -42,14 +42,14 @@ func mainArgs(
 	osArgs ...string,
 ) {
 	args, usageOutput, err := flags.Parse(osArgs...)
-	switch err {
-	case nil:
-	case flag.ErrHelp:
+	switch {
+	case err == nil:
+	case errors.Is(err, flag.ErrHelp):
 		fmt.Print(usageOutput)
 		return
 	default:
 		fmt.Print(usageOutput)
-		cmd.Exit(2)
+		cmd.Exit(cmd.ExitCodeInvalidUsage)
 	}
 
 	log.SetOutput(ioutil.Discard) // disable godoc's internal logging

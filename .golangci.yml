@@ -1,6 +1,27 @@
 linters:
   enable:
     # Default linters plus these:
+    - bodyclose
+    - durationcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - gochecknoglobals
+    - gochecknoinits
+    - goconst
+    - gocognit
+    - gocritic
+    - gofmt
+    - gomnd
+    - gosec
+    - ireturn
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - noctx
+    - nolintlint
     - revive
 
 issues:
@@ -10,3 +31,25 @@ issues:
     - EXC0013
     - EXC0014
     - EXC0015
+  exclude-rules:
+    # Pipes are best used as pre-compiled globals, much like regexp.Mustcompile()
+    - text: ".*Pipe is a global variable"
+      linters:
+        - gochecknoglobals
+    # Reflection is slow, so some global reflect types are ok
+    - text: ".*Type is a global variable"
+      source: ".*Type = reflect.TypeOf\\(.*"
+      linters:
+        - gochecknoglobals
+
+linters-settings:
+  ireturn:
+    allow:
+      # Defaults:
+      - anon
+      - error
+      - empty
+      - stdlib
+      # Also allow these common interfaces:
+      - github\.com\/go-git\/go-billy\/v5
+      - golang\.org\/x\/tools\/godoc\/vfs

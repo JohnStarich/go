@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -10,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func init() {
+func TestMain(m *testing.M) {
 	osErr = bytes.NewBuffer(nil)
 	osExiter = func(code int) {
 		buf := osErr.(*bytes.Buffer)
@@ -18,9 +19,11 @@ func init() {
 		err := errors.New(string(bytes))
 		panic(errors.Wrapf(err, "exited with code %d and output", code))
 	}
+	setColorOnce(false)
+	os.Exit(m.Run())
 }
 
-func TestMain(t *testing.T) {
+func TestRunMain(t *testing.T) {
 	handlePanic(t, main, func(v interface{}) {
 		require.Implements(t, (*error)(nil), v)
 		err := v.(error)

@@ -25,8 +25,7 @@ func hostnamesHandler(ctx context.Context, t *testing.T, responseDelay time.Dura
 		var message dns.Msg
 		message.SetReply(r)
 
-		switch r.Question[0].Qtype {
-		case dns.TypeA:
+		if r.Question[0].Qtype == dns.TypeA {
 			hostname := r.Question[0].Name
 			for _, ip := range hostnames[hostname] {
 				message.Answer = append(message.Answer, &dns.A{
@@ -55,11 +54,15 @@ type DNSConfig struct {
 // StartDNSServer starts a DNS server with the given configuration
 func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel context.CancelFunc) {
 	t.Helper()
+	const (
+		netUDP4 = "udp4"
+		netUDP6 = "udp6"
+	)
 	if config.Network == "" {
-		config.Network = "udp4"
+		config.Network = netUDP4
 	}
 	switch config.Network {
-	case "udp4", "udp6":
+	case netUDP4, netUDP6:
 	default:
 		t.Fatal("Unsupported network for DNS:", config.Network)
 	}
@@ -87,9 +90,9 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 	_, port, err := net.SplitHostPort(localAddr)
 	require.NoError(t, err)
 	switch config.Network {
-	case "udp4":
+	case netUDP4:
 		localAddr = "127.0.0.1:" + port
-	case "udp6":
+	case netUDP6:
 		localAddr = "[::1]:" + port
 	}
 	return localAddr, cancel

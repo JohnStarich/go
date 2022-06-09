@@ -13,6 +13,7 @@ const (
 )
 
 func newCoverageStatus(f float64) coverageStatus {
+	// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
 	switch {
 	case f < 0.50:
 		return coverageError
@@ -33,28 +34,30 @@ func (c coverageStatus) WorkflowCommand() string {
 		return "notice"
 	case coverageOK, coverageWarning:
 		return "warning"
+	case coverageError:
+		return "error"
 	default:
 		return "error"
 	}
 }
 
-var (
-	boldGreen = color.New(color.Bold, color.FgGreen)
-	boldRed   = color.New(color.Bold, color.FgRed)
-)
+func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
+func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
 
 func (c coverageStatus) Colorize(s string) string {
 	switch c {
 	case coverageExcellent:
-		return boldGreen.Sprint(s)
+		return boldGreen().Sprint(s)
 	case coverageGood:
 		return color.GreenString(s)
 	case coverageOK:
 		return color.YellowString(s)
 	case coverageWarning:
 		return color.RedString(s)
+	case coverageError:
+		return boldRed().Sprint(s)
 	default:
-		return boldRed.Sprint(s)
+		return boldRed().Sprint(s)
 	}
 }
 
@@ -66,6 +69,8 @@ func (c coverageStatus) Emoji() string {
 		return "🟡"
 	case coverageWarning:
 		return "🟠"
+	case coverageError:
+		return "🔴"
 	default:
 		return "🔴"
 	}

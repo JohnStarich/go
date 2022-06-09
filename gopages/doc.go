@@ -33,6 +33,6 @@
 //     	example, "https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}"
 //     	generates links compatible with GitHub and GitLab. Must be a valid Go template
 //     	and must generate valid URLs.
-// 
+//
 //
 package main

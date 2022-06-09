@@ -7,7 +7,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-var exiter = os.Exit
+const (
+	// ExitCodeInvalidUsage is an exit code indicating invalid command line arguments were provided
+	ExitCodeInvalidUsage = 2
+)
+
+var exiter = os.Exit // nolint:gochecknoglobals // Enables os.Exit() to be swapped out in tests for a slightly safer variant. Required for sane test results in older Go versions.
 
 // Exit runs os.Exit(). If SetupTestExiter() has been called, it panics instead.
 func Exit(code int) {
