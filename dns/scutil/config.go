@@ -1,6 +1,5 @@
+// Package scutil provides a complete model and parser for 'scutil --dns' output.
 package scutil
-
-// 'scutil' provides a complete model and parser for 'scutil --dns' output.
 
 import (
 	"bufio"
@@ -12,10 +11,12 @@ import (
 	"time"
 )
 
+// Config is a parsed scutil DNS config
 type Config struct {
 	Resolvers []Resolver
 }
 
+// Resolver is an scutil resolver entry
 type Resolver struct {
 	Domain         string
 	Flags          []Flag
@@ -31,6 +32,7 @@ type Resolver struct {
 	Timeout        time.Duration
 }
 
+// ReadMacOSDNS reads and parses the current macOS scutil DNS settings
 func ReadMacOSDNS(ctx context.Context) (Config, error) {
 	return readMacOSDNS(ctx, runSCUtilDNS)
 }
@@ -127,6 +129,9 @@ func splitKeyValue(line string) (key, value string) {
 	}
 }
 
+// Reachable returns whether this resolver is reachable.
+//
+// scutil defines it as: The specified nodename/address can be reached using the current network configuration.
 func (r Resolver) Reachable() bool {
 	return r.reachable
 }

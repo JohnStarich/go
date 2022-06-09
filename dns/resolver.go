@@ -16,6 +16,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// Config contains options for configuring a DNS resolver.
+// Currently has no effect on non-macOS runtimes.
 type Config struct {
 	Logger                 *zap.Logger
 	InitialNameserverDelay time.Duration
@@ -24,10 +26,12 @@ type Config struct {
 
 const macOSRuntimeName = "darwin"
 
+// New returns a default DNS resolver for this runtime
 func New() *net.Resolver {
 	return NewWithConfig(Config{})
 }
 
+// NewWithConfig returns a DNS resolver with the given config for this runtime
 func NewWithConfig(config Config) *net.Resolver {
 	return newWithConfig(runtime.GOOS, config)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/johnstarich/go/gopages/internal/generate/source"
 )
 
+// GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc source pages
 type GoPagesLinker struct {
 	baseURL string
 }
@@ -21,6 +22,7 @@ func newGoPagesLinker(baseURL string) *GoPagesLinker {
 	}
 }
 
+// LinkToSource implements source.Linker
 func (l *GoPagesLinker) LinkToSource(packagePath string, options source.LinkOptions) url.URL {
 	u := url.URL{
 		Path: path.Join(l.baseURL, "/src", packagePath),
@@ -31,6 +33,7 @@ func (l *GoPagesLinker) LinkToSource(packagePath string, options source.LinkOpti
 	return u
 }
 
+// TemplateLinker is a custom template-based source.Linker, which links to external source pages
 type TemplateLinker struct {
 	template      *template.Template
 	modulePackage string
@@ -49,6 +52,7 @@ func newTemplateLinker(modulePackageURL, tmpl string) (*TemplateLinker, error) {
 	return &l, err
 }
 
+// LinkToSource implements source.Linker
 func (l *TemplateLinker) LinkToSource(packagePath string, options source.LinkOptions) url.URL {
 	filePath := strings.TrimPrefix(packagePath, l.modulePackage)
 	filePath = strings.TrimPrefix(filePath, "/")
@@ -71,6 +75,7 @@ func (l *TemplateLinker) LinkToSource(packagePath string, options source.LinkOpt
 	return u
 }
 
+// ShouldScrapePackage implements source.ScrapeChecker
 func (l *TemplateLinker) ShouldScrapePackage(packagePath string) bool {
 	return strings.HasPrefix(packagePath, l.modulePackage+"/")
 }

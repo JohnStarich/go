@@ -10,16 +10,19 @@ import (
 
 const separator = "/"
 
+// FromFSPath converts from an io/fs.FS compatible path to an os package compatible path
 func FromFSPath(p string) string {
 	// TODO fix for windows
 	return filepath.FromSlash(path.Join(separator, p))
 }
 
+// ToFSPath converts from an os package compatible path to an io/fs.FS compatible path
 func ToFSPath(p string) string {
 	// TODO fix for windows
 	return strings.TrimPrefix(filepath.ToSlash(p), separator)
 }
 
+// ToFSPathList converts list's path elements to os package compatible paths and rejoins them together
 func ToFSPathList(list string) string {
 	items := filepath.SplitList(list)
 	for i, item := range items {
@@ -28,6 +31,8 @@ func ToFSPathList(list string) string {
 	return strings.Join(items, string(filepath.ListSeparator))
 }
 
+// CommonBase returns the common base path between a and b.
+// Returns "." if there are no common path elements.
 func CommonBase(a, b string) string {
 	a = path.Clean(a)
 	b = path.Clean(b)
@@ -40,6 +45,8 @@ func CommonBase(a, b string) string {
 	return path.Clean(a[:i])
 }
 
+// Rel returns the relative FS path from basePath to targetPath.
+// Similar to filepath.Rel without including OS-dependent behavior.
 func Rel(basePath, targetPath string) (string, error) {
 	basePath = path.Clean(basePath)
 	targetPath = path.Clean(targetPath)

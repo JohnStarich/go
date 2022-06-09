@@ -23,7 +23,7 @@ func ExampleCheckError() {
 	isPositive := New(Options{}).
 		Append(func(args []interface{}) (int, error) {
 			in, ok := args[0].(int)
-			return in + 1, CheckError(!ok, fmt.Errorf("not an int!"))
+			return in + 1, CheckError(!ok, fmt.Errorf("not an int"))
 		}).
 		Append(func(x int) bool {
 			return x > 0
@@ -31,7 +31,7 @@ func ExampleCheckError() {
 
 	_, err := isPositive.Do([]interface{}{"some string"})
 	fmt.Println(err)
-	// Output: pipe: not an int!
+	// Output: pipe: not an int
 }
 
 func TestCheckErrorf(t *testing.T) {

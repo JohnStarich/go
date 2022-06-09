@@ -7,6 +7,7 @@ import (
 	"github.com/johnstarich/go/covet/internal/span"
 )
 
+// File represents a file parsed in a Covet report. Includes the file name and which lines are covered.
 type File struct {
 	Name      string
 	Covered   uint
@@ -39,6 +40,7 @@ func (f File) findContextSpans(contextLines uint) []span.Span {
 	return spans
 }
 
+// Line represents a line in a file parsed in a Covet report
 type Line struct {
 	Covered    bool
 	LineNumber uint
@@ -53,6 +55,8 @@ func (l Line) diffOpPrefix() string {
 	return "-"
 }
 
+// DiffChunk is a chunk of lines parsed from a Covet report.
+// Includes the associated beginning and end line numbers of the chunk and the diff-like lines of text from the file.
 type DiffChunk struct {
 	FirstLine, LastLine uint
 	Lines               []string

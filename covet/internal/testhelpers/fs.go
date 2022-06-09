@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// OSFSWithTemp returns an os.FS instance with 1) the current module's directory and 2) a temporary directory mounted inside.
+// Returns the FS paths to both mounts.
 func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, workingDirectory, tempDirectory string) {
 	t.Helper()
 
@@ -37,6 +39,8 @@ func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, work
 	return fs, workingDirectory, tempDirectory
 }
 
+// FSWithFiles returns an FS with the given files contents generated inside it.
+// The contents are trimmed and a newline appended for convenient comparisons.
 func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS {
 	t.Helper()
 	fs, err := mem.NewFS()

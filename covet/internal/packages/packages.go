@@ -14,6 +14,7 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+// Options contains configurable options for calls to FilePath()
 type Options struct {
 	// GoRoot sets a custom GOROOT on the current build context.
 	// Defaults to no root. Paths are relative to the 'fs'.

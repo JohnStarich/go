@@ -197,6 +197,8 @@ func (c *Covet) DiffCovered() float64 {
 	return coveredTotal / (coveredTotal + uncoveredTotal)
 }
 
+// DiffCoverageFiles generates a report of all files that are in the diff and have coverage information.
+// These files can be used to display diff coverage information.
 func (c *Covet) DiffCoverageFiles() []File {
 	var coveredFiles []File
 	fileNames, coveredSpans, uncoveredSpans := c.coveredAndUncovered()
