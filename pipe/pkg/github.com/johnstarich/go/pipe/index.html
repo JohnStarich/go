@@ -226,7 +226,7 @@ CheckError returns &#39;err&#39; if &#39;cond&#39; is true, nil otherwise
 			<pre class="code">isPositive := New(Options{}).
     Append(func(args []interface{}) (int, error) {
         in, ok := args[0].(int)
-        return in + 1, CheckError(!ok, fmt.Errorf(&#34;not an int!&#34;))
+        return in + 1, CheckError(!ok, fmt.Errorf(&#34;not an int&#34;))
     }).
     Append(func(x int) bool {
         return x &gt; 0
@@ -237,7 +237,7 @@ fmt.Println(err)
 <span class="comment"></pre>
 			
 			<p>Output:</p>
-			<pre class="output">pipe: not an int!
+			<pre class="output">pipe: not an int
 </pre>
 			
 		
