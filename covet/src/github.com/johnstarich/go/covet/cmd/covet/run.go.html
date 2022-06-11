@@ -347,7 +347,7 @@
 <span id="L290" class="ln">   290  </span>	targetMissingLines := 0
 <span id="L291" class="ln">   291  </span>	totalLines := uint(0)
 <span id="L292" class="ln">   292  </span>	for _, f := range coveredFiles {
-<span id="L293" class="ln">   293  </span>		totalLines += uint(f.Covered + f.Uncovered)
+<span id="L293" class="ln">   293  </span>		totalLines += f.Covered + f.Uncovered
 <span id="L294" class="ln">   294  </span>	}
 <span id="L295" class="ln">   295  </span>	if percentDiff := target - current; percentDiff &gt; 0 {
 <span id="L296" class="ln">   296  </span>		targetMissingLines = int(percentDiff * float64(totalLines))

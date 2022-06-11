@@ -124,7 +124,7 @@
 <span id="L67" class="ln">    67  </span>	}
 <span id="L68" class="ln">    68  </span>
 <span id="L69" class="ln">    69  </span>	packageName, coverageFile := path.Split(filePattern)
-<span id="L70" class="ln">    70  </span>	ctx := newFSBuildContext(mountFS, workingDirectory, options)
+<span id="L70" class="ln">    70  </span>	ctx := newFSBuildContext(mountFS, options)
 <span id="L71" class="ln">    71  </span>	pkg, err := ctx.Import(packageName, workingDirectory, build.FindOnly)
 <span id="L72" class="ln">    72  </span>	setErr(err, &amp;sErr)
 <span id="L73" class="ln">    73  </span>	coverageFile = path.Join(pkg.Dir, coverageFile)
@@ -152,7 +152,7 @@
 <span id="L95" class="ln">    95  </span>	return strings.Join(allElems, string(filepath.ListSeparator))
 <span id="L96" class="ln">    96  </span>}
 <span id="L97" class="ln">    97  </span>
-<span id="L98" class="ln">    98  </span>func newFSBuildContext(fs hackpadfs.FS, workingDirectory string, options Options) build.Context {
+<span id="L98" class="ln">    98  </span>func newFSBuildContext(fs hackpadfs.FS, options Options) build.Context {
 <span id="L99" class="ln">    99  </span>	ctx := build.Default
 <span id="L100" class="ln">   100  </span>	ctx.GOROOT = options.GoRoot
 <span id="L101" class="ln">   101  </span>	ctx.GOPATH = options.GoPath
