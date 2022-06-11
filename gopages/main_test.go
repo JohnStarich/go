@@ -79,8 +79,7 @@ func TestMainArgs(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) {
-	t.Parallel()
+func TestRun(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
 	for _, tc := range []struct {
 		description string
 		args        []string
@@ -94,9 +93,7 @@ func TestRun(t *testing.T) {
 			args:        []string{"-gh-pages"},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
-			t.Parallel()
 			// create dummy repo to enable cloning
 			ghPagesDir, err := ioutil.TempDir("", "")
 			require.NoError(t, err)
