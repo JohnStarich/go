@@ -118,11 +118,10 @@ func TestDialDNS(t *testing.T) {
 			t.Parallel()
 			var servers []string
 			for _, server := range tc.servers {
-				addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+				addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 					ResponseDelay: server.delay,
 					Hostnames:     server.hostnames,
 				})
-				defer cancel()
 				servers = append(servers, addr)
 			}
 			t.Logf("DNS servers, in-order: %+v", servers)
@@ -160,20 +159,18 @@ func TestStagger(t *testing.T) {
 	startServers := func(t *testing.T) []string {
 		const slowServerDelay = 30 * time.Second
 		var servers []string
-		addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+		addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 			ResponseDelay: slowServerDelay,
 			Hostnames: map[string][]string{
 				"hi.local.": {"1.2.3.4"},
 			},
 		})
-		defer cancel()
 		servers = append(servers, addr)
-		addr, cancel = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+		addr = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 			Hostnames: map[string][]string{
 				"hi.local.": {"5.6.7.8"},
 			},
 		})
-		defer cancel()
 		servers = append(servers, addr)
 		return servers
 	}

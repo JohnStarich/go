@@ -52,7 +52,7 @@ type DNSConfig struct {
 }
 
 // StartDNSServer starts a DNS server with the given configuration
-func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel context.CancelFunc) {
+func StartDNSServer(t *testing.T, config DNSConfig) string {
 	t.Helper()
 	const (
 		netUDP4 = "udp4"
@@ -68,6 +68,7 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
 	mux := dns.NewServeMux()
 	mux.HandleFunc("local.", hostnamesHandler(ctx, t, config.ResponseDelay, config.Hostnames))
 
@@ -102,5 +103,5 @@ func StartDNSServer(t *testing.T, config DNSConfig) (address string, cancel cont
 	case netUDP6:
 		localAddr = "[::1]:" + port
 	}
-	return localAddr, cancel
+	return localAddr
 }

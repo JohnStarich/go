@@ -164,13 +164,12 @@ func TestDNSLookupHost(t *testing.T) {
 		tc := tc
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+			workingDNS := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 				ResponseDelay: 1 * time.Second,
 				Hostnames: map[string][]string{
 					"hi.local.": {"5.6.7.8"},
 				},
 			})
-			defer cancel()
 			failingDNS := "1.2.3.4:53"
 
 			dialer := testDialer(t)
@@ -206,14 +205,13 @@ func TestDNSLookupHost(t *testing.T) {
 
 func TestDNSLookupHostIPv6(t *testing.T) {
 	t.Parallel()
-	workingDNS, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+	workingDNS := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 		ResponseDelay: 1 * time.Second,
 		Hostnames: map[string][]string{
 			"hi.local.": {"5.6.7.8"},
 		},
 		Network: "udp6",
 	})
-	defer cancel()
 
 	dialer := testDialer(t)
 	dialer.nameservers = []string{workingDNS}
@@ -235,12 +233,11 @@ func TestDNSLookupHostIPv6(t *testing.T) {
 
 func TestReorderNameservers(t *testing.T) {
 	t.Parallel()
-	addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+	addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 		Hostnames: map[string][]string{
 			"hi.local.": {"5.6.7.8"},
 		},
 	})
-	defer cancel()
 
 	const initialDelay = 3 * time.Second
 	dialer := newMacOSDialer(Config{
