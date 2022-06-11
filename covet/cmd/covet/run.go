@@ -290,7 +290,7 @@ func findReportableUncoveredFiles(coveredFiles []covet.File, target, current flo
 	targetMissingLines := 0
 	totalLines := uint(0)
 	for _, f := range coveredFiles {
-		totalLines += uint(f.Covered + f.Uncovered)
+		totalLines += f.Covered + f.Uncovered
 	}
 	if percentDiff := target - current; percentDiff > 0 {
 		targetMissingLines = int(percentDiff * float64(totalLines))

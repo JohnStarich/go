@@ -24,6 +24,8 @@ linters:
     - nolintlint
     - paralleltest
     - revive
+    - unconvert
+    - unparam
 
 issues:
   include:
