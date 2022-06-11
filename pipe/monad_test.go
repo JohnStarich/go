@@ -6,6 +6,7 @@ import (
 )
 
 func TestMap(t *testing.T) {
+	t.Parallel()
 	p := New(Options{}).Append(func(args []interface{}) (int, error) {
 		in := args[0].(int)
 		return in, CheckErrorf(in == 5, "input was 5")
@@ -19,6 +20,7 @@ func TestMap(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
+		t.Parallel()
 		results, err := Map(p, multiArgs[:5])
 		if err != nil {
 			t.Error("Unexpected error:", err)
@@ -36,6 +38,7 @@ func TestMap(t *testing.T) {
 	})
 
 	t.Run("failed", func(t *testing.T) {
+		t.Parallel()
 		results, err := Map(p, multiArgs)
 		if err == nil || err.Error() != "pipe: input was 5" {
 			t.Error("Expected error to be 'input was 5', got:", err)
@@ -47,6 +50,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestFilter(t *testing.T) {
+	t.Parallel()
 	p := New(Options{}).Append(func(args []interface{}) (int, error) {
 		in := args[0].(int)
 		return in, CheckErrorf(in != 5, "input was not 5")
@@ -60,6 +64,7 @@ func TestFilter(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
+		t.Parallel()
 		results, err := Filter(p, multiArgs)
 		if err != nil {
 			t.Error("Unexpected error:", err)
@@ -73,6 +78,7 @@ func TestFilter(t *testing.T) {
 	})
 
 	t.Run("failed", func(t *testing.T) {
+		t.Parallel()
 		results, err := Filter(p, multiArgs[:5])
 		if err == nil || err.Error() != "pipe: input was not 5" {
 			t.Error("Expected error to be 'input was 5', got:", err)

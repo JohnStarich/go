@@ -8,5 +8,6 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	t.Parallel()
 	assert.NotNil(t, net.DefaultResolver)
 }

@@ -118,11 +118,10 @@ func TestDialDNS(t *testing.T) {
 			t.Parallel()
 			var servers []string
 			for _, server := range tc.servers {
-				addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+				addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
 					ResponseDelay: server.delay,
 					Hostnames:     server.hostnames,
 				})
-				defer cancel()
 				servers = append(servers, addr)
 			}
 			t.Logf("DNS servers, in-order: %+v", servers)
@@ -157,24 +156,28 @@ func TestDialDNS(t *testing.T) {
 func TestStagger(t *testing.T) {
 	t.Parallel()
 
-	var servers []string
-	addr, cancel := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-		ResponseDelay: 30 * time.Second,
-		Hostnames: map[string][]string{
-			"hi.local.": {"1.2.3.4"},
-		},
-	})
-	defer cancel()
-	servers = append(servers, addr)
-	addr, cancel = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-		Hostnames: map[string][]string{
-			"hi.local.": {"5.6.7.8"},
-		},
-	})
-	defer cancel()
-	servers = append(servers, addr)
+	startServers := func(t *testing.T) []string {
+		const slowServerDelay = 30 * time.Second
+		var servers []string
+		addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+			ResponseDelay: slowServerDelay,
+			Hostnames: map[string][]string{
+				"hi.local.": {"1.2.3.4"},
+			},
+		})
+		servers = append(servers, addr)
+		addr = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+			Hostnames: map[string][]string{
+				"hi.local.": {"5.6.7.8"},
+			},
+		})
+		servers = append(servers, addr)
+		return servers
+	}
 
 	t.Run("stagger never enables", func(t *testing.T) {
+		t.Parallel()
+		servers := startServers(t)
 		res := &net.Resolver{
 			PreferGo: true,
 			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
@@ -198,6 +201,8 @@ func TestStagger(t *testing.T) {
 	})
 
 	t.Run("stagger eventually succeeds", func(t *testing.T) {
+		t.Parallel()
+		servers := startServers(t)
 		const delay = 1 * time.Second
 		res := &net.Resolver{
 			PreferGo: true,
@@ -234,13 +239,15 @@ func TestStagger(t *testing.T) {
 		start := time.Now()
 		addrs, err := res.LookupHost(ctx, "hi.local")
 		d := time.Since(start)
-		assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		assert.NoError(t, err)
+		assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		assert.LessOrEqual(t, int(delay), int(d), "DNS should not resolve before second connection is enabled")
 		assert.GreaterOrEqual(t, int(testTimeout), int(d), "DNS should resolve before the test times out")
 	})
 
 	t.Run("stagger enables all (almost) instantly", func(t *testing.T) {
+		t.Parallel()
+		servers := startServers(t)
 		res := &net.Resolver{
 			PreferGo: true,
 			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
@@ -264,13 +271,14 @@ func TestStagger(t *testing.T) {
 		start := time.Now()
 		addrs, err := res.LookupHost(ctx, "hi.local")
 		d := time.Since(start)
-		assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		assert.NoError(t, err)
+		assert.Equal(t, []string{"5.6.7.8"}, addrs)
 		assert.Less(t, int(d), int(float64(testTimeout)*0.01), "Second connection should be used almost immediately")
 	})
 }
 
 func TestLocalAddr(t *testing.T) {
+	t.Parallel()
 	firstConn := dialUDP(t, "1.2.3.4:53")
 	conn := New([]PacketConn{
 		firstConn,
@@ -280,6 +288,7 @@ func TestLocalAddr(t *testing.T) {
 }
 
 func TestRemoteAddr(t *testing.T) {
+	t.Parallel()
 	firstConn := dialUDP(t, "1.2.3.4:53")
 	conn := New([]PacketConn{
 		firstConn,
@@ -309,6 +318,7 @@ func (w *wrapperConn) RemoteAddr() net.Addr {
 }
 
 func TestSetReadDeadline(t *testing.T) {
+	t.Parallel()
 	conns := []PacketConn{
 		&wrapperConn{},
 		&wrapperConn{},
@@ -322,6 +332,7 @@ func TestSetReadDeadline(t *testing.T) {
 }
 
 func TestSetWriteDeadline(t *testing.T) {
+	t.Parallel()
 	conns := []PacketConn{
 		&wrapperConn{},
 		&wrapperConn{},
@@ -335,6 +346,7 @@ func TestSetWriteDeadline(t *testing.T) {
 }
 
 func TestStats(t *testing.T) {
+	t.Parallel()
 	_, addr, err := net.ParseCIDR("192.0.2.0/24")
 	require.NoError(t, err)
 

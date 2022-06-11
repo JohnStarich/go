@@ -8,6 +8,7 @@ import (
 )
 
 func TestIntersect(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		a, b         Span
 		intersection Span
@@ -48,7 +49,9 @@ func TestIntersect(t *testing.T) {
 			intersection: Span{Start: 4, End: 6},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s∩%s", tc.a, tc.b), func(t *testing.T) {
+			t.Parallel()
 			span, intersects := tc.a.Intersection(tc.b)
 			assert.Equal(t, tc.intersection, span)
 			assert.Equal(t, tc.intersection != Span{}, intersects)
@@ -57,6 +60,7 @@ func TestIntersect(t *testing.T) {
 }
 
 func TestMerge(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		a, b   Span
 		merged Span
@@ -97,7 +101,9 @@ func TestMerge(t *testing.T) {
 			merged: Span{Start: 1, End: 10},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s∩%s", tc.a, tc.b), func(t *testing.T) {
+			t.Parallel()
 			span, merged := tc.a.Merge(tc.b)
 			assert.Equal(t, tc.merged, span)
 			assert.Equal(t, tc.merged != Span{}, merged)

@@ -9,82 +9,101 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, Size{value: big.NewInt(2)}, New(2))
 }
 
 func TestBytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, int64(2), Bytes(2).Bytes())
 }
 
 func TestKilobytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e3), Kilobytes(2))
 }
 
 func TestMegabytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e6), Megabytes(2))
 }
 
 func TestGigabytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e9), Gigabytes(2))
 }
 
 func TestTerabytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e12), Terabytes(2))
 }
 
 func TestPetabytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e15), Petabytes(2))
 }
 
 func TestExabytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2e18), Exabytes(2))
 }
 
 func TestZettabytes(t *testing.T) {
+	t.Parallel()
 	zetta := new(big.Int).Mul(big.NewInt(2e18), big.NewInt(1e3))
 	assert.Equal(t, NewFromInt(zetta), Zettabytes(2))
 }
 
 func TestYottabytes(t *testing.T) {
+	t.Parallel()
 	yotta := new(big.Int).Mul(big.NewInt(2e18), big.NewInt(1e6))
 	assert.Equal(t, NewFromInt(yotta), Yottabytes(2))
 }
 
 func TestKibibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<10), Kibibytes(2))
 }
 
 func TestMebibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<20), Mebibytes(2))
 }
 
 func TestGibibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<30), Gibibytes(2))
 }
 
 func TestTebibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<40), Tebibytes(2))
 }
 
 func TestPebibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<50), Pebibytes(2))
 }
 
 func TestExbibytes(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, New(2<<60), Exbibytes(2))
 }
 
 func TestZebibytes(t *testing.T) {
+	t.Parallel()
 	zebi := new(big.Int).Mul(big.NewInt(2<<60), big.NewInt(1<<10))
 	assert.Equal(t, NewFromInt(zebi), Zebibytes(2))
 }
 
 func TestYobibytes(t *testing.T) {
+	t.Parallel()
 	yobi := new(big.Int).Mul(big.NewInt(2<<60), big.NewInt(1<<20))
 	assert.Equal(t, NewFromInt(yobi), Yobibytes(2))
 }
 
 func TestFormatSI(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		input         float64
 		expectedValue float64
@@ -103,7 +122,9 @@ func TestFormatSI(t *testing.T) {
 		{2e21, 2, "ZB"},
 		{2e24, 2, "YB"},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%g", tc.input), func(t *testing.T) {
+			t.Parallel()
 			i, _ := big.NewFloat(tc.input).Int(nil)
 			num := NewFromInt(i)
 			value, unit := num.FormatSI()
@@ -116,6 +137,7 @@ func TestFormatSI(t *testing.T) {
 }
 
 func TestFormatIEC(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		input         float64
 		expectedValue float64
@@ -134,7 +156,9 @@ func TestFormatIEC(t *testing.T) {
 		{2 << 70, 2, "ZiB"},
 		{2 << 80, 2, "YiB"},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%g", tc.input), func(t *testing.T) {
+			t.Parallel()
 			i, _ := big.NewFloat(tc.input).Int(nil)
 			num := NewFromInt(i)
 			value, unit := num.FormatIEC()

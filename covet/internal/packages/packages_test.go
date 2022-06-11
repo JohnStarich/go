@@ -11,6 +11,7 @@ import (
 )
 
 func TestFilePath(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description      string
 		files            map[string]string
@@ -97,7 +98,9 @@ package main
 			expectPath:       "main.go",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)
 			pkgFile, err := FilePath(fs, tc.workingDirectory, tc.filePattern, Options{})
 			assert.NoError(t, err)
@@ -208,6 +211,7 @@ func toQuickInfos(infos []hackpadfs.FileInfo) []quickInfo {
 }
 
 func TestFSReadDirectory(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description     string
 		files           map[string]string
@@ -236,7 +240,9 @@ func TestFSReadDirectory(t *testing.T) {
 			expectErr:   hackpadfs.ErrNotExist,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)
 			readDir := fsReadDir(fs)
 			fileInfos, err := readDir(tc.dir)

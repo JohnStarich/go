@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateDocs(t *testing.T) {
+func TestGenerateDocs(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
 	// create a new package "thing" and generate docs for it
 	thing, err := ioutil.TempDir("", "")
 	require.NoError(t, err)

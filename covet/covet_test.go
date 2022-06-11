@@ -19,6 +19,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description       string
 		diff              string
@@ -90,7 +91,9 @@ foo
 			expectErr: "bad mode line: foo",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			if tc.diffReader == nil {
 				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
 			}
@@ -128,6 +131,7 @@ foo
 }
 
 func TestParseInvalidOptions(t *testing.T) {
+	t.Parallel()
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	var (
@@ -197,7 +201,9 @@ func TestParseInvalidOptions(t *testing.T) {
 			expectErr: "diff reader must not be nil",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			_, err := Parse(tc.options)
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, "covet: "+tc.expectErr)

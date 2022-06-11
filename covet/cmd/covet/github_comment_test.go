@@ -14,6 +14,7 @@ import (
 )
 
 func TestEnsureAppGitHubComment(t *testing.T) {
+	t.Parallel()
 	someCommentID := int64(1)
 	created := false
 	updated := false
@@ -85,6 +86,7 @@ some other body`),
 }
 
 func TestStringOrEmpty(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, "", stringOrEmpty(nil))
 	s := "foo"
 	assert.Equal(t, s, stringOrEmpty(&s))

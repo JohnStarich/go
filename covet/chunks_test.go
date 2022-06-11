@@ -10,6 +10,7 @@ import (
 )
 
 func TestFileFindContextSpans(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		description  string
 		file         File
@@ -89,7 +90,9 @@ func TestFileFindContextSpans(t *testing.T) {
 			},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			spans := tc.file.findContextSpans(tc.contextLines)
 			assert.Equal(t, tc.expectSpans, spans)
 		})
@@ -97,6 +100,7 @@ func TestFileFindContextSpans(t *testing.T) {
 }
 
 func TestDiffChunks(t *testing.T) {
+	t.Parallel()
 	diff := strings.TrimSpace(`
 1: first line
 2:
@@ -132,11 +136,13 @@ func TestDiffChunks(t *testing.T) {
 }
 
 func TestLineIterator(t *testing.T) {
+	t.Parallel()
 	const threeLines = `line 1
 line 2
 line 3
 `
 	t.Run("skip and next", func(t *testing.T) {
+		t.Parallel()
 		li := newLineIterator(strings.NewReader(threeLines))
 		require.NoError(t, li.SkipLines(1))
 		lines, err := li.NextLines(1)
@@ -145,11 +151,13 @@ line 3
 	})
 
 	t.Run("skip past end", func(t *testing.T) {
+		t.Parallel()
 		li := newLineIterator(strings.NewReader(threeLines))
 		assert.NoError(t, li.SkipLines(4))
 	})
 
 	t.Run("read past end", func(t *testing.T) {
+		t.Parallel()
 		li := newLineIterator(strings.NewReader(threeLines))
 		lines, err := li.NextLines(4)
 		assert.NoError(t, err)

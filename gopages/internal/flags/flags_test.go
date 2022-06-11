@@ -9,6 +9,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
+	t.Parallel()
 	args, output, err := Parse("-help")
 	assert.Equal(t, Args{
 		OutputPath: "dist",
@@ -18,9 +19,11 @@ func TestParse(t *testing.T) {
 }
 
 func TestArgsLinker(t *testing.T) {
+	t.Parallel()
 	const someBaseURL = "/some/base"
 
 	t.Run("default behavior - no template provided", func(t *testing.T) {
+		t.Parallel()
 		args := Args{
 			BaseURL:            someBaseURL,
 			SourceLinkTemplate: "",
@@ -31,6 +34,7 @@ func TestArgsLinker(t *testing.T) {
 	})
 
 	t.Run("link template provided", func(t *testing.T) {
+		t.Parallel()
 		const someModulePackage = "github.com/org/repo"
 		args := Args{
 			BaseURL:            someBaseURL,

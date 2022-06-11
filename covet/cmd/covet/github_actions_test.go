@@ -7,6 +7,7 @@ import (
 )
 
 func TestWorkflowCommand(t *testing.T) {
+	t.Parallel()
 	command := workflowCommand("error", "My message.", map[string]string{
 		"file": "someFile.txt",
 		"name": "hello",
