@@ -67,7 +67,7 @@ func FilePath(fs hackpadfs.FS, workingDirectory, filePattern string, options Opt
 	}
 
 	packageName, coverageFile := path.Split(filePattern)
-	ctx := newFSBuildContext(mountFS, workingDirectory, options)
+	ctx := newFSBuildContext(mountFS, options)
 	pkg, err := ctx.Import(packageName, workingDirectory, build.FindOnly)
 	setErr(err, &sErr)
 	coverageFile = path.Join(pkg.Dir, coverageFile)
@@ -95,7 +95,7 @@ func makePathList(elems ...[]string) string {
 	return strings.Join(allElems, string(filepath.ListSeparator))
 }
 
-func newFSBuildContext(fs hackpadfs.FS, workingDirectory string, options Options) build.Context {
+func newFSBuildContext(fs hackpadfs.FS, options Options) build.Context {
 	ctx := build.Default
 	ctx.GOROOT = options.GoRoot
 	ctx.GOPATH = options.GoPath

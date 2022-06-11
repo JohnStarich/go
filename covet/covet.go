@@ -88,21 +88,18 @@ func Parse(options Options) (covet *Covet, err error) {
 		return nil, err
 	}
 
-	if err := covet.addDiff(diffFiles); err != nil {
-		return nil, err
-	}
-	if err := covet.addCoverage(options.FS, options.GoCoveragePath, options.GoCoverageBaseDir, coverageFiles); err != nil {
+	covet.addDiff(diffFiles)
+	if err := covet.addCoverage(options.FS, options.GoCoverageBaseDir, coverageFiles); err != nil {
 		return nil, err
 	}
 	return covet, nil
 }
 
-func (c *Covet) addDiff(diffFiles []*gitdiff.File) error {
+func (c *Covet) addDiff(diffFiles []*gitdiff.File) {
 	for _, file := range diffFiles {
 		spans := findDiffAddSpans(file.TextFragments)
 		c.addedLines[file.NewName] = append(c.addedLines[file.NewName], spans...)
 	}
-	return nil
 }
 
 func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
@@ -125,7 +122,7 @@ func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	return spans
 }
 
-func (c *Covet) addCoverage(fs hackpadfs.FS, coveragePath, baseDir string, coverageFiles []*cover.Profile) error {
+func (c *Covet) addCoverage(fs hackpadfs.FS, baseDir string, coverageFiles []*cover.Profile) error {
 	for _, file := range coverageFiles {
 		for _, block := range file.Blocks {
 			coverageFile, err := packages.FilePath(fs, baseDir, file.FileName, packages.Options{})
