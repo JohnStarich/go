@@ -65,53 +65,71 @@
 <span id="L8" class="ln">     8  </span>)
 <span id="L9" class="ln">     9  </span>
 <span id="L10" class="ln">    10  </span>func TestNewCoverageStatus(t *testing.T) {
-<span id="L11" class="ln">    11  </span>	for f, status := range map[float64]coverageStatus{
-<span id="L12" class="ln">    12  </span>		-10: coverageError,
-<span id="L13" class="ln">    13  </span>		0.0: coverageError,
-<span id="L14" class="ln">    14  </span>		0.1: coverageError,
-<span id="L15" class="ln">    15  </span>		0.5: coverageWarning,
-<span id="L16" class="ln">    16  </span>		0.7: coverageOK,
-<span id="L17" class="ln">    17  </span>		0.8: coverageGood,
-<span id="L18" class="ln">    18  </span>		0.9: coverageExcellent,
-<span id="L19" class="ln">    19  </span>		1.0: coverageExcellent,
-<span id="L20" class="ln">    20  </span>		10:  coverageExcellent,
-<span id="L21" class="ln">    21  </span>	} {
-<span id="L22" class="ln">    22  </span>		t.Run(fmt.Sprint(f, status), func(t *testing.T) {
-<span id="L23" class="ln">    23  </span>			assert.Equal(t, status, newCoverageStatus(f))
-<span id="L24" class="ln">    24  </span>		})
-<span id="L25" class="ln">    25  </span>	}
-<span id="L26" class="ln">    26  </span>}
-<span id="L27" class="ln">    27  </span>
-<span id="L28" class="ln">    28  </span>func TestCoverageStatusWorkflowCommand(t *testing.T) {
-<span id="L29" class="ln">    29  </span>	for status, command := range map[coverageStatus]string{
-<span id="L30" class="ln">    30  </span>		coverageExcellent:  &#34;notice&#34;,
-<span id="L31" class="ln">    31  </span>		coverageGood:       &#34;notice&#34;,
-<span id="L32" class="ln">    32  </span>		coverageOK:         &#34;warning&#34;,
-<span id="L33" class="ln">    33  </span>		coverageWarning:    &#34;warning&#34;,
-<span id="L34" class="ln">    34  </span>		coverageError:      &#34;error&#34;,
-<span id="L35" class="ln">    35  </span>		coverageStatus(-1): &#34;error&#34;,
-<span id="L36" class="ln">    36  </span>	} {
-<span id="L37" class="ln">    37  </span>		t.Run(fmt.Sprint(status, command), func(t *testing.T) {
-<span id="L38" class="ln">    38  </span>			assert.Equal(t, command, status.WorkflowCommand())
-<span id="L39" class="ln">    39  </span>		})
-<span id="L40" class="ln">    40  </span>	}
-<span id="L41" class="ln">    41  </span>}
-<span id="L42" class="ln">    42  </span>
-<span id="L43" class="ln">    43  </span>func TestCoverageStatusEmoji(t *testing.T) {
-<span id="L44" class="ln">    44  </span>	for status, emoji := range map[coverageStatus]string{
-<span id="L45" class="ln">    45  </span>		coverageExcellent:  &#34;🟢&#34;,
-<span id="L46" class="ln">    46  </span>		coverageGood:       &#34;🟢&#34;,
-<span id="L47" class="ln">    47  </span>		coverageOK:         &#34;🟡&#34;,
-<span id="L48" class="ln">    48  </span>		coverageWarning:    &#34;🟠&#34;,
-<span id="L49" class="ln">    49  </span>		coverageError:      &#34;🔴&#34;,
-<span id="L50" class="ln">    50  </span>		coverageStatus(-1): &#34;🔴&#34;,
-<span id="L51" class="ln">    51  </span>	} {
-<span id="L52" class="ln">    52  </span>		t.Run(fmt.Sprint(status, emoji), func(t *testing.T) {
-<span id="L53" class="ln">    53  </span>			assert.Equal(t, emoji, status.Emoji())
-<span id="L54" class="ln">    54  </span>		})
-<span id="L55" class="ln">    55  </span>	}
-<span id="L56" class="ln">    56  </span>}
-<span id="L57" class="ln">    57  </span>
+<span id="L11" class="ln">    11  </span>	t.Parallel()
+<span id="L12" class="ln">    12  </span>	for _, tc := range []struct {
+<span id="L13" class="ln">    13  </span>		f      float64
+<span id="L14" class="ln">    14  </span>		status coverageStatus
+<span id="L15" class="ln">    15  </span>	}{
+<span id="L16" class="ln">    16  </span>		{-10, coverageError},
+<span id="L17" class="ln">    17  </span>		{0.0, coverageError},
+<span id="L18" class="ln">    18  </span>		{0.1, coverageError},
+<span id="L19" class="ln">    19  </span>		{0.5, coverageWarning},
+<span id="L20" class="ln">    20  </span>		{0.7, coverageOK},
+<span id="L21" class="ln">    21  </span>		{0.8, coverageGood},
+<span id="L22" class="ln">    22  </span>		{0.9, coverageExcellent},
+<span id="L23" class="ln">    23  </span>		{1.0, coverageExcellent},
+<span id="L24" class="ln">    24  </span>		{10, coverageExcellent},
+<span id="L25" class="ln">    25  </span>	} {
+<span id="L26" class="ln">    26  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L27" class="ln">    27  </span>		t.Run(fmt.Sprint(tc.f, tc.status), func(t *testing.T) {
+<span id="L28" class="ln">    28  </span>			t.Parallel()
+<span id="L29" class="ln">    29  </span>			assert.Equal(t, tc.status, newCoverageStatus(tc.f))
+<span id="L30" class="ln">    30  </span>		})
+<span id="L31" class="ln">    31  </span>	}
+<span id="L32" class="ln">    32  </span>}
+<span id="L33" class="ln">    33  </span>
+<span id="L34" class="ln">    34  </span>func TestCoverageStatusWorkflowCommand(t *testing.T) {
+<span id="L35" class="ln">    35  </span>	t.Parallel()
+<span id="L36" class="ln">    36  </span>	for _, tc := range []struct {
+<span id="L37" class="ln">    37  </span>		status  coverageStatus
+<span id="L38" class="ln">    38  </span>		command string
+<span id="L39" class="ln">    39  </span>	}{
+<span id="L40" class="ln">    40  </span>		{coverageExcellent, &#34;notice&#34;},
+<span id="L41" class="ln">    41  </span>		{coverageGood, &#34;notice&#34;},
+<span id="L42" class="ln">    42  </span>		{coverageOK, &#34;warning&#34;},
+<span id="L43" class="ln">    43  </span>		{coverageWarning, &#34;warning&#34;},
+<span id="L44" class="ln">    44  </span>		{coverageError, &#34;error&#34;},
+<span id="L45" class="ln">    45  </span>		{coverageStatus(-1), &#34;error&#34;},
+<span id="L46" class="ln">    46  </span>	} {
+<span id="L47" class="ln">    47  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L48" class="ln">    48  </span>		t.Run(fmt.Sprint(tc.status, tc.command), func(t *testing.T) {
+<span id="L49" class="ln">    49  </span>			t.Parallel()
+<span id="L50" class="ln">    50  </span>			assert.Equal(t, tc.command, tc.status.WorkflowCommand())
+<span id="L51" class="ln">    51  </span>		})
+<span id="L52" class="ln">    52  </span>	}
+<span id="L53" class="ln">    53  </span>}
+<span id="L54" class="ln">    54  </span>
+<span id="L55" class="ln">    55  </span>func TestCoverageStatusEmoji(t *testing.T) {
+<span id="L56" class="ln">    56  </span>	t.Parallel()
+<span id="L57" class="ln">    57  </span>	for _, tc := range []struct {
+<span id="L58" class="ln">    58  </span>		status coverageStatus
+<span id="L59" class="ln">    59  </span>		emoji  string
+<span id="L60" class="ln">    60  </span>	}{
+<span id="L61" class="ln">    61  </span>		{coverageExcellent, &#34;🟢&#34;},
+<span id="L62" class="ln">    62  </span>		{coverageGood, &#34;🟢&#34;},
+<span id="L63" class="ln">    63  </span>		{coverageOK, &#34;🟡&#34;},
+<span id="L64" class="ln">    64  </span>		{coverageWarning, &#34;🟠&#34;},
+<span id="L65" class="ln">    65  </span>		{coverageError, &#34;🔴&#34;},
+<span id="L66" class="ln">    66  </span>		{coverageStatus(-1), &#34;🔴&#34;},
+<span id="L67" class="ln">    67  </span>	} {
+<span id="L68" class="ln">    68  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L69" class="ln">    69  </span>		t.Run(fmt.Sprint(tc.status, tc.emoji), func(t *testing.T) {
+<span id="L70" class="ln">    70  </span>			t.Parallel()
+<span id="L71" class="ln">    71  </span>			assert.Equal(t, tc.emoji, tc.status.Emoji())
+<span id="L72" class="ln">    72  </span>		})
+<span id="L73" class="ln">    73  </span>	}
+<span id="L74" class="ln">    74  </span>}
+<span id="L75" class="ln">    75  </span>
 </pre><p></p>
 
 <div id="footer">

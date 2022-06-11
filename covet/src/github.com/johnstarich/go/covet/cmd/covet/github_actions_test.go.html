@@ -64,13 +64,14 @@
 <span id="L7" class="ln">     7  </span>)
 <span id="L8" class="ln">     8  </span>
 <span id="L9" class="ln">     9  </span>func TestWorkflowCommand(t *testing.T) {
-<span id="L10" class="ln">    10  </span>	command := workflowCommand(&#34;error&#34;, &#34;My message.&#34;, map[string]string{
-<span id="L11" class="ln">    11  </span>		&#34;file&#34;: &#34;someFile.txt&#34;,
-<span id="L12" class="ln">    12  </span>		&#34;name&#34;: &#34;hello&#34;,
-<span id="L13" class="ln">    13  </span>	})
-<span id="L14" class="ln">    14  </span>	assert.Equal(t, `::error file=someFile.txt,name=hello::My message.`, command)
-<span id="L15" class="ln">    15  </span>}
-<span id="L16" class="ln">    16  </span>
+<span id="L10" class="ln">    10  </span>	t.Parallel()
+<span id="L11" class="ln">    11  </span>	command := workflowCommand(&#34;error&#34;, &#34;My message.&#34;, map[string]string{
+<span id="L12" class="ln">    12  </span>		&#34;file&#34;: &#34;someFile.txt&#34;,
+<span id="L13" class="ln">    13  </span>		&#34;name&#34;: &#34;hello&#34;,
+<span id="L14" class="ln">    14  </span>	})
+<span id="L15" class="ln">    15  </span>	assert.Equal(t, `::error file=someFile.txt,name=hello::My message.`, command)
+<span id="L16" class="ln">    16  </span>}
+<span id="L17" class="ln">    17  </span>
 </pre><p></p>
 
 <div id="footer">

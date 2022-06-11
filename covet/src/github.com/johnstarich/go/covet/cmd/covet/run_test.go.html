@@ -508,234 +508,244 @@
 <span id="L451" class="ln">   451  </span>}
 <span id="L452" class="ln">   452  </span>
 <span id="L453" class="ln">   453  </span>func TestParseIssueURL(t *testing.T) {
-<span id="L454" class="ln">   454  </span>	for _, tc := range []struct {
-<span id="L455" class="ln">   455  </span>		url          string
-<span id="L456" class="ln">   456  </span>		expectOrg    string
-<span id="L457" class="ln">   457  </span>		expectRepo   string
-<span id="L458" class="ln">   458  </span>		expectNumber int
-<span id="L459" class="ln">   459  </span>		expectErr    string
-<span id="L460" class="ln">   460  </span>	}{
-<span id="L461" class="ln">   461  </span>		{
-<span id="L462" class="ln">   462  </span>			url:       &#34;&#34;,
-<span id="L463" class="ln">   463  </span>			expectErr: &#34;-gh-issue is required&#34;,
-<span id="L464" class="ln">   464  </span>		},
-<span id="L465" class="ln">   465  </span>		{
-<span id="L466" class="ln">   466  </span>			url:       &#34;example.com&#34;,
-<span id="L467" class="ln">   467  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
-<span id="L468" class="ln">   468  </span>		},
-<span id="L469" class="ln">   469  </span>		{
-<span id="L470" class="ln">   470  </span>			url:          &#34;github.com/myorg/myrepo/pull/123&#34;,
-<span id="L471" class="ln">   471  </span>			expectOrg:    &#34;myorg&#34;,
-<span id="L472" class="ln">   472  </span>			expectRepo:   &#34;myrepo&#34;,
-<span id="L473" class="ln">   473  </span>			expectNumber: 123,
-<span id="L474" class="ln">   474  </span>		},
-<span id="L475" class="ln">   475  </span>		{
-<span id="L476" class="ln">   476  </span>			url:          &#34;github.com/myorg/myrepo/pull/123/extra&#34;,
-<span id="L477" class="ln">   477  </span>			expectOrg:    &#34;myorg&#34;,
-<span id="L478" class="ln">   478  </span>			expectRepo:   &#34;myrepo&#34;,
-<span id="L479" class="ln">   479  </span>			expectNumber: 123,
-<span id="L480" class="ln">   480  </span>		},
-<span id="L481" class="ln">   481  </span>		{
-<span id="L482" class="ln">   482  </span>			url:       &#34;github.com/myorg/myrepo/pull/not-a-number&#34;,
-<span id="L483" class="ln">   483  </span>			expectErr: `strconv.ParseInt: parsing &#34;not-a-number&#34;: invalid syntax`,
-<span id="L484" class="ln">   484  </span>		},
-<span id="L485" class="ln">   485  </span>	} {
-<span id="L486" class="ln">   486  </span>		t.Run(tc.url, func(t *testing.T) {
-<span id="L487" class="ln">   487  </span>			org, repo, number, err := parseIssueURL(tc.url)
-<span id="L488" class="ln">   488  </span>			assert.Equal(t, tc.expectOrg, org)
-<span id="L489" class="ln">   489  </span>			assert.Equal(t, tc.expectRepo, repo)
-<span id="L490" class="ln">   490  </span>			assert.Equal(t, tc.expectNumber, number)
-<span id="L491" class="ln">   491  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L492" class="ln">   492  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L493" class="ln">   493  </span>			} else {
-<span id="L494" class="ln">   494  </span>				assert.NoError(t, err)
-<span id="L495" class="ln">   495  </span>			}
-<span id="L496" class="ln">   496  </span>		})
-<span id="L497" class="ln">   497  </span>	}
-<span id="L498" class="ln">   498  </span>}
-<span id="L499" class="ln">   499  </span>
-<span id="L500" class="ln">   500  </span>func TestParseArgs(t *testing.T) {
-<span id="L501" class="ln">   501  </span>	t.Parallel()
+<span id="L454" class="ln">   454  </span>	t.Parallel()
+<span id="L455" class="ln">   455  </span>	for _, tc := range []struct {
+<span id="L456" class="ln">   456  </span>		url          string
+<span id="L457" class="ln">   457  </span>		expectOrg    string
+<span id="L458" class="ln">   458  </span>		expectRepo   string
+<span id="L459" class="ln">   459  </span>		expectNumber int
+<span id="L460" class="ln">   460  </span>		expectErr    string
+<span id="L461" class="ln">   461  </span>	}{
+<span id="L462" class="ln">   462  </span>		{
+<span id="L463" class="ln">   463  </span>			url:       &#34;&#34;,
+<span id="L464" class="ln">   464  </span>			expectErr: &#34;-gh-issue is required&#34;,
+<span id="L465" class="ln">   465  </span>		},
+<span id="L466" class="ln">   466  </span>		{
+<span id="L467" class="ln">   467  </span>			url:       &#34;example.com&#34;,
+<span id="L468" class="ln">   468  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
+<span id="L469" class="ln">   469  </span>		},
+<span id="L470" class="ln">   470  </span>		{
+<span id="L471" class="ln">   471  </span>			url:          &#34;github.com/myorg/myrepo/pull/123&#34;,
+<span id="L472" class="ln">   472  </span>			expectOrg:    &#34;myorg&#34;,
+<span id="L473" class="ln">   473  </span>			expectRepo:   &#34;myrepo&#34;,
+<span id="L474" class="ln">   474  </span>			expectNumber: 123,
+<span id="L475" class="ln">   475  </span>		},
+<span id="L476" class="ln">   476  </span>		{
+<span id="L477" class="ln">   477  </span>			url:          &#34;github.com/myorg/myrepo/pull/123/extra&#34;,
+<span id="L478" class="ln">   478  </span>			expectOrg:    &#34;myorg&#34;,
+<span id="L479" class="ln">   479  </span>			expectRepo:   &#34;myrepo&#34;,
+<span id="L480" class="ln">   480  </span>			expectNumber: 123,
+<span id="L481" class="ln">   481  </span>		},
+<span id="L482" class="ln">   482  </span>		{
+<span id="L483" class="ln">   483  </span>			url:       &#34;github.com/myorg/myrepo/pull/not-a-number&#34;,
+<span id="L484" class="ln">   484  </span>			expectErr: `strconv.ParseInt: parsing &#34;not-a-number&#34;: invalid syntax`,
+<span id="L485" class="ln">   485  </span>		},
+<span id="L486" class="ln">   486  </span>	} {
+<span id="L487" class="ln">   487  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L488" class="ln">   488  </span>		t.Run(tc.url, func(t *testing.T) {
+<span id="L489" class="ln">   489  </span>			t.Parallel()
+<span id="L490" class="ln">   490  </span>			org, repo, number, err := parseIssueURL(tc.url)
+<span id="L491" class="ln">   491  </span>			assert.Equal(t, tc.expectOrg, org)
+<span id="L492" class="ln">   492  </span>			assert.Equal(t, tc.expectRepo, repo)
+<span id="L493" class="ln">   493  </span>			assert.Equal(t, tc.expectNumber, number)
+<span id="L494" class="ln">   494  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L495" class="ln">   495  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L496" class="ln">   496  </span>			} else {
+<span id="L497" class="ln">   497  </span>				assert.NoError(t, err)
+<span id="L498" class="ln">   498  </span>			}
+<span id="L499" class="ln">   499  </span>		})
+<span id="L500" class="ln">   500  </span>	}
+<span id="L501" class="ln">   501  </span>}
 <span id="L502" class="ln">   502  </span>
-<span id="L503" class="ln">   503  </span>	t.Run(&#34;missing required param&#34;, func(t *testing.T) {
-<span id="L504" class="ln">   504  </span>		var buf bytes.Buffer
-<span id="L505" class="ln">   505  </span>		_, err := parseArgs([]string{}, &amp;buf)
-<span id="L506" class="ln">   506  </span>		assert.EqualError(t, err, &#34;flag -cover-go is required&#34;)
-<span id="L507" class="ln">   507  </span>	})
-<span id="L508" class="ln">   508  </span>
-<span id="L509" class="ln">   509  </span>	t.Run(&#34;invalid flags&#34;, func(t *testing.T) {
-<span id="L510" class="ln">   510  </span>		var buf bytes.Buffer
-<span id="L511" class="ln">   511  </span>		_, err := parseArgs([]string{
-<span id="L512" class="ln">   512  </span>			&#34;-target-diff-coverage&#34;, &#34;not-a-number&#34;,
-<span id="L513" class="ln">   513  </span>		}, &amp;buf)
-<span id="L514" class="ln">   514  </span>		assert.EqualError(t, err, `invalid value &#34;not-a-number&#34; for flag -target-diff-coverage: parse error`)
-<span id="L515" class="ln">   515  </span>	})
-<span id="L516" class="ln">   516  </span>
-<span id="L517" class="ln">   517  </span>	t.Run(&#34;set fs paths&#34;, func(t *testing.T) {
-<span id="L518" class="ln">   518  </span>		const (
-<span id="L519" class="ln">   519  </span>			someCoverPath = &#34;some-cover-path&#34;
-<span id="L520" class="ln">   520  </span>			someDiffPath  = &#34;mydiff.patch&#34;
-<span id="L521" class="ln">   521  </span>		)
-<span id="L522" class="ln">   522  </span>		var buf bytes.Buffer
-<span id="L523" class="ln">   523  </span>		args, err := parseArgs([]string{
-<span id="L524" class="ln">   524  </span>			&#34;-cover-go&#34;, someCoverPath,
-<span id="L525" class="ln">   525  </span>			&#34;-diff-file&#34;, someDiffPath,
-<span id="L526" class="ln">   526  </span>		}, &amp;buf)
-<span id="L527" class="ln">   527  </span>		assert.NoError(t, err)
-<span id="L528" class="ln">   528  </span>
-<span id="L529" class="ln">   529  </span>		workingDir, err := toFSPath(&#34;&#34;)
-<span id="L530" class="ln">   530  </span>		require.NoError(t, err)
-<span id="L531" class="ln">   531  </span>
-<span id="L532" class="ln">   532  </span>		assert.Equal(t, Args{
-<span id="L533" class="ln">   533  </span>			DiffFile:           path.Join(workingDir, someDiffPath),
-<span id="L534" class="ln">   534  </span>			DiffBaseDir:        workingDir,
-<span id="L535" class="ln">   535  </span>			GoCoverageFile:     path.Join(workingDir, someCoverPath),
-<span id="L536" class="ln">   536  </span>			TargetDiffCoverage: 90,
-<span id="L537" class="ln">   537  </span>			GitHubEndpoint:     &#34;https://api.github.com&#34;,
-<span id="L538" class="ln">   538  </span>		}, args)
-<span id="L539" class="ln">   539  </span>	})
-<span id="L540" class="ln">   540  </span>}
-<span id="L541" class="ln">   541  </span>
-<span id="L542" class="ln">   542  </span>func TestSetErr(t *testing.T) {
-<span id="L543" class="ln">   543  </span>	someError := errors.New(&#34;some error&#34;)
-<span id="L544" class="ln">   544  </span>	var err error
-<span id="L545" class="ln">   545  </span>	setErr(nil, &amp;err)
-<span id="L546" class="ln">   546  </span>	assert.NoError(t, err)
+<span id="L503" class="ln">   503  </span>func TestParseArgs(t *testing.T) {
+<span id="L504" class="ln">   504  </span>	t.Parallel()
+<span id="L505" class="ln">   505  </span>
+<span id="L506" class="ln">   506  </span>	t.Run(&#34;missing required param&#34;, func(t *testing.T) {
+<span id="L507" class="ln">   507  </span>		t.Parallel()
+<span id="L508" class="ln">   508  </span>		var buf bytes.Buffer
+<span id="L509" class="ln">   509  </span>		_, err := parseArgs([]string{}, &amp;buf)
+<span id="L510" class="ln">   510  </span>		assert.EqualError(t, err, &#34;flag -cover-go is required&#34;)
+<span id="L511" class="ln">   511  </span>	})
+<span id="L512" class="ln">   512  </span>
+<span id="L513" class="ln">   513  </span>	t.Run(&#34;invalid flags&#34;, func(t *testing.T) {
+<span id="L514" class="ln">   514  </span>		t.Parallel()
+<span id="L515" class="ln">   515  </span>		var buf bytes.Buffer
+<span id="L516" class="ln">   516  </span>		_, err := parseArgs([]string{
+<span id="L517" class="ln">   517  </span>			&#34;-target-diff-coverage&#34;, &#34;not-a-number&#34;,
+<span id="L518" class="ln">   518  </span>		}, &amp;buf)
+<span id="L519" class="ln">   519  </span>		assert.EqualError(t, err, `invalid value &#34;not-a-number&#34; for flag -target-diff-coverage: parse error`)
+<span id="L520" class="ln">   520  </span>	})
+<span id="L521" class="ln">   521  </span>
+<span id="L522" class="ln">   522  </span>	t.Run(&#34;set fs paths&#34;, func(t *testing.T) {
+<span id="L523" class="ln">   523  </span>		t.Parallel()
+<span id="L524" class="ln">   524  </span>		const (
+<span id="L525" class="ln">   525  </span>			someCoverPath = &#34;some-cover-path&#34;
+<span id="L526" class="ln">   526  </span>			someDiffPath  = &#34;mydiff.patch&#34;
+<span id="L527" class="ln">   527  </span>		)
+<span id="L528" class="ln">   528  </span>		var buf bytes.Buffer
+<span id="L529" class="ln">   529  </span>		args, err := parseArgs([]string{
+<span id="L530" class="ln">   530  </span>			&#34;-cover-go&#34;, someCoverPath,
+<span id="L531" class="ln">   531  </span>			&#34;-diff-file&#34;, someDiffPath,
+<span id="L532" class="ln">   532  </span>		}, &amp;buf)
+<span id="L533" class="ln">   533  </span>		assert.NoError(t, err)
+<span id="L534" class="ln">   534  </span>
+<span id="L535" class="ln">   535  </span>		workingDir, err := toFSPath(&#34;&#34;)
+<span id="L536" class="ln">   536  </span>		require.NoError(t, err)
+<span id="L537" class="ln">   537  </span>
+<span id="L538" class="ln">   538  </span>		assert.Equal(t, Args{
+<span id="L539" class="ln">   539  </span>			DiffFile:           path.Join(workingDir, someDiffPath),
+<span id="L540" class="ln">   540  </span>			DiffBaseDir:        workingDir,
+<span id="L541" class="ln">   541  </span>			GoCoverageFile:     path.Join(workingDir, someCoverPath),
+<span id="L542" class="ln">   542  </span>			TargetDiffCoverage: 90,
+<span id="L543" class="ln">   543  </span>			GitHubEndpoint:     &#34;https://api.github.com&#34;,
+<span id="L544" class="ln">   544  </span>		}, args)
+<span id="L545" class="ln">   545  </span>	})
+<span id="L546" class="ln">   546  </span>}
 <span id="L547" class="ln">   547  </span>
-<span id="L548" class="ln">   548  </span>	setErr(someError, &amp;err)
-<span id="L549" class="ln">   549  </span>	assert.Same(t, someError, err)
-<span id="L550" class="ln">   550  </span>}
-<span id="L551" class="ln">   551  </span>
-<span id="L552" class="ln">   552  </span>func TestFindUncoveredLines(t *testing.T) {
-<span id="L553" class="ln">   553  </span>	t.Parallel()
-<span id="L554" class="ln">   554  </span>	for _, tc := range []struct {
-<span id="L555" class="ln">   555  </span>		description string
-<span id="L556" class="ln">   556  </span>		lines       []covet.Line
-<span id="L557" class="ln">   557  </span>		expect      []span.Span
-<span id="L558" class="ln">   558  </span>	}{
-<span id="L559" class="ln">   559  </span>		{
-<span id="L560" class="ln">   560  </span>			description: &#34;no lines&#34;,
-<span id="L561" class="ln">   561  </span>			lines:       []covet.Line{},
-<span id="L562" class="ln">   562  </span>			expect:      nil,
-<span id="L563" class="ln">   563  </span>		},
-<span id="L564" class="ln">   564  </span>		{
-<span id="L565" class="ln">   565  </span>			description: &#34;1 covered line&#34;,
-<span id="L566" class="ln">   566  </span>			lines: []covet.Line{
-<span id="L567" class="ln">   567  </span>				{Covered: true, LineNumber: 1},
-<span id="L568" class="ln">   568  </span>			},
-<span id="L569" class="ln">   569  </span>			expect: nil,
+<span id="L548" class="ln">   548  </span>func TestSetErr(t *testing.T) {
+<span id="L549" class="ln">   549  </span>	t.Parallel()
+<span id="L550" class="ln">   550  </span>	someError := errors.New(&#34;some error&#34;)
+<span id="L551" class="ln">   551  </span>	var err error
+<span id="L552" class="ln">   552  </span>	setErr(nil, &amp;err)
+<span id="L553" class="ln">   553  </span>	assert.NoError(t, err)
+<span id="L554" class="ln">   554  </span>
+<span id="L555" class="ln">   555  </span>	setErr(someError, &amp;err)
+<span id="L556" class="ln">   556  </span>	assert.Same(t, someError, err)
+<span id="L557" class="ln">   557  </span>}
+<span id="L558" class="ln">   558  </span>
+<span id="L559" class="ln">   559  </span>func TestFindUncoveredLines(t *testing.T) {
+<span id="L560" class="ln">   560  </span>	t.Parallel()
+<span id="L561" class="ln">   561  </span>	for _, tc := range []struct {
+<span id="L562" class="ln">   562  </span>		description string
+<span id="L563" class="ln">   563  </span>		lines       []covet.Line
+<span id="L564" class="ln">   564  </span>		expect      []span.Span
+<span id="L565" class="ln">   565  </span>	}{
+<span id="L566" class="ln">   566  </span>		{
+<span id="L567" class="ln">   567  </span>			description: &#34;no lines&#34;,
+<span id="L568" class="ln">   568  </span>			lines:       []covet.Line{},
+<span id="L569" class="ln">   569  </span>			expect:      nil,
 <span id="L570" class="ln">   570  </span>		},
 <span id="L571" class="ln">   571  </span>		{
-<span id="L572" class="ln">   572  </span>			description: &#34;1 uncovered line&#34;,
+<span id="L572" class="ln">   572  </span>			description: &#34;1 covered line&#34;,
 <span id="L573" class="ln">   573  </span>			lines: []covet.Line{
-<span id="L574" class="ln">   574  </span>				{Covered: false, LineNumber: 1},
+<span id="L574" class="ln">   574  </span>				{Covered: true, LineNumber: 1},
 <span id="L575" class="ln">   575  </span>			},
-<span id="L576" class="ln">   576  </span>			expect: []span.Span{
-<span id="L577" class="ln">   577  </span>				{Start: 1, End: 2},
-<span id="L578" class="ln">   578  </span>			},
-<span id="L579" class="ln">   579  </span>		},
-<span id="L580" class="ln">   580  </span>		{
-<span id="L581" class="ln">   581  </span>			description: &#34;2 small spans&#34;,
-<span id="L582" class="ln">   582  </span>			lines: []covet.Line{
-<span id="L583" class="ln">   583  </span>				{Covered: false, LineNumber: 1},
-<span id="L584" class="ln">   584  </span>				{Covered: true, LineNumber: 2},
-<span id="L585" class="ln">   585  </span>				{Covered: false, LineNumber: 3},
-<span id="L586" class="ln">   586  </span>			},
-<span id="L587" class="ln">   587  </span>			expect: []span.Span{
-<span id="L588" class="ln">   588  </span>				{Start: 1, End: 2},
-<span id="L589" class="ln">   589  </span>				{Start: 3, End: 4},
-<span id="L590" class="ln">   590  </span>			},
-<span id="L591" class="ln">   591  </span>		},
-<span id="L592" class="ln">   592  </span>		{
-<span id="L593" class="ln">   593  </span>			description: &#34;2 sparse spans&#34;,
-<span id="L594" class="ln">   594  </span>			lines: []covet.Line{
-<span id="L595" class="ln">   595  </span>				{Covered: false, LineNumber: 1},
-<span id="L596" class="ln">   596  </span>				{Covered: false, LineNumber: 3},
+<span id="L576" class="ln">   576  </span>			expect: nil,
+<span id="L577" class="ln">   577  </span>		},
+<span id="L578" class="ln">   578  </span>		{
+<span id="L579" class="ln">   579  </span>			description: &#34;1 uncovered line&#34;,
+<span id="L580" class="ln">   580  </span>			lines: []covet.Line{
+<span id="L581" class="ln">   581  </span>				{Covered: false, LineNumber: 1},
+<span id="L582" class="ln">   582  </span>			},
+<span id="L583" class="ln">   583  </span>			expect: []span.Span{
+<span id="L584" class="ln">   584  </span>				{Start: 1, End: 2},
+<span id="L585" class="ln">   585  </span>			},
+<span id="L586" class="ln">   586  </span>		},
+<span id="L587" class="ln">   587  </span>		{
+<span id="L588" class="ln">   588  </span>			description: &#34;2 small spans&#34;,
+<span id="L589" class="ln">   589  </span>			lines: []covet.Line{
+<span id="L590" class="ln">   590  </span>				{Covered: false, LineNumber: 1},
+<span id="L591" class="ln">   591  </span>				{Covered: true, LineNumber: 2},
+<span id="L592" class="ln">   592  </span>				{Covered: false, LineNumber: 3},
+<span id="L593" class="ln">   593  </span>			},
+<span id="L594" class="ln">   594  </span>			expect: []span.Span{
+<span id="L595" class="ln">   595  </span>				{Start: 1, End: 2},
+<span id="L596" class="ln">   596  </span>				{Start: 3, End: 4},
 <span id="L597" class="ln">   597  </span>			},
-<span id="L598" class="ln">   598  </span>			expect: []span.Span{
-<span id="L599" class="ln">   599  </span>				{Start: 1, End: 2},
-<span id="L600" class="ln">   600  </span>				{Start: 3, End: 4},
-<span id="L601" class="ln">   601  </span>			},
-<span id="L602" class="ln">   602  </span>		},
-<span id="L603" class="ln">   603  </span>		{
-<span id="L604" class="ln">   604  </span>			description: &#34;2 spans with 1 larger span&#34;,
-<span id="L605" class="ln">   605  </span>			lines: []covet.Line{
-<span id="L606" class="ln">   606  </span>				{Covered: false, LineNumber: 1},
-<span id="L607" class="ln">   607  </span>				{Covered: false, LineNumber: 3},
-<span id="L608" class="ln">   608  </span>				{Covered: false, LineNumber: 4},
-<span id="L609" class="ln">   609  </span>			},
-<span id="L610" class="ln">   610  </span>			expect: []span.Span{
-<span id="L611" class="ln">   611  </span>				{Start: 3, End: 5},
-<span id="L612" class="ln">   612  </span>				{Start: 1, End: 2},
-<span id="L613" class="ln">   613  </span>			},
-<span id="L614" class="ln">   614  </span>		},
-<span id="L615" class="ln">   615  </span>		{
-<span id="L616" class="ln">   616  </span>			description: &#34;multiple spans&#34;,
-<span id="L617" class="ln">   617  </span>			lines: []covet.Line{
-<span id="L618" class="ln">   618  </span>				{Covered: false, LineNumber: 1},
-<span id="L619" class="ln">   619  </span>
-<span id="L620" class="ln">   620  </span>				{Covered: true, LineNumber: 3},
-<span id="L621" class="ln">   621  </span>				{Covered: false, LineNumber: 4},
-<span id="L622" class="ln">   622  </span>
-<span id="L623" class="ln">   623  </span>				{Covered: true, LineNumber: 7},
-<span id="L624" class="ln">   624  </span>				{Covered: true, LineNumber: 8},
-<span id="L625" class="ln">   625  </span>
-<span id="L626" class="ln">   626  </span>				{Covered: false, LineNumber: 10},
-<span id="L627" class="ln">   627  </span>				{Covered: false, LineNumber: 11},
-<span id="L628" class="ln">   628  </span>				{Covered: false, LineNumber: 12},
-<span id="L629" class="ln">   629  </span>				{Covered: false, LineNumber: 13},
-<span id="L630" class="ln">   630  </span>			},
-<span id="L631" class="ln">   631  </span>			expect: []span.Span{
-<span id="L632" class="ln">   632  </span>				{Start: 10, End: 14},
-<span id="L633" class="ln">   633  </span>				{Start: 1, End: 2},
-<span id="L634" class="ln">   634  </span>				{Start: 4, End: 5},
-<span id="L635" class="ln">   635  </span>			},
-<span id="L636" class="ln">   636  </span>		},
-<span id="L637" class="ln">   637  </span>	} {
-<span id="L638" class="ln">   638  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L639" class="ln">   639  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L640" class="ln">   640  </span>			t.Parallel()
-<span id="L641" class="ln">   641  </span>			spans := findUncoveredLines(covet.File{
-<span id="L642" class="ln">   642  </span>				Lines: tc.lines,
-<span id="L643" class="ln">   643  </span>			})
-<span id="L644" class="ln">   644  </span>			assert.Equal(t, tc.expect, spans)
-<span id="L645" class="ln">   645  </span>		})
-<span id="L646" class="ln">   646  </span>	}
-<span id="L647" class="ln">   647  </span>}
-<span id="L648" class="ln">   648  </span>
-<span id="L649" class="ln">   649  </span>func TestFindReportableUncoveredFiles(t *testing.T) {
-<span id="L650" class="ln">   650  </span>	t.Run(&#34;sort and filter just enough files&#34;, func(t *testing.T) {
-<span id="L651" class="ln">   651  </span>		files := []covet.File{
-<span id="L652" class="ln">   652  </span>			{Name: &#34;foo&#34;, Covered: 2, Uncovered: 0},
-<span id="L653" class="ln">   653  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
-<span id="L654" class="ln">   654  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
-<span id="L655" class="ln">   655  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
-<span id="L656" class="ln">   656  </span>		}
-<span id="L657" class="ln">   657  </span>		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
-<span id="L658" class="ln">   658  </span>		assert.Equal(t, []covet.File{
-<span id="L659" class="ln">   659  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
-<span id="L660" class="ln">   660  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
-<span id="L661" class="ln">   661  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
-<span id="L662" class="ln">   662  </span>		}, reportable)
-<span id="L663" class="ln">   663  </span>	})
-<span id="L664" class="ln">   664  </span>
-<span id="L665" class="ln">   665  </span>	t.Run(&#34;include more small files if the biggest chunks are not close enough to target&#34;, func(t *testing.T) {
-<span id="L666" class="ln">   666  </span>		files := []covet.File{
-<span id="L667" class="ln">   667  </span>			{Name: &#34;foo&#34;, Covered: 0, Uncovered: 1},
-<span id="L668" class="ln">   668  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
-<span id="L669" class="ln">   669  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
-<span id="L670" class="ln">   670  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
-<span id="L671" class="ln">   671  </span>		}
-<span id="L672" class="ln">   672  </span>		reportable := findReportableUncoveredFiles(files, 0.8, 0)
-<span id="L673" class="ln">   673  </span>		assert.Equal(t, []covet.File{
-<span id="L674" class="ln">   674  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
-<span id="L675" class="ln">   675  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
-<span id="L676" class="ln">   676  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
+<span id="L598" class="ln">   598  </span>		},
+<span id="L599" class="ln">   599  </span>		{
+<span id="L600" class="ln">   600  </span>			description: &#34;2 sparse spans&#34;,
+<span id="L601" class="ln">   601  </span>			lines: []covet.Line{
+<span id="L602" class="ln">   602  </span>				{Covered: false, LineNumber: 1},
+<span id="L603" class="ln">   603  </span>				{Covered: false, LineNumber: 3},
+<span id="L604" class="ln">   604  </span>			},
+<span id="L605" class="ln">   605  </span>			expect: []span.Span{
+<span id="L606" class="ln">   606  </span>				{Start: 1, End: 2},
+<span id="L607" class="ln">   607  </span>				{Start: 3, End: 4},
+<span id="L608" class="ln">   608  </span>			},
+<span id="L609" class="ln">   609  </span>		},
+<span id="L610" class="ln">   610  </span>		{
+<span id="L611" class="ln">   611  </span>			description: &#34;2 spans with 1 larger span&#34;,
+<span id="L612" class="ln">   612  </span>			lines: []covet.Line{
+<span id="L613" class="ln">   613  </span>				{Covered: false, LineNumber: 1},
+<span id="L614" class="ln">   614  </span>				{Covered: false, LineNumber: 3},
+<span id="L615" class="ln">   615  </span>				{Covered: false, LineNumber: 4},
+<span id="L616" class="ln">   616  </span>			},
+<span id="L617" class="ln">   617  </span>			expect: []span.Span{
+<span id="L618" class="ln">   618  </span>				{Start: 3, End: 5},
+<span id="L619" class="ln">   619  </span>				{Start: 1, End: 2},
+<span id="L620" class="ln">   620  </span>			},
+<span id="L621" class="ln">   621  </span>		},
+<span id="L622" class="ln">   622  </span>		{
+<span id="L623" class="ln">   623  </span>			description: &#34;multiple spans&#34;,
+<span id="L624" class="ln">   624  </span>			lines: []covet.Line{
+<span id="L625" class="ln">   625  </span>				{Covered: false, LineNumber: 1},
+<span id="L626" class="ln">   626  </span>
+<span id="L627" class="ln">   627  </span>				{Covered: true, LineNumber: 3},
+<span id="L628" class="ln">   628  </span>				{Covered: false, LineNumber: 4},
+<span id="L629" class="ln">   629  </span>
+<span id="L630" class="ln">   630  </span>				{Covered: true, LineNumber: 7},
+<span id="L631" class="ln">   631  </span>				{Covered: true, LineNumber: 8},
+<span id="L632" class="ln">   632  </span>
+<span id="L633" class="ln">   633  </span>				{Covered: false, LineNumber: 10},
+<span id="L634" class="ln">   634  </span>				{Covered: false, LineNumber: 11},
+<span id="L635" class="ln">   635  </span>				{Covered: false, LineNumber: 12},
+<span id="L636" class="ln">   636  </span>				{Covered: false, LineNumber: 13},
+<span id="L637" class="ln">   637  </span>			},
+<span id="L638" class="ln">   638  </span>			expect: []span.Span{
+<span id="L639" class="ln">   639  </span>				{Start: 10, End: 14},
+<span id="L640" class="ln">   640  </span>				{Start: 1, End: 2},
+<span id="L641" class="ln">   641  </span>				{Start: 4, End: 5},
+<span id="L642" class="ln">   642  </span>			},
+<span id="L643" class="ln">   643  </span>		},
+<span id="L644" class="ln">   644  </span>	} {
+<span id="L645" class="ln">   645  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L646" class="ln">   646  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L647" class="ln">   647  </span>			t.Parallel()
+<span id="L648" class="ln">   648  </span>			spans := findUncoveredLines(covet.File{
+<span id="L649" class="ln">   649  </span>				Lines: tc.lines,
+<span id="L650" class="ln">   650  </span>			})
+<span id="L651" class="ln">   651  </span>			assert.Equal(t, tc.expect, spans)
+<span id="L652" class="ln">   652  </span>		})
+<span id="L653" class="ln">   653  </span>	}
+<span id="L654" class="ln">   654  </span>}
+<span id="L655" class="ln">   655  </span>
+<span id="L656" class="ln">   656  </span>func TestFindReportableUncoveredFiles(t *testing.T) {
+<span id="L657" class="ln">   657  </span>	t.Parallel()
+<span id="L658" class="ln">   658  </span>	t.Run(&#34;sort and filter just enough files&#34;, func(t *testing.T) {
+<span id="L659" class="ln">   659  </span>		t.Parallel()
+<span id="L660" class="ln">   660  </span>		files := []covet.File{
+<span id="L661" class="ln">   661  </span>			{Name: &#34;foo&#34;, Covered: 2, Uncovered: 0},
+<span id="L662" class="ln">   662  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
+<span id="L663" class="ln">   663  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
+<span id="L664" class="ln">   664  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
+<span id="L665" class="ln">   665  </span>		}
+<span id="L666" class="ln">   666  </span>		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
+<span id="L667" class="ln">   667  </span>		assert.Equal(t, []covet.File{
+<span id="L668" class="ln">   668  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
+<span id="L669" class="ln">   669  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
+<span id="L670" class="ln">   670  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
+<span id="L671" class="ln">   671  </span>		}, reportable)
+<span id="L672" class="ln">   672  </span>	})
+<span id="L673" class="ln">   673  </span>
+<span id="L674" class="ln">   674  </span>	t.Run(&#34;include more small files if the biggest chunks are not close enough to target&#34;, func(t *testing.T) {
+<span id="L675" class="ln">   675  </span>		t.Parallel()
+<span id="L676" class="ln">   676  </span>		files := []covet.File{
 <span id="L677" class="ln">   677  </span>			{Name: &#34;foo&#34;, Covered: 0, Uncovered: 1},
-<span id="L678" class="ln">   678  </span>		}, reportable)
-<span id="L679" class="ln">   679  </span>	})
-<span id="L680" class="ln">   680  </span>}
-<span id="L681" class="ln">   681  </span>
+<span id="L678" class="ln">   678  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
+<span id="L679" class="ln">   679  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
+<span id="L680" class="ln">   680  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
+<span id="L681" class="ln">   681  </span>		}
+<span id="L682" class="ln">   682  </span>		reportable := findReportableUncoveredFiles(files, 0.8, 0)
+<span id="L683" class="ln">   683  </span>		assert.Equal(t, []covet.File{
+<span id="L684" class="ln">   684  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
+<span id="L685" class="ln">   685  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
+<span id="L686" class="ln">   686  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
+<span id="L687" class="ln">   687  </span>			{Name: &#34;foo&#34;, Covered: 0, Uncovered: 1},
+<span id="L688" class="ln">   688  </span>		}, reportable)
+<span id="L689" class="ln">   689  </span>	})
+<span id="L690" class="ln">   690  </span>}
+<span id="L691" class="ln">   691  </span>
 </pre><p></p>
 
 <div id="footer">
