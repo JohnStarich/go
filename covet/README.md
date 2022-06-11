@@ -57,13 +57,13 @@ Here's an example using GitHub Actions:
         go-version: 1.16.x
     - name: Test
       run: |
-	git diff origin/master | \
-	    covet \
-		-diff-file - \
-		-cover-go ./cover.out \
-		-show-diff-coverage \
-		-gh-token "$GITHUB_TOKEN" \
-		-gh-issue "github.com/${GITHUB_REPOSITORY}/pull/${ISSUE_NUMBER}" 
+        git diff origin/master | \
+            covet \
+                -diff-file - \
+                -cover-go ./cover.out \
+                -show-diff-coverage \
+                -gh-token "$GITHUB_TOKEN" \
+                -gh-issue "github.com/${GITHUB_REPOSITORY}/pull/${ISSUE_NUMBER}" 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
