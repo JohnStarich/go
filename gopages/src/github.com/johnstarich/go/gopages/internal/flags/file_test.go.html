@@ -78,39 +78,43 @@
 <span id="L21" class="ln">    21  </span>}
 <span id="L22" class="ln">    22  </span>
 <span id="L23" class="ln">    23  </span>func TestFilePathContents(t *testing.T) {
-<span id="L24" class="ln">    24  </span>	t.Run(&#34;no flag&#34;, func(t *testing.T) {
-<span id="L25" class="ln">    25  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
-<span id="L26" class="ln">    26  </span>		var f FilePathContents
-<span id="L27" class="ln">    27  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
-<span id="L28" class="ln">    28  </span>		err := set.Parse(nil)
-<span id="L29" class="ln">    29  </span>		assert.NoError(t, err)
-<span id="L30" class="ln">    30  </span>		assert.Equal(t, &#34;&#34;, string(f.Contents()))
-<span id="L31" class="ln">    31  </span>	})
-<span id="L32" class="ln">    32  </span>
-<span id="L33" class="ln">    33  </span>	t.Run(&#34;valid file&#34;, func(t *testing.T) {
-<span id="L34" class="ln">    34  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
-<span id="L35" class="ln">    35  </span>		const someContents = &#34;some contents&#34;
-<span id="L36" class="ln">    36  </span>		tempFile := testFile(t, someContents)
-<span id="L37" class="ln">    37  </span>
-<span id="L38" class="ln">    38  </span>		var f FilePathContents
-<span id="L39" class="ln">    39  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
-<span id="L40" class="ln">    40  </span>		err := set.Parse([]string{&#34;-myflag&#34;, tempFile})
-<span id="L41" class="ln">    41  </span>		assert.NoError(t, err)
-<span id="L42" class="ln">    42  </span>		assert.Equal(t, someContents, string(f.Contents()))
-<span id="L43" class="ln">    43  </span>		assert.Equal(t, someContents, f.String())
-<span id="L44" class="ln">    44  </span>	})
-<span id="L45" class="ln">    45  </span>
-<span id="L46" class="ln">    46  </span>	t.Run(&#34;invalid file&#34;, func(t *testing.T) {
-<span id="L47" class="ln">    47  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
-<span id="L48" class="ln">    48  </span>		var f FilePathContents
-<span id="L49" class="ln">    49  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
-<span id="L50" class="ln">    50  </span>		err := set.Parse([]string{&#34;-myflag&#34;, &#34;/does/not/exist&#34;})
-<span id="L51" class="ln">    51  </span>		require.Error(t, err)
-<span id="L52" class="ln">    52  </span>		assert.Contains(t, err.Error(), &#34;open /does/not/exist: no such file or directory&#34;)
-<span id="L53" class="ln">    53  </span>		assert.Equal(t, &#34;&#34;, f.String())
-<span id="L54" class="ln">    54  </span>	})
-<span id="L55" class="ln">    55  </span>}
-<span id="L56" class="ln">    56  </span>
+<span id="L24" class="ln">    24  </span>	t.Parallel()
+<span id="L25" class="ln">    25  </span>	t.Run(&#34;no flag&#34;, func(t *testing.T) {
+<span id="L26" class="ln">    26  </span>		t.Parallel()
+<span id="L27" class="ln">    27  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
+<span id="L28" class="ln">    28  </span>		var f FilePathContents
+<span id="L29" class="ln">    29  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
+<span id="L30" class="ln">    30  </span>		err := set.Parse(nil)
+<span id="L31" class="ln">    31  </span>		assert.NoError(t, err)
+<span id="L32" class="ln">    32  </span>		assert.Equal(t, &#34;&#34;, string(f.Contents()))
+<span id="L33" class="ln">    33  </span>	})
+<span id="L34" class="ln">    34  </span>
+<span id="L35" class="ln">    35  </span>	t.Run(&#34;valid file&#34;, func(t *testing.T) {
+<span id="L36" class="ln">    36  </span>		t.Parallel()
+<span id="L37" class="ln">    37  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
+<span id="L38" class="ln">    38  </span>		const someContents = &#34;some contents&#34;
+<span id="L39" class="ln">    39  </span>		tempFile := testFile(t, someContents)
+<span id="L40" class="ln">    40  </span>
+<span id="L41" class="ln">    41  </span>		var f FilePathContents
+<span id="L42" class="ln">    42  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
+<span id="L43" class="ln">    43  </span>		err := set.Parse([]string{&#34;-myflag&#34;, tempFile})
+<span id="L44" class="ln">    44  </span>		assert.NoError(t, err)
+<span id="L45" class="ln">    45  </span>		assert.Equal(t, someContents, string(f.Contents()))
+<span id="L46" class="ln">    46  </span>		assert.Equal(t, someContents, f.String())
+<span id="L47" class="ln">    47  </span>	})
+<span id="L48" class="ln">    48  </span>
+<span id="L49" class="ln">    49  </span>	t.Run(&#34;invalid file&#34;, func(t *testing.T) {
+<span id="L50" class="ln">    50  </span>		t.Parallel()
+<span id="L51" class="ln">    51  </span>		set := flag.NewFlagSet(&#34;&#34;, flag.ContinueOnError)
+<span id="L52" class="ln">    52  </span>		var f FilePathContents
+<span id="L53" class="ln">    53  </span>		set.Var(&amp;f, &#34;myflag&#34;, &#34;&#34;)
+<span id="L54" class="ln">    54  </span>		err := set.Parse([]string{&#34;-myflag&#34;, &#34;/does/not/exist&#34;})
+<span id="L55" class="ln">    55  </span>		require.Error(t, err)
+<span id="L56" class="ln">    56  </span>		assert.Contains(t, err.Error(), &#34;open /does/not/exist: no such file or directory&#34;)
+<span id="L57" class="ln">    57  </span>		assert.Equal(t, &#34;&#34;, f.String())
+<span id="L58" class="ln">    58  </span>	})
+<span id="L59" class="ln">    59  </span>}
+<span id="L60" class="ln">    60  </span>
 </pre><p></p>
 
 <div id="footer">

@@ -64,12 +64,13 @@
 <span id="L7" class="ln">     7  </span>)
 <span id="L8" class="ln">     8  </span>
 <span id="L9" class="ln">     9  </span>func TestExiter(t *testing.T) {
-<span id="L10" class="ln">    10  </span>	SetupTestExiter(t)
-<span id="L11" class="ln">    11  </span>	assert.PanicsWithError(t, &#34;Attempted to exit with exit code 1&#34;, func() {
-<span id="L12" class="ln">    12  </span>		Exit(1)
-<span id="L13" class="ln">    13  </span>	})
-<span id="L14" class="ln">    14  </span>}
-<span id="L15" class="ln">    15  </span>
+<span id="L10" class="ln">    10  </span>	t.Parallel()
+<span id="L11" class="ln">    11  </span>	SetupTestExiter(t)
+<span id="L12" class="ln">    12  </span>	assert.PanicsWithError(t, &#34;Attempted to exit with exit code 1&#34;, func() {
+<span id="L13" class="ln">    13  </span>		Exit(1)
+<span id="L14" class="ln">    14  </span>	})
+<span id="L15" class="ln">    15  </span>}
+<span id="L16" class="ln">    16  </span>
 </pre><p></p>
 
 <div id="footer">

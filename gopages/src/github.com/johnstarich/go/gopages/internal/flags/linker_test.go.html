@@ -68,138 +68,150 @@
 <span id="L11" class="ln">    11  </span>)
 <span id="L12" class="ln">    12  </span>
 <span id="L13" class="ln">    13  </span>func TestNewGoPagesLinker(t *testing.T) {
-<span id="L14" class="ln">    14  </span>	const someBaseURL = &#34;/some/base&#34;
-<span id="L15" class="ln">    15  </span>	linker := newGoPagesLinker(someBaseURL)
-<span id="L16" class="ln">    16  </span>	assert.Equal(t, &amp;GoPagesLinker{baseURL: someBaseURL}, linker)
-<span id="L17" class="ln">    17  </span>}
-<span id="L18" class="ln">    18  </span>
-<span id="L19" class="ln">    19  </span>func TestGoPagesLinkToSource(t *testing.T) {
-<span id="L20" class="ln">    20  </span>	for _, tc := range []struct {
-<span id="L21" class="ln">    21  </span>		description string
-<span id="L22" class="ln">    22  </span>		baseURL     string
-<span id="L23" class="ln">    23  </span>		pkgPath     string
-<span id="L24" class="ln">    24  </span>		options     source.LinkOptions
-<span id="L25" class="ln">    25  </span>		expectLink  string
-<span id="L26" class="ln">    26  </span>	}{
-<span id="L27" class="ln">    27  </span>		{
-<span id="L28" class="ln">    28  </span>			description: &#34;simple path&#34;,
-<span id="L29" class="ln">    29  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L30" class="ln">    30  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L31" class="ln">    31  </span>		},
-<span id="L32" class="ln">    32  </span>		{
-<span id="L33" class="ln">    33  </span>			description: &#34;base URL&#34;,
-<span id="L34" class="ln">    34  </span>			baseURL:     &#34;/some/base&#34;,
-<span id="L35" class="ln">    35  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L36" class="ln">    36  </span>			expectLink:  &#34;/some/base/src/github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L37" class="ln">    37  </span>		},
-<span id="L38" class="ln">    38  </span>		{
-<span id="L39" class="ln">    39  </span>			description: &#34;line number&#34;,
-<span id="L40" class="ln">    40  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L41" class="ln">    41  </span>			options:     source.LinkOptions{Line: 10},
-<span id="L42" class="ln">    42  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go#L10&#34;,
-<span id="L43" class="ln">    43  </span>		},
-<span id="L44" class="ln">    44  </span>	} {
-<span id="L45" class="ln">    45  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L46" class="ln">    46  </span>			linker := newGoPagesLinker(tc.baseURL)
-<span id="L47" class="ln">    47  </span>			url := linker.LinkToSource(tc.pkgPath, tc.options)
-<span id="L48" class="ln">    48  </span>			assert.Equal(t, tc.expectLink, url.String())
-<span id="L49" class="ln">    49  </span>		})
-<span id="L50" class="ln">    50  </span>	}
-<span id="L51" class="ln">    51  </span>}
-<span id="L52" class="ln">    52  </span>
-<span id="L53" class="ln">    53  </span>func TestNewTemplateLinker(t *testing.T) {
-<span id="L54" class="ln">    54  </span>	const (
-<span id="L55" class="ln">    55  </span>		someModulePkg = &#34;https://github.com/johnstarich/go&#34;
-<span id="L56" class="ln">    56  </span>		someTemplate  = &#34;https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&#34;
-<span id="L57" class="ln">    57  </span>	)
-<span id="L58" class="ln">    58  </span>	linker, err := newTemplateLinker(someModulePkg, someTemplate)
-<span id="L59" class="ln">    59  </span>	assert.NoError(t, err)
-<span id="L60" class="ln">    60  </span>	assert.Equal(t, &amp;TemplateLinker{
-<span id="L61" class="ln">    61  </span>		modulePackage: &#34;github.com/johnstarich/go&#34;,
-<span id="L62" class="ln">    62  </span>		template:      template.Must(template.New(&#34;&#34;).Parse(someTemplate)),
-<span id="L63" class="ln">    63  </span>	}, linker)
-<span id="L64" class="ln">    64  </span>}
-<span id="L65" class="ln">    65  </span>
-<span id="L66" class="ln">    66  </span>func TestTemplateLinkToSource(t *testing.T) {
-<span id="L67" class="ln">    67  </span>	for _, tc := range []struct {
-<span id="L68" class="ln">    68  </span>		description string
-<span id="L69" class="ln">    69  </span>		modulePkg   string
-<span id="L70" class="ln">    70  </span>		template    string
-<span id="L71" class="ln">    71  </span>		pkgPath     string
-<span id="L72" class="ln">    72  </span>		options     source.LinkOptions
-<span id="L73" class="ln">    73  </span>		expectLink  string
-<span id="L74" class="ln">    74  </span>	}{
-<span id="L75" class="ln">    75  </span>		{
-<span id="L76" class="ln">    76  </span>			description: &#34;simple path&#34;,
-<span id="L77" class="ln">    77  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
-<span id="L78" class="ln">    78  </span>			template:    &#34;{{.Path}}&#34;,
-<span id="L79" class="ln">    79  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L80" class="ln">    80  </span>			expectLink:  &#34;mypkg/myfile.go&#34;,
-<span id="L81" class="ln">    81  </span>		},
-<span id="L82" class="ln">    82  </span>		{
-<span id="L83" class="ln">    83  </span>			description: &#34;line number&#34;,
-<span id="L84" class="ln">    84  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
-<span id="L85" class="ln">    85  </span>			template:    &#34;{{.Path}}#L{{.Line}}&#34;,
-<span id="L86" class="ln">    86  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L87" class="ln">    87  </span>			options:     source.LinkOptions{Line: 10},
-<span id="L88" class="ln">    88  </span>			expectLink:  &#34;mypkg/myfile.go#L10&#34;,
-<span id="L89" class="ln">    89  </span>		},
-<span id="L90" class="ln">    90  </span>		{
-<span id="L91" class="ln">    91  </span>			description: &#34;non-module path&#34;,
-<span id="L92" class="ln">    92  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
-<span id="L93" class="ln">    93  </span>			template:    &#34;{{.Path}}#L{{.Line}}&#34;,
-<span id="L94" class="ln">    94  </span>			pkgPath:     &#34;example.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L95" class="ln">    95  </span>			expectLink:  &#34;&#34;,
-<span id="L96" class="ln">    96  </span>		},
-<span id="L97" class="ln">    97  </span>	} {
-<span id="L98" class="ln">    98  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L99" class="ln">    99  </span>			linker, err := newTemplateLinker(tc.modulePkg, tc.template)
-<span id="L100" class="ln">   100  </span>			require.NoError(t, err)
-<span id="L101" class="ln">   101  </span>			url := linker.LinkToSource(tc.pkgPath, tc.options)
-<span id="L102" class="ln">   102  </span>			assert.Equal(t, tc.expectLink, url.String())
-<span id="L103" class="ln">   103  </span>		})
-<span id="L104" class="ln">   104  </span>	}
-<span id="L105" class="ln">   105  </span>}
-<span id="L106" class="ln">   106  </span>
-<span id="L107" class="ln">   107  </span>func TestTemplateShouldScrapePackage(t *testing.T) {
-<span id="L108" class="ln">   108  </span>	for _, tc := range []struct {
-<span id="L109" class="ln">   109  </span>		description  string
-<span id="L110" class="ln">   110  </span>		modulePkg    string
-<span id="L111" class="ln">   111  </span>		pkgPath      string
-<span id="L112" class="ln">   112  </span>		expectScrape bool
-<span id="L113" class="ln">   113  </span>	}{
-<span id="L114" class="ln">   114  </span>		{
-<span id="L115" class="ln">   115  </span>			description:  &#34;same package&#34;,
-<span id="L116" class="ln">   116  </span>			modulePkg:    &#34;github.com/org/repo&#34;,
-<span id="L117" class="ln">   117  </span>			pkgPath:      &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L118" class="ln">   118  </span>			expectScrape: true,
-<span id="L119" class="ln">   119  </span>		},
-<span id="L120" class="ln">   120  </span>		{
-<span id="L121" class="ln">   121  </span>			description:  &#34;different package&#34;,
-<span id="L122" class="ln">   122  </span>			modulePkg:    &#34;github.com/org/repo&#34;,
-<span id="L123" class="ln">   123  </span>			pkgPath:      &#34;example.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L124" class="ln">   124  </span>			expectScrape: false,
-<span id="L125" class="ln">   125  </span>		},
-<span id="L126" class="ln">   126  </span>	} {
-<span id="L127" class="ln">   127  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L128" class="ln">   128  </span>			linker, err := newTemplateLinker(tc.modulePkg, &#34;&#34;)
-<span id="L129" class="ln">   129  </span>			require.NoError(t, err)
-<span id="L130" class="ln">   130  </span>			shouldScrape := linker.ShouldScrapePackage(tc.pkgPath)
-<span id="L131" class="ln">   131  </span>			assert.Equal(t, tc.expectScrape, shouldScrape)
-<span id="L132" class="ln">   132  </span>		})
-<span id="L133" class="ln">   133  </span>	}
-<span id="L134" class="ln">   134  </span>}
-<span id="L135" class="ln">   135  </span>
-<span id="L136" class="ln">   136  </span>func TestPanicIfErr(t *testing.T) {
-<span id="L137" class="ln">   137  </span>	assert.PanicsWithError(t, &#34;some error&#34;, func() {
-<span id="L138" class="ln">   138  </span>		panicIfErr(errors.New(&#34;some error&#34;))
-<span id="L139" class="ln">   139  </span>	})
-<span id="L140" class="ln">   140  </span>
-<span id="L141" class="ln">   141  </span>	assert.NotPanics(t, func() {
-<span id="L142" class="ln">   142  </span>		panicIfErr(nil)
-<span id="L143" class="ln">   143  </span>	})
-<span id="L144" class="ln">   144  </span>}
-<span id="L145" class="ln">   145  </span>
+<span id="L14" class="ln">    14  </span>	t.Parallel()
+<span id="L15" class="ln">    15  </span>	const someBaseURL = &#34;/some/base&#34;
+<span id="L16" class="ln">    16  </span>	linker := newGoPagesLinker(someBaseURL)
+<span id="L17" class="ln">    17  </span>	assert.Equal(t, &amp;GoPagesLinker{baseURL: someBaseURL}, linker)
+<span id="L18" class="ln">    18  </span>}
+<span id="L19" class="ln">    19  </span>
+<span id="L20" class="ln">    20  </span>func TestGoPagesLinkToSource(t *testing.T) {
+<span id="L21" class="ln">    21  </span>	t.Parallel()
+<span id="L22" class="ln">    22  </span>	for _, tc := range []struct {
+<span id="L23" class="ln">    23  </span>		description string
+<span id="L24" class="ln">    24  </span>		baseURL     string
+<span id="L25" class="ln">    25  </span>		pkgPath     string
+<span id="L26" class="ln">    26  </span>		options     source.LinkOptions
+<span id="L27" class="ln">    27  </span>		expectLink  string
+<span id="L28" class="ln">    28  </span>	}{
+<span id="L29" class="ln">    29  </span>		{
+<span id="L30" class="ln">    30  </span>			description: &#34;simple path&#34;,
+<span id="L31" class="ln">    31  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L32" class="ln">    32  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L33" class="ln">    33  </span>		},
+<span id="L34" class="ln">    34  </span>		{
+<span id="L35" class="ln">    35  </span>			description: &#34;base URL&#34;,
+<span id="L36" class="ln">    36  </span>			baseURL:     &#34;/some/base&#34;,
+<span id="L37" class="ln">    37  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L38" class="ln">    38  </span>			expectLink:  &#34;/some/base/src/github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L39" class="ln">    39  </span>		},
+<span id="L40" class="ln">    40  </span>		{
+<span id="L41" class="ln">    41  </span>			description: &#34;line number&#34;,
+<span id="L42" class="ln">    42  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L43" class="ln">    43  </span>			options:     source.LinkOptions{Line: 10},
+<span id="L44" class="ln">    44  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go#L10&#34;,
+<span id="L45" class="ln">    45  </span>		},
+<span id="L46" class="ln">    46  </span>	} {
+<span id="L47" class="ln">    47  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L48" class="ln">    48  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L49" class="ln">    49  </span>			t.Parallel()
+<span id="L50" class="ln">    50  </span>			linker := newGoPagesLinker(tc.baseURL)
+<span id="L51" class="ln">    51  </span>			url := linker.LinkToSource(tc.pkgPath, tc.options)
+<span id="L52" class="ln">    52  </span>			assert.Equal(t, tc.expectLink, url.String())
+<span id="L53" class="ln">    53  </span>		})
+<span id="L54" class="ln">    54  </span>	}
+<span id="L55" class="ln">    55  </span>}
+<span id="L56" class="ln">    56  </span>
+<span id="L57" class="ln">    57  </span>func TestNewTemplateLinker(t *testing.T) {
+<span id="L58" class="ln">    58  </span>	t.Parallel()
+<span id="L59" class="ln">    59  </span>	const (
+<span id="L60" class="ln">    60  </span>		someModulePkg = &#34;https://github.com/johnstarich/go&#34;
+<span id="L61" class="ln">    61  </span>		someTemplate  = &#34;https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&#34;
+<span id="L62" class="ln">    62  </span>	)
+<span id="L63" class="ln">    63  </span>	linker, err := newTemplateLinker(someModulePkg, someTemplate)
+<span id="L64" class="ln">    64  </span>	assert.NoError(t, err)
+<span id="L65" class="ln">    65  </span>	assert.Equal(t, &amp;TemplateLinker{
+<span id="L66" class="ln">    66  </span>		modulePackage: &#34;github.com/johnstarich/go&#34;,
+<span id="L67" class="ln">    67  </span>		template:      template.Must(template.New(&#34;&#34;).Parse(someTemplate)),
+<span id="L68" class="ln">    68  </span>	}, linker)
+<span id="L69" class="ln">    69  </span>}
+<span id="L70" class="ln">    70  </span>
+<span id="L71" class="ln">    71  </span>func TestTemplateLinkToSource(t *testing.T) {
+<span id="L72" class="ln">    72  </span>	t.Parallel()
+<span id="L73" class="ln">    73  </span>	for _, tc := range []struct {
+<span id="L74" class="ln">    74  </span>		description string
+<span id="L75" class="ln">    75  </span>		modulePkg   string
+<span id="L76" class="ln">    76  </span>		template    string
+<span id="L77" class="ln">    77  </span>		pkgPath     string
+<span id="L78" class="ln">    78  </span>		options     source.LinkOptions
+<span id="L79" class="ln">    79  </span>		expectLink  string
+<span id="L80" class="ln">    80  </span>	}{
+<span id="L81" class="ln">    81  </span>		{
+<span id="L82" class="ln">    82  </span>			description: &#34;simple path&#34;,
+<span id="L83" class="ln">    83  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
+<span id="L84" class="ln">    84  </span>			template:    &#34;{{.Path}}&#34;,
+<span id="L85" class="ln">    85  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L86" class="ln">    86  </span>			expectLink:  &#34;mypkg/myfile.go&#34;,
+<span id="L87" class="ln">    87  </span>		},
+<span id="L88" class="ln">    88  </span>		{
+<span id="L89" class="ln">    89  </span>			description: &#34;line number&#34;,
+<span id="L90" class="ln">    90  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
+<span id="L91" class="ln">    91  </span>			template:    &#34;{{.Path}}#L{{.Line}}&#34;,
+<span id="L92" class="ln">    92  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L93" class="ln">    93  </span>			options:     source.LinkOptions{Line: 10},
+<span id="L94" class="ln">    94  </span>			expectLink:  &#34;mypkg/myfile.go#L10&#34;,
+<span id="L95" class="ln">    95  </span>		},
+<span id="L96" class="ln">    96  </span>		{
+<span id="L97" class="ln">    97  </span>			description: &#34;non-module path&#34;,
+<span id="L98" class="ln">    98  </span>			modulePkg:   &#34;github.com/org/repo&#34;,
+<span id="L99" class="ln">    99  </span>			template:    &#34;{{.Path}}#L{{.Line}}&#34;,
+<span id="L100" class="ln">   100  </span>			pkgPath:     &#34;example.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L101" class="ln">   101  </span>			expectLink:  &#34;&#34;,
+<span id="L102" class="ln">   102  </span>		},
+<span id="L103" class="ln">   103  </span>	} {
+<span id="L104" class="ln">   104  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L105" class="ln">   105  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L106" class="ln">   106  </span>			t.Parallel()
+<span id="L107" class="ln">   107  </span>			linker, err := newTemplateLinker(tc.modulePkg, tc.template)
+<span id="L108" class="ln">   108  </span>			require.NoError(t, err)
+<span id="L109" class="ln">   109  </span>			url := linker.LinkToSource(tc.pkgPath, tc.options)
+<span id="L110" class="ln">   110  </span>			assert.Equal(t, tc.expectLink, url.String())
+<span id="L111" class="ln">   111  </span>		})
+<span id="L112" class="ln">   112  </span>	}
+<span id="L113" class="ln">   113  </span>}
+<span id="L114" class="ln">   114  </span>
+<span id="L115" class="ln">   115  </span>func TestTemplateShouldScrapePackage(t *testing.T) {
+<span id="L116" class="ln">   116  </span>	t.Parallel()
+<span id="L117" class="ln">   117  </span>	for _, tc := range []struct {
+<span id="L118" class="ln">   118  </span>		description  string
+<span id="L119" class="ln">   119  </span>		modulePkg    string
+<span id="L120" class="ln">   120  </span>		pkgPath      string
+<span id="L121" class="ln">   121  </span>		expectScrape bool
+<span id="L122" class="ln">   122  </span>	}{
+<span id="L123" class="ln">   123  </span>		{
+<span id="L124" class="ln">   124  </span>			description:  &#34;same package&#34;,
+<span id="L125" class="ln">   125  </span>			modulePkg:    &#34;github.com/org/repo&#34;,
+<span id="L126" class="ln">   126  </span>			pkgPath:      &#34;github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L127" class="ln">   127  </span>			expectScrape: true,
+<span id="L128" class="ln">   128  </span>		},
+<span id="L129" class="ln">   129  </span>		{
+<span id="L130" class="ln">   130  </span>			description:  &#34;different package&#34;,
+<span id="L131" class="ln">   131  </span>			modulePkg:    &#34;github.com/org/repo&#34;,
+<span id="L132" class="ln">   132  </span>			pkgPath:      &#34;example.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L133" class="ln">   133  </span>			expectScrape: false,
+<span id="L134" class="ln">   134  </span>		},
+<span id="L135" class="ln">   135  </span>	} {
+<span id="L136" class="ln">   136  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L137" class="ln">   137  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L138" class="ln">   138  </span>			t.Parallel()
+<span id="L139" class="ln">   139  </span>			linker, err := newTemplateLinker(tc.modulePkg, &#34;&#34;)
+<span id="L140" class="ln">   140  </span>			require.NoError(t, err)
+<span id="L141" class="ln">   141  </span>			shouldScrape := linker.ShouldScrapePackage(tc.pkgPath)
+<span id="L142" class="ln">   142  </span>			assert.Equal(t, tc.expectScrape, shouldScrape)
+<span id="L143" class="ln">   143  </span>		})
+<span id="L144" class="ln">   144  </span>	}
+<span id="L145" class="ln">   145  </span>}
+<span id="L146" class="ln">   146  </span>
+<span id="L147" class="ln">   147  </span>func TestPanicIfErr(t *testing.T) {
+<span id="L148" class="ln">   148  </span>	t.Parallel()
+<span id="L149" class="ln">   149  </span>	assert.PanicsWithError(t, &#34;some error&#34;, func() {
+<span id="L150" class="ln">   150  </span>		panicIfErr(errors.New(&#34;some error&#34;))
+<span id="L151" class="ln">   151  </span>	})
+<span id="L152" class="ln">   152  </span>
+<span id="L153" class="ln">   153  </span>	assert.NotPanics(t, func() {
+<span id="L154" class="ln">   154  </span>		panicIfErr(nil)
+<span id="L155" class="ln">   155  </span>	})
+<span id="L156" class="ln">   156  </span>}
+<span id="L157" class="ln">   157  </span>
 </pre><p></p>
 
 <div id="footer">

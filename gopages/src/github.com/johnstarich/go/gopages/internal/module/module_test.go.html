@@ -65,11 +65,12 @@
 <span id="L8" class="ln">     8  </span>)
 <span id="L9" class="ln">     9  </span>
 <span id="L10" class="ln">    10  </span>func TestPackage(t *testing.T) {
-<span id="L11" class="ln">    11  </span>	modulePackage, err := Package(&#34;../..&#34;)
-<span id="L12" class="ln">    12  </span>	require.NoError(t, err)
-<span id="L13" class="ln">    13  </span>	assert.Equal(t, &#34;github.com/johnstarich/go/gopages&#34;, modulePackage)
-<span id="L14" class="ln">    14  </span>}
-<span id="L15" class="ln">    15  </span>
+<span id="L11" class="ln">    11  </span>	t.Parallel()
+<span id="L12" class="ln">    12  </span>	modulePackage, err := Package(&#34;../..&#34;)
+<span id="L13" class="ln">    13  </span>	require.NoError(t, err)
+<span id="L14" class="ln">    14  </span>	assert.Equal(t, &#34;github.com/johnstarich/go/gopages&#34;, modulePackage)
+<span id="L15" class="ln">    15  </span>}
+<span id="L16" class="ln">    16  </span>
 </pre><p></p>
 
 <div id="footer">
