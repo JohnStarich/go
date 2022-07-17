@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/johnstarich/go/covet/internal/coverstatus"
 	"github.com/johnstarich/go/covet/internal/span"
 )
 
@@ -66,7 +67,7 @@ func runWorkflow(s string) {
 }
 
 func coverageCommand(percent float64, file string, uncovered []span.Span) string {
-	status := newCoverageStatus(percent)
+	status := coverstatus.New(percent)
 	message := fmt.Sprintf("Diff coverage is %.1f%%", maxPercentInt*percent)
 	args := map[string]string{
 		"title": "covet",

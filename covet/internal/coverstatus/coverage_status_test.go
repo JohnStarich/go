@@ -1,4 +1,4 @@
-package main
+package coverstatus
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ func TestNewCoverageStatus(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
 		f      float64
-		status coverageStatus
+		status Status
 	}{
 		{-10, coverageError},
 		{0.0, coverageError},
@@ -26,7 +26,7 @@ func TestNewCoverageStatus(t *testing.T) {
 		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.f, tc.status), func(t *testing.T) {
 			t.Parallel()
-			assert.Equal(t, tc.status, newCoverageStatus(tc.f))
+			assert.Equal(t, tc.status, New(tc.f))
 		})
 	}
 }
@@ -34,7 +34,7 @@ func TestNewCoverageStatus(t *testing.T) {
 func TestCoverageStatusWorkflowCommand(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
-		status  coverageStatus
+		status  Status
 		command string
 	}{
 		{coverageExcellent, "notice"},
@@ -42,7 +42,7 @@ func TestCoverageStatusWorkflowCommand(t *testing.T) {
 		{coverageOK, "warning"},
 		{coverageWarning, "warning"},
 		{coverageError, "error"},
-		{coverageStatus(-1), "error"},
+		{Status(-1), "error"},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.status, tc.command), func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestCoverageStatusWorkflowCommand(t *testing.T) {
 func TestCoverageStatusEmoji(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
-		status coverageStatus
+		status Status
 		emoji  string
 	}{
 		{coverageExcellent, "🟢"},
@@ -63,7 +63,7 @@ func TestCoverageStatusEmoji(t *testing.T) {
 		{coverageOK, "🟡"},
 		{coverageWarning, "🟠"},
 		{coverageError, "🔴"},
-		{coverageStatus(-1), "🔴"},
+		{Status(-1), "🔴"},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.status, tc.emoji), func(t *testing.T) {

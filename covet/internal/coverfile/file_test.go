@@ -1,4 +1,4 @@
-package covet
+package coverfile
 
 import (
 	"strings"

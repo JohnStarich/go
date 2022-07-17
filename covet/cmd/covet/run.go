@@ -16,13 +16,13 @@ import (
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
+	"github.com/johnstarich/go/covet/internal/coverstatus"
 	"github.com/johnstarich/go/covet/internal/span"
+	"github.com/johnstarich/go/covet/internal/summary"
 	"github.com/pkg/errors"
 )
 
 const maxPercentInt = 100
-
-func boldColor() *color.Color { return color.New(color.Bold) }
 
 // Args contains all flag values for a covet run
 type Args struct {
@@ -167,15 +167,15 @@ func runArgs(args Args, deps Deps) (err error) {
 	}
 
 	fmt.Fprintln(deps.Stdout)
-	totalCoveredStatus := newCoverageStatus(totalCovered)
-	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(formatPercent(totalCovered)))
+	totalCoveredStatus := coverstatus.New(totalCovered)
+	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(summary.FormatPercent(totalCovered)))
 	fmt.Fprintln(deps.Stdout)
-	summary := covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryTable)
-	fmt.Fprint(deps.Stdout, summary)
+	summaryReport := summary.New(uncoveredFiles, args.TargetDiffCoverage, summary.FormatTable)
+	fmt.Fprint(deps.Stdout, summaryReport)
 
 	runWorkflow(coverageCommand(totalCovered, "", nil))
 	for _, f := range uncoveredFiles {
-		runWorkflow(coverageCommand(coveredFile(f), f.Name, findUncoveredLines(f)))
+		runWorkflow(coverageCommand(summary.FileCoverage(f), f.Name, findUncoveredLines(f)))
 	}
 
 	if args.GitHubToken != "" {
@@ -189,7 +189,7 @@ func runArgs(args Args, deps Deps) (err error) {
 			RepoOwner:      org,
 			Repo:           repo,
 			IssueNumber:    number,
-			Body:           covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryMarkdown),
+			Body:           summary.New(uncoveredFiles, args.TargetDiffCoverage, summary.FormatMarkdown),
 		})
 		if err != nil {
 			fmt.Fprintln(deps.Stdout, "\nFailed to update GitHub comment, skipping. Error:", err)
@@ -222,10 +222,6 @@ func printCovet(w io.Writer, fs hackpadfs.FS, f covet.File, covPath string) erro
 		}
 	}
 	return nil
-}
-
-func coveredFile(f covet.File) float64 {
-	return float64(f.Covered) / float64(f.Covered+f.Uncovered)
 }
 
 func openFile(fs hackpadfs.FS, name, covPath string) (io.ReadCloser, error) {

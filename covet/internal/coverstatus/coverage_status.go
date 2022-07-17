@@ -1,18 +1,18 @@
-package main
+package coverstatus
 
 import "github.com/fatih/color"
 
-type coverageStatus int
+type Status int
 
 const (
-	coverageExcellent coverageStatus = iota
+	coverageExcellent Status = iota
 	coverageGood
 	coverageOK
 	coverageWarning
 	coverageError
 )
 
-func newCoverageStatus(f float64) coverageStatus {
+func New(f float64) Status {
 	// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
 	switch {
 	case f < 0.50:
@@ -28,8 +28,8 @@ func newCoverageStatus(f float64) coverageStatus {
 	}
 }
 
-func (c coverageStatus) WorkflowCommand() string {
-	switch c {
+func (s Status) WorkflowCommand() string {
+	switch s {
 	case coverageExcellent, coverageGood:
 		return "notice"
 	case coverageOK, coverageWarning:
@@ -44,25 +44,25 @@ func (c coverageStatus) WorkflowCommand() string {
 func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
 func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
 
-func (c coverageStatus) Colorize(s string) string {
-	switch c {
+func (s Status) Colorize(str string) string {
+	switch s {
 	case coverageExcellent:
-		return boldGreen().Sprint(s)
+		return boldGreen().Sprint(str)
 	case coverageGood:
-		return color.GreenString(s)
+		return color.GreenString(str)
 	case coverageOK:
-		return color.YellowString(s)
+		return color.YellowString(str)
 	case coverageWarning:
-		return color.RedString(s)
+		return color.RedString(str)
 	case coverageError:
-		return boldRed().Sprint(s)
+		return boldRed().Sprint(str)
 	default:
-		return boldRed().Sprint(s)
+		return boldRed().Sprint(str)
 	}
 }
 
-func (c coverageStatus) Emoji() string {
-	switch c {
+func (s Status) Emoji() string {
+	switch s {
 	case coverageExcellent, coverageGood:
 		return "🟢"
 	case coverageOK:
