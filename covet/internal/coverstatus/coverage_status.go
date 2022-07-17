@@ -42,22 +42,29 @@ func (s Status) WorkflowCommand() string {
 }
 
 func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
+func green() *color.Color     { return color.New(color.FgGreen) }
+func yellow() *color.Color    { return color.New(color.FgYellow) }
+func red() *color.Color       { return color.New(color.FgRed) }
 func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
 
 func (s Status) Colorize(str string) string {
+	return s.color().Sprint(str)
+}
+
+func (s Status) color() *color.Color {
 	switch s {
 	case coverageExcellent:
-		return boldGreen().Sprint(str)
+		return boldGreen()
 	case coverageGood:
-		return color.GreenString(str)
+		return green()
 	case coverageOK:
-		return color.YellowString(str)
+		return yellow()
 	case coverageWarning:
-		return color.RedString(str)
+		return red()
 	case coverageError:
-		return boldRed().Sprint(str)
+		return boldRed()
 	default:
-		return boldRed().Sprint(str)
+		return boldRed()
 	}
 }
 

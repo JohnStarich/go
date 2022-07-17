@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/fatih/color"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,6 +70,27 @@ func TestCoverageStatusEmoji(t *testing.T) {
 		t.Run(fmt.Sprint(tc.status, tc.emoji), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.emoji, tc.status.Emoji())
+		})
+	}
+}
+
+func TestCoverageStatusColor(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		status Status
+		expect *color.Color
+	}{
+		{coverageExcellent, boldGreen()},
+		{coverageGood, green()},
+		{coverageOK, yellow()},
+		{coverageWarning, red()},
+		{coverageError, boldRed()},
+		{Status(-1), boldRed()},
+	} {
+		tc := tc // enable parallel sub-tests
+		t.Run(fmt.Sprint(tc.status, tc.expect), func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.expect, tc.status.color())
 		})
 	}
 }
