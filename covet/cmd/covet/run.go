@@ -14,6 +14,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
 	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/pkg/errors"
@@ -86,16 +87,17 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 		return Args{}, err
 	}
 
+	osFS := os.NewFS()
 	if args.DiffFile != "-" {
-		args.DiffFile = toFSPathSetErr(args.DiffFile, &err)
+		args.DiffFile = toFSPathSetErr(osFS, args.DiffFile, &err)
 	}
-	args.DiffBaseDir = toFSPathSetErr(args.DiffBaseDir, &err)
-	args.GoCoverageFile = toFSPathSetErr(args.GoCoverageFile, &err)
+	args.DiffBaseDir = toFSPathSetErr(osFS, args.DiffBaseDir, &err)
+	args.GoCoverageFile = toFSPathSetErr(osFS, args.GoCoverageFile, &err)
 	return args, err
 }
 
-func toFSPathSetErr(p string, err *error) string {
-	p, pathErr := toFSPath(p)
+func toFSPathSetErr(fs *os.FS, p string, err *error) string {
+	p, pathErr := toFSPath(fs, p)
 	setErr(pathErr, err)
 	return p
 }
@@ -106,10 +108,11 @@ func setErr(err error, setErr *error) {
 	}
 }
 
-func toFSPath(p string) (string, error) {
+func toFSPath(fs *os.FS, p string) (string, error) {
 	p, err := filepath.Abs(p)
-	p = filepath.ToSlash(p)
-	p = strings.TrimPrefix(p, "/")
+	if err == nil {
+		p, err = fs.FromOSPath(p)
+	}
 	return p, err
 }
 

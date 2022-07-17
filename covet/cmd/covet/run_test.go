@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path"
 	"strings"
 	"testing"
 	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
+	osfs "github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
 	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
@@ -532,7 +534,9 @@ func TestParseArgs(t *testing.T) {
 		}, &buf)
 		assert.NoError(t, err)
 
-		workingDir, err := toFSPath("")
+		wd, err := os.Getwd()
+		require.NoError(t, err)
+		workingDir, err := osfs.NewFS().FromOSPath(wd)
 		require.NoError(t, err)
 
 		assert.Equal(t, Args{

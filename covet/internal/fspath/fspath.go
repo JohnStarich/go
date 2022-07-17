@@ -2,34 +2,12 @@ package fspath
 
 import (
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
 const separator = "/"
-
-// FromFSPath converts from an io/fs.FS compatible path to an os package compatible path
-func FromFSPath(p string) string {
-	// TODO fix for windows
-	return filepath.FromSlash(path.Join(separator, p))
-}
-
-// ToFSPath converts from an os package compatible path to an io/fs.FS compatible path
-func ToFSPath(p string) string {
-	// TODO fix for windows
-	return strings.TrimPrefix(filepath.ToSlash(p), separator)
-}
-
-// ToFSPathList converts list's path elements to os package compatible paths and rejoins them together
-func ToFSPathList(list string) string {
-	items := filepath.SplitList(list)
-	for i, item := range items {
-		items[i] = ToFSPath(item)
-	}
-	return strings.Join(items, string(filepath.ListSeparator))
-}
 
 // CommonBase returns the common base path between a and b.
 // Returns "." if there are no common path elements.

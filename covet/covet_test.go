@@ -12,7 +12,6 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/johnstarich/go/covet/internal/fspath"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -135,9 +134,9 @@ func TestParseInvalidOptions(t *testing.T) {
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	var (
-		workingDirectory = fspath.ToFSPath(wd)
-		baseDir          = path.Join(workingDirectory, "testdata")
-		coverFile        = path.Join(baseDir, "add2.out")
+		workingDirectory, _ = os.NewFS().FromOSPath(wd)
+		baseDir             = path.Join(workingDirectory, "testdata")
+		coverFile           = path.Join(baseDir, "add2.out")
 	)
 	for _, tc := range []struct {
 		description string
