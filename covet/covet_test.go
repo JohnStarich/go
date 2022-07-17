@@ -212,3 +212,43 @@ func TestParseInvalidOptions(t *testing.T) {
 		})
 	}
 }
+
+func TestReportFileCoverage(t *testing.T) {
+	t.Parallel()
+	fs := testhelpers.FSWithFiles(t, map[string]string{
+		"main.go": `
+package main
+
+func main() {
+	println("A")
+	println("B")
+}
+`,
+	})
+
+	covet := &Covet{
+		options: Options{
+			FS:             fs,
+			GoCoveragePath: "cover.out",
+		},
+	}
+	file := File{
+		Name:      "main.go",
+		Covered:   1,
+		Uncovered: 1,
+		Lines: []Line{
+			{Covered: true, LineNumber: 4},
+			{Covered: false, LineNumber: 5},
+		},
+	}
+	var buf bytes.Buffer
+	assert.NoError(t, covet.ReportFileCoverage(&buf, file, ReportFileCoverageOptions{}))
+	assert.Equal(t, strings.TrimSpace(`
+Coverage: 2 to 6
+ 
+ func main() {
++	println("A")
+-	println("B")
+ }
+`), strings.TrimSpace(buf.String()))
+}
