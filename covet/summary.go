@@ -18,9 +18,9 @@ func (c *Covet) ReportSummaryMarkdown(w io.Writer, options ReportSummaryOptions)
 	return c.reportSummary(w, options, summary.FormatMarkdown)
 }
 
-// ReportSummaryTable writes a plain text report to 'w'.
-func (c *Covet) ReportSummaryTable(w io.Writer, options ReportSummaryOptions) error {
-	return c.reportSummary(w, options, summary.FormatTable)
+// ReportSummaryColorTerminal writes a plain text report with color to 'w'.
+func (c *Covet) ReportSummaryColorTerminal(w io.Writer, options ReportSummaryOptions) error {
+	return c.reportSummary(w, options, summary.FormatColorTerminal)
 }
 
 func (c *Covet) reportSummary(w io.Writer, options ReportSummaryOptions, format summary.Format) error {

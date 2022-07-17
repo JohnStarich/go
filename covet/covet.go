@@ -235,6 +235,7 @@ func (c *Covet) DiffCoverageFiles() []File {
 
 type ReportFileCoverageOptions struct{} // reserved for future use
 
+// ReportFileCoverage writes a diff-like plain text report with color to 'w'.
 func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error {
 	name := path.Join(path.Dir(c.options.GoCoveragePath), f.Name)
 	r, err := c.options.FS.Open(name)

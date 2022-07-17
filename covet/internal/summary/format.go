@@ -13,19 +13,19 @@ import (
 type Format int
 
 const (
-	FormatTable Format = iota
+	FormatColorTerminal Format = iota
 	FormatMarkdown
 )
 
 func (f Format) Colorize(c *color.Color, s string) string {
-	if f == FormatTable {
+	if f == FormatColorTerminal {
 		return c.Sprint(s)
 	}
 	return s
 }
 
 func (f Format) ColorizeStatus(status coverstatus.Status, s string) string {
-	if f == FormatTable {
+	if f == FormatColorTerminal {
 		return status.Colorize(s)
 	}
 	return s

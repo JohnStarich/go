@@ -168,7 +168,7 @@ func runArgs(args Args, deps Deps) (err error) {
 	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(summary.FormatPercent(totalCovered)))
 	fmt.Fprintln(deps.Stdout)
 	summaryOptions := covet.ReportSummaryOptions{Target: args.TargetDiffCoverage}
-	err = cov.ReportSummaryTable(deps.Stdout, summaryOptions)
+	err = cov.ReportSummaryColorTerminal(deps.Stdout, summaryOptions)
 	if err != nil {
 		return err
 	}
