@@ -2,12 +2,15 @@
 package covet
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"path"
 	"sort"
+	"strings"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
+	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet/internal/fspath"
@@ -228,4 +231,33 @@ func (c *Covet) DiffCoverageFiles() []File {
 		coveredFiles = append(coveredFiles, coveredFile)
 	}
 	return coveredFiles
+}
+
+type ReportFileCoverageOptions struct{} // reserved for future use
+
+func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error {
+	name := path.Join(path.Dir(c.options.GoCoveragePath), f.Name)
+	r, err := c.options.FS.Open(name)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	chunks, err := DiffChunks(f, r)
+	if err != nil {
+		return err
+	}
+	for _, chunk := range chunks {
+		fmt.Fprintln(w, "Coverage:", chunk.FirstLine, "to", chunk.LastLine)
+		for _, line := range chunk.Lines {
+			switch {
+			case strings.HasPrefix(line, "+"):
+				line = color.GreenString(line)
+			case strings.HasPrefix(line, "-"):
+				line = color.RedString(line)
+			}
+			fmt.Fprintln(w, line)
+		}
+	}
+	return nil
 }
