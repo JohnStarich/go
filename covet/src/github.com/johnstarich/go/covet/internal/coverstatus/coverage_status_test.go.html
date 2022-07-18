@@ -1,0 +1,165 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/covet/internal/coverstatus/coverage_status_test.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/covet/src">src</a>/<a href="/go/covet/src/github.com">github.com</a>/<a href="/go/covet/src/github.com/johnstarich">johnstarich</a>/<a href="/go/covet/src/github.com/johnstarich/go">go</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet">covet</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal">internal</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal/coverstatus">coverstatus</a>/<span class="text-muted">coverage_status_test.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus">github.com/johnstarich/go/covet/internal/coverstatus</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package coverstatus
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;fmt&#34;
+<span id="L5" class="ln">     5  </span>	&#34;testing&#34;
+<span id="L6" class="ln">     6  </span>
+<span id="L7" class="ln">     7  </span>	&#34;github.com/fatih/color&#34;
+<span id="L8" class="ln">     8  </span>	&#34;github.com/stretchr/testify/assert&#34;
+<span id="L9" class="ln">     9  </span>)
+<span id="L10" class="ln">    10  </span>
+<span id="L11" class="ln">    11  </span>func TestNewCoverageStatus(t *testing.T) {
+<span id="L12" class="ln">    12  </span>	t.Parallel()
+<span id="L13" class="ln">    13  </span>	for _, tc := range []struct {
+<span id="L14" class="ln">    14  </span>		f      float64
+<span id="L15" class="ln">    15  </span>		status Status
+<span id="L16" class="ln">    16  </span>	}{
+<span id="L17" class="ln">    17  </span>		{-10, coverageError},
+<span id="L18" class="ln">    18  </span>		{0.0, coverageError},
+<span id="L19" class="ln">    19  </span>		{0.1, coverageError},
+<span id="L20" class="ln">    20  </span>		{0.5, coverageWarning},
+<span id="L21" class="ln">    21  </span>		{0.7, coverageOK},
+<span id="L22" class="ln">    22  </span>		{0.8, coverageGood},
+<span id="L23" class="ln">    23  </span>		{0.9, coverageExcellent},
+<span id="L24" class="ln">    24  </span>		{1.0, coverageExcellent},
+<span id="L25" class="ln">    25  </span>		{10, coverageExcellent},
+<span id="L26" class="ln">    26  </span>	} {
+<span id="L27" class="ln">    27  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L28" class="ln">    28  </span>		t.Run(fmt.Sprint(tc.f, tc.status), func(t *testing.T) {
+<span id="L29" class="ln">    29  </span>			t.Parallel()
+<span id="L30" class="ln">    30  </span>			assert.Equal(t, tc.status, New(tc.f))
+<span id="L31" class="ln">    31  </span>		})
+<span id="L32" class="ln">    32  </span>	}
+<span id="L33" class="ln">    33  </span>}
+<span id="L34" class="ln">    34  </span>
+<span id="L35" class="ln">    35  </span>func TestCoverageStatusWorkflowCommand(t *testing.T) {
+<span id="L36" class="ln">    36  </span>	t.Parallel()
+<span id="L37" class="ln">    37  </span>	for _, tc := range []struct {
+<span id="L38" class="ln">    38  </span>		status  Status
+<span id="L39" class="ln">    39  </span>		command string
+<span id="L40" class="ln">    40  </span>	}{
+<span id="L41" class="ln">    41  </span>		{coverageExcellent, &#34;notice&#34;},
+<span id="L42" class="ln">    42  </span>		{coverageGood, &#34;notice&#34;},
+<span id="L43" class="ln">    43  </span>		{coverageOK, &#34;warning&#34;},
+<span id="L44" class="ln">    44  </span>		{coverageWarning, &#34;warning&#34;},
+<span id="L45" class="ln">    45  </span>		{coverageError, &#34;error&#34;},
+<span id="L46" class="ln">    46  </span>		{Status(-1), &#34;error&#34;},
+<span id="L47" class="ln">    47  </span>	} {
+<span id="L48" class="ln">    48  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L49" class="ln">    49  </span>		t.Run(fmt.Sprint(tc.status, tc.command), func(t *testing.T) {
+<span id="L50" class="ln">    50  </span>			t.Parallel()
+<span id="L51" class="ln">    51  </span>			assert.Equal(t, tc.command, tc.status.WorkflowCommand())
+<span id="L52" class="ln">    52  </span>		})
+<span id="L53" class="ln">    53  </span>	}
+<span id="L54" class="ln">    54  </span>}
+<span id="L55" class="ln">    55  </span>
+<span id="L56" class="ln">    56  </span>func TestCoverageStatusEmoji(t *testing.T) {
+<span id="L57" class="ln">    57  </span>	t.Parallel()
+<span id="L58" class="ln">    58  </span>	for _, tc := range []struct {
+<span id="L59" class="ln">    59  </span>		status Status
+<span id="L60" class="ln">    60  </span>		emoji  string
+<span id="L61" class="ln">    61  </span>	}{
+<span id="L62" class="ln">    62  </span>		{coverageExcellent, &#34;🟢&#34;},
+<span id="L63" class="ln">    63  </span>		{coverageGood, &#34;🟢&#34;},
+<span id="L64" class="ln">    64  </span>		{coverageOK, &#34;🟡&#34;},
+<span id="L65" class="ln">    65  </span>		{coverageWarning, &#34;🟠&#34;},
+<span id="L66" class="ln">    66  </span>		{coverageError, &#34;🔴&#34;},
+<span id="L67" class="ln">    67  </span>		{Status(-1), &#34;🔴&#34;},
+<span id="L68" class="ln">    68  </span>	} {
+<span id="L69" class="ln">    69  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L70" class="ln">    70  </span>		t.Run(fmt.Sprint(tc.status, tc.emoji), func(t *testing.T) {
+<span id="L71" class="ln">    71  </span>			t.Parallel()
+<span id="L72" class="ln">    72  </span>			assert.Equal(t, tc.emoji, tc.status.Emoji())
+<span id="L73" class="ln">    73  </span>		})
+<span id="L74" class="ln">    74  </span>	}
+<span id="L75" class="ln">    75  </span>}
+<span id="L76" class="ln">    76  </span>
+<span id="L77" class="ln">    77  </span>func TestCoverageStatusColor(t *testing.T) {
+<span id="L78" class="ln">    78  </span>	t.Parallel()
+<span id="L79" class="ln">    79  </span>	for _, tc := range []struct {
+<span id="L80" class="ln">    80  </span>		status Status
+<span id="L81" class="ln">    81  </span>		expect *color.Color
+<span id="L82" class="ln">    82  </span>	}{
+<span id="L83" class="ln">    83  </span>		{coverageExcellent, boldGreen()},
+<span id="L84" class="ln">    84  </span>		{coverageGood, green()},
+<span id="L85" class="ln">    85  </span>		{coverageOK, yellow()},
+<span id="L86" class="ln">    86  </span>		{coverageWarning, red()},
+<span id="L87" class="ln">    87  </span>		{coverageError, boldRed()},
+<span id="L88" class="ln">    88  </span>		{Status(-1), boldRed()},
+<span id="L89" class="ln">    89  </span>	} {
+<span id="L90" class="ln">    90  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L91" class="ln">    91  </span>		t.Run(fmt.Sprint(tc.status, tc.expect), func(t *testing.T) {
+<span id="L92" class="ln">    92  </span>			t.Parallel()
+<span id="L93" class="ln">    93  </span>			assert.Equal(t, tc.expect, tc.status.color())
+<span id="L94" class="ln">    94  </span>		})
+<span id="L95" class="ln">    95  </span>	}
+<span id="L96" class="ln">    96  </span>}
+<span id="L97" class="ln">    97  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

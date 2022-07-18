@@ -1,0 +1,159 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/covet/internal/coverstatus/coverage_status.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/covet/src">src</a>/<a href="/go/covet/src/github.com">github.com</a>/<a href="/go/covet/src/github.com/johnstarich">johnstarich</a>/<a href="/go/covet/src/github.com/johnstarich/go">go</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet">covet</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal">internal</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet/internal/coverstatus">coverstatus</a>/<span class="text-muted">coverage_status.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus">github.com/johnstarich/go/covet/internal/coverstatus</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package coverstatus
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import &#34;github.com/fatih/color&#34;
+<span id="L4" class="ln">     4  </span>
+<span id="L5" class="ln">     5  </span><span class="comment">// Status represents a coverage status level, ranging from &#34;excellent&#34; to &#34;error&#34;</span>
+<span id="L6" class="ln">     6  </span>type Status int
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span>const (
+<span id="L9" class="ln">     9  </span>	coverageExcellent Status = iota
+<span id="L10" class="ln">    10  </span>	coverageGood
+<span id="L11" class="ln">    11  </span>	coverageOK
+<span id="L12" class="ln">    12  </span>	coverageWarning
+<span id="L13" class="ln">    13  </span>	coverageError
+<span id="L14" class="ln">    14  </span>)
+<span id="L15" class="ln">    15  </span>
+<span id="L16" class="ln">    16  </span><span class="comment">// New categorizes the given percentage (between 0 and 1) as a coverage status</span>
+<span id="L17" class="ln">    17  </span>func New(f float64) Status {
+<span id="L18" class="ln">    18  </span>	<span class="comment">// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we&#39;re ok.</span>
+<span id="L19" class="ln">    19  </span>	switch {
+<span id="L20" class="ln">    20  </span>	case f &lt; 0.50:
+<span id="L21" class="ln">    21  </span>		return coverageError
+<span id="L22" class="ln">    22  </span>	case f &lt; 0.70:
+<span id="L23" class="ln">    23  </span>		return coverageWarning
+<span id="L24" class="ln">    24  </span>	case f &lt; 0.80:
+<span id="L25" class="ln">    25  </span>		return coverageOK
+<span id="L26" class="ln">    26  </span>	case f &lt; 0.90:
+<span id="L27" class="ln">    27  </span>		return coverageGood
+<span id="L28" class="ln">    28  </span>	default:
+<span id="L29" class="ln">    29  </span>		return coverageExcellent
+<span id="L30" class="ln">    30  </span>	}
+<span id="L31" class="ln">    31  </span>}
+<span id="L32" class="ln">    32  </span>
+<span id="L33" class="ln">    33  </span><span class="comment">// WorkflowCommand returns a GitHub Actions workflow command for this coverage status.</span>
+<span id="L34" class="ln">    34  </span><span class="comment">// These are specifically the log &#34;level&#34; commands.</span>
+<span id="L35" class="ln">    35  </span>func (s Status) WorkflowCommand() string {
+<span id="L36" class="ln">    36  </span>	switch s {
+<span id="L37" class="ln">    37  </span>	case coverageExcellent, coverageGood:
+<span id="L38" class="ln">    38  </span>		return &#34;notice&#34;
+<span id="L39" class="ln">    39  </span>	case coverageOK, coverageWarning:
+<span id="L40" class="ln">    40  </span>		return &#34;warning&#34;
+<span id="L41" class="ln">    41  </span>	case coverageError:
+<span id="L42" class="ln">    42  </span>		return &#34;error&#34;
+<span id="L43" class="ln">    43  </span>	default:
+<span id="L44" class="ln">    44  </span>		return &#34;error&#34;
+<span id="L45" class="ln">    45  </span>	}
+<span id="L46" class="ln">    46  </span>}
+<span id="L47" class="ln">    47  </span>
+<span id="L48" class="ln">    48  </span>func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
+<span id="L49" class="ln">    49  </span>func green() *color.Color     { return color.New(color.FgGreen) }
+<span id="L50" class="ln">    50  </span>func yellow() *color.Color    { return color.New(color.FgYellow) }
+<span id="L51" class="ln">    51  </span>func red() *color.Color       { return color.New(color.FgRed) }
+<span id="L52" class="ln">    52  </span>func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
+<span id="L53" class="ln">    53  </span>
+<span id="L54" class="ln">    54  </span><span class="comment">// Colorize formats &#39;str&#39; with this status&#39;s assigned color</span>
+<span id="L55" class="ln">    55  </span>func (s Status) Colorize(str string) string {
+<span id="L56" class="ln">    56  </span>	return s.color().Sprint(str)
+<span id="L57" class="ln">    57  </span>}
+<span id="L58" class="ln">    58  </span>
+<span id="L59" class="ln">    59  </span>func (s Status) color() *color.Color {
+<span id="L60" class="ln">    60  </span>	switch s {
+<span id="L61" class="ln">    61  </span>	case coverageExcellent:
+<span id="L62" class="ln">    62  </span>		return boldGreen()
+<span id="L63" class="ln">    63  </span>	case coverageGood:
+<span id="L64" class="ln">    64  </span>		return green()
+<span id="L65" class="ln">    65  </span>	case coverageOK:
+<span id="L66" class="ln">    66  </span>		return yellow()
+<span id="L67" class="ln">    67  </span>	case coverageWarning:
+<span id="L68" class="ln">    68  </span>		return red()
+<span id="L69" class="ln">    69  </span>	case coverageError:
+<span id="L70" class="ln">    70  </span>		return boldRed()
+<span id="L71" class="ln">    71  </span>	default:
+<span id="L72" class="ln">    72  </span>		return boldRed()
+<span id="L73" class="ln">    73  </span>	}
+<span id="L74" class="ln">    74  </span>}
+<span id="L75" class="ln">    75  </span>
+<span id="L76" class="ln">    76  </span><span class="comment">// Emoji returns this status&#39;s assigned emoji</span>
+<span id="L77" class="ln">    77  </span>func (s Status) Emoji() string {
+<span id="L78" class="ln">    78  </span>	switch s {
+<span id="L79" class="ln">    79  </span>	case coverageExcellent, coverageGood:
+<span id="L80" class="ln">    80  </span>		return &#34;🟢&#34;
+<span id="L81" class="ln">    81  </span>	case coverageOK:
+<span id="L82" class="ln">    82  </span>		return &#34;🟡&#34;
+<span id="L83" class="ln">    83  </span>	case coverageWarning:
+<span id="L84" class="ln">    84  </span>		return &#34;🟠&#34;
+<span id="L85" class="ln">    85  </span>	case coverageError:
+<span id="L86" class="ln">    86  </span>		return &#34;🔴&#34;
+<span id="L87" class="ln">    87  </span>	default:
+<span id="L88" class="ln">    88  </span>		return &#34;🔴&#34;
+<span id="L89" class="ln">    89  </span>	}
+<span id="L90" class="ln">    90  </span>}
+<span id="L91" class="ln">    91  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

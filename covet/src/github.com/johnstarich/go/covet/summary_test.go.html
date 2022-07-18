@@ -1,0 +1,229 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/covet/summary_test.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/covet/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/covet/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/covet/pkg/github.com/johnstarich/go/covet/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/covet/src">src</a>/<a href="/go/covet/src/github.com">github.com</a>/<a href="/go/covet/src/github.com/johnstarich">johnstarich</a>/<a href="/go/covet/src/github.com/johnstarich/go">go</a>/<a href="/go/covet/src/github.com/johnstarich/go/covet">covet</a>/<span class="text-muted">summary_test.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/covet/pkg/github.com/johnstarich/go/covet">github.com/johnstarich/go/covet</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span>package covet
+<span id="L2" class="ln">     2  </span>
+<span id="L3" class="ln">     3  </span>import (
+<span id="L4" class="ln">     4  </span>	&#34;bytes&#34;
+<span id="L5" class="ln">     5  </span>	&#34;path&#34;
+<span id="L6" class="ln">     6  </span>	&#34;strings&#34;
+<span id="L7" class="ln">     7  </span>	&#34;testing&#34;
+<span id="L8" class="ln">     8  </span>
+<span id="L9" class="ln">     9  </span>	&#34;github.com/hack-pad/hackpadfs&#34;
+<span id="L10" class="ln">    10  </span>	&#34;github.com/johnstarich/go/covet/internal/testhelpers&#34;
+<span id="L11" class="ln">    11  </span>	&#34;github.com/stretchr/testify/assert&#34;
+<span id="L12" class="ln">    12  </span>	&#34;github.com/stretchr/testify/require&#34;
+<span id="L13" class="ln">    13  </span>)
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>func TestReportSummaryMarkdown(t *testing.T) {
+<span id="L16" class="ln">    16  </span>	t.Parallel()
+<span id="L17" class="ln">    17  </span>	for _, tc := range []struct {
+<span id="L18" class="ln">    18  </span>		description    string
+<span id="L19" class="ln">    19  </span>		diff           string
+<span id="L20" class="ln">    20  </span>		coverage       string
+<span id="L21" class="ln">    21  </span>		expectMarkdown string
+<span id="L22" class="ln">    22  </span>		expectTerminal string
+<span id="L23" class="ln">    23  </span>		expectErr      string
+<span id="L24" class="ln">    24  </span>	}{
+<span id="L25" class="ln">    25  </span>		{
+<span id="L26" class="ln">    26  </span>			description: &#34;half covered&#34;,
+<span id="L27" class="ln">    27  </span>			diff: `
+<span id="L28" class="ln">    28  </span>diff --git a/covet.go b/covet.go
+<span id="L29" class="ln">    29  </span>index 0000000..1111111 100644
+<span id="L30" class="ln">    30  </span>--- a/covet.go
+<span id="L31" class="ln">    31  </span>+++ b/covet.go
+<span id="L32" class="ln">    32  </span>@@ -0,0 +1,2 @@
+<span id="L33" class="ln">    33  </span>+added 1
+<span id="L34" class="ln">    34  </span>+added 2
+<span id="L35" class="ln">    35  </span>`,
+<span id="L36" class="ln">    36  </span>			coverage: `
+<span id="L37" class="ln">    37  </span>mode: atomic
+<span id="L38" class="ln">    38  </span>github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 1
+<span id="L39" class="ln">    39  </span>github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
+<span id="L40" class="ln">    40  </span>`,
+<span id="L41" class="ln">    41  </span>			expectMarkdown: `
+<span id="L42" class="ln">    42  </span>Diff coverage is below target. Add tests for these files:
+<span id="L43" class="ln">    43  </span>|  | Lines | Coverage | File |
+<span id="L44" class="ln">    44  </span>| --- |:---:| --- | --- |
+<span id="L45" class="ln">    45  </span>| 🟠 | ~~1/2~~ | ~~ 50.0% ██▌  ~~ | covet.go |
+<span id="L46" class="ln">    46  </span>`,
+<span id="L47" class="ln">    47  </span>			expectTerminal: `
+<span id="L48" class="ln">    48  </span>Diff coverage is below target. Add tests for these files:
+<span id="L49" class="ln">    49  </span>┌───────┬──────────────┬──────────┐
+<span id="L50" class="ln">    50  </span>│ LINES │ COVERAGE     │ FILE     │
+<span id="L51" class="ln">    51  </span>├───────┼──────────────┼──────────┤
+<span id="L52" class="ln">    52  </span>│  1/2  │  50.0% ██▌   │ covet.go │
+<span id="L53" class="ln">    53  </span>└───────┴──────────────┴──────────┘
+<span id="L54" class="ln">    54  </span>`,
+<span id="L55" class="ln">    55  </span>		},
+<span id="L56" class="ln">    56  </span>		{
+<span id="L57" class="ln">    57  </span>			description: &#34;no coverage hits&#34;,
+<span id="L58" class="ln">    58  </span>			diff: `
+<span id="L59" class="ln">    59  </span>diff --git a/covet.go b/covet.go
+<span id="L60" class="ln">    60  </span>index 0000000..1111111 100644
+<span id="L61" class="ln">    61  </span>--- a/covet.go
+<span id="L62" class="ln">    62  </span>+++ b/covet.go
+<span id="L63" class="ln">    63  </span>@@ -0,0 +1,2 @@
+<span id="L64" class="ln">    64  </span>+added 1
+<span id="L65" class="ln">    65  </span>+added 2
+<span id="L66" class="ln">    66  </span>`,
+<span id="L67" class="ln">    67  </span>			coverage: `
+<span id="L68" class="ln">    68  </span>mode: atomic
+<span id="L69" class="ln">    69  </span>github.com/johnstarich/go/covet/covet.go:1.1,1.7 1 0
+<span id="L70" class="ln">    70  </span>github.com/johnstarich/go/covet/covet.go:2.1,2.7 1 0
+<span id="L71" class="ln">    71  </span>`,
+<span id="L72" class="ln">    72  </span>			expectMarkdown: `
+<span id="L73" class="ln">    73  </span>Diff coverage is below target. Add tests for these files:
+<span id="L74" class="ln">    74  </span>|  | Lines | Coverage | File |
+<span id="L75" class="ln">    75  </span>| --- |:---:| --- | --- |
+<span id="L76" class="ln">    76  </span>| 🔴 | ~~0/2~~ | ~~  0.0% ▏    ~~ | covet.go |
+<span id="L77" class="ln">    77  </span>`,
+<span id="L78" class="ln">    78  </span>			expectTerminal: `
+<span id="L79" class="ln">    79  </span>Diff coverage is below target. Add tests for these files:
+<span id="L80" class="ln">    80  </span>┌───────┬──────────────┬──────────┐
+<span id="L81" class="ln">    81  </span>│ LINES │ COVERAGE     │ FILE     │
+<span id="L82" class="ln">    82  </span>├───────┼──────────────┼──────────┤
+<span id="L83" class="ln">    83  </span>│  0/2  │   0.0% ▏     │ covet.go │
+<span id="L84" class="ln">    84  </span>└───────┴──────────────┴──────────┘
+<span id="L85" class="ln">    85  </span>`,
+<span id="L86" class="ln">    86  </span>		},
+<span id="L87" class="ln">    87  </span>	} {
+<span id="L88" class="ln">    88  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
+<span id="L89" class="ln">    89  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L90" class="ln">    90  </span>			t.Parallel()
+<span id="L91" class="ln">    91  </span>			diffReader := strings.NewReader(strings.TrimSpace(tc.diff))
+<span id="L92" class="ln">    92  </span>			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t, &#34;&#34;)
+<span id="L93" class="ln">    93  </span>
+<span id="L94" class="ln">    94  </span>			coverFile := path.Join(tmpDir, &#34;cover.out&#34;)
+<span id="L95" class="ln">    95  </span>			{
+<span id="L96" class="ln">    96  </span>				f, err := hackpadfs.OpenFile(fs, coverFile, hackpadfs.FlagWriteOnly|hackpadfs.FlagCreate, 0600)
+<span id="L97" class="ln">    97  </span>				require.NoError(t, err)
+<span id="L98" class="ln">    98  </span>				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(tc.coverage)))
+<span id="L99" class="ln">    99  </span>				require.NoError(t, err)
+<span id="L100" class="ln">   100  </span>				require.NoError(t, f.Close())
+<span id="L101" class="ln">   101  </span>			}
+<span id="L102" class="ln">   102  </span>
+<span id="L103" class="ln">   103  </span>			covet, err := Parse(Options{
+<span id="L104" class="ln">   104  </span>				FS:                fs,
+<span id="L105" class="ln">   105  </span>				Diff:              diffReader,
+<span id="L106" class="ln">   106  </span>				DiffBaseDir:       wd,
+<span id="L107" class="ln">   107  </span>				GoCoveragePath:    coverFile,
+<span id="L108" class="ln">   108  </span>				GoCoverageBaseDir: wd,
+<span id="L109" class="ln">   109  </span>			})
+<span id="L110" class="ln">   110  </span>			require.NoError(t, err)
+<span id="L111" class="ln">   111  </span>			var buf bytes.Buffer
+<span id="L112" class="ln">   112  </span>			assert.NoError(t, covet.ReportSummaryMarkdown(&amp;buf, ReportSummaryOptions{
+<span id="L113" class="ln">   113  </span>				Target: 90,
+<span id="L114" class="ln">   114  </span>			}))
+<span id="L115" class="ln">   115  </span>			expectMarkdown := strings.ReplaceAll(tc.expectMarkdown, &#34;~~&#34;, &#34;``&#34;)
+<span id="L116" class="ln">   116  </span>			assert.Equal(t, strings.TrimSpace(expectMarkdown), strings.TrimSpace(buf.String()))
+<span id="L117" class="ln">   117  </span>			buf.Reset()
+<span id="L118" class="ln">   118  </span>			assert.NoError(t, covet.ReportSummaryColorTerminal(&amp;buf, ReportSummaryOptions{
+<span id="L119" class="ln">   119  </span>				Target: 90,
+<span id="L120" class="ln">   120  </span>			}))
+<span id="L121" class="ln">   121  </span>			assert.Equal(t, strings.TrimSpace(tc.expectTerminal), strings.TrimSpace(buf.String()))
+<span id="L122" class="ln">   122  </span>		})
+<span id="L123" class="ln">   123  </span>	}
+<span id="L124" class="ln">   124  </span>}
+<span id="L125" class="ln">   125  </span>
+<span id="L126" class="ln">   126  </span>func TestFindReportableUncoveredFiles(t *testing.T) {
+<span id="L127" class="ln">   127  </span>	t.Parallel()
+<span id="L128" class="ln">   128  </span>	t.Run(&#34;sort and filter just enough files&#34;, func(t *testing.T) {
+<span id="L129" class="ln">   129  </span>		t.Parallel()
+<span id="L130" class="ln">   130  </span>		files := []File{
+<span id="L131" class="ln">   131  </span>			{Name: &#34;foo&#34;, Covered: 2, Uncovered: 0},
+<span id="L132" class="ln">   132  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
+<span id="L133" class="ln">   133  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
+<span id="L134" class="ln">   134  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
+<span id="L135" class="ln">   135  </span>		}
+<span id="L136" class="ln">   136  </span>		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
+<span id="L137" class="ln">   137  </span>		assert.Equal(t, []File{
+<span id="L138" class="ln">   138  </span>			{Name: &#34;bar&#34;, Covered: 1, Uncovered: 2},
+<span id="L139" class="ln">   139  </span>			{Name: &#34;baz&#34;, Covered: 1, Uncovered: 2},
+<span id="L140" class="ln">   140  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 2},
+<span id="L141" class="ln">   141  </span>		}, reportable)
+<span id="L142" class="ln">   142  </span>	})
+<span id="L143" class="ln">   143  </span>
+<span id="L144" class="ln">   144  </span>	t.Run(&#34;include more small files if the biggest chunks are not close enough to target&#34;, func(t *testing.T) {
+<span id="L145" class="ln">   145  </span>		t.Parallel()
+<span id="L146" class="ln">   146  </span>		files := []File{
+<span id="L147" class="ln">   147  </span>			{Name: &#34;foo&#34;, Covered: 0, Uncovered: 1},
+<span id="L148" class="ln">   148  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
+<span id="L149" class="ln">   149  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
+<span id="L150" class="ln">   150  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
+<span id="L151" class="ln">   151  </span>		}
+<span id="L152" class="ln">   152  </span>		reportable := findReportableUncoveredFiles(files, 0.8, 0)
+<span id="L153" class="ln">   153  </span>		assert.Equal(t, []File{
+<span id="L154" class="ln">   154  </span>			{Name: &#34;biff&#34;, Covered: 0, Uncovered: 7},
+<span id="L155" class="ln">   155  </span>			{Name: &#34;bar&#34;, Covered: 0, Uncovered: 1},
+<span id="L156" class="ln">   156  </span>			{Name: &#34;baz&#34;, Covered: 0, Uncovered: 1},
+<span id="L157" class="ln">   157  </span>			{Name: &#34;foo&#34;, Covered: 0, Uncovered: 1},
+<span id="L158" class="ln">   158  </span>		}, reportable)
+<span id="L159" class="ln">   159  </span>	})
+<span id="L160" class="ln">   160  </span>}
+<span id="L161" class="ln">   161  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>

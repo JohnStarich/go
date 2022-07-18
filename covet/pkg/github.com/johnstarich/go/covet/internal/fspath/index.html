@@ -111,16 +111,7 @@
 				<dd><a href="#CommonBase">func CommonBase(a, b string) string</a></dd>
 			
 				
-				<dd><a href="#FromFSPath">func FromFSPath(p string) string</a></dd>
-			
-				
 				<dd><a href="#Rel">func Rel(basePath, targetPath string) (string, error)</a></dd>
-			
-				
-				<dd><a href="#ToFSPath">func ToFSPath(p string) string</a></dd>
-			
-				
-				<dd><a href="#ToFSPathList">func ToFSPathList(list string) string</a></dd>
 			
 			
 			
@@ -149,7 +140,7 @@
 		
 			
 			
-			<h2 id="CommonBase">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L36">CommonBase</a>
+			<h2 id="CommonBase">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L14">CommonBase</a>
 				<a class="permalink" href="#CommonBase">&#xb6;</a>
 				
 				
@@ -166,23 +157,7 @@ Returns &#34;.&#34; if there are no common path elements.
 		
 			
 			
-			<h2 id="FromFSPath">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L14">FromFSPath</a>
-				<a class="permalink" href="#FromFSPath">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func FromFSPath(p <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
-			<p>
-FromFSPath converts from an io/fs.FS compatible path to an os package compatible path
-</p>
-
-			
-			
-
-		
-			
-			
-			<h2 id="Rel">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L50">Rel</a>
+			<h2 id="Rel">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L28">Rel</a>
 				<a class="permalink" href="#Rel">&#xb6;</a>
 				
 				
@@ -191,38 +166,6 @@ FromFSPath converts from an io/fs.FS compatible path to an os package compatible
 			<p>
 Rel returns the relative FS path from basePath to targetPath.
 Similar to filepath.Rel without including OS-dependent behavior.
-</p>
-
-			
-			
-
-		
-			
-			
-			<h2 id="ToFSPath">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L20">ToFSPath</a>
-				<a class="permalink" href="#ToFSPath">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func ToFSPath(p <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
-			<p>
-ToFSPath converts from an os package compatible path to an io/fs.FS compatible path
-</p>
-
-			
-			
-
-		
-			
-			
-			<h2 id="ToFSPathList">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L26">ToFSPathList</a>
-				<a class="permalink" href="#ToFSPathList">&#xb6;</a>
-				
-				
-			</h2>
-			<pre>func ToFSPathList(list <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
-			<p>
-ToFSPathList converts list&#39;s path elements to os package compatible paths and rejoins them together
 </p>
 
 			
