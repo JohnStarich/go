@@ -233,7 +233,9 @@ func (c *Covet) DiffCoverageFiles() []File {
 	return coveredFiles
 }
 
-type ReportFileCoverageOptions struct{} // reserved for future use
+// ReportFileCoverageOptions contains options to format a file coverage report.
+// Reserved for future use.
+type ReportFileCoverageOptions struct{}
 
 // ReportFileCoverage writes a diff-like plain text report with color to 'w'.
 func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error {

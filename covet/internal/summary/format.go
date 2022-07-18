@@ -10,13 +10,16 @@ import (
 	"github.com/johnstarich/go/covet/internal/minmax"
 )
 
+// Format represents a summary report's format
 type Format int
 
+// Supported formats
 const (
 	FormatColorTerminal Format = iota
 	FormatMarkdown
 )
 
+// Colorize returns 's' and optionally wraps with color 'c' according to the format's rules
 func (f Format) Colorize(c *color.Color, s string) string {
 	if f == FormatColorTerminal {
 		return c.Sprint(s)
@@ -24,6 +27,7 @@ func (f Format) Colorize(c *color.Color, s string) string {
 	return s
 }
 
+// ColorizeStatus returns 's' and optionally wraps with the coverage status's color according to the format's rules
 func (f Format) ColorizeStatus(status coverstatus.Status, s string) string {
 	if f == FormatColorTerminal {
 		return status.Colorize(s)
@@ -31,6 +35,7 @@ func (f Format) ColorizeStatus(status coverstatus.Status, s string) string {
 	return s
 }
 
+// FormatTable returns a formatted table according to the format's rules
 func (f Format) FormatTable(tbl table.Writer) string {
 	if f == FormatMarkdown {
 		return tbl.RenderMarkdown()
@@ -39,6 +44,8 @@ func (f Format) FormatTable(tbl table.Writer) string {
 	return tbl.Render()
 }
 
+// Monospace returns a monospaced string according to the format's rules.
+// Markdown uses code blocks with non-breaking spaces to ensure proper spacing.
 func (f Format) Monospace(s string) string {
 	const nonBreakingSpace = " " // ASCII 255, non-breaking space
 	if f == FormatMarkdown {
@@ -48,6 +55,8 @@ func (f Format) Monospace(s string) string {
 	return s
 }
 
+// StatusIcon returns a coverage status icon according to the format's rules.
+// Markdown returns an emoji, terminal returns empty string.
 func (f Format) StatusIcon(status coverstatus.Status) string {
 	if f == FormatMarkdown {
 		return status.Emoji()
@@ -70,6 +79,7 @@ func formatFraction(numerator, denominator uint) string {
 	return fmt.Sprintf("%s/%s", formatWidth(nStr, width), formatWidthLeft(dStr, width))
 }
 
+// FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
 func FormatPercent(f float64) string {
 	const maxPercentInt = 100
 	return fmt.Sprintf("%5.1f%%", maxPercentInt*f)

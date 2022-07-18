@@ -10,6 +10,7 @@ import (
 	"github.com/johnstarich/go/covet/internal/coverstatus"
 )
 
+// New generates a new summary report in the given format
 func New(uncoveredFiles []coverfile.File, targetCoverage uint, format Format) string {
 	if len(uncoveredFiles) == 0 {
 		return fmt.Sprintf("Successfully reached diff coverage target: >%d%%\n", targetCoverage)
@@ -45,6 +46,7 @@ func New(uncoveredFiles []coverfile.File, targetCoverage uint, format Format) st
 	return sb.String()
 }
 
+// FileCoverage returns a File's coverage percentage between 0 and 1
 func FileCoverage(f coverfile.File) float64 {
 	return float64(f.Covered) / float64(f.Covered+f.Uncovered)
 }
