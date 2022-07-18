@@ -1,27 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
 	"io"
 	"net/url"
-	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
+	"github.com/johnstarich/go/covet/internal/coverstatus"
 	"github.com/johnstarich/go/covet/internal/span"
+	"github.com/johnstarich/go/covet/internal/summary"
 	"github.com/pkg/errors"
 )
 
 const maxPercentInt = 100
-
-func boldColor() *color.Color { return color.New(color.Bold) }
 
 // Args contains all flag values for a covet run
 type Args struct {
@@ -86,16 +86,17 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 		return Args{}, err
 	}
 
+	osFS := os.NewFS()
 	if args.DiffFile != "-" {
-		args.DiffFile = toFSPathSetErr(args.DiffFile, &err)
+		args.DiffFile = toFSPathSetErr(osFS, args.DiffFile, &err)
 	}
-	args.DiffBaseDir = toFSPathSetErr(args.DiffBaseDir, &err)
-	args.GoCoverageFile = toFSPathSetErr(args.GoCoverageFile, &err)
+	args.DiffBaseDir = toFSPathSetErr(osFS, args.DiffBaseDir, &err)
+	args.GoCoverageFile = toFSPathSetErr(osFS, args.GoCoverageFile, &err)
 	return args, err
 }
 
-func toFSPathSetErr(p string, err *error) string {
-	p, pathErr := toFSPath(p)
+func toFSPathSetErr(fs *os.FS, p string, err *error) string {
+	p, pathErr := toFSPath(fs, p)
 	setErr(pathErr, err)
 	return p
 }
@@ -106,10 +107,11 @@ func setErr(err error, setErr *error) {
 	}
 }
 
-func toFSPath(p string) (string, error) {
+func toFSPath(fs *os.FS, p string) (string, error) {
 	p, err := filepath.Abs(p)
-	p = filepath.ToSlash(p)
-	p = strings.TrimPrefix(p, "/")
+	if err == nil {
+		p, err = fs.FromOSPath(p)
+	}
 	return p, err
 }
 
@@ -135,7 +137,7 @@ func runArgs(args Args, deps Deps) (err error) {
 		diffFile = f
 	}
 
-	covet, err := covet.Parse(covet.Options{
+	cov, err := covet.Parse(covet.Options{
 		FS:             deps.FS,
 		Diff:           diffFile,
 		DiffBaseDir:    args.DiffBaseDir,
@@ -144,19 +146,16 @@ func runArgs(args Args, deps Deps) (err error) {
 	if err != nil {
 		return err
 	}
-	if len(covet.DiffCoverageFiles()) == 0 {
+	if len(cov.DiffCoverageFiles()) == 0 {
 		fmt.Fprintln(deps.Stdout, "No coverage information intersects with diff.")
 		return nil
 	}
 
-	totalCovered := covet.DiffCovered()
-
-	uncoveredFiles := findReportableUncoveredFiles(covet.DiffCoverageFiles(), float64(args.TargetDiffCoverage)/maxPercentInt, totalCovered)
-
+	uncoveredFiles := cov.PriorityUncoveredFiles(args.TargetDiffCoverage)
 	if args.ShowCoverage {
 		for _, f := range uncoveredFiles {
 			fmt.Fprintln(deps.Stdout, "Coverage diff:", f.Name)
-			err := printCovet(deps.Stdout, deps.FS, f, args.GoCoverageFile)
+			err := cov.ReportFileCoverage(deps.Stdout, f, covet.ReportFileCoverageOptions{})
 			if err != nil {
 				return err
 			}
@@ -164,19 +163,28 @@ func runArgs(args Args, deps Deps) (err error) {
 	}
 
 	fmt.Fprintln(deps.Stdout)
-	totalCoveredStatus := newCoverageStatus(totalCovered)
-	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(formatPercent(totalCovered)))
+	totalCovered := cov.DiffCovered()
+	totalCoveredStatus := coverstatus.New(totalCovered)
+	fmt.Fprintln(deps.Stdout, "Total diff coverage:", totalCoveredStatus.Colorize(summary.FormatPercent(totalCovered)))
 	fmt.Fprintln(deps.Stdout)
-	summary := covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryTable)
-	fmt.Fprint(deps.Stdout, summary)
+	summaryOptions := covet.ReportSummaryOptions{Target: args.TargetDiffCoverage}
+	err = cov.ReportSummaryColorTerminal(deps.Stdout, summaryOptions)
+	if err != nil {
+		return err
+	}
 
 	runWorkflow(coverageCommand(totalCovered, "", nil))
 	for _, f := range uncoveredFiles {
-		runWorkflow(coverageCommand(coveredFile(f), f.Name, findUncoveredLines(f)))
+		runWorkflow(coverageCommand(summary.FileCoverage(f), f.Name, findUncoveredLines(f)))
 	}
 
 	if args.GitHubToken != "" {
 		org, repo, number, err := parseIssueURL(args.GitHubIssue)
+		if err != nil {
+			return err
+		}
+		var markdownReport bytes.Buffer
+		err = cov.ReportSummaryMarkdown(&markdownReport, summaryOptions)
 		if err != nil {
 			return err
 		}
@@ -186,48 +194,13 @@ func runArgs(args Args, deps Deps) (err error) {
 			RepoOwner:      org,
 			Repo:           repo,
 			IssueNumber:    number,
-			Body:           covetSummary(uncoveredFiles, args.TargetDiffCoverage, summaryMarkdown),
+			Body:           markdownReport.String(),
 		})
 		if err != nil {
 			fmt.Fprintln(deps.Stdout, "\nFailed to update GitHub comment, skipping. Error:", err)
 		}
 	}
 	return nil
-}
-
-func printCovet(w io.Writer, fs hackpadfs.FS, f covet.File, covPath string) error {
-	r, err := openFile(fs, f.Name, covPath)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	chunks, err := covet.DiffChunks(f, r)
-	if err != nil {
-		return err
-	}
-	for _, chunk := range chunks {
-		fmt.Fprintln(w, "Coverage:", chunk.FirstLine, "to", chunk.LastLine)
-		for _, line := range chunk.Lines {
-			switch {
-			case strings.HasPrefix(line, "+"):
-				line = color.GreenString(line)
-			case strings.HasPrefix(line, "-"):
-				line = color.RedString(line)
-			}
-			fmt.Fprintln(w, line)
-		}
-	}
-	return nil
-}
-
-func coveredFile(f covet.File) float64 {
-	return float64(f.Covered) / float64(f.Covered+f.Uncovered)
-}
-
-func openFile(fs hackpadfs.FS, name, covPath string) (io.ReadCloser, error) {
-	name = path.Join(path.Dir(covPath), name)
-	return fs.Open(name)
 }
 
 func findUncoveredLines(f covet.File) []span.Span {
@@ -271,46 +244,6 @@ func findFirstUncoveredLines(lines []covet.Line, startIndex int) (uncovered span
 		uncovered.End++
 	}
 	return
-}
-
-func findReportableUncoveredFiles(coveredFiles []covet.File, target, current float64) []covet.File {
-	// sort by highest uncovered line count
-	sort.Slice(coveredFiles, func(aIndex, bIndex int) bool {
-		a, b := coveredFiles[aIndex], coveredFiles[bIndex]
-		switch {
-		case a.Uncovered != b.Uncovered:
-			return a.Uncovered > b.Uncovered
-		default:
-			return a.Name < b.Name
-		}
-	})
-
-	var uncoveredFiles []covet.File
-	// find minimum number of covered lines required to hit target
-	targetMissingLines := 0
-	totalLines := uint(0)
-	for _, f := range coveredFiles {
-		totalLines += f.Covered + f.Uncovered
-	}
-	if percentDiff := target - current; percentDiff > 0 {
-		targetMissingLines = int(percentDiff * float64(totalLines))
-	} else {
-		return nil // target is met
-	}
-	// next, collect the biggest uncovered files until we'd hit the target
-	for _, f := range coveredFiles {
-		const minUncoveredThreshold = 2 // include more files if it is slim pickings
-		if f.Uncovered > 0 {
-			uncoveredFiles = append(uncoveredFiles, f)
-		}
-		if f.Uncovered > minUncoveredThreshold {
-			targetMissingLines -= int(f.Uncovered)
-		}
-		if targetMissingLines <= 0 {
-			break
-		}
-	}
-	return uncoveredFiles
 }
 
 const (

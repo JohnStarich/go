@@ -1,18 +1,20 @@
-package main
+package coverstatus
 
 import "github.com/fatih/color"
 
-type coverageStatus int
+// Status represents a coverage status level, ranging from "excellent" to "error"
+type Status int
 
 const (
-	coverageExcellent coverageStatus = iota
+	coverageExcellent Status = iota
 	coverageGood
 	coverageOK
 	coverageWarning
 	coverageError
 )
 
-func newCoverageStatus(f float64) coverageStatus {
+// New categorizes the given percentage (between 0 and 1) as a coverage status
+func New(f float64) Status {
 	// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
 	switch {
 	case f < 0.50:
@@ -28,8 +30,10 @@ func newCoverageStatus(f float64) coverageStatus {
 	}
 }
 
-func (c coverageStatus) WorkflowCommand() string {
-	switch c {
+// WorkflowCommand returns a GitHub Actions workflow command for this coverage status.
+// These are specifically the log "level" commands.
+func (s Status) WorkflowCommand() string {
+	switch s {
 	case coverageExcellent, coverageGood:
 		return "notice"
 	case coverageOK, coverageWarning:
@@ -42,27 +46,36 @@ func (c coverageStatus) WorkflowCommand() string {
 }
 
 func boldGreen() *color.Color { return color.New(color.Bold, color.FgGreen) }
+func green() *color.Color     { return color.New(color.FgGreen) }
+func yellow() *color.Color    { return color.New(color.FgYellow) }
+func red() *color.Color       { return color.New(color.FgRed) }
 func boldRed() *color.Color   { return color.New(color.Bold, color.FgRed) }
 
-func (c coverageStatus) Colorize(s string) string {
-	switch c {
+// Colorize formats 'str' with this status's assigned color
+func (s Status) Colorize(str string) string {
+	return s.color().Sprint(str)
+}
+
+func (s Status) color() *color.Color {
+	switch s {
 	case coverageExcellent:
-		return boldGreen().Sprint(s)
+		return boldGreen()
 	case coverageGood:
-		return color.GreenString(s)
+		return green()
 	case coverageOK:
-		return color.YellowString(s)
+		return yellow()
 	case coverageWarning:
-		return color.RedString(s)
+		return red()
 	case coverageError:
-		return boldRed().Sprint(s)
+		return boldRed()
 	default:
-		return boldRed().Sprint(s)
+		return boldRed()
 	}
 }
 
-func (c coverageStatus) Emoji() string {
-	switch c {
+// Emoji returns this status's assigned emoji
+func (s Status) Emoji() string {
+	switch s {
 	case coverageExcellent, coverageGood:
 		return "🟢"
 	case coverageOK:

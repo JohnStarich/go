@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path"
 	"strings"
 	"testing"
 	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
+	osfs "github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
 	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
@@ -532,7 +534,9 @@ func TestParseArgs(t *testing.T) {
 		}, &buf)
 		assert.NoError(t, err)
 
-		workingDir, err := toFSPath("")
+		wd, err := os.Getwd()
+		require.NoError(t, err)
+		workingDir, err := osfs.NewFS().FromOSPath(wd)
 		require.NoError(t, err)
 
 		assert.Equal(t, Args{
@@ -651,40 +655,4 @@ func TestFindUncoveredLines(t *testing.T) {
 			assert.Equal(t, tc.expect, spans)
 		})
 	}
-}
-
-func TestFindReportableUncoveredFiles(t *testing.T) {
-	t.Parallel()
-	t.Run("sort and filter just enough files", func(t *testing.T) {
-		t.Parallel()
-		files := []covet.File{
-			{Name: "foo", Covered: 2, Uncovered: 0},
-			{Name: "bar", Covered: 1, Uncovered: 2},
-			{Name: "baz", Covered: 1, Uncovered: 2},
-			{Name: "biff", Covered: 0, Uncovered: 2},
-		}
-		reportable := findReportableUncoveredFiles(files, 0.75, 0.4)
-		assert.Equal(t, []covet.File{
-			{Name: "bar", Covered: 1, Uncovered: 2},
-			{Name: "baz", Covered: 1, Uncovered: 2},
-			{Name: "biff", Covered: 0, Uncovered: 2},
-		}, reportable)
-	})
-
-	t.Run("include more small files if the biggest chunks are not close enough to target", func(t *testing.T) {
-		t.Parallel()
-		files := []covet.File{
-			{Name: "foo", Covered: 0, Uncovered: 1},
-			{Name: "bar", Covered: 0, Uncovered: 1},
-			{Name: "baz", Covered: 0, Uncovered: 1},
-			{Name: "biff", Covered: 0, Uncovered: 7},
-		}
-		reportable := findReportableUncoveredFiles(files, 0.8, 0)
-		assert.Equal(t, []covet.File{
-			{Name: "biff", Covered: 0, Uncovered: 7},
-			{Name: "bar", Covered: 0, Uncovered: 1},
-			{Name: "baz", Covered: 0, Uncovered: 1},
-			{Name: "foo", Covered: 0, Uncovered: 1},
-		}, reportable)
-	})
 }

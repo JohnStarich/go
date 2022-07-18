@@ -10,7 +10,7 @@ import (
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/hack-pad/hackpadfs/mount"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/johnstarich/go/covet/internal/fspath"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,9 +23,13 @@ func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, work
 
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
-	wdPath := path.Join(fspath.ToFSPath(wd), relPathToModuleDir)
-	osFS, err := os.NewFS().Sub(wdPath)
+	osFS := os.NewFS()
+	wdFSPath, err := osFS.FromOSPath(wd)
 	require.NoError(t, err)
+	wdPath := path.Join(wdFSPath, relPathToModuleDir)
+	if fs, err := osFS.Sub(wdPath); assert.NoError(t, err) {
+		osFS = fs.(*os.FS)
+	}
 
 	memFS, err := mem.NewFS()
 	require.NoError(t, err)

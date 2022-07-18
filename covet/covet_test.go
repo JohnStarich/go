@@ -12,7 +12,6 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/johnstarich/go/covet/internal/fspath"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -135,9 +134,9 @@ func TestParseInvalidOptions(t *testing.T) {
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	var (
-		workingDirectory = fspath.ToFSPath(wd)
-		baseDir          = path.Join(workingDirectory, "testdata")
-		coverFile        = path.Join(baseDir, "add2.out")
+		workingDirectory, _ = os.NewFS().FromOSPath(wd)
+		baseDir             = path.Join(workingDirectory, "testdata")
+		coverFile           = path.Join(baseDir, "add2.out")
 	)
 	for _, tc := range []struct {
 		description string
@@ -212,4 +211,44 @@ func TestParseInvalidOptions(t *testing.T) {
 			assert.NoError(t, err)
 		})
 	}
+}
+
+func TestReportFileCoverage(t *testing.T) {
+	t.Parallel()
+	fs := testhelpers.FSWithFiles(t, map[string]string{
+		"main.go": `
+package main
+
+func main() {
+	println("A")
+	println("B")
+}
+`,
+	})
+
+	covet := &Covet{
+		options: Options{
+			FS:             fs,
+			GoCoveragePath: "cover.out",
+		},
+	}
+	file := File{
+		Name:      "main.go",
+		Covered:   1,
+		Uncovered: 1,
+		Lines: []Line{
+			{Covered: true, LineNumber: 4},
+			{Covered: false, LineNumber: 5},
+		},
+	}
+	var buf bytes.Buffer
+	assert.NoError(t, covet.ReportFileCoverage(&buf, file, ReportFileCoverageOptions{}))
+	assert.Equal(t, strings.TrimSpace(`
+Coverage: 2 to 6
+ 
+ func main() {
++	println("A")
+-	println("B")
+ }
+`), strings.TrimSpace(buf.String()))
 }
