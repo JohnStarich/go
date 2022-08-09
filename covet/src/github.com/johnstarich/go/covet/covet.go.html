@@ -296,7 +296,7 @@
 <span id="L239" class="ln">   239  </span>
 <span id="L240" class="ln">   240  </span><span class="comment">// ReportFileCoverage writes a diff-like plain text report with color to &#39;w&#39;.</span>
 <span id="L241" class="ln">   241  </span>func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error {
-<span id="L242" class="ln">   242  </span>	name := path.Join(path.Dir(c.options.GoCoverageBaseDir), f.Name)
+<span id="L242" class="ln">   242  </span>	name := path.Join(c.options.GoCoverageBaseDir, f.Name)
 <span id="L243" class="ln">   243  </span>	r, err := c.options.FS.Open(name)
 <span id="L244" class="ln">   244  </span>	if err != nil {
 <span id="L245" class="ln">   245  </span>		return err
