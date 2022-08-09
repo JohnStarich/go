@@ -8,9 +8,7 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/hack-pad/hackpadfs/mem"
-	"github.com/hack-pad/hackpadfs/mount"
 	"github.com/hack-pad/hackpadfs/os"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,25 +22,13 @@ func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, work
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	osFS := os.NewFS()
-	wdFSPath, err := osFS.FromOSPath(wd)
+	workingDirectory, err = osFS.FromOSPath(wd)
 	require.NoError(t, err)
-	wdPath := path.Join(wdFSPath, relPathToModuleDir)
-	if fs, err := osFS.Sub(wdPath); assert.NoError(t, err) {
-		osFS = fs.(*os.FS)
-	}
+	workingDirectory = path.Join(workingDirectory, relPathToModuleDir)
 
-	memFS, err := mem.NewFS()
+	tempDirectory, err = osFS.FromOSPath(t.TempDir())
 	require.NoError(t, err)
-	fs, err := mount.NewFS(memFS)
-	require.NoError(t, err)
-
-	workingDirectory = "work"
-	require.NoError(t, hackpadfs.MkdirAll(fs, workingDirectory, testDirPermission))
-	require.NoError(t, fs.AddMount(workingDirectory, osFS))
-
-	tempDirectory = "tmp"
-	require.NoError(t, hackpadfs.MkdirAll(fs, tempDirectory, testDirPermission))
-	return fs, workingDirectory, tempDirectory
+	return osFS, workingDirectory, tempDirectory
 }
 
 // FSWithFiles returns an FS with the given files contents generated inside it.

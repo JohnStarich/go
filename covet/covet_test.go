@@ -228,8 +228,9 @@ func main() {
 
 	covet := &Covet{
 		options: Options{
-			FS:             fs,
-			GoCoveragePath: "cover.out",
+			FS:                fs,
+			GoCoveragePath:    "subdir/cover.out",
+			GoCoverageBaseDir: ".",
 		},
 	}
 	file := File{
