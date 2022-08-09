@@ -285,31 +285,32 @@
 <span id="L228" class="ln">   228  </span>
 <span id="L229" class="ln">   229  </span>	covet := &amp;Covet{
 <span id="L230" class="ln">   230  </span>		options: Options{
-<span id="L231" class="ln">   231  </span>			FS:             fs,
-<span id="L232" class="ln">   232  </span>			GoCoveragePath: &#34;cover.out&#34;,
-<span id="L233" class="ln">   233  </span>		},
-<span id="L234" class="ln">   234  </span>	}
-<span id="L235" class="ln">   235  </span>	file := File{
-<span id="L236" class="ln">   236  </span>		Name:      &#34;main.go&#34;,
-<span id="L237" class="ln">   237  </span>		Covered:   1,
-<span id="L238" class="ln">   238  </span>		Uncovered: 1,
-<span id="L239" class="ln">   239  </span>		Lines: []Line{
-<span id="L240" class="ln">   240  </span>			{Covered: true, LineNumber: 4},
-<span id="L241" class="ln">   241  </span>			{Covered: false, LineNumber: 5},
-<span id="L242" class="ln">   242  </span>		},
-<span id="L243" class="ln">   243  </span>	}
-<span id="L244" class="ln">   244  </span>	var buf bytes.Buffer
-<span id="L245" class="ln">   245  </span>	assert.NoError(t, covet.ReportFileCoverage(&amp;buf, file, ReportFileCoverageOptions{}))
-<span id="L246" class="ln">   246  </span>	assert.Equal(t, strings.TrimSpace(`
-<span id="L247" class="ln">   247  </span>Coverage: 2 to 6
-<span id="L248" class="ln">   248  </span> 
-<span id="L249" class="ln">   249  </span> func main() {
-<span id="L250" class="ln">   250  </span>+	println(&#34;A&#34;)
-<span id="L251" class="ln">   251  </span>-	println(&#34;B&#34;)
-<span id="L252" class="ln">   252  </span> }
-<span id="L253" class="ln">   253  </span>`), strings.TrimSpace(buf.String()))
-<span id="L254" class="ln">   254  </span>}
-<span id="L255" class="ln">   255  </span>
+<span id="L231" class="ln">   231  </span>			FS:                fs,
+<span id="L232" class="ln">   232  </span>			GoCoveragePath:    &#34;subdir/cover.out&#34;,
+<span id="L233" class="ln">   233  </span>			GoCoverageBaseDir: &#34;.&#34;,
+<span id="L234" class="ln">   234  </span>		},
+<span id="L235" class="ln">   235  </span>	}
+<span id="L236" class="ln">   236  </span>	file := File{
+<span id="L237" class="ln">   237  </span>		Name:      &#34;main.go&#34;,
+<span id="L238" class="ln">   238  </span>		Covered:   1,
+<span id="L239" class="ln">   239  </span>		Uncovered: 1,
+<span id="L240" class="ln">   240  </span>		Lines: []Line{
+<span id="L241" class="ln">   241  </span>			{Covered: true, LineNumber: 4},
+<span id="L242" class="ln">   242  </span>			{Covered: false, LineNumber: 5},
+<span id="L243" class="ln">   243  </span>		},
+<span id="L244" class="ln">   244  </span>	}
+<span id="L245" class="ln">   245  </span>	var buf bytes.Buffer
+<span id="L246" class="ln">   246  </span>	assert.NoError(t, covet.ReportFileCoverage(&amp;buf, file, ReportFileCoverageOptions{}))
+<span id="L247" class="ln">   247  </span>	assert.Equal(t, strings.TrimSpace(`
+<span id="L248" class="ln">   248  </span>Coverage: 2 to 6
+<span id="L249" class="ln">   249  </span> 
+<span id="L250" class="ln">   250  </span> func main() {
+<span id="L251" class="ln">   251  </span>+	println(&#34;A&#34;)
+<span id="L252" class="ln">   252  </span>-	println(&#34;B&#34;)
+<span id="L253" class="ln">   253  </span> }
+<span id="L254" class="ln">   254  </span>`), strings.TrimSpace(buf.String()))
+<span id="L255" class="ln">   255  </span>}
+<span id="L256" class="ln">   256  </span>
 </pre><p></p>
 
 <div id="footer">
