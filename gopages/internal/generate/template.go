@@ -10,7 +10,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/therve/go/gopages/internal/flags"
 	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/net/html"

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/johnstarich/go/gopages/cmd"
+	"github.com/therve/go/gopages/cmd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

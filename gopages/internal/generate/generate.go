@@ -15,9 +15,9 @@ import (
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
-	"github.com/johnstarich/go/gopages/internal/flags"
-	"github.com/johnstarich/go/gopages/internal/generate/source"
-	"github.com/johnstarich/go/gopages/internal/safememfs"
+	"github.com/therve/go/gopages/internal/flags"
+	"github.com/therve/go/gopages/internal/generate/source"
+	"github.com/therve/go/gopages/internal/safememfs"
 	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"

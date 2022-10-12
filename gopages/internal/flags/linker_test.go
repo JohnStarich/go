@@ -5,7 +5,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/johnstarich/go/gopages/internal/generate/source"
+	"github.com/therve/go/gopages/internal/generate/source"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

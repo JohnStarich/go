@@ -1,7 +1,7 @@
 // gopages generates static files for Go documentation, formatted with godoc.
 //
 // Installation:
-//   go get github.com/johnstarich/go/gopages
+//   go get github.com/therve/go/gopages
 //
 // Generate documentation for your module by running without any flags.
 //
