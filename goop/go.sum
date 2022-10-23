@@ -1,0 +1,3 @@
+github.com/hack-pad/go-indexeddb v0.1.0/go.mod h1:NH8CaojufPNcKYDhy5JkjfyBXE/72oJPeiywlabN/lM=
+github.com/hack-pad/hackpadfs v0.1.5 h1:lcMmk2S1B/qma/2AMpnSXGv0RsTR4zRDLMITRm9cuu4=
+github.com/hack-pad/hackpadfs v0.1.5/go.mod h1:8bsINHOQhQUioUUiCzCyZZNLfEXjs0RwBIf3lTG+CEg=
