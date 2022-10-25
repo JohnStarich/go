@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"path"
 
@@ -17,13 +16,7 @@ func (a App) moduleBinPath(module Module) string {
 
 func (a App) add(module Module) error {
 	scriptPath := a.moduleBinPath(module)
-	_, err := hackpadfs.Stat(a.fs, scriptPath)
-	if err == nil || !errors.Is(err, hackpadfs.ErrNotExist) {
-		// stop early if script is already added or we hit an unexpected error
-		return err
-	}
-
-	err = hackpadfs.MkdirAll(a.fs, path.Dir(scriptPath), 0700)
+	err := hackpadfs.MkdirAll(a.fs, path.Dir(scriptPath), 0700)
 	if err != nil {
 		return err
 	}
