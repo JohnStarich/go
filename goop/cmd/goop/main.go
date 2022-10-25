@@ -92,40 +92,50 @@ func (a App) Run(args []string) error {
 		Commands: []*cli.Command{
 			{
 				Name:   "info",
-				Before: a.noArgs,
 				Action: a.info,
 			},
 			{
 				Name:   "install",
-				Before: a.noArgs,
 				Action: a.install,
 				Flags: []cli.Flag{
 					moduleFlag,
 				},
 			},
 			{
-				Name:   "exec",
-				Hidden: true,
-				Action: a.exec,
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:     "encoded-module",
-						Required: true,
-					},
-				},
-			},
-			{
 				Name:   "rm",
-				Before: a.noArgs,
 				Action: a.rm,
 				Flags: []cli.Flag{
 					moduleFlag,
 				},
 			},
 		},
-		ExitErrHandler: func(*cli.Context, error) {},
+		HideHelpCommand: true,
+		ExitErrHandler:  func(*cli.Context, error) {},
 	}
+
+	applyCommands(cliApp.Commands, func(cmd *cli.Command) {
+		cmd.Before = a.noArgs
+	})
+	// Add exec command after applying 'Before's.
+	cliApp.Commands = append(cliApp.Commands, &cli.Command{
+		Name:   "exec",
+		Hidden: true,
+		Action: a.exec,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "encoded-module",
+				Required: true,
+			},
+		},
+	})
 	return cliApp.Run(args)
+}
+
+func applyCommands(commands cli.Commands, apply func(cmd *cli.Command)) {
+	for _, cmd := range commands {
+		apply(cmd)
+		applyCommands(cmd.Subcommands, apply)
+	}
 }
 
 func (a App) noArgs(c *cli.Context) error {
