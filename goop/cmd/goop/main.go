@@ -34,7 +34,6 @@ type App struct {
 	cacheDir  string
 	configDir string
 	fs        hackpadfs.FS
-	getenv    func(string) string
 	runCmd    func(*exec.Cmd) error
 }
 
@@ -65,7 +64,6 @@ func newApp() (App, error) {
 		cacheDir:  path.Join(cacheDir, appName),
 		configDir: path.Join(configDir, appName),
 		fs:        fs,
-		getenv:    os.Getenv,
 		runCmd:    runCmd,
 	}, nil
 }
