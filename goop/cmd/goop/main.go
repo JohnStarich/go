@@ -31,13 +31,11 @@ func main() {
 }
 
 type App struct {
-	cacheDir   string
-	configDir  string
-	fromOSPath func(string) (string, error)
-	fs         hackpadfs.FS
-	getenv     func(string) string
-	runCmd     func(*exec.Cmd) error
-	toOSPath   func(string) (string, error)
+	cacheDir  string
+	configDir string
+	fs        hackpadfs.FS
+	getenv    func(string) string
+	runCmd    func(*exec.Cmd) error
 }
 
 func newApp() (App, error) {
@@ -64,13 +62,11 @@ func newApp() (App, error) {
 	}
 
 	return App{
-		cacheDir:   path.Join(cacheDir, appName),
-		configDir:  path.Join(configDir, appName),
-		fromOSPath: fs.FromOSPath,
-		fs:         fs,
-		getenv:     os.Getenv,
-		runCmd:     runCmd,
-		toOSPath:   fs.ToOSPath,
+		cacheDir:  path.Join(cacheDir, appName),
+		configDir: path.Join(configDir, appName),
+		fs:        fs,
+		getenv:    os.Getenv,
+		runCmd:    runCmd,
 	}, nil
 }
 
@@ -143,4 +139,26 @@ func (a App) noArgs(c *cli.Context) error {
 		return fmt.Errorf("unexpected arguments used without flags: %s", strings.Join(c.Args().Slice(), " "))
 	}
 	return nil
+}
+
+type osPathFS interface {
+	hackpadfs.FS
+	FromOSPath(path string) (string, error)
+	ToOSPath(path string) (string, error)
+}
+
+func (a App) fromOSPath(path string) (string, error) {
+	fs, ok := a.fs.(osPathFS)
+	if ok {
+		return fs.FromOSPath(path)
+	}
+	return path, nil
+}
+
+func (a App) toOSPath(path string) (string, error) {
+	fs, ok := a.fs.(osPathFS)
+	if ok {
+		return fs.ToOSPath(path)
+	}
+	return path, nil
 }
