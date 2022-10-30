@@ -5,39 +5,35 @@ import (
 	"fmt"
 	"os/exec"
 	"path"
-	"strings"
 
-	"github.com/hack-pad/hackpadfs"
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
-func (a App) moduleInstallDir(module Module) string {
-	return path.Join(a.cacheDir, "install", module.Name)
+func (a App) packageInstallDir(name string) string {
+	return path.Join(a.cacheDir, "install", name)
 }
 
 func (a App) exec(c *cli.Context) error {
-	modulePath := c.String("encoded-module")
-	decodedPath, err := base64.StdEncoding.DecodeString(modulePath)
+	decode := func(s string) (string, error) {
+		b, err := base64.StdEncoding.DecodeString(s)
+		return string(b), err
+	}
+	name, err := decode(c.String("encoded-name"))
 	if err != nil {
 		return err
 	}
-	modulePath = string(decodedPath)
-	module, err := a.parseModulePathArg(modulePath)
+	packagePattern, err := decode(c.String("encoded-package"))
+	if err != nil {
+		return err
+	}
+	pkg, err := a.parsePackagePattern(packagePattern)
 	if err != nil {
 		return err
 	}
 
-	installDir := a.moduleInstallDir(module)
-	binaryPath, found, err := findBinary(a.fs, installDir, module.Name)
+	binaryPath, err := a.build(c.Context, name, pkg, false)
 	if err != nil {
 		return err
-	}
-	if !found {
-		binaryPath, err = a.build(c.Context, module)
-		if err != nil {
-			return err
-		}
 	}
 	binaryOSPath, err := a.toOSPath(binaryPath)
 	if err != nil {
@@ -57,17 +53,4 @@ func toEnv(envMap map[string]string) []string {
 		envKeys = append(envKeys, fmt.Sprintf("%s=%s", key, value))
 	}
 	return envKeys
-}
-
-func findBinary(fs hackpadfs.FS, installDir, moduleName string) (string, bool, error) {
-	dirEntries, err := hackpadfs.ReadDir(fs, installDir)
-	if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
-		return "", false, err
-	}
-	for _, entry := range dirEntries {
-		if strings.HasPrefix(entry.Name(), moduleName) {
-			return path.Join(installDir, entry.Name()), true, nil
-		}
-	}
-	return "", false, nil
 }

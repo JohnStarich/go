@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -33,7 +34,9 @@ func main() {
 type App struct {
 	cacheDir  string
 	configDir string
+	errWriter io.Writer
 	fs        hackpadfs.FS
+	outWriter io.Writer
 	runCmd    func(*exec.Cmd) error
 }
 
@@ -63,7 +66,9 @@ func newApp() (App, error) {
 	return App{
 		cacheDir:  path.Join(cacheDir, appName),
 		configDir: path.Join(configDir, appName),
+		errWriter: os.Stderr,
 		fs:        fs,
+		outWriter: os.Stdout,
 		runCmd:    runCmd,
 	}, nil
 }
@@ -76,11 +81,6 @@ func runCmd(cmd *exec.Cmd) error {
 }
 
 func (a App) Run(args []string) error {
-	moduleFlag := &cli.StringFlag{
-		Name:     "module",
-		Required: true,
-		Aliases:  []string{"m"},
-	}
 	cliApp := &cli.App{
 		Name: appName,
 		Commands: []*cli.Command{
@@ -92,19 +92,31 @@ func (a App) Run(args []string) error {
 				Name:   "install",
 				Action: a.install,
 				Flags: []cli.Flag{
-					moduleFlag,
+					&cli.StringFlag{
+						Name:     "package",
+						Required: true,
+						Aliases:  []string{"p"},
+					},
+					&cli.StringFlag{
+						Name: "name",
+					},
 				},
 			},
 			{
 				Name:   "rm",
 				Action: a.rm,
 				Flags: []cli.Flag{
-					moduleFlag,
+					&cli.StringFlag{
+						Name:     "name",
+						Required: true,
+					},
 				},
 			},
 		},
 		HideHelpCommand: true,
+		ErrWriter:       a.errWriter,
 		ExitErrHandler:  func(*cli.Context, error) {},
+		Writer:          a.outWriter,
 	}
 
 	applyCommands(cliApp.Commands, func(cmd *cli.Command) {
@@ -117,7 +129,11 @@ func (a App) Run(args []string) error {
 		Action: a.exec,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "encoded-module",
+				Name:     "encoded-name",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "encoded-package",
 				Required: true,
 			},
 		},

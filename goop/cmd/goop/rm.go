@@ -6,16 +6,12 @@ import (
 )
 
 func (a App) rm(c *cli.Context) error {
-	module, err := a.parseModulePathArg(c.String("module"))
-	if err != nil {
-		return err
-	}
-
-	installDir := a.moduleInstallDir(module)
+	name := c.String("name")
+	installDir := a.packageInstallDir(name)
 	if err := hackpadfs.RemoveAll(a.fs, installDir); err != nil {
 		return err
 	}
-	binPath := a.moduleBinPath(module)
+	binPath := a.packageBinPath(name)
 	if err := hackpadfs.RemoveAll(a.fs, binPath); err != nil {
 		return err
 	}
