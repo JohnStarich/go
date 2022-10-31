@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -48,17 +47,11 @@ func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredP
 		return err
 	}
 
-	installPath := pkg.InstallPath()
-	dir := ""
-	if filepath.IsAbs(installPath) {
-		dir = installPath
-		installPath = "."
-	}
-
-	args := []string{"install", installPath}
-	fmt.Fprintf(a.errWriter, "Env: PWD=%q GOBIN=%q\nRunning 'go %s'...\n", dir, gobin, strings.Join(args, " "))
+	workingDir, installPattern := pkg.InstallPaths()
+	args := []string{"install", installPattern}
+	fmt.Fprintf(a.errWriter, "Env: PWD=%q GOBIN=%q\nRunning 'go %s'...\n", workingDir, gobin, strings.Join(args, " "))
 	cmd := exec.CommandContext(ctx, "go", args...)
-	cmd.Dir = dir
+	cmd.Dir = workingDir
 	cmd.Env = append(os.Environ(), toEnv(map[string]string{
 		"GOBIN": gobin,
 	})...)
@@ -66,7 +59,7 @@ func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredP
 		return err
 	}
 
-	binaryPath, found, err := findBinary(a.fs, installDir, pkg.Name)
+	binaryPath, found, err := findBinary(a.fs, installDir)
 	if err != nil {
 		return err
 	}
@@ -84,13 +77,13 @@ func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredP
 	return nil
 }
 
-func findBinary(fs hackpadfs.FS, installDir, moduleName string) (string, bool, error) {
+func findBinary(fs hackpadfs.FS, installDir string) (string, bool, error) {
 	dirEntries, err := hackpadfs.ReadDir(fs, installDir)
 	if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
 		return "", false, err
 	}
 	for _, entry := range dirEntries {
-		if strings.HasPrefix(entry.Name(), moduleName) {
+		if entry.Type().IsRegular() {
 			return path.Join(installDir, entry.Name()), true, nil
 		}
 	}

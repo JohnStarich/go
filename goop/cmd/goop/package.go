@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -12,12 +13,15 @@ type Package struct {
 	ModuleVersion string
 }
 
-func (p Package) InstallPath() string {
-	path := p.Path
-	if p.ModuleVersion != "" {
-		path += "@" + p.ModuleVersion
+func (p Package) InstallPaths() (workingDir, installPattern string) {
+	installPattern = p.Path
+	if filepath.IsAbs(installPattern) {
+		workingDir = installPattern
+		installPattern = "."
+	} else if p.ModuleVersion != "" {
+		installPattern += "@" + p.ModuleVersion
 	}
-	return path
+	return
 }
 
 func (a App) parsePackagePattern(packagePattern string) (Package, error) {
