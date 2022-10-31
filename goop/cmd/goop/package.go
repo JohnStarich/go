@@ -18,8 +18,12 @@ func (p Package) InstallPaths() (workingDir, installPattern string) {
 	if filepath.IsAbs(installPattern) {
 		workingDir = installPattern
 		installPattern = "."
-	} else if p.ModuleVersion != "" {
-		installPattern += "@" + p.ModuleVersion
+	} else {
+		version := p.ModuleVersion
+		if version == "" {
+			version = "latest"
+		}
+		installPattern += "@" + version
 	}
 	return
 }
