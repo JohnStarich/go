@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"path"
 
 	"github.com/hack-pad/hackpadfs"
@@ -54,6 +55,9 @@ func isAppExecutable(fs hackpadfs.FS, filePath string) (bool, error) {
 	shebangPrefix := make([]byte, len(expectedShebangPrefix))
 	_, err = f.Read(shebangPrefix)
 	if err != nil {
+		if errors.Is(err, io.EOF) {
+			err = nil
+		}
 		return false, err
 	}
 	return expectedShebangPrefix == string(shebangPrefix), nil
