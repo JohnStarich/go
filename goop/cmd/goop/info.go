@@ -18,7 +18,7 @@ func (a App) info(c *cli.Context) error {
 
 	fmt.Fprintf(c.App.Writer, "Installed: (%s)\n", binPath)
 	for _, entry := range dirEntries {
-		isInstalled, err := isAppExecutable(a.fs, entry.Type(), path.Join(binPath, entry.Name()))
+		isInstalled, err := isAppExecutable(a.fs, path.Join(binPath, entry.Name()))
 		if err != nil {
 			return err
 		}
@@ -29,17 +29,25 @@ func (a App) info(c *cli.Context) error {
 	return nil
 }
 
-func isAppExecutable(fs hackpadfs.FS, mode hackpadfs.FileMode, filePath string) (bool, error) {
-	if !mode.IsRegular() && mode&hackpadfs.ModeSymlink == 0 {
-		return false, nil
-	}
+func isAppExecutable(fs hackpadfs.FS, filePath string) (bool, error) {
 	f, err := fs.Open(filePath)
 	if err != nil {
+		if errors.Is(err, hackpadfs.ErrNotExist) {
+			err = nil
+		}
 		return false, err
 	}
 	defer f.Close()
 
-	const expectedShebangPrefix = `#!/usr/bin/env goop `
+	info, err := f.Stat()
+	if err != nil {
+		return false, err
+	}
+	if !info.Mode().IsRegular() && info.Mode()&hackpadfs.ModeSymlink == 0 {
+		return false, nil
+	}
+
+	const expectedShebangPrefix = `#!/usr/bin/env -S goop `
 	shebangPrefix := make([]byte, len(expectedShebangPrefix))
 	_, err = f.Read(shebangPrefix)
 	if err != nil {

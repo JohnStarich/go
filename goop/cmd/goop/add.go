@@ -31,7 +31,7 @@ func (a App) add(name string, pkg Package) error {
 	}
 	// Script shebang should run as follows:
 	// goop exec -name foo -encoded-package abc123== -- ~/.config/goop/bin/foo arg1 arg2 ...
-	script := fmt.Sprintf("#!/usr/bin/env goop exec -encoded-name %s -encoded-package %s --\n",
+	script := fmt.Sprintf("#!/usr/bin/env -S goop exec -encoded-name %s -encoded-package %s --\n",
 		// shebangs do not support spaces or quotes, so encode all variables
 		encode(name),
 		encode(pkg.Path),
