@@ -4,17 +4,35 @@ import (
 	"encoding/base64"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/hack-pad/hackpadfs"
 )
 
-func (a App) packageBinPath(name string) string {
-	return path.Join(a.staticBinDir, name)
+func (a App) packageBinPath(name string) (string, error) {
+	binDir, err := a.userBinDir()
+	return path.Join(binDir, name), err
+}
+
+func (a App) userBinDir() (string, error) {
+	binDir := a.staticBinDir
+	appBinEnvironmentVar := strings.ToUpper(appName) + "_BIN"
+	if configBin := a.getEnv(appBinEnvironmentVar); configBin != "" {
+		var err error
+		binDir, err = a.fromOSPath(configBin)
+		if err != nil {
+			return "", err
+		}
+	}
+	return binDir, nil
 }
 
 func (a App) add(name string, pkg Package) error {
-	scriptPath := a.packageBinPath(name)
-	err := hackpadfs.MkdirAll(a.fs, path.Dir(scriptPath), 0700)
+	scriptPath, err := a.packageBinPath(name)
+	if err != nil {
+		return err
+	}
+	err = hackpadfs.MkdirAll(a.fs, path.Dir(scriptPath), 0700)
 	if err != nil {
 		return err
 	}

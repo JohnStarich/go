@@ -7,7 +7,10 @@ import (
 
 func (a App) rm(c *cli.Context) error {
 	name := c.String("name")
-	binPath := a.packageBinPath(name)
+	binPath, err := a.packageBinPath(name)
+	if err != nil {
+		return err
+	}
 	if isInstalled, err := isAppExecutable(a.fs, binPath); !isInstalled || err != nil {
 		return err
 	}

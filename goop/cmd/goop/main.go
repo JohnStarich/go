@@ -34,6 +34,7 @@ func main() {
 type App struct {
 	errWriter      io.Writer
 	fs             hackpadfs.FS
+	getEnv         func(string) string
 	outWriter      io.Writer
 	runCmd         func(*exec.Cmd) error
 	staticBinDir   string
@@ -67,6 +68,7 @@ func newApp() (App, error) {
 	return App{
 		errWriter:      os.Stderr,
 		fs:             fs,
+		getEnv:         os.Getenv,
 		outWriter:      os.Stdout,
 		runCmd:         runCmd,
 		staticBinDir:   path.Join(configDir, appName, configBin),
