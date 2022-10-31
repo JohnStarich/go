@@ -10,14 +10,14 @@ import (
 )
 
 func (a App) info(c *cli.Context) error {
-	dirEntries, err := hackpadfs.ReadDir(a.fs, a.binDir)
+	dirEntries, err := hackpadfs.ReadDir(a.fs, a.staticBinDir)
 	if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
 		return err
 	}
 
-	fmt.Fprintf(c.App.Writer, "Installed: (%s)\n", a.binDir)
+	fmt.Fprintf(c.App.Writer, "Installed: (%s)\n", a.staticBinDir)
 	for _, entry := range dirEntries {
-		isInstalled, err := isAppExecutable(a.fs, path.Join(a.binDir, entry.Name()))
+		isInstalled, err := isAppExecutable(a.fs, path.Join(a.staticBinDir, entry.Name()))
 		if err != nil {
 			return err
 		}

@@ -9,7 +9,7 @@ import (
 )
 
 func (a App) packageBinPath(name string) string {
-	return path.Join(a.binDir, name)
+	return path.Join(a.staticBinDir, name)
 }
 
 func (a App) add(name string, pkg Package) error {

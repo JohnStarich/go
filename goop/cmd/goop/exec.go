@@ -10,7 +10,7 @@ import (
 )
 
 func (a App) packageInstallDir(name string) string {
-	return path.Join(a.cacheDir, "install", name)
+	return path.Join(a.staticCacheDir, "install", name)
 }
 
 func (a App) exec(c *cli.Context) error {

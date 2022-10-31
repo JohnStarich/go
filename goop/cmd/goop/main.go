@@ -32,12 +32,12 @@ func main() {
 }
 
 type App struct {
-	binDir    string
-	cacheDir  string
-	errWriter io.Writer
-	fs        hackpadfs.FS
-	outWriter io.Writer
-	runCmd    func(*exec.Cmd) error
+	errWriter      io.Writer
+	fs             hackpadfs.FS
+	outWriter      io.Writer
+	runCmd         func(*exec.Cmd) error
+	staticBinDir   string
+	staticCacheDir string
 }
 
 func newApp() (App, error) {
@@ -65,12 +65,12 @@ func newApp() (App, error) {
 
 	const configBin = "bin"
 	return App{
-		binDir:    path.Join(configDir, appName, configBin),
-		cacheDir:  path.Join(cacheDir, appName),
-		errWriter: os.Stderr,
-		fs:        fs,
-		outWriter: os.Stdout,
-		runCmd:    runCmd,
+		errWriter:      os.Stderr,
+		fs:             fs,
+		outWriter:      os.Stdout,
+		runCmd:         runCmd,
+		staticBinDir:   path.Join(configDir, appName, configBin),
+		staticCacheDir: path.Join(cacheDir, appName),
 	}, nil
 }
 
