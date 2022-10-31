@@ -47,7 +47,7 @@ func isAppExecutable(fs hackpadfs.FS, filePath string) (bool, error) {
 		return false, nil
 	}
 
-	const expectedShebangPrefix = `#!/usr/bin/env -S goop `
+	expectedShebangPrefix := makeShebang("goop ")
 	shebangPrefix := make([]byte, len(expectedShebangPrefix))
 	_, err = f.Read(shebangPrefix)
 	if err != nil {
