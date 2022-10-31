@@ -8,10 +8,8 @@ import (
 	"github.com/hack-pad/hackpadfs"
 )
 
-const configBin = "bin"
-
 func (a App) packageBinPath(name string) string {
-	return path.Join(a.configDir, configBin, name)
+	return path.Join(a.binDir, name)
 }
 
 func (a App) add(name string, pkg Package) error {

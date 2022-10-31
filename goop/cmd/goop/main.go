@@ -32,8 +32,8 @@ func main() {
 }
 
 type App struct {
+	binDir    string
 	cacheDir  string
-	configDir string
 	errWriter io.Writer
 	fs        hackpadfs.FS
 	outWriter io.Writer
@@ -63,9 +63,10 @@ func newApp() (App, error) {
 		}
 	}
 
+	const configBin = "bin"
 	return App{
+		binDir:    path.Join(configDir, appName, configBin),
 		cacheDir:  path.Join(cacheDir, appName),
-		configDir: path.Join(configDir, appName),
 		errWriter: os.Stderr,
 		fs:        fs,
 		outWriter: os.Stdout,
