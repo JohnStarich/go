@@ -6,6 +6,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/hack-pad/go-indexeddb v0.1.0/go.mod h1:NH8CaojufPNcKYDhy5JkjfyBXE/72oJPeiywlabN/lM=
 github.com/hack-pad/hackpadfs v0.1.5 h1:lcMmk2S1B/qma/2AMpnSXGv0RsTR4zRDLMITRm9cuu4=
 github.com/hack-pad/hackpadfs v0.1.5/go.mod h1:8bsINHOQhQUioUUiCzCyZZNLfEXjs0RwBIf3lTG+CEg=
+github.com/johnstarich/go/pipe v0.2.0 h1:YtM8f4JfpxlOhQoc47OZVIpyvsdBO+PByR2ABRt3tBc=
+github.com/johnstarich/go/pipe v0.2.0/go.mod h1:3X9IdVJJnI7pkpzEH6np98wqHl55zFmbilKG+9+koMo=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/hack-pad/hackpadfs v0.1.5
+	github.com/johnstarich/go/pipe v0.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.20.3

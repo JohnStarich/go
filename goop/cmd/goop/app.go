@@ -13,8 +13,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func run(args []string) error {
-	app, err := newApp()
+func run(args []string, outWriter, errWriter io.Writer) error {
+	app, err := newApp(outWriter, errWriter)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ type App struct {
 	staticCacheDir string
 }
 
-func newApp() (App, error) {
+func newApp(outWriter, errWriter io.Writer) (App, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return App{}, err
@@ -58,10 +58,10 @@ func newApp() (App, error) {
 
 	const configBin = "bin"
 	return App{
-		errWriter:      os.Stderr,
+		errWriter:      errWriter,
 		fs:             fs,
 		getEnv:         os.Getenv,
-		outWriter:      os.Stdout,
+		outWriter:      outWriter,
 		runCmd:         runCmd,
 		staticBinDir:   path.Join(configDir, appName, configBin),
 		staticCacheDir: path.Join(cacheDir, appName),
@@ -73,6 +73,10 @@ func runCmd(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func formatCmd(cmd *exec.Cmd) string {
+	return strings.Join(cmd.Args, " ")
 }
 
 func (a App) Run(args []string) error {

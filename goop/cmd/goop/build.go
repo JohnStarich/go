@@ -56,7 +56,7 @@ func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredP
 		"GOBIN": gobin,
 	})...)
 	if err := a.runCmd(cmd); err != nil {
-		return err
+		return errors.WithMessage(err, formatCmd(cmd))
 	}
 
 	binaryPath, found, err := findBinary(a.fs, installDir)

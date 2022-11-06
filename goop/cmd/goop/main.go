@@ -3,17 +3,23 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/urfave/cli/v2"
 )
 
-var osExiter = os.Exit
+var (
+	osArgs             = os.Args
+	osExiter           = os.Exit
+	osOut    io.Writer = os.Stdout
+	osErr    io.Writer = os.Stderr
+)
 
 func main() {
-	err := run(os.Args)
+	err := run(osArgs, osOut, osErr)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(osErr, err)
 		osExiter(exitCode(err))
 		return
 	}
