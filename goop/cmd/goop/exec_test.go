@@ -14,9 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const thisPackage = "github.com/johnstarich/go/goop/cmd/goop"
+
 func TestExec(t *testing.T) {
 	t.Parallel()
-	const thisPackage = "github.com/johnstarich/go/goop"
 
 	t.Run("invalid package name", func(t *testing.T) {
 		encodedName := base64EncodeString("foo")
@@ -62,9 +63,9 @@ func TestExec(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
-Building "github.com/johnstarich/go/goop"...
+Building "github.com/johnstarich/go/goop/cmd/goop"...
 Env: PWD="" GOBIN="cache/install/foo"
-Running 'go install github.com/johnstarich/go/goop@latest'...
+Running 'go install github.com/johnstarich/go/goop/cmd/goop@latest'...
 Build successful.
 `), strings.TrimSpace(app.Stderr()))
 		assert.Equal(t, "Running foo!\n", app.Stdout())

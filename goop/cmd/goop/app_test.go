@@ -17,7 +17,8 @@ type testAppOptions struct {
 type TestApp struct {
 	App
 
-	options testAppOptions
+	options  testAppOptions
+	testingT *testing.T
 }
 
 func newTestApp(t *testing.T, options testAppOptions) *TestApp {
@@ -26,7 +27,8 @@ func newTestApp(t *testing.T, options testAppOptions) *TestApp {
 	fs, err := mem.NewFS()
 	require.NoError(t, err)
 	testApp := &TestApp{
-		options: options,
+		options:  options,
+		testingT: t,
 	}
 	testApp.App = App{
 		errWriter:      newTestWriter(t),
@@ -49,6 +51,10 @@ func (t *TestApp) Stderr() string {
 }
 
 func (t *TestApp) runCmd(cmd *exec.Cmd) error {
+	t.testingT.Helper()
+	if t.options.runCmd == nil {
+		t.testingT.Fatal("No runCmd provided")
+	}
 	cmd.Stdin = nil
 	cmd.Stdout = t.outWriter
 	cmd.Stderr = t.errWriter
