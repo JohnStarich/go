@@ -3,7 +3,7 @@ module github.com/johnstarich/go/goop
 go 1.19
 
 require (
-	github.com/hack-pad/hackpadfs v0.1.5
+	github.com/hack-pad/hackpadfs v0.1.8
 	github.com/johnstarich/go/pipe v0.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
