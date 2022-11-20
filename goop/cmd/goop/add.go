@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hack-pad/hackpadfs"
+	"github.com/johnstarich/go/pipe"
 )
 
 func (a App) packageBinPath(name string) (string, error) {
@@ -16,43 +17,56 @@ func (a App) packageBinPath(name string) (string, error) {
 
 func (a App) userBinDir() (string, error) {
 	binDir := a.staticBinDir
+	var err error
 	appBinEnvironmentVar := strings.ToUpper(appName) + "_BIN"
 	if configBin := a.getEnv(appBinEnvironmentVar); configBin != "" {
-		var err error
 		binDir, err = a.fromOSPath(configBin)
-		if err != nil {
-			return "", err
-		}
 	}
-	return binDir, nil
+	return binDir, err
 }
 
-func (a App) add(name string, pkg Package) error {
-	scriptPath, err := a.packageBinPath(name)
-	if err != nil {
-		return err
-	}
-	err = hackpadfs.MkdirAll(a.fs, path.Dir(scriptPath), 0700)
-	if err != nil {
-		return err
-	}
-	scriptFile, err := hackpadfs.OpenFile(a.fs, scriptPath, hackpadfs.FlagWriteOnly|hackpadfs.FlagCreate|hackpadfs.FlagTruncate, 0700)
-	if err != nil {
-		return err
-	}
-	defer scriptFile.Close()
+type addArgs struct {
+	App     App
+	Name    string
+	Package Package
+}
 
-	encode := func(s string) string {
-		return base64.StdEncoding.EncodeToString([]byte(s))
-	}
-	// Script shebang should run as follows:
-	// goop exec -name foo -encoded-package abc123== -- ~/.config/goop/bin/foo arg1 arg2 ...
-	script := fmt.Sprintf("goop exec -encoded-name %s -encoded-package %s --\n",
-		// shebangs do not support spaces or quotes, so encode all variables
-		encode(name),
-		encode(pkg.Path),
-	)
-	_, err = hackpadfs.WriteFile(scriptFile, []byte(makeShebang(script)))
+var addPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) addArgs {
+		return args[0].(addArgs)
+	}).
+	Append(func(args addArgs) (addArgs, string, error) {
+		scriptPath, err := args.App.packageBinPath(args.Name)
+		return args, scriptPath, err
+	}).
+	Append(func(args addArgs, scriptPath string) (addArgs, string, error) {
+		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), 0700)
+		return args, scriptPath, err
+	}).
+	Append(func(args addArgs, scriptPath string) (addArgs, string, error) {
+		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), 0700)
+		return args, scriptPath, err
+	}).
+	Append(func(args addArgs, scriptPath string) error {
+		encode := func(s string) string {
+			return base64.StdEncoding.EncodeToString([]byte(s))
+		}
+		// Script shebang should run as follows:
+		// goop exec -name foo -encoded-package abc123== -- ~/.config/goop/bin/foo arg1 arg2 ...
+		script := fmt.Sprintf("goop exec -encoded-name %s -encoded-package %s --\n",
+			// shebangs do not support spaces or quotes, so encode all variables
+			encode(args.Name),
+			encode(args.Package.Path),
+		)
+		return hackpadfs.WriteFullFile(args.App.fs, scriptPath, []byte(makeShebang(script)), 0700)
+	})
+
+func (a App) add(name string, pkg Package) error {
+	_, err := addPipe.Do(addArgs{
+		App:     a,
+		Name:    name,
+		Package: pkg,
+	})
 	return err
 }
 

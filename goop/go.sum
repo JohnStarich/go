@@ -9,6 +9,8 @@ github.com/hack-pad/hackpadfs v0.1.5 h1:lcMmk2S1B/qma/2AMpnSXGv0RsTR4zRDLMITRm9c
 github.com/hack-pad/hackpadfs v0.1.5/go.mod h1:8bsINHOQhQUioUUiCzCyZZNLfEXjs0RwBIf3lTG+CEg=
 github.com/hack-pad/hackpadfs v0.1.8 h1:WzwbcqVnokVMGcDFqXh22OvGAe8wDJ3ayE18NEwfsqs=
 github.com/hack-pad/hackpadfs v0.1.8/go.mod h1:vxkKV6RBMwF6GWWlHz/Vgf8FGgfI2zts0Aew3/+THzA=
+github.com/hack-pad/hackpadfs v0.1.9 h1:9L1C9fH6b2VvvFUQ0srMGsupIjuCo2Pv6PpFY/vcBKk=
+github.com/hack-pad/hackpadfs v0.1.9/go.mod h1:vxkKV6RBMwF6GWWlHz/Vgf8FGgfI2zts0Aew3/+THzA=
 github.com/johnstarich/go/pipe v0.2.0 h1:YtM8f4JfpxlOhQoc47OZVIpyvsdBO+PByR2ABRt3tBc=
 github.com/johnstarich/go/pipe v0.2.0/go.mod h1:3X9IdVJJnI7pkpzEH6np98wqHl55zFmbilKG+9+koMo=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
