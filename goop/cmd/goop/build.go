@@ -10,18 +10,20 @@ import (
 	"strings"
 
 	"github.com/hack-pad/hackpadfs"
+	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
 )
 
 func (a App) build(ctx context.Context, name string, pkg Package, alwaysBuild bool) (string, error) {
-	desiredPath := path.Join(a.packageInstallDir(name), name)
+	return a.buildOS(ctx, name, pkg, alwaysBuild, runtime.GOOS)
+}
+
+func (a App) buildOS(ctx context.Context, name string, pkg Package, alwaysBuild bool, goos string) (string, error) {
+	desiredPath := path.Join(a.packageInstallDir(name), name) + systemExt(goos)
 	const (
 		windowsGOOS = "windows"
 		windowsExt  = ".exe"
 	)
-	if runtime.GOOS == windowsGOOS {
-		desiredPath += windowsExt
-	}
 	// TODO support checking version hash of file-based modules
 	if !alwaysBuild {
 		info, err := hackpadfs.Stat(a.fs, desiredPath)
@@ -36,47 +38,74 @@ func (a App) build(ctx context.Context, name string, pkg Package, alwaysBuild bo
 	return desiredPath, a.buildAtPath(ctx, name, pkg, desiredPath)
 }
 
-func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredPath string) error {
-	installDir := a.packageInstallDir(name)
-	err := hackpadfs.MkdirAll(a.fs, installDir, 0700)
-	if err != nil {
-		return err
+func systemExt(goos string) string {
+	if goos == "windows" {
+		return ".exe"
 	}
-	gobin, err := a.toOSPath(installDir)
-	if err != nil {
-		return err
-	}
-
-	workingDir, installPattern := pkg.InstallPaths()
-	args := []string{"install", installPattern}
-	fmt.Fprintf(a.errWriter, "Env: PWD=%q GOBIN=%q\nRunning 'go %s'...\n", workingDir, gobin, strings.Join(args, " "))
-	cmd := exec.CommandContext(ctx, "go", args...)
-	cmd.Dir = workingDir
-	cmd.Env = append(os.Environ(), toEnv(map[string]string{
-		"GOBIN": gobin,
-	})...)
-	if err := a.runCmd(cmd); err != nil {
-		return errors.WithMessage(err, formatCmd(cmd))
-	}
-
-	binaryPath, found, err := findBinary(a.fs, installDir)
-	if err != nil {
-		return err
-	}
-	if !found {
-		return errors.Errorf("go install result not found at path: %s", installDir)
-	}
-
-	if binaryPath != desiredPath {
-		err := hackpadfs.Rename(a.fs, binaryPath, desiredPath)
-		if err != nil {
-			return err
-		}
-	}
-	fmt.Fprintln(a.errWriter, "Build successful.")
-	return nil
+	return ""
 }
 
+type buildAtPathArgs struct {
+	App         App
+	Context     context.Context
+	DesiredPath string
+	InstallDir  string
+	Package     Package
+}
+
+var buildAtPathPipe = pipe.New(pipe.Options{}).
+	Append(func(args []interface{}) buildAtPathArgs {
+		return args[0].(buildAtPathArgs)
+	}).
+	Append(func(args buildAtPathArgs) (buildAtPathArgs, error) {
+		return args, hackpadfs.MkdirAll(args.App.fs, args.InstallDir, 0700)
+	}).
+	Append(func(args buildAtPathArgs) (buildAtPathArgs, string, error) {
+		gobin, err := args.App.toOSPath(args.InstallDir)
+		return args, gobin, err
+	}).
+	Append(func(args buildAtPathArgs, gobin string) (buildAtPathArgs, error) {
+		workingDir, installPattern := args.Package.InstallPaths()
+		cmdArgs := []string{"install", installPattern}
+		fmt.Fprintf(args.App.errWriter, "Env: PWD=%q GOBIN=%q\nRunning 'go %s'...\n", workingDir, gobin, strings.Join(cmdArgs, " "))
+		cmd := exec.CommandContext(args.Context, "go", cmdArgs...)
+		cmd.Dir = workingDir
+		cmd.Env = append(os.Environ(), toEnv(map[string]string{
+			"GOBIN": gobin,
+		})...)
+		err := args.App.runCmd(cmd)
+		return args, errors.WithMessage(err, formatCmd(cmd))
+	}).
+	Append(func(args buildAtPathArgs) (buildAtPathArgs, string, bool, error) {
+		binaryPath, found, err := findBinary(args.App.fs, args.InstallDir)
+		return args, binaryPath, found, err
+	}).
+	Append(func(args buildAtPathArgs, binaryPath string, found bool) (buildAtPathArgs, string, error) {
+		return args, binaryPath, pipe.CheckError(!found,
+			errors.Errorf("go install result not found at path: %s", args.InstallDir))
+	}).
+	Append(func(args buildAtPathArgs, binaryPath string) error {
+		if binaryPath != args.DesiredPath {
+			return hackpadfs.Rename(args.App.fs, binaryPath, args.DesiredPath)
+		}
+		return nil
+	})
+
+func (a App) buildAtPath(ctx context.Context, name string, pkg Package, desiredPath string) error {
+	_, err := buildAtPathPipe.Do(buildAtPathArgs{
+		App:         a,
+		Context:     ctx,
+		DesiredPath: desiredPath,
+		InstallDir:  a.packageInstallDir(name),
+		Package:     pkg,
+	})
+	if err == nil {
+		fmt.Fprintln(a.errWriter, "Build successful.")
+	}
+	return errors.Unwrap(err)
+}
+
+// findBinary returns the first regular file in the directory listing
 func findBinary(fs hackpadfs.FS, installDir string) (string, bool, error) {
 	dirEntries, err := hackpadfs.ReadDir(fs, installDir)
 	if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
