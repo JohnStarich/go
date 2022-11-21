@@ -160,6 +160,7 @@ type osPathFS interface {
 	ToOSPath(path string) (string, error)
 }
 
+// fromOSPath attempts to derive the FS path from an OS-like path
 func (a App) fromOSPath(path string) (string, error) {
 	fs, ok := a.fs.(osPathFS)
 	if ok {
@@ -168,6 +169,7 @@ func (a App) fromOSPath(path string) (string, error) {
 	return path, nil
 }
 
+// toOSPath attempts to derive an OS path from an FS path
 func (a App) toOSPath(path string) (string, error) {
 	fs, ok := a.fs.(osPathFS)
 	if ok {

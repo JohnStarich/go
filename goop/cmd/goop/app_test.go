@@ -3,10 +3,13 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/hack-pad/hackpadfs/mem"
+	osfs "github.com/hack-pad/hackpadfs/os"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,4 +80,38 @@ func (w testWriter) Write(b []byte) (n int, err error) {
 	w.testingT.Log(strings.TrimSuffix(string(b), "\n"))
 	n, err = w.out.Write(b)
 	return
+}
+
+func TestOSPath(t *testing.T) {
+	t.Parallel()
+	t.Run("non-OS FS", func(t *testing.T) {
+		t.Parallel()
+		memFS, err := mem.NewFS()
+		assert.NoError(t, err)
+		app := App{fs: memFS}
+		osPath := "/a/b/c"
+		newFSPath, err := app.fromOSPath(osPath)
+		assert.NoError(t, err)
+		assert.Equal(t, osPath, newFSPath)
+		newOSPath, err := app.toOSPath(newFSPath)
+		assert.NoError(t, err)
+		assert.Equal(t, osPath, newOSPath)
+	})
+
+	t.Run("OS FS", func(t *testing.T) {
+		t.Parallel()
+		switch runtime.GOOS {
+		case "darwin", "linux":
+		default:
+			t.Skip("Only testing OS path behavior on a handful of similar platforms. Hackpadfs has the rest covered.")
+		}
+		osFS := osfs.NewFS()
+		app := App{fs: osFS}
+		newFSPath, err := app.fromOSPath("/a/b/c")
+		assert.NoError(t, err)
+		assert.Equal(t, "a/b/c", newFSPath)
+		newOSPath, err := app.toOSPath("a/b/c")
+		assert.NoError(t, err)
+		assert.Equal(t, "/a/b/c", newOSPath)
+	})
 }
