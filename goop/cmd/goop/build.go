@@ -8,6 +8,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/johnstarich/go/pipe"
@@ -20,20 +21,20 @@ func (a App) build(ctx context.Context, name string, pkg Package, alwaysBuild bo
 
 func (a App) buildOS(ctx context.Context, name string, pkg Package, alwaysBuild bool, goos string) (string, error) {
 	desiredPath := path.Join(a.packageInstallDir(name), name) + systemExt(goos)
-	const (
-		windowsGOOS = "windows"
-		windowsExt  = ".exe"
-	)
-	// TODO support checking version hash of file-based modules
-	if !alwaysBuild {
-		info, err := hackpadfs.Stat(a.fs, desiredPath)
-		if err == nil && info.Mode().IsRegular() {
-			return desiredPath, nil
-		}
-		if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
+	info, err := hackpadfs.Stat(a.fs, desiredPath)
+	if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
+		return "", err
+	}
+	if err == nil && info.Mode().IsRegular() && !alwaysBuild {
+		shouldRebuild, err := a.shouldRebuild(info, pkg)
+		if err != nil {
 			return "", err
 		}
+		if !shouldRebuild {
+			return desiredPath, nil
+		}
 	}
+
 	fmt.Fprintf(a.errWriter, "Building %q...\n", pkg.Path)
 	return desiredPath, a.buildAtPath(ctx, name, pkg, desiredPath)
 }
@@ -117,4 +118,65 @@ func findBinary(fs hackpadfs.FS, installDir string) (string, bool, error) {
 		}
 	}
 	return "", false, nil
+}
+
+func (a App) shouldRebuild(binaryInfo hackpadfs.FileInfo, pkg Package) (bool, error) {
+	filePath, isFilePath := pkg.FilePath()
+	if !isFilePath {
+		// remote module, assume up-to-date
+		return false, nil
+	}
+
+	// local module, find out if the build is stale
+	binaryModTime := binaryInfo.ModTime()
+	fsPath, err := a.fromOSPath(filePath)
+	if err != nil {
+		return false, err
+	}
+	moduleRoot, err := moduleRoot(a.fs, fsPath)
+	if err != nil {
+		return false, err
+	}
+	return hasNewerModTime(a.fs, moduleRoot, binaryModTime)
+}
+
+func moduleRoot(fs hackpadfs.FS, p string) (string, error) {
+	const goMod = "go.mod"
+	_, err := hackpadfs.Stat(fs, path.Join(p, goMod))
+	if err == nil {
+		return p, nil
+	}
+	parentPath := path.Dir(p)
+	if parentPath == p {
+		return "", errors.Errorf("go.mod not found for package: %q", p)
+	}
+	root, parentErr := moduleRoot(fs, parentPath)
+	if parentErr != nil {
+		// if parent also failed to find module, return original error
+		return "", err
+	}
+	return root, nil
+}
+
+func hasNewerModTime(fs hackpadfs.FS, path string, baseModTime time.Time) (bool, error) {
+	hasNewerModTime := false
+	err := hackpadfs.WalkDir(fs, path, func(path string, d hackpadfs.DirEntry, err error) error {
+		if hasNewerModTime {
+			return hackpadfs.SkipDir
+		}
+		if err != nil {
+			return err
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		modTime := info.ModTime()
+		if modTime.After(baseModTime) {
+			hasNewerModTime = true
+			return hackpadfs.SkipDir
+		}
+		return nil
+	})
+	return hasNewerModTime, err
 }

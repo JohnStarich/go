@@ -12,17 +12,23 @@ type Package struct {
 	ModuleVersion string
 }
 
+func (p Package) FilePath() (string, bool) {
+	if filepath.IsAbs(p.Path) {
+		return p.Path, true
+	}
+	return "", false
+}
+
 func (p Package) InstallPaths() (workingDir, installPattern string) {
-	installPattern = p.Path
-	if filepath.IsAbs(installPattern) {
-		workingDir = installPattern
+	if filePath, ok := p.FilePath(); ok {
+		workingDir = filePath
 		installPattern = "."
 	} else {
 		version := p.ModuleVersion
 		if version == "" {
 			version = "latest"
 		}
-		installPattern += "@" + version
+		installPattern = p.Path + "@" + version
 	}
 	return
 }
