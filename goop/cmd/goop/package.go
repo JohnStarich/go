@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"unicode"
 )
 
 type Package struct {
@@ -44,20 +43,4 @@ func (a App) parsePackagePattern(packagePattern string) (Package, error) {
 		pkg.Name = pkg.Path[i+1:]
 	}
 	return pkg, nil
-}
-
-func isBlankNotSpace(r rune) bool {
-	return unicode.IsSpace(r) && r != ' '
-}
-
-func replaceAll(str string, shouldReplace func(rune) bool, replacement string) string {
-	var sb strings.Builder
-	for _, r := range str {
-		if shouldReplace(r) {
-			sb.WriteString(replacement)
-		} else {
-			sb.WriteRune(r)
-		}
-	}
-	return sb.String()
 }
