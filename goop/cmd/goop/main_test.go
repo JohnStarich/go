@@ -25,22 +25,9 @@ func TestMain(t *testing.T) {
 		main()
 	})
 	assert.Equal(t, "flag provided but not defined: -not-a-flag\n", osErr.(*bytes.Buffer).String())
-	assert.Equal(t, `Incorrect Usage: flag provided but not defined: -not-a-flag
-
-NAME:
-   goop - A new cli application
-
-USAGE:
-   goop [global options] command [command options] [arguments...]
-
-COMMANDS:
-   info     
-   install  
-   rm       
-
-GLOBAL OPTIONS:
-   --help, -h  show help (default: false)
-`, osOut.(*bytes.Buffer).String())
+	output := osOut.(*bytes.Buffer).String()
+	assert.Contains(t, output, "Incorrect Usage: flag provided but not defined: -not-a-flag")
+	assert.Contains(t, output, "COMMANDS:")
 }
 
 func TestExitCode(t *testing.T) {

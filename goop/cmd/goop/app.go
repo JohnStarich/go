@@ -85,31 +85,52 @@ func formatCmd(cmd *exec.Cmd) string {
 func (a App) Run(args []string) error {
 	cliApp := &cli.App{
 		Name: appName,
+		Usage: strings.TrimSpace(`
+Write and run Go scripts without the fuss. Start with 'goop install', then run the module's name as a command to execute it.
+
+Includes:
+- Support for both local and remote modules.
+- Automatic rebuilds of local modules.
+- Shareable command bin for easy setup on multiple machines.
+`),
 		Commands: []*cli.Command{
 			{
 				Name:   "info",
+				Usage:  "Shows general information for currently installed modules.",
 				Action: a.info,
 			},
 			{
-				Name:   "install",
+				Name:  "install",
+				Usage: "Installs modules as commands for use on the command-line.",
+				Description: `Installs modules as commands for use on the command-line.
+
+For example, run 'goop install -p github.com/johnstarich/go/covet/cmd/covet' to build and install the covet tool, then run 'covet --help' to execute the covet command.
+
+To run an installed module, use its name on the command-line. For local modules, Goop automatically triggers a rebuild when the command is out of date. This means local scripts can be updated and used immediately.
+
+Set the GOOP_BIN environment variable to select a custom command location. This is helpful when sharing commands across multiple machines with a tool like OneDrive, iCloud Drive, or Google Drive.`,
 				Action: a.install,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "package",
+						Usage:    "The package pattern to install. Can be a local or remote module. Remote modules may use a '@version' like '-p github.com/johnstarich/go/covet/cmd/covet@latest'. Local modules must use absolute paths without a '@version' like '-p /path/to/my/module'.",
 						Required: true,
 						Aliases:  []string{"p"},
 					},
 					&cli.StringFlag{
-						Name: "name",
+						Name:  "name",
+						Usage: "An optional name for the command when installed. For example, 'goop install -p github.com/johnstarich/go/covet/cmd/covet -name foo' and then run 'foo' as the command. Defaults to the package base name.",
 					},
 				},
 			},
 			{
 				Name:   "rm",
+				Usage:  "Removes a previously installed command.",
 				Action: a.rm,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "name",
+						Usage:    "The name of the module command to remove.",
 						Required: true,
 					},
 				},
