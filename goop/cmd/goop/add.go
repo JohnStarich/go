@@ -54,7 +54,7 @@ var addPipe = pipe.New(pipe.Options{}).
 		}
 		return args, scriptPath, err
 	}).
-	Append(func(args addArgs, scriptPath string) error {
+	Append(func(args addArgs, scriptPath string) (string, error) {
 		encode := func(s string) string {
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		}
@@ -65,16 +65,32 @@ var addPipe = pipe.New(pipe.Options{}).
 			encode(args.Name),
 			encode(args.Package.Path),
 		)
-		return hackpadfs.WriteFullFile(args.App.fs, scriptPath, []byte(makeShebang(script)), binPermission)
+		err := hackpadfs.WriteFullFile(args.App.fs, scriptPath, []byte(makeShebang(script)), binPermission)
+		return scriptPath, err
 	})
 
 func (a App) add(name string, pkg Package) error {
-	_, err := addPipe.Do(addArgs{
+	results, err := addPipe.Do(addArgs{
 		App:     a,
 		Name:    name,
 		Package: pkg,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	scriptPath := results[0].(string)
+	scriptOSPath, err := a.toOSPath(scriptPath)
+	if err != nil {
+		return err
+	}
+	executableOSPath, err := a.lookPath(name)
+	if err != nil {
+		fmt.Fprintf(a.errWriter, "WARNING: Failed to find %q on PATH. Check to ensure the directory %q is added to your PATH environment variable.\n", name, path.Dir(scriptOSPath))
+	}
+	if scriptOSPath != executableOSPath {
+		fmt.Fprintf(a.errWriter, "WARNING: Executable on PATH for name %q does not match install location: %q != %q\n", name, executableOSPath, scriptOSPath)
+	}
+	return nil
 }
 
 func makeShebang(s string) string {

@@ -29,6 +29,7 @@ type App struct {
 	errWriter       io.Writer
 	fs              hackpadfs.FS
 	getEnv          func(string) string
+	lookPath        func(string) (string, error)
 	outWriter       io.Writer
 	runCmd          func(*exec.Cmd) error
 	staticBinDir    string
@@ -68,6 +69,7 @@ func newApp(outWriter, errWriter io.Writer) (App, error) {
 		errWriter:       errWriter,
 		fs:              fs,
 		getEnv:          os.Getenv,
+		lookPath:        exec.LookPath,
 		outWriter:       outWriter,
 		runCmd:          runCmd,
 		staticBinDir:    path.Join(configDir, appName, configBin),

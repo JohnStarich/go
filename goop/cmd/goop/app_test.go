@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"path"
 	"runtime"
 	"strings"
 	"testing"
@@ -34,9 +35,12 @@ func newTestApp(t *testing.T, options testAppOptions) *TestApp {
 		testingT: t,
 	}
 	testApp.App = App{
-		errWriter:       newTestWriter(t),
-		fs:              fs,
-		getEnv:          func(string) string { return "" },
+		errWriter: newTestWriter(t),
+		fs:        fs,
+		getEnv:    func(string) string { return "" },
+		lookPath: func(name string) (string, error) {
+			return path.Join("bin", name), nil
+		},
 		outWriter:       newTestWriter(t),
 		runCmd:          testApp.runCmd,
 		staticBinDir:    "bin",
