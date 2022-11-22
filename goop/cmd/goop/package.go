@@ -6,12 +6,15 @@ import (
 	"strings"
 )
 
+// Package represents a package pattern used in the install and exec commands. Example: github.com/johnstarich/go/goop/cmd/goop@latest
 type Package struct {
 	Path          string
 	Name          string
 	ModuleVersion string
 }
 
+// FilePath returns this package's local file path and true if it is a local module.
+// Empty string and false otherwise.
 func (p Package) FilePath() (string, bool) {
 	if filepath.IsAbs(p.Path) {
 		return p.Path, true
@@ -19,6 +22,7 @@ func (p Package) FilePath() (string, bool) {
 	return "", false
 }
 
+// InstallPaths returns this module's "go install ..." args and working directory.
 func (p Package) InstallPaths() (workingDir, installPattern string) {
 	if filePath, ok := p.FilePath(); ok {
 		workingDir = filePath

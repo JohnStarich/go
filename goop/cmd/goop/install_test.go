@@ -14,7 +14,9 @@ import (
 )
 
 func TestInstall(t *testing.T) {
+	t.Parallel()
 	t.Run("pattern failure", func(t *testing.T) {
+		t.Parallel()
 		const name = "foo"
 		app := newTestApp(t, testAppOptions{})
 		err := app.Run([]string{"", "install", "-name", name, "-p", thisPackage + "/..."})
@@ -25,6 +27,7 @@ func TestInstall(t *testing.T) {
 	})
 
 	t.Run("build failure", func(t *testing.T) {
+		t.Parallel()
 		const name = "foo"
 		someErr := errors.New("some error")
 		app := newTestApp(t, testAppOptions{
@@ -44,6 +47,7 @@ Running 'go install github.com/johnstarich/go/goop/cmd/goop@latest'...
 	})
 
 	t.Run("install with name", func(t *testing.T) {
+		t.Parallel()
 		const name = "foo"
 		var commandsToRun [][]string
 		var commandPaths []string
@@ -94,6 +98,7 @@ Build successful.
 	})
 
 	t.Run("install without name", func(t *testing.T) {
+		t.Parallel()
 		var commandsToRun [][]string
 		var commandPaths []string
 		app := newTestApp(t, testAppOptions{
@@ -143,6 +148,7 @@ Build successful.
 	})
 
 	t.Run("install also reinstalls", func(t *testing.T) {
+		t.Parallel()
 		var commandsToRun [][]string
 		var commandPaths []string
 		app := newTestApp(t, testAppOptions{

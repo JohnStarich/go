@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+//nolint:gochecknoglobals // This minimal set of globals enables testing of main().
 var (
 	osArgs             = os.Args
 	osExiter           = os.Exit

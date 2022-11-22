@@ -1,3 +1,4 @@
+// Command goop installs and manages both local and remote Go modules.
 package main
 
 import (
@@ -23,6 +24,7 @@ func run(args []string, outWriter, errWriter io.Writer) error {
 
 const appName = "goop"
 
+// App is the goop application object, used to run commands from user input.
 type App struct {
 	errWriter      io.Writer
 	fs             hackpadfs.FS
@@ -79,6 +81,7 @@ func formatCmd(cmd *exec.Cmd) string {
 	return strings.Join(cmd.Args, " ")
 }
 
+// Run executes this application with the given CLI args.
 func (a App) Run(args []string) error {
 	cliApp := &cli.App{
 		Name: appName,

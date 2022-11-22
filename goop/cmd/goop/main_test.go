@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+//nolint:gochecknoinits // This minimal init enables testing of main().
 func init() {
 	osArgs = []string{"goop", "-not-a-flag"}
 	osExiter = func(code int) {

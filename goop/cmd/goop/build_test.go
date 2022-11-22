@@ -12,18 +12,22 @@ import (
 )
 
 func TestSystemExt(t *testing.T) {
+	t.Parallel()
 	assert.Equal(t, ".exe", systemExt("windows"))
 	assert.Equal(t, "", systemExt("foo"))
 }
 
 func TestBuild(t *testing.T) {
+	t.Parallel()
 	t.Run("invalid stat", func(t *testing.T) {
+		t.Parallel()
 		app := newTestApp(t, testAppOptions{})
 		_, err := app.build(context.Background(), "../../../../..", Package{}, false)
 		assert.EqualError(t, err, "stat ../../../../../../../..: invalid argument")
 	})
 
 	t.Run("build latest *nix", func(t *testing.T) {
+		t.Parallel()
 		const (
 			name         = "foo"
 			nonWindowsOS = "bar"
@@ -52,6 +56,7 @@ func TestBuild(t *testing.T) {
 	})
 
 	t.Run("build semver *nix", func(t *testing.T) {
+		t.Parallel()
 		const (
 			name         = "foo"
 			nonWindowsOS = "bar"
@@ -82,6 +87,7 @@ func TestBuild(t *testing.T) {
 	})
 
 	t.Run("build latest windows", func(t *testing.T) {
+		t.Parallel()
 		const (
 			name        = "foo"
 			windowsOS   = "windows"
@@ -110,6 +116,7 @@ func TestBuild(t *testing.T) {
 	})
 
 	t.Run("build only once", func(t *testing.T) {
+		t.Parallel()
 		const (
 			name         = "foo"
 			nonWindowsOS = "bar"
@@ -137,6 +144,7 @@ func TestBuild(t *testing.T) {
 	})
 
 	t.Run("build and overwrite", func(t *testing.T) {
+		t.Parallel()
 		const (
 			name         = "foo"
 			nonWindowsOS = "bar"
@@ -170,7 +178,9 @@ func TestBuild(t *testing.T) {
 }
 
 func TestFindBinary(t *testing.T) {
+	t.Parallel()
 	t.Run("directory missing", func(t *testing.T) {
+		t.Parallel()
 		fs, err := mem.NewFS()
 		require.NoError(t, err)
 
@@ -180,6 +190,7 @@ func TestFindBinary(t *testing.T) {
 	})
 
 	t.Run("install dir is file", func(t *testing.T) {
+		t.Parallel()
 		fs, err := mem.NewFS()
 		require.NoError(t, err)
 		f, err := hackpadfs.Create(fs, "foo")
@@ -191,6 +202,7 @@ func TestFindBinary(t *testing.T) {
 	})
 
 	t.Run("found", func(t *testing.T) {
+		t.Parallel()
 		fs, err := mem.NewFS()
 		require.NoError(t, err)
 		require.NoError(t, hackpadfs.Mkdir(fs, "foo", 0700))

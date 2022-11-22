@@ -31,6 +31,8 @@ type addArgs struct {
 	Package Package
 }
 
+const binPermission = 0700
+
 var addPipe = pipe.New(pipe.Options{}).
 	Append(func(args []interface{}) addArgs {
 		return args[0].(addArgs)
@@ -40,11 +42,11 @@ var addPipe = pipe.New(pipe.Options{}).
 		return args, scriptPath, err
 	}).
 	Append(func(args addArgs, scriptPath string) (addArgs, string, error) {
-		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), 0700)
+		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), binPermission)
 		return args, scriptPath, err
 	}).
 	Append(func(args addArgs, scriptPath string) (addArgs, string, error) {
-		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), 0700)
+		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), binPermission)
 		return args, scriptPath, err
 	}).
 	Append(func(args addArgs, scriptPath string) error {
@@ -58,7 +60,7 @@ var addPipe = pipe.New(pipe.Options{}).
 			encode(args.Name),
 			encode(args.Package.Path),
 		)
-		return hackpadfs.WriteFullFile(args.App.fs, scriptPath, []byte(makeShebang(script)), 0700)
+		return hackpadfs.WriteFullFile(args.App.fs, scriptPath, []byte(makeShebang(script)), binPermission)
 	})
 
 func (a App) add(name string, pkg Package) error {

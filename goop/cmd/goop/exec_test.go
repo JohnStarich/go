@@ -22,8 +22,10 @@ const thisPackage = "github.com/johnstarich/go/goop/cmd/goop"
 func TestExec(t *testing.T) {
 	t.Parallel()
 
+	const name = "foo"
 	t.Run("invalid package name", func(t *testing.T) {
-		encodedName := base64EncodeString("foo")
+		t.Parallel()
+		encodedName := base64EncodeString(name)
 		encodedPackage := base64EncodeString("bar")
 		app := newTestApp(t, testAppOptions{
 			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
@@ -35,7 +37,7 @@ func TestExec(t *testing.T) {
 	})
 
 	t.Run("exec install then run", func(t *testing.T) {
-		const name = "foo"
+		t.Parallel()
 		encodedName := base64EncodeString(name)
 		encodedPackage := base64EncodeString(thisPackage)
 		var commandsToRun [][]string
@@ -54,7 +56,7 @@ func TestExec(t *testing.T) {
 					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
-				case "foo":
+				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
 					t.Errorf("Unexpected command: %q", cmd.Args[0])
@@ -75,7 +77,7 @@ Build successful.
 
 		assert.Equal(t, [][]string{
 			{"go", "install", thisPackage + "@latest"},
-			{"foo"},
+			{name},
 		}, commandsToRun)
 		const goCmdIndex = 0
 		assert.Equal(t, "go", filepath.Base(commandPaths[goCmdIndex]))
@@ -86,7 +88,7 @@ Build successful.
 	})
 
 	t.Run("exec already installed run with args", func(t *testing.T) {
-		const name = "foo"
+		t.Parallel()
 		encodedName := base64EncodeString(name)
 		encodedPackage := base64EncodeString(thisPackage)
 		var commandsToRun [][]string
@@ -96,7 +98,7 @@ Build successful.
 				commandsToRun = append(commandsToRun, cmd.Args)
 				commandPaths = append(commandPaths, cmd.Path)
 				switch cmd.Args[0] {
-				case "foo":
+				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
 					t.Errorf("Unexpected command: %q", cmd.Args[0])
@@ -127,7 +129,7 @@ Build successful.
 	})
 
 	t.Run("exec install local module then run", func(t *testing.T) {
-		const name = "foo"
+		t.Parallel()
 		thisDir, err := os.Getwd()
 		require.NoError(t, err)
 		encodedName := base64EncodeString(name)
@@ -150,7 +152,7 @@ Build successful.
 					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
-				case "foo":
+				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
 					t.Errorf("Unexpected command: %q", cmd.Args[0])
@@ -171,7 +173,7 @@ Build successful.
 
 		assert.Equal(t, [][]string{
 			{"go", "install", "."},
-			{"foo"},
+			{name},
 		}, commandsToRun)
 		const goCmdIndex = 0
 		assert.Equal(t, "go", filepath.Base(commandPaths[goCmdIndex]))
@@ -182,8 +184,8 @@ Build successful.
 	})
 
 	t.Run("exec local module reinstalls outdated", func(t *testing.T) {
+		t.Parallel()
 		const (
-			name             = "foo"
 			workingDirFSPath = "some/working/directory"
 		)
 		thisDir, err := os.Getwd()
@@ -208,7 +210,7 @@ Build successful.
 					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
-				case "foo":
+				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
 					t.Errorf("Unexpected command: %q", cmd.Args[0])
@@ -292,7 +294,8 @@ func (fs *fsWithOSPath) Mount(name string) (hackpadfs.FS, string) {
 	return fs.FS, name
 }
 
-func (fs *fsWithOSPath) ToOSPath(name string) (string, error) {
+// ToOSPath implements hackpadfs.MountFS
+func (fs *fsWithOSPath) ToOSPath(name string) (string, error) { //nolint:unparam // Implements interface, cannot remove param.
 	for osPath, fsPath := range fs.osToFSPaths {
 		if name == fsPath {
 			return osPath, nil
@@ -301,7 +304,8 @@ func (fs *fsWithOSPath) ToOSPath(name string) (string, error) {
 	return name, nil
 }
 
-func (fs *fsWithOSPath) FromOSPath(name string) (string, error) {
+// FromOSPath implements hackpadfs.MountFS
+func (fs *fsWithOSPath) FromOSPath(name string) (string, error) { //nolint:unparam // Implements interface, cannot remove param.
 	fsPath, ok := fs.osToFSPaths[name]
 	if !ok {
 		return name, nil
@@ -392,7 +396,9 @@ func TestModuleRoot(t *testing.T) {
 			expectRoot: ".",
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			fs, err := mem.NewFS()
 			require.NoError(t, err)
 			writeFiles(t, fs, tc.files, time.Now())
@@ -518,7 +524,9 @@ func TestHasNewerModTime(t *testing.T) {
 			expectNewer: false,
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
 			fs, err := mem.NewFS()
 			require.NoError(t, err)
 			writeFiles(t, fs, tc.files, earlier)

@@ -54,12 +54,14 @@ type buildAtPathArgs struct {
 	Package     Package
 }
 
+const installPermission = 0700
+
 var buildAtPathPipe = pipe.New(pipe.Options{}).
 	Append(func(args []interface{}) buildAtPathArgs {
 		return args[0].(buildAtPathArgs)
 	}).
 	Append(func(args buildAtPathArgs) (buildAtPathArgs, error) {
-		return args, hackpadfs.MkdirAll(args.App.fs, args.InstallDir, 0700)
+		return args, hackpadfs.MkdirAll(args.App.fs, args.InstallDir, installPermission)
 	}).
 	Append(func(args buildAtPathArgs) (buildAtPathArgs, string, error) {
 		gobin, err := args.App.toOSPath(args.InstallDir)
