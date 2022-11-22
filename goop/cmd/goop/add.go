@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/johnstarich/go/pipe"
@@ -18,7 +17,7 @@ func (a App) packageBinPath(name string) (string, error) {
 func (a App) userBinDir() (string, error) {
 	binDir := a.staticBinDir
 	var err error
-	appBinEnvironmentVar := strings.ToUpper(appName) + "_BIN"
+	const appBinEnvironmentVar = "GOOP_BIN"
 	if configBin := a.getEnv(appBinEnvironmentVar); configBin != "" {
 		binDir, err = a.fromOSPath(configBin)
 	}
