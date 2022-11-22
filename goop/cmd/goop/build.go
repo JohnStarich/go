@@ -158,13 +158,13 @@ func moduleRoot(fs hackpadfs.FS, p string) (string, error) {
 	return root, nil
 }
 
-func hasNewerModTime(fs hackpadfs.FS, path string, baseModTime time.Time) (bool, error) {
+func hasNewerModTime(fs hackpadfs.FS, root string, baseModTime time.Time) (bool, error) {
 	hasNewerModTime := false
-	err := hackpadfs.WalkDir(fs, path, func(path string, d hackpadfs.DirEntry, err error) error {
+	err := hackpadfs.WalkDir(fs, root, func(path string, d hackpadfs.DirEntry, err error) error {
 		if hasNewerModTime {
 			return hackpadfs.SkipDir
 		}
-		if err != nil {
+		if err != nil || path == root {
 			return err
 		}
 		info, err := d.Info()

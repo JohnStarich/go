@@ -309,10 +309,14 @@ func (fs *fsWithOSPath) FromOSPath(name string) (string, error) {
 	return fsPath, nil
 }
 
-func writeFiles(t *testing.T, fs hackpadfs.FS, files map[string]string) {
+func writeFiles(t *testing.T, fs hackpadfs.FS, files map[string]string, modTime time.Time) {
+	t.Helper()
 	for filePath, contents := range files {
 		require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(filePath), 0700))
 		require.NoError(t, hackpadfs.WriteFullFile(fs, filePath, []byte(contents), 0700))
+		for f := filePath; f != path.Dir(f); f = path.Dir(f) {
+			require.NoError(t, hackpadfs.Chtimes(fs, f, modTime, modTime))
+		}
 	}
 }
 
@@ -391,10 +395,139 @@ func TestModuleRoot(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			fs, err := mem.NewFS()
 			require.NoError(t, err)
-			writeFiles(t, fs, tc.files)
+			writeFiles(t, fs, tc.files, time.Now())
 
 			root, err := moduleRoot(fs, tc.path)
 			assert.Equal(t, tc.expectRoot, root)
+			if tc.expectErr != "" {
+				assert.EqualError(t, err, tc.expectErr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestHasNewerModTime(t *testing.T) {
+	t.Parallel()
+	var (
+		now     = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
+		earlier = now.Add(-time.Minute)
+	)
+	for _, tc := range []struct {
+		description string
+		files       map[string]string
+		fileMtimes  map[string]time.Time
+		root        string
+		baseModTime time.Time
+		expectNewer bool
+		expectErr   string
+	}{
+		{
+			description: "no files",
+			root:        ".",
+			baseModTime: now,
+			expectNewer: false,
+		},
+		{
+			description: "one newer file",
+			root:        ".",
+			files: map[string]string{
+				"foo": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo": now,
+			},
+			baseModTime: earlier,
+			expectNewer: true,
+		},
+		{
+			description: "one older file",
+			root:        ".",
+			files: map[string]string{
+				"foo": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo": earlier,
+			},
+			baseModTime: now,
+			expectNewer: false,
+		},
+		{
+			description: "one newer dir",
+			root:        ".",
+			files: map[string]string{
+				"foo/bar": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo": now,
+			},
+			baseModTime: earlier,
+			expectNewer: true,
+		},
+		{
+			description: "one older dir",
+			root:        ".",
+			files: map[string]string{
+				"foo/bar": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo": earlier,
+			},
+			baseModTime: now,
+			expectNewer: false,
+		},
+		{
+			description: "one newer before second item scanned",
+			root:        ".",
+			files: map[string]string{
+				"bar/baz": "",
+				"foo":     "",
+			},
+			fileMtimes: map[string]time.Time{
+				"bar/baz": now,
+			},
+			baseModTime: earlier,
+			expectNewer: true,
+		},
+		{
+			description: "one newer with root",
+			root:        "foo",
+			files: map[string]string{
+				"foo/bar": "",
+				"foo/baz": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo/baz": now,
+			},
+			baseModTime: earlier,
+			expectNewer: true,
+		},
+		{
+			description: "none newer with different root",
+			root:        "biff",
+			files: map[string]string{
+				"foo/bar":   "",
+				"foo/baz":   "",
+				"biff/derp": "",
+			},
+			fileMtimes: map[string]time.Time{
+				"foo/baz": now,
+			},
+			baseModTime: earlier,
+			expectNewer: false,
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			fs, err := mem.NewFS()
+			require.NoError(t, err)
+			writeFiles(t, fs, tc.files, earlier)
+			for filePath, mtime := range tc.fileMtimes {
+				require.NoError(t, hackpadfs.Chtimes(fs, filePath, mtime, mtime))
+			}
+
+			hasNewer, err := hasNewerModTime(fs, tc.root, tc.baseModTime)
+			assert.Equal(t, tc.expectNewer, hasNewer)
 			if tc.expectErr != "" {
 				assert.EqualError(t, err, tc.expectErr)
 			} else {
