@@ -7,6 +7,7 @@ import (
 
 	"github.com/hack-pad/hackpadfs"
 	"github.com/johnstarich/go/pipe"
+	"github.com/pkg/errors"
 )
 
 func (a App) packageBinPath(name string) (string, error) {
@@ -45,7 +46,12 @@ var addPipe = pipe.New(pipe.Options{}).
 		return args, scriptPath, err
 	}).
 	Append(func(args addArgs, scriptPath string) (addArgs, string, error) {
-		err := hackpadfs.MkdirAll(args.App.fs, path.Dir(scriptPath), binPermission)
+		isExecutable, err := isAppExecutable(args.App.fs, scriptPath)
+		if errors.Is(err, hackpadfs.ErrNotExist) {
+			err = nil
+		} else if err == nil {
+			err = pipe.CheckError(!isExecutable, errors.Errorf("refusing to overwrite non-goop script file: %q", scriptPath))
+		}
 		return args, scriptPath, err
 	}).
 	Append(func(args addArgs, scriptPath string) error {

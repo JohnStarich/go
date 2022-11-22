@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hack-pad/hackpadfs"
+	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
@@ -12,6 +13,9 @@ func (a App) rm(c *cli.Context) error {
 		return err
 	}
 	if isInstalled, err := isAppExecutable(a.fs, binPath); !isInstalled || err != nil {
+		if errors.Is(err, hackpadfs.ErrNotExist) {
+			err = nil
+		}
 		return err
 	}
 

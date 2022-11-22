@@ -152,7 +152,7 @@ Build successful.
 		var commandsToRun [][]string
 		var commandPaths []string
 		app := newTestApp(t, testAppOptions{
-			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+			runCmd: func(_ *TestApp, cmd *exec.Cmd) error {
 				commandsToRun = append(commandsToRun, cmd.Args)
 				commandPaths = append(commandPaths, cmd.Path)
 				switch cmd.Args[0] {
@@ -170,15 +170,11 @@ Build successful.
 		})
 		// binary already installed, still does a reinstall
 		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0700))
-		f, err := hackpadfs.Create(app.fs, path.Join("cache/install", appName, appName))
-		require.NoError(t, err)
-		require.NoError(t, f.Close())
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0700))
 		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
-		f, err = hackpadfs.Create(app.fs, path.Join("bin", appName))
-		require.NoError(t, err)
-		require.NoError(t, f.Close())
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), []byte(makeShebang("goop exec ...")), 0700))
 
-		err = app.Run([]string{"", "install", "-p", thisPackage})
+		err := app.Run([]string{"", "install", "-p", thisPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -202,5 +198,44 @@ Build successful.
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
 		assert.NoError(t, err)
 		assert.Equal(t, "#!/usr/bin/env -S goop exec -encoded-name Z29vcA== -encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
+	})
+
+	t.Run("install fails reinstall for non-goop script", func(t *testing.T) {
+		t.Parallel()
+		app := newTestApp(t, testAppOptions{
+			runCmd: func(_ *TestApp, cmd *exec.Cmd) error {
+				switch cmd.Args[0] {
+				case "go":
+					assert.Equal(t, []string{
+						"go",
+						"install",
+						thisPackage + "@latest",
+					}, cmd.Args)
+				default:
+					t.Errorf("Unexpected command: %q", cmd.Args[0])
+				}
+				return nil
+			},
+		})
+		// non-goop script already installed, fails reinstall
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0700))
+		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), nil, 0700))
+
+		err := app.Run([]string{"", "install", "-p", thisPackage})
+		assert.EqualError(t, err, `pipe: refusing to overwrite non-goop script file: "bin/goop"`)
+
+		assert.Equal(t, strings.TrimSpace(`
+Building "github.com/johnstarich/go/goop/cmd/goop"...
+Env: PWD="" GOBIN="cache/install/goop"
+Running 'go install github.com/johnstarich/go/goop/cmd/goop@latest'...
+Build successful.
+`), strings.TrimSpace(app.Stderr()))
+		assert.Empty(t, app.Stdout())
+
+		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
+		assert.NoError(t, err)
+		assert.Empty(t, string(binFile))
 	})
 }

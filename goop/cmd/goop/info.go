@@ -36,9 +36,6 @@ func (a App) info(c *cli.Context) error {
 func isAppExecutable(fs hackpadfs.FS, filePath string) (bool, error) {
 	f, err := fs.Open(filePath)
 	if err != nil {
-		if errors.Is(err, hackpadfs.ErrNotExist) {
-			err = nil
-		}
 		return false, err
 	}
 	defer f.Close()
