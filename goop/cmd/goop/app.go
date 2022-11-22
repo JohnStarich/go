@@ -26,13 +26,14 @@ const appName = "goop"
 
 // App is the goop application object, used to run commands from user input.
 type App struct {
-	errWriter      io.Writer
-	fs             hackpadfs.FS
-	getEnv         func(string) string
-	outWriter      io.Writer
-	runCmd         func(*exec.Cmd) error
-	staticBinDir   string
-	staticCacheDir string
+	errWriter       io.Writer
+	fs              hackpadfs.FS
+	getEnv          func(string) string
+	outWriter       io.Writer
+	runCmd          func(*exec.Cmd) error
+	staticBinDir    string
+	staticCacheDir  string
+	staticOSHomeDir string
 }
 
 func newApp(outWriter, errWriter io.Writer) (App, error) {
@@ -41,6 +42,10 @@ func newApp(outWriter, errWriter io.Writer) (App, error) {
 		return App{}, err
 	}
 	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return App{}, err
+	}
+	osHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		return App{}, err
 	}
@@ -60,13 +65,14 @@ func newApp(outWriter, errWriter io.Writer) (App, error) {
 
 	const configBin = "bin"
 	return App{
-		errWriter:      errWriter,
-		fs:             fs,
-		getEnv:         os.Getenv,
-		outWriter:      outWriter,
-		runCmd:         runCmd,
-		staticBinDir:   path.Join(configDir, appName, configBin),
-		staticCacheDir: path.Join(cacheDir, appName),
+		errWriter:       errWriter,
+		fs:              fs,
+		getEnv:          os.Getenv,
+		outWriter:       outWriter,
+		runCmd:          runCmd,
+		staticBinDir:    path.Join(configDir, appName, configBin),
+		staticCacheDir:  path.Join(cacheDir, appName),
+		staticOSHomeDir: osHomeDir,
 	}, nil
 }
 

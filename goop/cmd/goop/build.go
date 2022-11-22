@@ -68,7 +68,7 @@ var buildAtPathPipe = pipe.New(pipe.Options{}).
 		return args, gobin, err
 	}).
 	Append(func(args buildAtPathArgs, gobin string) (buildAtPathArgs, error) {
-		workingDir, installPattern := args.Package.InstallPaths()
+		workingDir, installPattern := args.App.packageInstallPaths(args.Package)
 		cmdArgs := []string{"install", installPattern}
 		fmt.Fprintf(args.App.errWriter, "Env: PWD=%q GOBIN=%q\nRunning 'go %s'...\n", workingDir, gobin, strings.Join(cmdArgs, " "))
 		cmd := exec.CommandContext(args.Context, "go", cmdArgs...)
@@ -123,7 +123,7 @@ func findBinary(fs hackpadfs.FS, installDir string) (string, bool, error) {
 }
 
 func (a App) shouldRebuild(binaryInfo hackpadfs.FileInfo, pkg Package) (bool, error) {
-	filePath, isFilePath := pkg.FilePath()
+	filePath, isFilePath := a.packageFilePath(pkg)
 	if !isFilePath {
 		// remote module, assume up-to-date
 		return false, nil

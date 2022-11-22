@@ -34,13 +34,14 @@ func newTestApp(t *testing.T, options testAppOptions) *TestApp {
 		testingT: t,
 	}
 	testApp.App = App{
-		errWriter:      newTestWriter(t),
-		fs:             fs,
-		getEnv:         func(string) string { return "" },
-		outWriter:      newTestWriter(t),
-		runCmd:         testApp.runCmd,
-		staticBinDir:   "bin",
-		staticCacheDir: "cache",
+		errWriter:       newTestWriter(t),
+		fs:              fs,
+		getEnv:          func(string) string { return "" },
+		outWriter:       newTestWriter(t),
+		runCmd:          testApp.runCmd,
+		staticBinDir:    "bin",
+		staticCacheDir:  "cache",
+		staticOSHomeDir: "home",
 	}
 	return testApp
 }
