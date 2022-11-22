@@ -15,10 +15,10 @@ import (
 
 func run(args []string, outWriter, errWriter io.Writer) error {
 	app, err := newApp(outWriter, errWriter)
-	if err != nil {
-		return err
+	if err == nil {
+		err = app.Run(args)
 	}
-	return app.Run(args)
+	return err
 }
 
 const appName = "goop"
