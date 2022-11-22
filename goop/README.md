@@ -1,6 +1,6 @@
 # goop <a href="https://johnstarich.com/go/goop"><img src="https://img.shields.io/badge/gopages-reference-%235272B4" /></a>
 
-Write and run Go scripts without the fuss. Automatically builds installed Go commands when you run them.
+Goop makes it easy to write and run Go scripts. Automatically builds installed Go commands when you run them.
 
 Features:
 * Support for both local and remote modules.
