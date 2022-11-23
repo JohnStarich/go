@@ -22,7 +22,7 @@ func (a App) info(cmd *cobra.Command, args []string) error {
 	cmd.Printf("Installed: (%s)\n", binDir)
 	for _, entry := range dirEntries {
 		isInstalled, err := isAppExecutable(a.fs, path.Join(binDir, entry.Name()))
-		if err != nil {
+		if err != nil && !errors.Is(err, hackpadfs.ErrNotExist) {
 			return err
 		}
 		if isInstalled {
