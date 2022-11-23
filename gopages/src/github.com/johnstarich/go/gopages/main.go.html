@@ -62,7 +62,7 @@
 <span id="L5" class="ln">     5  </span>import (
 <span id="L6" class="ln">     6  </span>	&#34;flag&#34;
 <span id="L7" class="ln">     7  </span>	&#34;fmt&#34;
-<span id="L8" class="ln">     8  </span>	&#34;io/ioutil&#34;
+<span id="L8" class="ln">     8  </span>	&#34;io&#34;
 <span id="L9" class="ln">     9  </span>	&#34;log&#34;
 <span id="L10" class="ln">    10  </span>	&#34;os&#34;
 <span id="L11" class="ln">    11  </span>	&#34;path/filepath&#34;
@@ -109,7 +109,7 @@
 <span id="L52" class="ln">    52  </span>		cmd.Exit(cmd.ExitCodeInvalidUsage)
 <span id="L53" class="ln">    53  </span>	}
 <span id="L54" class="ln">    54  </span>
-<span id="L55" class="ln">    55  </span>	log.SetOutput(ioutil.Discard) <span class="comment">// disable godoc&#39;s internal logging</span>
+<span id="L55" class="ln">    55  </span>	log.SetOutput(io.Discard) <span class="comment">// disable godoc&#39;s internal logging</span>
 <span id="L56" class="ln">    56  </span>
 <span id="L57" class="ln">    57  </span>	modulePath, err := getWD()
 <span id="L58" class="ln">    58  </span>	if err != nil {

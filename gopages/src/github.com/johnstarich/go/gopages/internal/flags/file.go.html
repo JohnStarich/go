@@ -57,7 +57,7 @@
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
 <pre><span id="L1" class="ln">     1  </span>package flags
 <span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span>import &#34;io/ioutil&#34;
+<span id="L3" class="ln">     3  </span>import &#34;os&#34;
 <span id="L4" class="ln">     4  </span>
 <span id="L5" class="ln">     5  </span><span class="comment">// FilePathContents is a flag that reads a file by the passed in path and contains its contents</span>
 <span id="L6" class="ln">     6  </span>type FilePathContents struct {
@@ -78,7 +78,7 @@
 <span id="L21" class="ln">    21  </span>
 <span id="L22" class="ln">    22  </span><span class="comment">// Set implements flag.Value</span>
 <span id="L23" class="ln">    23  </span>func (f *FilePathContents) Set(s string) error {
-<span id="L24" class="ln">    24  </span>	contents, err := ioutil.ReadFile(s)
+<span id="L24" class="ln">    24  </span>	contents, err := os.ReadFile(s)
 <span id="L25" class="ln">    25  </span>	if err != nil {
 <span id="L26" class="ln">    26  </span>		return err
 <span id="L27" class="ln">    27  </span>	}

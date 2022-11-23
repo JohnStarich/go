@@ -55,27 +55,28 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span>package source
-<span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span>import (
-<span id="L4" class="ln">     4  </span>	&#34;net/url&#34;
-<span id="L5" class="ln">     5  </span>)
-<span id="L6" class="ln">     6  </span>
-<span id="L7" class="ln">     7  </span><span class="comment">// LinkOptions contains options for configuring hyperlinks to source files</span>
-<span id="L8" class="ln">     8  </span>type LinkOptions struct {
-<span id="L9" class="ln">     9  </span>	Line int
-<span id="L10" class="ln">    10  </span>}
-<span id="L11" class="ln">    11  </span>
-<span id="L12" class="ln">    12  </span><span class="comment">// Linker can generate hyperlinks for any given package&#39;s file</span>
-<span id="L13" class="ln">    13  </span>type Linker interface {
-<span id="L14" class="ln">    14  </span>	LinkToSource(packagePath string, options LinkOptions) url.URL
-<span id="L15" class="ln">    15  </span>}
-<span id="L16" class="ln">    16  </span>
-<span id="L17" class="ln">    17  </span><span class="comment">// ScrapeChecker returns whether or not a given package&#39;s path should be scraped and included in the output</span>
-<span id="L18" class="ln">    18  </span>type ScrapeChecker interface {
-<span id="L19" class="ln">    19  </span>	ShouldScrapePackage(packagePath string) bool
-<span id="L20" class="ln">    20  </span>}
-<span id="L21" class="ln">    21  </span>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Package source defines interfaces for generating URL links in documentation.</span>
+<span id="L2" class="ln">     2  </span>package source
+<span id="L3" class="ln">     3  </span>
+<span id="L4" class="ln">     4  </span>import (
+<span id="L5" class="ln">     5  </span>	&#34;net/url&#34;
+<span id="L6" class="ln">     6  </span>)
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span><span class="comment">// LinkOptions contains options for configuring hyperlinks to source files</span>
+<span id="L9" class="ln">     9  </span>type LinkOptions struct {
+<span id="L10" class="ln">    10  </span>	Line int
+<span id="L11" class="ln">    11  </span>}
+<span id="L12" class="ln">    12  </span>
+<span id="L13" class="ln">    13  </span><span class="comment">// Linker can generate hyperlinks for any given package&#39;s file</span>
+<span id="L14" class="ln">    14  </span>type Linker interface {
+<span id="L15" class="ln">    15  </span>	LinkToSource(packagePath string, options LinkOptions) url.URL
+<span id="L16" class="ln">    16  </span>}
+<span id="L17" class="ln">    17  </span>
+<span id="L18" class="ln">    18  </span><span class="comment">// ScrapeChecker returns whether or not a given package&#39;s path should be scraped and included in the output</span>
+<span id="L19" class="ln">    19  </span>type ScrapeChecker interface {
+<span id="L20" class="ln">    20  </span>	ShouldScrapePackage(packagePath string) bool
+<span id="L21" class="ln">    21  </span>}
+<span id="L22" class="ln">    22  </span>
 </pre><p></p>
 
 <div id="footer">
