@@ -16,7 +16,7 @@ func TestRemove(t *testing.T) {
 	t.Run("does not exist", func(t *testing.T) {
 		t.Parallel()
 		app := newTestApp(t, testAppOptions{})
-		err := app.Run([]string{"", "rm", "-name", "foo"})
+		err := app.Run([]string{"rm", "--name", "foo"})
 		assert.NoError(t, err)
 	})
 
@@ -33,7 +33,7 @@ func TestRemove(t *testing.T) {
 				return hackpadfs.WriteFullFile(app.fs, path.Join(installDir, name), nil, 0700)
 			},
 		})
-		err := app.Run([]string{"", "install", "-name", name, "-p", thisPackage})
+		err := app.Run([]string{"install", "--name", name, "-p", thisPackage})
 		require.NoError(t, err)
 		dir, err := hackpadfs.ReadDir(app.fs, binDir)
 		assert.NoError(t, err)
@@ -42,7 +42,7 @@ func TestRemove(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, dir)
 
-		err = app.Run([]string{"", "rm", "-name", name})
+		err = app.Run([]string{"rm", "--name", name})
 		assert.NoError(t, err)
 		dir, err = hackpadfs.ReadDir(app.fs, binDir)
 		assert.NoError(t, err)

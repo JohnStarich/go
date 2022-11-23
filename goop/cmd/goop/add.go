@@ -59,8 +59,8 @@ var addPipe = pipe.New(pipe.Options{}).
 			return base64.StdEncoding.EncodeToString([]byte(s))
 		}
 		// Script shebang should run as follows:
-		// goop exec -name foo -encoded-package abc123== -- ~/.config/goop/bin/foo arg1 arg2 ...
-		script := fmt.Sprintf("goop exec -encoded-name %s -encoded-package %s --\n",
+		// goop exec --name foo --encoded-package abc123== -- ~/.config/goop/bin/foo arg1 arg2 ...
+		script := fmt.Sprintf("goop exec --encoded-name %s --encoded-package %s --\n",
 			// shebangs do not support spaces or quotes, so encode all variables
 			encode(args.Name),
 			encode(args.Package.Path),

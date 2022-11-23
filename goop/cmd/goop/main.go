@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"github.com/urfave/cli/v2"
 )
 
 //nolint:gochecknoglobals // This minimal set of globals enables testing of main().
@@ -26,11 +24,16 @@ func main() {
 	}
 }
 
+type exitCoder interface {
+	error
+	ExitCode() int
+}
+
 func exitCode(err error) int {
 	code := 1
-	var exitCoder cli.ExitCoder
-	if errors.As(err, &exitCoder) {
-		code = exitCoder.ExitCode()
+	var exitErr exitCoder
+	if errors.As(err, &exitErr) {
+		code = exitErr.ExitCode()
 	}
 	return code
 }

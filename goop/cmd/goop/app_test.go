@@ -10,6 +10,7 @@ import (
 
 	"github.com/hack-pad/hackpadfs/mem"
 	osfs "github.com/hack-pad/hackpadfs/os"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -118,5 +119,15 @@ func TestOSPath(t *testing.T) {
 		newOSPath, err := app.toOSPath("a/b/c")
 		assert.NoError(t, err)
 		assert.Equal(t, "/a/b/c", newOSPath)
+	})
+}
+
+func TestPanicIfError(t *testing.T) {
+	t.Parallel()
+	assert.PanicsWithError(t, "some error", func() {
+		panicIfErr(errors.New("some error"))
+	})
+	assert.NotPanics(t, func() {
+		panicIfErr(nil)
 	})
 }

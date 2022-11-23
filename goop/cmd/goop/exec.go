@@ -8,12 +8,12 @@ import (
 
 	"github.com/johnstarich/go/pipe"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 type execPipeArgs struct {
 	App     App
-	Context *cli.Context
+	Cmd     *cobra.Command
 	Package Package
 	Name    string
 }
@@ -21,17 +21,25 @@ type execPipeArgs struct {
 var execPipe = pipe.New(pipe.Options{}).
 	Append(func(args []interface{}) execPipeArgs {
 		return execPipeArgs{
-			App:     args[1].(App),
-			Context: args[0].(*cli.Context),
+			App: args[1].(App),
+			Cmd: args[0].(*cobra.Command),
 		}
 	}).
-	Append(func(args execPipeArgs) (execPipeArgs, error) {
+	Append(func(args execPipeArgs) (execPipeArgs, string, error) {
+		encodedName, err := args.Cmd.Flags().GetString("encoded-name")
+		return args, encodedName, err
+	}).
+	Append(func(args execPipeArgs, encodedName string) (execPipeArgs, error) {
 		var err error
-		args.Name, err = base64DecodeString(args.Context.String("encoded-name"))
+		args.Name, err = base64DecodeString(encodedName)
 		return args, err
 	}).
 	Append(func(args execPipeArgs) (execPipeArgs, string, error) {
-		packagePattern, err := base64DecodeString(args.Context.String("encoded-package"))
+		encodedPackage, err := args.Cmd.Flags().GetString("encoded-package")
+		return args, encodedPackage, err
+	}).
+	Append(func(args execPipeArgs, encodedPackage string) (execPipeArgs, string, error) {
+		packagePattern, err := base64DecodeString(encodedPackage)
 		return args, packagePattern, err
 	}).
 	Append(func(args execPipeArgs, packagePattern string) (execPipeArgs, error) {
@@ -40,7 +48,7 @@ var execPipe = pipe.New(pipe.Options{}).
 		return args, err
 	}).
 	Append(func(args execPipeArgs) (execPipeArgs, string, error) {
-		binaryPath, err := args.App.build(args.Context.Context, args.Name, args.Package, false)
+		binaryPath, err := args.App.build(args.Cmd.Context(), args.Name, args.Package, false)
 		return args, binaryPath, err
 	}).
 	Append(func(args execPipeArgs, binaryPath string) (execPipeArgs, string, error) {
@@ -48,23 +56,29 @@ var execPipe = pipe.New(pipe.Options{}).
 		return args, binaryOSPath, err
 	}).
 	Append(func(args execPipeArgs, binaryOSPath string) error {
-		arg0 := args.Context.Args().First()
+		arg0, argv := popFirst(args.Cmd.Flags().Args())
 		if arg0 == "" {
 			arg0 = path.Base(binaryOSPath)
 		}
-		argv := args.Context.Args().Tail()
-		cmd := exec.CommandContext(args.Context.Context, binaryOSPath, argv...)
+		cmd := exec.CommandContext(args.Cmd.Context(), binaryOSPath, argv...)
 		cmd.Args[0] = arg0
 		err := args.App.runCmd(cmd)
 		return errors.WithMessage(err, formatCmd(cmd))
 	})
 
+func popFirst(strings []string) (string, []string) {
+	if len(strings) > 0 {
+		return strings[0], strings[1:]
+	}
+	return "", nil
+}
+
 func (a App) packageInstallDir(name string) string {
 	return path.Join(a.staticCacheDir, "install", name)
 }
 
-func (a App) exec(c *cli.Context) error {
-	_, err := execPipe.Do(c, a)
+func (a App) exec(cmd *cobra.Command, args []string) error {
+	_, err := execPipe.Do(cmd, a)
 	return err
 }
 

@@ -19,7 +19,7 @@ func TestInstall(t *testing.T) {
 		t.Parallel()
 		const name = "foo"
 		app := newTestApp(t, testAppOptions{})
-		err := app.Run([]string{"", "install", "-name", name, "-p", thisPackage + "/..."})
+		err := app.Run([]string{"install", "--name", name, "-p", thisPackage + "/..."})
 		assert.EqualError(t, err, `package pattern must not use the '/...' operator: "github.com/johnstarich/go/goop/cmd/goop/..."`)
 
 		assert.Empty(t, app.Stderr())
@@ -35,7 +35,7 @@ func TestInstall(t *testing.T) {
 				return someErr
 			},
 		})
-		err := app.Run([]string{"", "install", "-name", name, "-p", thisPackage})
+		err := app.Run([]string{"install", "--name", name, "-p", thisPackage})
 		assert.ErrorIs(t, err, someErr)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -71,7 +71,7 @@ Running 'go install github.com/johnstarich/go/goop/cmd/goop@latest'...
 				return nil
 			},
 		})
-		err := app.Run([]string{"", "install", "-name", name, "-p", thisPackage})
+		err := app.Run([]string{"install", "--name", name, "-p", thisPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -94,7 +94,7 @@ Build successful.
 		assert.Equal(t, name, binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/foo")
 		assert.NoError(t, err)
-		assert.Equal(t, "#!/usr/bin/env -S goop exec -encoded-name Zm9v -encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
+		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Zm9v --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
 	})
 
 	t.Run("install without name", func(t *testing.T) {
@@ -121,7 +121,7 @@ Build successful.
 				return nil
 			},
 		})
-		err := app.Run([]string{"", "install", "-p", thisPackage})
+		err := app.Run([]string{"install", "-p", thisPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -144,7 +144,7 @@ Build successful.
 		assert.Equal(t, appName, binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
 		assert.NoError(t, err)
-		assert.Equal(t, "#!/usr/bin/env -S goop exec -encoded-name Z29vcA== -encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
+		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Z29vcA== --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
 	})
 
 	t.Run("install also reinstalls", func(t *testing.T) {
@@ -174,7 +174,7 @@ Build successful.
 		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
 		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), []byte(makeShebang("goop exec ...")), 0700))
 
-		err := app.Run([]string{"", "install", "-p", thisPackage})
+		err := app.Run([]string{"install", "-p", thisPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -197,7 +197,7 @@ Build successful.
 		assert.Equal(t, appName, binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
 		assert.NoError(t, err)
-		assert.Equal(t, "#!/usr/bin/env -S goop exec -encoded-name Z29vcA== -encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
+		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Z29vcA== --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
 	})
 
 	t.Run("install fails reinstall for non-goop script", func(t *testing.T) {
@@ -223,7 +223,7 @@ Build successful.
 		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
 		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), nil, 0700))
 
-		err := app.Run([]string{"", "install", "-p", thisPackage})
+		err := app.Run([]string{"install", "-p", thisPackage})
 		assert.EqualError(t, err, `pipe: refusing to overwrite non-goop script file: "bin/goop"`)
 
 		assert.Equal(t, strings.TrimSpace(`

@@ -2,15 +2,14 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"path"
 
 	"github.com/hack-pad/hackpadfs"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
-func (a App) info(c *cli.Context) error {
+func (a App) info(cmd *cobra.Command, args []string) error {
 	binDir, err := a.userBinDir()
 	if err != nil {
 		return err
@@ -20,14 +19,14 @@ func (a App) info(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Fprintf(c.App.Writer, "Installed: (%s)\n", binDir)
+	cmd.Printf("Installed: (%s)\n", binDir)
 	for _, entry := range dirEntries {
 		isInstalled, err := isAppExecutable(a.fs, path.Join(binDir, entry.Name()))
 		if err != nil {
 			return err
 		}
 		if isInstalled {
-			fmt.Fprintln(c.App.Writer, "-", entry.Name())
+			cmd.Println("-", entry.Name())
 		}
 	}
 	return nil

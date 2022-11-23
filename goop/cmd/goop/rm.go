@@ -3,11 +3,14 @@ package main
 import (
 	"github.com/hack-pad/hackpadfs"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
-func (a App) rm(c *cli.Context) error {
-	name := c.String("name")
+func (a App) rm(cmd *cobra.Command, args []string) error {
+	name, err := cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
 	binPath, err := a.packageBinPath(name)
 	if err != nil {
 		return err

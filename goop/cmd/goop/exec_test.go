@@ -32,7 +32,7 @@ func TestExec(t *testing.T) {
 				return runCmd(cmd) // use real command
 			},
 		})
-		err := app.Run([]string{"", "exec", "-encoded-name", encodedName, "-encoded-package", encodedPackage})
+		err := app.Run([]string{"exec", "--encoded-name", encodedName, "--encoded-package", encodedPackage})
 		assert.EqualError(t, err, "pipe: go install bar@latest: exit status 1")
 	})
 
@@ -64,7 +64,7 @@ func TestExec(t *testing.T) {
 				return nil
 			},
 		})
-		err := app.Run([]string{"", "exec", "-encoded-name", encodedName, "-encoded-package", encodedPackage})
+		err := app.Run([]string{"exec", "--encoded-name", encodedName, "--encoded-package", encodedPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(`
@@ -112,7 +112,7 @@ Build successful.
 		require.NoError(t, f.Close())
 
 		err = app.Run([]string{
-			"", "exec", "-encoded-name", encodedName, "-encoded-package", encodedPackage,
+			"exec", "--encoded-name", encodedName, "--encoded-package", encodedPackage,
 			"--", name, "-bar",
 		})
 		assert.NoError(t, err)
@@ -160,7 +160,7 @@ Build successful.
 				return nil
 			},
 		})
-		err = app.Run([]string{"", "exec", "-encoded-name", encodedName, "-encoded-package", encodedPackage})
+		err = app.Run([]string{"exec", "--encoded-name", encodedName, "--encoded-package", encodedPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(fmt.Sprintf(`
@@ -237,7 +237,7 @@ func main() {}
 		year2000 := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 		require.NoError(t, hackpadfs.Chtimes(app.fs, filePath, year2000, year2000))
 
-		err = app.Run([]string{"", "exec", "-encoded-name", encodedName, "-encoded-package", encodedPackage})
+		err = app.Run([]string{"exec", "--encoded-name", encodedName, "--encoded-package", encodedPackage})
 		assert.NoError(t, err)
 
 		assert.Equal(t, strings.TrimSpace(fmt.Sprintf(`
