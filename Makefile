@@ -38,7 +38,7 @@ test: $(MODULES:=-test)
 		printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
 		printf '##########################\n' >&2; \
 		echo "$$coverage"
-	@if [[ -n "$$GITHUB_TOKEN" ]]; then \
+	@if [[ -n "$$GITHUB_TOKEN" && "$$(go version)" == *"go$${COVERAGE_VERSION}"* ]]; then \
 		set -ex; \
 		set -o pipefail; \
 		go install github.com/mattn/goveralls@v0.0.11; \
