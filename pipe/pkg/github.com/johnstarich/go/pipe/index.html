@@ -91,7 +91,11 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				
+				<p>
+Package pipe handles errors so you don&#39;t have to.
+A `Pipe` is a series of functions that pass data to one another, in-order. These functions can also fail with an error, which stops the flow and returns immediately.
+</p>
+
 				
 			</div>
 		</div>
@@ -391,7 +395,7 @@ Returns the first error. If there was not exactly 1 error, returns nil.
 		
 			
 			
-			<h2 id="Options">type <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L24">Options</a>
+			<h2 id="Options">type <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L26">Options</a>
 				<a class="permalink" href="#Options">&#xb6;</a>
 				
 				
@@ -421,7 +425,7 @@ Options defines all available options to configure a Pipe
 		
 			
 			
-			<h2 id="Pipe">type <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L18">Pipe</a>
+			<h2 id="Pipe">type <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L20">Pipe</a>
 				<a class="permalink" href="#Pipe">&#xb6;</a>
 				
 				
@@ -487,7 +491,7 @@ true
 
 			
 				
-				<h3 id="New">func <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L31">New</a>
+				<h3 id="New">func <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L33">New</a>
 					<a class="permalink" href="#New">&#xb6;</a>
 					
 					
@@ -503,7 +507,7 @@ New returns a Pipe with the provided options, ready to Append new functions
 
 			
 				
-				<h3 id="Pipe.Append">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L67">Append</a>
+				<h3 id="Pipe.Append">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L69">Append</a>
 					<a class="permalink" href="#Pipe.Append">&#xb6;</a>
 					
 					
@@ -522,7 +526,7 @@ The return types of a function must match the parameter types of the next append
 				
 			
 				
-				<h3 id="Pipe.Concat">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L76">Concat</a>
+				<h3 id="Pipe.Concat">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L78">Concat</a>
 					<a class="permalink" href="#Pipe.Concat">&#xb6;</a>
 					
 					
@@ -537,7 +541,7 @@ Concat returns a new Pipe with the functions in &#39;other&#39; appended to its 
 				
 			
 				
-				<h3 id="Pipe.Do">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L38">Do</a>
+				<h3 id="Pipe.Do">func (Pipe) <a href="/go/pipe/src/github.com/johnstarich/go/pipe/pipe.go#L40">Do</a>
 					<a class="permalink" href="#Pipe.Do">&#xb6;</a>
 					
 					

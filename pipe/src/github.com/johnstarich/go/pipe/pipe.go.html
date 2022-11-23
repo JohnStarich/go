@@ -55,178 +55,180 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span>package pipe
-<span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span>import (
-<span id="L4" class="ln">     4  </span>	&#34;fmt&#34;
-<span id="L5" class="ln">     5  </span>	&#34;reflect&#34;
-<span id="L6" class="ln">     6  </span>)
-<span id="L7" class="ln">     7  </span>
-<span id="L8" class="ln">     8  </span>var (
-<span id="L9" class="ln">     9  </span>	interfaceSliceType = reflect.TypeOf([]interface{}{})
-<span id="L10" class="ln">    10  </span>	errType            = reflect.TypeOf((*error)(nil)).Elem()
-<span id="L11" class="ln">    11  </span>)
-<span id="L12" class="ln">    12  </span>
-<span id="L13" class="ln">    13  </span><span class="comment">// Pipe combines several functions together into a pipeline.</span>
-<span id="L14" class="ln">    14  </span><span class="comment">// Each appended function&#39;s return values are passed as parameters to the next function.</span>
-<span id="L15" class="ln">    15  </span><span class="comment">//</span>
-<span id="L16" class="ln">    16  </span><span class="comment">// If a function returns an error, then the pipe&#39;s execution is halted and immediately returns.</span>
-<span id="L17" class="ln">    17  </span><span class="comment">// See Options for modifications to this behavior.</span>
-<span id="L18" class="ln">    18  </span>type Pipe struct {
-<span id="L19" class="ln">    19  </span>	options Options
-<span id="L20" class="ln">    20  </span>	ops     []reflect.Value
-<span id="L21" class="ln">    21  </span>}
-<span id="L22" class="ln">    22  </span>
-<span id="L23" class="ln">    23  </span><span class="comment">// Options defines all available options to configure a Pipe</span>
-<span id="L24" class="ln">    24  </span>type Options struct {
-<span id="L25" class="ln">    25  </span>	<span class="comment">// KeepGoing continues running later functions in a Pipe after an error is encountered.</span>
-<span id="L26" class="ln">    26  </span>	<span class="comment">// The errors are collected into an Error and returned at the end.</span>
-<span id="L27" class="ln">    27  </span>	KeepGoing bool
-<span id="L28" class="ln">    28  </span>}
-<span id="L29" class="ln">    29  </span>
-<span id="L30" class="ln">    30  </span><span class="comment">// New returns a Pipe with the provided options, ready to Append new functions</span>
-<span id="L31" class="ln">    31  </span>func New(options Options) Pipe {
-<span id="L32" class="ln">    32  </span>	return Pipe{
-<span id="L33" class="ln">    33  </span>		options: options,
-<span id="L34" class="ln">    34  </span>	}
-<span id="L35" class="ln">    35  </span>}
-<span id="L36" class="ln">    36  </span>
-<span id="L37" class="ln">    37  </span><span class="comment">// Do executes this Pipe, running each appended function in-order and handling any errors</span>
-<span id="L38" class="ln">    38  </span>func (p Pipe) Do(args ...interface{}) ([]interface{}, error) {
-<span id="L39" class="ln">    39  </span>	argVals := []reflect.Value{reflect.ValueOf(args)}
-<span id="L40" class="ln">    40  </span>	var errs []error
-<span id="L41" class="ln">    41  </span>	for _, op := range p.ops {
-<span id="L42" class="ln">    42  </span>		var err error
-<span id="L43" class="ln">    43  </span>		argVals, err = splitErrValue(op.Call(argVals))
-<span id="L44" class="ln">    44  </span>		if err != nil {
-<span id="L45" class="ln">    45  </span>			errs = append(errs, err)
-<span id="L46" class="ln">    46  </span>			if !p.options.KeepGoing {
-<span id="L47" class="ln">    47  </span>				break
-<span id="L48" class="ln">    48  </span>			}
-<span id="L49" class="ln">    49  </span>		}
-<span id="L50" class="ln">    50  </span>	}
-<span id="L51" class="ln">    51  </span>	if len(errs) &gt; 0 {
-<span id="L52" class="ln">    52  </span>		return nil, Error{errs: errs}
-<span id="L53" class="ln">    53  </span>	}
-<span id="L54" class="ln">    54  </span>
-<span id="L55" class="ln">    55  </span>	resultVals := argVals
-<span id="L56" class="ln">    56  </span>	results := make([]interface{}, len(resultVals))
-<span id="L57" class="ln">    57  </span>	for i := range resultVals {
-<span id="L58" class="ln">    58  </span>		results[i] = resultVals[i].Interface()
-<span id="L59" class="ln">    59  </span>	}
-<span id="L60" class="ln">    60  </span>	return results, nil
-<span id="L61" class="ln">    61  </span>}
-<span id="L62" class="ln">    62  </span>
-<span id="L63" class="ln">    63  </span><span class="comment">// Append returns a new Pipe with the fn function appended to its operations.</span>
-<span id="L64" class="ln">    64  </span><span class="comment">//</span>
-<span id="L65" class="ln">    65  </span><span class="comment">// The very first function in a Pipe must accept []interface{} as it&#39;s only parameter.</span>
-<span id="L66" class="ln">    66  </span><span class="comment">// The return types of a function must match the parameter types of the next appended function, panicking otherwise.</span>
-<span id="L67" class="ln">    67  </span>func (p Pipe) Append(fn interface{}) Pipe {
-<span id="L68" class="ln">    68  </span>	p, err := p.appendFunc(fn)
-<span id="L69" class="ln">    69  </span>	if err != nil {
-<span id="L70" class="ln">    70  </span>		panic(err)
-<span id="L71" class="ln">    71  </span>	}
-<span id="L72" class="ln">    72  </span>	return p
-<span id="L73" class="ln">    73  </span>}
-<span id="L74" class="ln">    74  </span>
-<span id="L75" class="ln">    75  </span><span class="comment">// Concat returns a new Pipe with the functions in &#39;other&#39; appended to its operations</span>
-<span id="L76" class="ln">    76  </span>func (p Pipe) Concat(other Pipe) Pipe {
-<span id="L77" class="ln">    77  </span>	if len(p.ops) == 0 {
-<span id="L78" class="ln">    78  </span>		return other
-<span id="L79" class="ln">    79  </span>	}
-<span id="L80" class="ln">    80  </span>
-<span id="L81" class="ln">    81  </span>	lastOp := p.ops[len(p.ops)-1].Type()
-<span id="L82" class="ln">    82  </span>	out := make([]reflect.Type, lastOp.NumOut())
-<span id="L83" class="ln">    83  </span>	for i := range out {
-<span id="L84" class="ln">    84  </span>		out[i] = lastOp.Out(i)
-<span id="L85" class="ln">    85  </span>	}
-<span id="L86" class="ln">    86  </span>	if len(out) &gt; 0 &amp;&amp; isErr(out[len(out)-1]) {
-<span id="L87" class="ln">    87  </span>		<span class="comment">// trim off last error return type, if present</span>
-<span id="L88" class="ln">    88  </span>		out = out[:len(out)-1]
-<span id="L89" class="ln">    89  </span>	}
-<span id="L90" class="ln">    90  </span>	bridgeType := reflect.FuncOf(out, []reflect.Type{interfaceSliceType}, false)
-<span id="L91" class="ln">    91  </span>	bridgeFn := func(argVals []reflect.Value) (results []reflect.Value) {
-<span id="L92" class="ln">    92  </span>		args := make([]interface{}, len(argVals))
-<span id="L93" class="ln">    93  </span>		for i := range args {
-<span id="L94" class="ln">    94  </span>			args[i] = argVals[i].Interface()
-<span id="L95" class="ln">    95  </span>		}
-<span id="L96" class="ln">    96  </span>		return []reflect.Value{reflect.ValueOf(args)}
-<span id="L97" class="ln">    97  </span>	}
-<span id="L98" class="ln">    98  </span>
-<span id="L99" class="ln">    99  </span>	p = p.Append(reflect.MakeFunc(bridgeType, bridgeFn).Interface())
-<span id="L100" class="ln">   100  </span>	p.ops = append(p.ops, other.ops...)
-<span id="L101" class="ln">   101  </span>	return p
-<span id="L102" class="ln">   102  </span>}
-<span id="L103" class="ln">   103  </span>
-<span id="L104" class="ln">   104  </span>func (p Pipe) appendFunc(fn interface{}) (Pipe, error) {
-<span id="L105" class="ln">   105  </span>	op := reflect.ValueOf(fn)
-<span id="L106" class="ln">   106  </span>	if op.Kind() != reflect.Func {
-<span id="L107" class="ln">   107  </span>		return p, fmt.Errorf(&#34;pipe value must a function, got: %T&#34;, fn)
-<span id="L108" class="ln">   108  </span>	}
-<span id="L109" class="ln">   109  </span>	if len(p.ops) == 0 {
-<span id="L110" class="ln">   110  </span>		opType := op.Type()
-<span id="L111" class="ln">   111  </span>		if opType.NumIn() != 1 || opType.In(0) != interfaceSliceType {
-<span id="L112" class="ln">   112  </span>			return p, fmt.Errorf(&#34;first pipe must accept 1 parameter of type []interface{}&#34;)
-<span id="L113" class="ln">   113  </span>		}
-<span id="L114" class="ln">   114  </span>	} else {
-<span id="L115" class="ln">   115  </span>		lastOp := p.ops[len(p.ops)-1]
-<span id="L116" class="ln">   116  </span>		if err := outMatchesIn(lastOp.Type(), op.Type()); err != nil {
-<span id="L117" class="ln">   117  </span>			return p, err
-<span id="L118" class="ln">   118  </span>		}
-<span id="L119" class="ln">   119  </span>	}
-<span id="L120" class="ln">   120  </span>	p.ops = append(p.ops, op)
-<span id="L121" class="ln">   121  </span>	return p, nil
-<span id="L122" class="ln">   122  </span>}
-<span id="L123" class="ln">   123  </span>
-<span id="L124" class="ln">   124  </span>func splitErrValue(args []reflect.Value) ([]reflect.Value, error) {
-<span id="L125" class="ln">   125  </span>	if len(args) == 0 {
-<span id="L126" class="ln">   126  </span>		return args, nil
-<span id="L127" class="ln">   127  </span>	}
-<span id="L128" class="ln">   128  </span>	lastVal := args[len(args)-1]
-<span id="L129" class="ln">   129  </span>	if !isErr(lastVal.Type()) {
-<span id="L130" class="ln">   130  </span>		return args, nil
-<span id="L131" class="ln">   131  </span>	}
-<span id="L132" class="ln">   132  </span>
-<span id="L133" class="ln">   133  </span>	errInt := lastVal.Interface()
-<span id="L134" class="ln">   134  </span>	var err error
-<span id="L135" class="ln">   135  </span>	if errInt != nil {
-<span id="L136" class="ln">   136  </span>		err = errInt.(error)
-<span id="L137" class="ln">   137  </span>	}
-<span id="L138" class="ln">   138  </span>	return args[:len(args)-1], err
-<span id="L139" class="ln">   139  </span>}
-<span id="L140" class="ln">   140  </span>
-<span id="L141" class="ln">   141  </span>func isErr(v reflect.Type) bool {
-<span id="L142" class="ln">   142  </span>	return v.Implements(errType)
-<span id="L143" class="ln">   143  </span>}
-<span id="L144" class="ln">   144  </span>
-<span id="L145" class="ln">   145  </span>func outMatchesIn(outFn, inFn reflect.Type) error {
-<span id="L146" class="ln">   146  </span>	var outTypes []reflect.Type
-<span id="L147" class="ln">   147  </span>	for i := 0; i &lt; outFn.NumOut(); i++ {
-<span id="L148" class="ln">   148  </span>		outTypes = append(outTypes, outFn.Out(i))
-<span id="L149" class="ln">   149  </span>	}
-<span id="L150" class="ln">   150  </span>	var inTypes []reflect.Type
-<span id="L151" class="ln">   151  </span>	for i := 0; i &lt; inFn.NumIn(); i++ {
-<span id="L152" class="ln">   152  </span>		inTypes = append(inTypes, inFn.In(i))
-<span id="L153" class="ln">   153  </span>	}
-<span id="L154" class="ln">   154  </span>
-<span id="L155" class="ln">   155  </span>	if len(outTypes) == len(inTypes)+1 &amp;&amp; isErr(outTypes[len(outTypes)-1]) {
-<span id="L156" class="ln">   156  </span>		outTypes = outTypes[:len(outTypes)-1]
-<span id="L157" class="ln">   157  </span>	}
-<span id="L158" class="ln">   158  </span>
-<span id="L159" class="ln">   159  </span>	if len(outTypes) != len(inTypes) {
-<span id="L160" class="ln">   160  </span>		return fmt.Errorf(&#34;new function&#39;s parameter types do not match output function&#39;s return types: %v != %v&#34;, outTypes, inTypes)
-<span id="L161" class="ln">   161  </span>	}
-<span id="L162" class="ln">   162  </span>
-<span id="L163" class="ln">   163  </span>	for i := range outTypes {
-<span id="L164" class="ln">   164  </span>		out := outTypes[i]
-<span id="L165" class="ln">   165  </span>		in := inTypes[i]
-<span id="L166" class="ln">   166  </span>		if out != in {
-<span id="L167" class="ln">   167  </span>			return fmt.Errorf(&#34;new function&#39;s parameter type %v does not match the expected return type %v&#34;, in, out)
-<span id="L168" class="ln">   168  </span>		}
-<span id="L169" class="ln">   169  </span>	}
-<span id="L170" class="ln">   170  </span>	return nil
-<span id="L171" class="ln">   171  </span>}
-<span id="L172" class="ln">   172  </span>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Package pipe handles errors so you don&#39;t have to.</span>
+<span id="L2" class="ln">     2  </span><span class="comment">// A `Pipe` is a series of functions that pass data to one another, in-order. These functions can also fail with an error, which stops the flow and returns immediately.</span>
+<span id="L3" class="ln">     3  </span>package pipe
+<span id="L4" class="ln">     4  </span>
+<span id="L5" class="ln">     5  </span>import (
+<span id="L6" class="ln">     6  </span>	&#34;fmt&#34;
+<span id="L7" class="ln">     7  </span>	&#34;reflect&#34;
+<span id="L8" class="ln">     8  </span>)
+<span id="L9" class="ln">     9  </span>
+<span id="L10" class="ln">    10  </span>var (
+<span id="L11" class="ln">    11  </span>	interfaceSliceType = reflect.TypeOf([]interface{}{})
+<span id="L12" class="ln">    12  </span>	errType            = reflect.TypeOf((*error)(nil)).Elem()
+<span id="L13" class="ln">    13  </span>)
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span><span class="comment">// Pipe combines several functions together into a pipeline.</span>
+<span id="L16" class="ln">    16  </span><span class="comment">// Each appended function&#39;s return values are passed as parameters to the next function.</span>
+<span id="L17" class="ln">    17  </span><span class="comment">//</span>
+<span id="L18" class="ln">    18  </span><span class="comment">// If a function returns an error, then the pipe&#39;s execution is halted and immediately returns.</span>
+<span id="L19" class="ln">    19  </span><span class="comment">// See Options for modifications to this behavior.</span>
+<span id="L20" class="ln">    20  </span>type Pipe struct {
+<span id="L21" class="ln">    21  </span>	options Options
+<span id="L22" class="ln">    22  </span>	ops     []reflect.Value
+<span id="L23" class="ln">    23  </span>}
+<span id="L24" class="ln">    24  </span>
+<span id="L25" class="ln">    25  </span><span class="comment">// Options defines all available options to configure a Pipe</span>
+<span id="L26" class="ln">    26  </span>type Options struct {
+<span id="L27" class="ln">    27  </span>	<span class="comment">// KeepGoing continues running later functions in a Pipe after an error is encountered.</span>
+<span id="L28" class="ln">    28  </span>	<span class="comment">// The errors are collected into an Error and returned at the end.</span>
+<span id="L29" class="ln">    29  </span>	KeepGoing bool
+<span id="L30" class="ln">    30  </span>}
+<span id="L31" class="ln">    31  </span>
+<span id="L32" class="ln">    32  </span><span class="comment">// New returns a Pipe with the provided options, ready to Append new functions</span>
+<span id="L33" class="ln">    33  </span>func New(options Options) Pipe {
+<span id="L34" class="ln">    34  </span>	return Pipe{
+<span id="L35" class="ln">    35  </span>		options: options,
+<span id="L36" class="ln">    36  </span>	}
+<span id="L37" class="ln">    37  </span>}
+<span id="L38" class="ln">    38  </span>
+<span id="L39" class="ln">    39  </span><span class="comment">// Do executes this Pipe, running each appended function in-order and handling any errors</span>
+<span id="L40" class="ln">    40  </span>func (p Pipe) Do(args ...interface{}) ([]interface{}, error) {
+<span id="L41" class="ln">    41  </span>	argVals := []reflect.Value{reflect.ValueOf(args)}
+<span id="L42" class="ln">    42  </span>	var errs []error
+<span id="L43" class="ln">    43  </span>	for _, op := range p.ops {
+<span id="L44" class="ln">    44  </span>		var err error
+<span id="L45" class="ln">    45  </span>		argVals, err = splitErrValue(op.Call(argVals))
+<span id="L46" class="ln">    46  </span>		if err != nil {
+<span id="L47" class="ln">    47  </span>			errs = append(errs, err)
+<span id="L48" class="ln">    48  </span>			if !p.options.KeepGoing {
+<span id="L49" class="ln">    49  </span>				break
+<span id="L50" class="ln">    50  </span>			}
+<span id="L51" class="ln">    51  </span>		}
+<span id="L52" class="ln">    52  </span>	}
+<span id="L53" class="ln">    53  </span>	if len(errs) &gt; 0 {
+<span id="L54" class="ln">    54  </span>		return nil, Error{errs: errs}
+<span id="L55" class="ln">    55  </span>	}
+<span id="L56" class="ln">    56  </span>
+<span id="L57" class="ln">    57  </span>	resultVals := argVals
+<span id="L58" class="ln">    58  </span>	results := make([]interface{}, len(resultVals))
+<span id="L59" class="ln">    59  </span>	for i := range resultVals {
+<span id="L60" class="ln">    60  </span>		results[i] = resultVals[i].Interface()
+<span id="L61" class="ln">    61  </span>	}
+<span id="L62" class="ln">    62  </span>	return results, nil
+<span id="L63" class="ln">    63  </span>}
+<span id="L64" class="ln">    64  </span>
+<span id="L65" class="ln">    65  </span><span class="comment">// Append returns a new Pipe with the fn function appended to its operations.</span>
+<span id="L66" class="ln">    66  </span><span class="comment">//</span>
+<span id="L67" class="ln">    67  </span><span class="comment">// The very first function in a Pipe must accept []interface{} as it&#39;s only parameter.</span>
+<span id="L68" class="ln">    68  </span><span class="comment">// The return types of a function must match the parameter types of the next appended function, panicking otherwise.</span>
+<span id="L69" class="ln">    69  </span>func (p Pipe) Append(fn interface{}) Pipe {
+<span id="L70" class="ln">    70  </span>	p, err := p.appendFunc(fn)
+<span id="L71" class="ln">    71  </span>	if err != nil {
+<span id="L72" class="ln">    72  </span>		panic(err)
+<span id="L73" class="ln">    73  </span>	}
+<span id="L74" class="ln">    74  </span>	return p
+<span id="L75" class="ln">    75  </span>}
+<span id="L76" class="ln">    76  </span>
+<span id="L77" class="ln">    77  </span><span class="comment">// Concat returns a new Pipe with the functions in &#39;other&#39; appended to its operations</span>
+<span id="L78" class="ln">    78  </span>func (p Pipe) Concat(other Pipe) Pipe {
+<span id="L79" class="ln">    79  </span>	if len(p.ops) == 0 {
+<span id="L80" class="ln">    80  </span>		return other
+<span id="L81" class="ln">    81  </span>	}
+<span id="L82" class="ln">    82  </span>
+<span id="L83" class="ln">    83  </span>	lastOp := p.ops[len(p.ops)-1].Type()
+<span id="L84" class="ln">    84  </span>	out := make([]reflect.Type, lastOp.NumOut())
+<span id="L85" class="ln">    85  </span>	for i := range out {
+<span id="L86" class="ln">    86  </span>		out[i] = lastOp.Out(i)
+<span id="L87" class="ln">    87  </span>	}
+<span id="L88" class="ln">    88  </span>	if len(out) &gt; 0 &amp;&amp; isErr(out[len(out)-1]) {
+<span id="L89" class="ln">    89  </span>		<span class="comment">// trim off last error return type, if present</span>
+<span id="L90" class="ln">    90  </span>		out = out[:len(out)-1]
+<span id="L91" class="ln">    91  </span>	}
+<span id="L92" class="ln">    92  </span>	bridgeType := reflect.FuncOf(out, []reflect.Type{interfaceSliceType}, false)
+<span id="L93" class="ln">    93  </span>	bridgeFn := func(argVals []reflect.Value) (results []reflect.Value) {
+<span id="L94" class="ln">    94  </span>		args := make([]interface{}, len(argVals))
+<span id="L95" class="ln">    95  </span>		for i := range args {
+<span id="L96" class="ln">    96  </span>			args[i] = argVals[i].Interface()
+<span id="L97" class="ln">    97  </span>		}
+<span id="L98" class="ln">    98  </span>		return []reflect.Value{reflect.ValueOf(args)}
+<span id="L99" class="ln">    99  </span>	}
+<span id="L100" class="ln">   100  </span>
+<span id="L101" class="ln">   101  </span>	p = p.Append(reflect.MakeFunc(bridgeType, bridgeFn).Interface())
+<span id="L102" class="ln">   102  </span>	p.ops = append(p.ops, other.ops...)
+<span id="L103" class="ln">   103  </span>	return p
+<span id="L104" class="ln">   104  </span>}
+<span id="L105" class="ln">   105  </span>
+<span id="L106" class="ln">   106  </span>func (p Pipe) appendFunc(fn interface{}) (Pipe, error) {
+<span id="L107" class="ln">   107  </span>	op := reflect.ValueOf(fn)
+<span id="L108" class="ln">   108  </span>	if op.Kind() != reflect.Func {
+<span id="L109" class="ln">   109  </span>		return p, fmt.Errorf(&#34;pipe value must a function, got: %T&#34;, fn)
+<span id="L110" class="ln">   110  </span>	}
+<span id="L111" class="ln">   111  </span>	if len(p.ops) == 0 {
+<span id="L112" class="ln">   112  </span>		opType := op.Type()
+<span id="L113" class="ln">   113  </span>		if opType.NumIn() != 1 || opType.In(0) != interfaceSliceType {
+<span id="L114" class="ln">   114  </span>			return p, fmt.Errorf(&#34;first pipe must accept 1 parameter of type []interface{}&#34;)
+<span id="L115" class="ln">   115  </span>		}
+<span id="L116" class="ln">   116  </span>	} else {
+<span id="L117" class="ln">   117  </span>		lastOp := p.ops[len(p.ops)-1]
+<span id="L118" class="ln">   118  </span>		if err := outMatchesIn(lastOp.Type(), op.Type()); err != nil {
+<span id="L119" class="ln">   119  </span>			return p, err
+<span id="L120" class="ln">   120  </span>		}
+<span id="L121" class="ln">   121  </span>	}
+<span id="L122" class="ln">   122  </span>	p.ops = append(p.ops, op)
+<span id="L123" class="ln">   123  </span>	return p, nil
+<span id="L124" class="ln">   124  </span>}
+<span id="L125" class="ln">   125  </span>
+<span id="L126" class="ln">   126  </span>func splitErrValue(args []reflect.Value) ([]reflect.Value, error) {
+<span id="L127" class="ln">   127  </span>	if len(args) == 0 {
+<span id="L128" class="ln">   128  </span>		return args, nil
+<span id="L129" class="ln">   129  </span>	}
+<span id="L130" class="ln">   130  </span>	lastVal := args[len(args)-1]
+<span id="L131" class="ln">   131  </span>	if !isErr(lastVal.Type()) {
+<span id="L132" class="ln">   132  </span>		return args, nil
+<span id="L133" class="ln">   133  </span>	}
+<span id="L134" class="ln">   134  </span>
+<span id="L135" class="ln">   135  </span>	errInt := lastVal.Interface()
+<span id="L136" class="ln">   136  </span>	var err error
+<span id="L137" class="ln">   137  </span>	if errInt != nil {
+<span id="L138" class="ln">   138  </span>		err = errInt.(error)
+<span id="L139" class="ln">   139  </span>	}
+<span id="L140" class="ln">   140  </span>	return args[:len(args)-1], err
+<span id="L141" class="ln">   141  </span>}
+<span id="L142" class="ln">   142  </span>
+<span id="L143" class="ln">   143  </span>func isErr(v reflect.Type) bool {
+<span id="L144" class="ln">   144  </span>	return v.Implements(errType)
+<span id="L145" class="ln">   145  </span>}
+<span id="L146" class="ln">   146  </span>
+<span id="L147" class="ln">   147  </span>func outMatchesIn(outFn, inFn reflect.Type) error {
+<span id="L148" class="ln">   148  </span>	var outTypes []reflect.Type
+<span id="L149" class="ln">   149  </span>	for i := 0; i &lt; outFn.NumOut(); i++ {
+<span id="L150" class="ln">   150  </span>		outTypes = append(outTypes, outFn.Out(i))
+<span id="L151" class="ln">   151  </span>	}
+<span id="L152" class="ln">   152  </span>	var inTypes []reflect.Type
+<span id="L153" class="ln">   153  </span>	for i := 0; i &lt; inFn.NumIn(); i++ {
+<span id="L154" class="ln">   154  </span>		inTypes = append(inTypes, inFn.In(i))
+<span id="L155" class="ln">   155  </span>	}
+<span id="L156" class="ln">   156  </span>
+<span id="L157" class="ln">   157  </span>	if len(outTypes) == len(inTypes)+1 &amp;&amp; isErr(outTypes[len(outTypes)-1]) {
+<span id="L158" class="ln">   158  </span>		outTypes = outTypes[:len(outTypes)-1]
+<span id="L159" class="ln">   159  </span>	}
+<span id="L160" class="ln">   160  </span>
+<span id="L161" class="ln">   161  </span>	if len(outTypes) != len(inTypes) {
+<span id="L162" class="ln">   162  </span>		return fmt.Errorf(&#34;new function&#39;s parameter types do not match output function&#39;s return types: %v != %v&#34;, outTypes, inTypes)
+<span id="L163" class="ln">   163  </span>	}
+<span id="L164" class="ln">   164  </span>
+<span id="L165" class="ln">   165  </span>	for i := range outTypes {
+<span id="L166" class="ln">   166  </span>		out := outTypes[i]
+<span id="L167" class="ln">   167  </span>		in := inTypes[i]
+<span id="L168" class="ln">   168  </span>		if out != in {
+<span id="L169" class="ln">   169  </span>			return fmt.Errorf(&#34;new function&#39;s parameter type %v does not match the expected return type %v&#34;, in, out)
+<span id="L170" class="ln">   170  </span>		}
+<span id="L171" class="ln">   171  </span>	}
+<span id="L172" class="ln">   172  </span>	return nil
+<span id="L173" class="ln">   173  </span>}
+<span id="L174" class="ln">   174  </span>
 </pre><p></p>
 
 <div id="footer">
