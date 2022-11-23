@@ -1,0 +1,310 @@
+<!DOCTYPE html><html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#375EAB"/>
+
+  <title>src/github.com/johnstarich/go/goop/cmd/goop/app.go - GoPages</title>
+
+<link type="text/css" rel="stylesheet" href="/go/goop/lib/godoc/style.css"/>
+
+<script>window.initFuncs = [];</script>
+<script src="/go/goop/lib/godoc/jquery.js" defer=""></script>
+
+
+
+
+<script>var goVersion = "go1.16.15";</script>
+<script src="/go/goop/lib/godoc/godocs.js" defer=""></script>
+
+</head>
+<body>
+
+<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/go/goop/pkg/github.com/johnstarich/go/goop/">GoPages | Auto-generated docs</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/go/goop/pkg/github.com/johnstarich/go/goop/">GoPages</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">▽</span></a>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Source file
+    <a href="/go/goop/src">src</a>/<a href="/go/goop/src/github.com">github.com</a>/<a href="/go/goop/src/github.com/johnstarich">johnstarich</a>/<a href="/go/goop/src/github.com/johnstarich/go">go</a>/<a href="/go/goop/src/github.com/johnstarich/go/goop">goop</a>/<a href="/go/goop/src/github.com/johnstarich/go/goop/cmd">cmd</a>/<a href="/go/goop/src/github.com/johnstarich/go/goop/cmd/goop">goop</a>/<span class="text-muted">app.go</span>
+  </h1>
+
+
+
+
+
+  <h2>
+    Documentation: <a href="/go/goop/pkg/github.com/johnstarich/go/goop/cmd/goop">github.com/johnstarich/go/goop/cmd/goop</a>
+  </h2>
+
+
+
+<div id="nav"></div>
+
+
+<script type="text/javascript">document.ANALYSIS_DATA = null;</script>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Command goop installs and manages both local and remote Go modules.</span>
+<span id="L2" class="ln">     2  </span>package main
+<span id="L3" class="ln">     3  </span>
+<span id="L4" class="ln">     4  </span>import (
+<span id="L5" class="ln">     5  </span>	&#34;context&#34;
+<span id="L6" class="ln">     6  </span>	&#34;io&#34;
+<span id="L7" class="ln">     7  </span>	&#34;os&#34;
+<span id="L8" class="ln">     8  </span>	&#34;os/exec&#34;
+<span id="L9" class="ln">     9  </span>	&#34;path&#34;
+<span id="L10" class="ln">    10  </span>	&#34;strings&#34;
+<span id="L11" class="ln">    11  </span>
+<span id="L12" class="ln">    12  </span>	&#34;github.com/hack-pad/hackpadfs&#34;
+<span id="L13" class="ln">    13  </span>	osfs &#34;github.com/hack-pad/hackpadfs/os&#34;
+<span id="L14" class="ln">    14  </span>	&#34;github.com/spf13/cobra&#34;
+<span id="L15" class="ln">    15  </span>)
+<span id="L16" class="ln">    16  </span>
+<span id="L17" class="ln">    17  </span>func run(args []string, outWriter, errWriter io.Writer) error {
+<span id="L18" class="ln">    18  </span>	app, err := newApp(outWriter, errWriter)
+<span id="L19" class="ln">    19  </span>	if err == nil {
+<span id="L20" class="ln">    20  </span>		err = app.Run(args[1:])
+<span id="L21" class="ln">    21  </span>	}
+<span id="L22" class="ln">    22  </span>	return err
+<span id="L23" class="ln">    23  </span>}
+<span id="L24" class="ln">    24  </span>
+<span id="L25" class="ln">    25  </span>const appName = &#34;goop&#34;
+<span id="L26" class="ln">    26  </span>
+<span id="L27" class="ln">    27  </span><span class="comment">// App is the goop application object, used to run commands from user input.</span>
+<span id="L28" class="ln">    28  </span>type App struct {
+<span id="L29" class="ln">    29  </span>	errWriter       io.Writer
+<span id="L30" class="ln">    30  </span>	fs              hackpadfs.FS
+<span id="L31" class="ln">    31  </span>	getEnv          func(string) string
+<span id="L32" class="ln">    32  </span>	lookPath        func(string) (string, error)
+<span id="L33" class="ln">    33  </span>	outWriter       io.Writer
+<span id="L34" class="ln">    34  </span>	runCmd          func(*exec.Cmd) error
+<span id="L35" class="ln">    35  </span>	staticBinDir    string
+<span id="L36" class="ln">    36  </span>	staticCacheDir  string
+<span id="L37" class="ln">    37  </span>	staticOSHomeDir string
+<span id="L38" class="ln">    38  </span>}
+<span id="L39" class="ln">    39  </span>
+<span id="L40" class="ln">    40  </span>func newApp(outWriter, errWriter io.Writer) (App, error) {
+<span id="L41" class="ln">    41  </span>	configDir, err := os.UserConfigDir()
+<span id="L42" class="ln">    42  </span>	if err != nil {
+<span id="L43" class="ln">    43  </span>		return App{}, err
+<span id="L44" class="ln">    44  </span>	}
+<span id="L45" class="ln">    45  </span>	cacheDir, err := os.UserCacheDir()
+<span id="L46" class="ln">    46  </span>	if err != nil {
+<span id="L47" class="ln">    47  </span>		return App{}, err
+<span id="L48" class="ln">    48  </span>	}
+<span id="L49" class="ln">    49  </span>	osHomeDir, err := os.UserHomeDir()
+<span id="L50" class="ln">    50  </span>	if err != nil {
+<span id="L51" class="ln">    51  </span>		return App{}, err
+<span id="L52" class="ln">    52  </span>	}
+<span id="L53" class="ln">    53  </span>
+<span id="L54" class="ln">    54  </span>	<span class="comment">// convert OS paths to FS paths</span>
+<span id="L55" class="ln">    55  </span>	osPaths := []*string{
+<span id="L56" class="ln">    56  </span>		&amp;configDir,
+<span id="L57" class="ln">    57  </span>		&amp;cacheDir,
+<span id="L58" class="ln">    58  </span>	}
+<span id="L59" class="ln">    59  </span>	fs := osfs.NewFS()
+<span id="L60" class="ln">    60  </span>	for _, p := range osPaths {
+<span id="L61" class="ln">    61  </span>		*p, err = fs.FromOSPath(*p)
+<span id="L62" class="ln">    62  </span>		if err != nil {
+<span id="L63" class="ln">    63  </span>			return App{}, err
+<span id="L64" class="ln">    64  </span>		}
+<span id="L65" class="ln">    65  </span>	}
+<span id="L66" class="ln">    66  </span>
+<span id="L67" class="ln">    67  </span>	const configBin = &#34;bin&#34;
+<span id="L68" class="ln">    68  </span>	return App{
+<span id="L69" class="ln">    69  </span>		errWriter:       errWriter,
+<span id="L70" class="ln">    70  </span>		fs:              fs,
+<span id="L71" class="ln">    71  </span>		getEnv:          os.Getenv,
+<span id="L72" class="ln">    72  </span>		lookPath:        exec.LookPath,
+<span id="L73" class="ln">    73  </span>		outWriter:       outWriter,
+<span id="L74" class="ln">    74  </span>		runCmd:          runCmd,
+<span id="L75" class="ln">    75  </span>		staticBinDir:    path.Join(configDir, appName, configBin),
+<span id="L76" class="ln">    76  </span>		staticCacheDir:  path.Join(cacheDir, appName),
+<span id="L77" class="ln">    77  </span>		staticOSHomeDir: osHomeDir,
+<span id="L78" class="ln">    78  </span>	}, nil
+<span id="L79" class="ln">    79  </span>}
+<span id="L80" class="ln">    80  </span>
+<span id="L81" class="ln">    81  </span>func runCmd(cmd *exec.Cmd) error {
+<span id="L82" class="ln">    82  </span>	cmd.Stdin = os.Stdin
+<span id="L83" class="ln">    83  </span>	cmd.Stdout = os.Stdout
+<span id="L84" class="ln">    84  </span>	cmd.Stderr = os.Stderr
+<span id="L85" class="ln">    85  </span>	return cmd.Run()
+<span id="L86" class="ln">    86  </span>}
+<span id="L87" class="ln">    87  </span>
+<span id="L88" class="ln">    88  </span>func formatCmd(cmd *exec.Cmd) string {
+<span id="L89" class="ln">    89  </span>	return strings.Join(cmd.Args, &#34; &#34;)
+<span id="L90" class="ln">    90  </span>}
+<span id="L91" class="ln">    91  </span>
+<span id="L92" class="ln">    92  </span><span class="comment">// Run executes this application with the given CLI args.</span>
+<span id="L93" class="ln">    93  </span><span class="comment">// Args should not include arg0.</span>
+<span id="L94" class="ln">    94  </span>func (a App) Run(args []string) error {
+<span id="L95" class="ln">    95  </span>	ranCommand := false
+<span id="L96" class="ln">    96  </span>	rootCommand := &amp;cobra.Command{
+<span id="L97" class="ln">    97  </span>		Use: appName,
+<span id="L98" class="ln">    98  </span>		Long: strings.TrimSpace(`
+<span id="L99" class="ln">    99  </span>Write and run Go scripts without the fuss. Start with &#39;goop install&#39;, then run the module&#39;s name as a command to execute it.
+<span id="L100" class="ln">   100  </span>
+<span id="L101" class="ln">   101  </span>Includes:
+<span id="L102" class="ln">   102  </span>- Support for both local and remote modules.
+<span id="L103" class="ln">   103  </span>- Automatic rebuilds of local modules.
+<span id="L104" class="ln">   104  </span>- Shareable command bin for easy setup on multiple machines.
+<span id="L105" class="ln">   105  </span>`),
+<span id="L106" class="ln">   106  </span>		CompletionOptions: cobra.CompletionOptions{
+<span id="L107" class="ln">   107  </span>			DisableDefaultCmd: true,
+<span id="L108" class="ln">   108  </span>		},
+<span id="L109" class="ln">   109  </span>		SilenceErrors: true,
+<span id="L110" class="ln">   110  </span>		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
+<span id="L111" class="ln">   111  </span>			cmd.SilenceUsage = true <span class="comment">// See https://github.com/spf13/cobra/issues/340#issuecomment-378726225</span>
+<span id="L112" class="ln">   112  </span>			ranCommand = true
+<span id="L113" class="ln">   113  </span>		},
+<span id="L114" class="ln">   114  </span>	}
+<span id="L115" class="ln">   115  </span>
+<span id="L116" class="ln">   116  </span>	rootCommand.SetOut(a.outWriter)
+<span id="L117" class="ln">   117  </span>	rootCommand.SetErr(a.errWriter)
+<span id="L118" class="ln">   118  </span>	rootCommand.SetHelpCommand(&amp;cobra.Command{Hidden: true}) <span class="comment">// remove help subcommand</span>
+<span id="L119" class="ln">   119  </span>
+<span id="L120" class="ln">   120  </span>	infoCommand := &amp;cobra.Command{
+<span id="L121" class="ln">   121  </span>		Use:   &#34;info&#34;,
+<span id="L122" class="ln">   122  </span>		Short: &#34;Shows general information for currently installed modules.&#34;,
+<span id="L123" class="ln">   123  </span>		RunE:  a.info,
+<span id="L124" class="ln">   124  </span>	}
+<span id="L125" class="ln">   125  </span>	rootCommand.AddCommand(infoCommand)
+<span id="L126" class="ln">   126  </span>
+<span id="L127" class="ln">   127  </span>	installCommand := &amp;cobra.Command{
+<span id="L128" class="ln">   128  </span>		Use:   &#34;install&#34;,
+<span id="L129" class="ln">   129  </span>		Short: &#34;Installs modules as commands for use on the command-line.&#34;,
+<span id="L130" class="ln">   130  </span>		Long: `Installs modules as commands for use on the command-line.
+<span id="L131" class="ln">   131  </span>
+<span id="L132" class="ln">   132  </span>For example, run &#39;goop install -p github.com/johnstarich/go/covet/cmd/covet&#39; to build and install the covet tool, then run &#39;covet --help&#39; to execute the covet command.
+<span id="L133" class="ln">   133  </span>
+<span id="L134" class="ln">   134  </span>To run an installed module, use its name on the command-line. For local modules, Goop automatically triggers a rebuild when the command is out of date. This means local scripts can be updated and used immediately.
+<span id="L135" class="ln">   135  </span>
+<span id="L136" class="ln">   136  </span>Set the GOOP_BIN environment variable to select a custom command location. This is helpful when sharing commands across multiple machines with a tool like OneDrive, iCloud Drive, or Google Drive.`,
+<span id="L137" class="ln">   137  </span>		RunE: a.install,
+<span id="L138" class="ln">   138  </span>	}
+<span id="L139" class="ln">   139  </span>	rootCommand.AddCommand(installCommand)
+<span id="L140" class="ln">   140  </span>	installCommand.Flags().StringP(&#34;package&#34;, &#34;p&#34;, &#34;&#34;, &#34;The package pattern to install. Can be a local or remote module. Remote modules may use a &#39;@version&#39; like &#39;-p github.com/johnstarich/go/covet/cmd/covet@latest&#39;. Local modules must use absolute paths without a &#39;@version&#39; like &#39;-p /path/to/my/module&#39;.&#34;)
+<span id="L141" class="ln">   141  </span>	panicIfErr(installCommand.MarkFlagRequired(&#34;package&#34;))
+<span id="L142" class="ln">   142  </span>	installCommand.Flags().String(&#34;name&#34;, &#34;&#34;, &#34;An optional name for the command when installed. For example, &#39;goop install -p github.com/johnstarich/go/covet/cmd/covet -name foo&#39; and then run &#39;foo&#39; as the command. Defaults to the package base name.&#34;)
+<span id="L143" class="ln">   143  </span>
+<span id="L144" class="ln">   144  </span>	removeCommand := &amp;cobra.Command{
+<span id="L145" class="ln">   145  </span>		Use:   &#34;rm&#34;,
+<span id="L146" class="ln">   146  </span>		Short: &#34;Removes a previously installed command.&#34;,
+<span id="L147" class="ln">   147  </span>		RunE:  a.rm,
+<span id="L148" class="ln">   148  </span>	}
+<span id="L149" class="ln">   149  </span>	rootCommand.AddCommand(removeCommand)
+<span id="L150" class="ln">   150  </span>	removeCommand.Flags().String(&#34;name&#34;, &#34;&#34;, &#34;The name of the module command to remove.&#34;)
+<span id="L151" class="ln">   151  </span>	panicIfErr(removeCommand.MarkFlagRequired(&#34;name&#34;))
+<span id="L152" class="ln">   152  </span>
+<span id="L153" class="ln">   153  </span>	applyCommands(rootCommand.Commands(), func(cmd *cobra.Command) {
+<span id="L154" class="ln">   154  </span>		cmd.Args = cobra.NoArgs
+<span id="L155" class="ln">   155  </span>	})
+<span id="L156" class="ln">   156  </span>	<span class="comment">// Add exec command after applying &#39;NoArgs&#39;.</span>
+<span id="L157" class="ln">   157  </span>	execCommand := &amp;cobra.Command{
+<span id="L158" class="ln">   158  </span>		Use:    &#34;exec&#34;,
+<span id="L159" class="ln">   159  </span>		Hidden: true,
+<span id="L160" class="ln">   160  </span>		RunE:   a.exec,
+<span id="L161" class="ln">   161  </span>	}
+<span id="L162" class="ln">   162  </span>	rootCommand.AddCommand(execCommand)
+<span id="L163" class="ln">   163  </span>	execCommand.Flags().String(&#34;encoded-name&#34;, &#34;&#34;, &#34;&#34;)
+<span id="L164" class="ln">   164  </span>	panicIfErr(execCommand.MarkFlagRequired(&#34;encoded-name&#34;))
+<span id="L165" class="ln">   165  </span>	execCommand.Flags().String(&#34;encoded-package&#34;, &#34;&#34;, &#34;&#34;)
+<span id="L166" class="ln">   166  </span>	panicIfErr(execCommand.MarkFlagRequired(&#34;encoded-package&#34;))
+<span id="L167" class="ln">   167  </span>
+<span id="L168" class="ln">   168  </span>	rootCommand.SetArgs(args)
+<span id="L169" class="ln">   169  </span>	err := rootCommand.ExecuteContext(context.Background())
+<span id="L170" class="ln">   170  </span>	if !ranCommand {
+<span id="L171" class="ln">   171  </span>		const usageExitCode = 2
+<span id="L172" class="ln">   172  </span>		err = wrapExitCode(err, usageExitCode)
+<span id="L173" class="ln">   173  </span>	}
+<span id="L174" class="ln">   174  </span>	return err
+<span id="L175" class="ln">   175  </span>}
+<span id="L176" class="ln">   176  </span>
+<span id="L177" class="ln">   177  </span><span class="comment">// panicIfErr is used to panic on any error which should be impossible.</span>
+<span id="L178" class="ln">   178  </span><span class="comment">// Helps test both nil and non-nil error branches.</span>
+<span id="L179" class="ln">   179  </span>func panicIfErr(err error) {
+<span id="L180" class="ln">   180  </span>	if err != nil {
+<span id="L181" class="ln">   181  </span>		panic(err)
+<span id="L182" class="ln">   182  </span>	}
+<span id="L183" class="ln">   183  </span>}
+<span id="L184" class="ln">   184  </span>
+<span id="L185" class="ln">   185  </span>type exitCodeError struct {
+<span id="L186" class="ln">   186  </span>	err  error
+<span id="L187" class="ln">   187  </span>	code int
+<span id="L188" class="ln">   188  </span>}
+<span id="L189" class="ln">   189  </span>
+<span id="L190" class="ln">   190  </span>func wrapExitCode(err error, code int) error {
+<span id="L191" class="ln">   191  </span>	if err == nil {
+<span id="L192" class="ln">   192  </span>		return nil
+<span id="L193" class="ln">   193  </span>	}
+<span id="L194" class="ln">   194  </span>	return exitCodeError{
+<span id="L195" class="ln">   195  </span>		err:  err,
+<span id="L196" class="ln">   196  </span>		code: code,
+<span id="L197" class="ln">   197  </span>	}
+<span id="L198" class="ln">   198  </span>}
+<span id="L199" class="ln">   199  </span>
+<span id="L200" class="ln">   200  </span>func (e exitCodeError) Error() string {
+<span id="L201" class="ln">   201  </span>	return e.err.Error()
+<span id="L202" class="ln">   202  </span>}
+<span id="L203" class="ln">   203  </span>
+<span id="L204" class="ln">   204  </span>func (e exitCodeError) Unwrap() error {
+<span id="L205" class="ln">   205  </span>	return e.err
+<span id="L206" class="ln">   206  </span>}
+<span id="L207" class="ln">   207  </span>
+<span id="L208" class="ln">   208  </span>func (e exitCodeError) ExitCode() int {
+<span id="L209" class="ln">   209  </span>	return e.code
+<span id="L210" class="ln">   210  </span>}
+<span id="L211" class="ln">   211  </span>
+<span id="L212" class="ln">   212  </span>func applyCommands(commands []*cobra.Command, apply func(cmd *cobra.Command)) {
+<span id="L213" class="ln">   213  </span>	for _, cmd := range commands {
+<span id="L214" class="ln">   214  </span>		apply(cmd)
+<span id="L215" class="ln">   215  </span>		applyCommands(cmd.Commands(), apply)
+<span id="L216" class="ln">   216  </span>	}
+<span id="L217" class="ln">   217  </span>}
+<span id="L218" class="ln">   218  </span>
+<span id="L219" class="ln">   219  </span>type osPathFS interface {
+<span id="L220" class="ln">   220  </span>	hackpadfs.FS
+<span id="L221" class="ln">   221  </span>	FromOSPath(path string) (string, error)
+<span id="L222" class="ln">   222  </span>	ToOSPath(path string) (string, error)
+<span id="L223" class="ln">   223  </span>}
+<span id="L224" class="ln">   224  </span>
+<span id="L225" class="ln">   225  </span><span class="comment">// fromOSPath attempts to derive the FS path from an OS-like path</span>
+<span id="L226" class="ln">   226  </span>func (a App) fromOSPath(path string) (string, error) {
+<span id="L227" class="ln">   227  </span>	fs, ok := a.fs.(osPathFS)
+<span id="L228" class="ln">   228  </span>	if ok {
+<span id="L229" class="ln">   229  </span>		return fs.FromOSPath(path)
+<span id="L230" class="ln">   230  </span>	}
+<span id="L231" class="ln">   231  </span>	return path, nil
+<span id="L232" class="ln">   232  </span>}
+<span id="L233" class="ln">   233  </span>
+<span id="L234" class="ln">   234  </span><span class="comment">// toOSPath attempts to derive an OS path from an FS path</span>
+<span id="L235" class="ln">   235  </span>func (a App) toOSPath(path string) (string, error) {
+<span id="L236" class="ln">   236  </span>	fs, ok := a.fs.(osPathFS)
+<span id="L237" class="ln">   237  </span>	if ok {
+<span id="L238" class="ln">   238  </span>		return fs.ToOSPath(path)
+<span id="L239" class="ln">   239  </span>	}
+<span id="L240" class="ln">   240  </span>	return path, nil
+<span id="L241" class="ln">   241  </span>}
+<span id="L242" class="ln">   242  </span>
+</pre><p></p>
+
+<div id="footer">
+Build version go1.16.15.<br/>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+
+
+</body></html>
