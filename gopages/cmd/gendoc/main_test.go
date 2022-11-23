@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/johnstarich/go/gopages/cmd"
@@ -13,6 +15,11 @@ import (
 
 func TestDocUpToDate(t *testing.T) {
 	t.Parallel()
+	targetGoVersion := os.Getenv("COVERAGE_VERSION")
+	if targetGoVersion == "" || !strings.HasPrefix(runtime.Version(), "go"+targetGoVersion) {
+		t.Skip("Skipping doc check. Will run on primary version of Go in CI. Current version:", runtime.Version())
+	}
+
 	templateBytes, err := os.ReadFile("doc.go")
 	require.NoError(t, err)
 	var newDoc bytes.Buffer
