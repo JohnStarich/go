@@ -91,7 +91,10 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				
+				<p>
+Package dns implements a working macOS DNS resolver (really just a `Dial`er) for projects that must cross-compile from Linux systems or just don&#39;t want CGO.
+</p>
+
 				
 			</div>
 		</div>
@@ -147,7 +150,7 @@
 		
 			
 			
-			<h2 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L30">New</a>
+			<h2 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L31">New</a>
 				<a class="permalink" href="#New">&#xb6;</a>
 				
 				
@@ -163,7 +166,7 @@ New returns a default DNS resolver for this runtime
 		
 			
 			
-			<h2 id="NewWithConfig">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L35">NewWithConfig</a>
+			<h2 id="NewWithConfig">func <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L36">NewWithConfig</a>
 				<a class="permalink" href="#NewWithConfig">&#xb6;</a>
 				
 				
@@ -180,7 +183,7 @@ NewWithConfig returns a DNS resolver with the given config for this runtime
 		
 			
 			
-			<h2 id="Config">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L21">Config</a>
+			<h2 id="Config">type <a href="/go/dns/src/github.com/johnstarich/go/dns/resolver.go#L22">Config</a>
 				<a class="permalink" href="#Config">&#xb6;</a>
 				
 				
@@ -242,7 +245,7 @@ Currently has no effect on non-macOS runtimes.
 					</td>
 				
 					<td class="pkg-synopsis">
-						
+						Package init provides a convenient side-effecting import to set the custom DNS resolver.
 					</td>
 				</tr>
 			
@@ -264,7 +267,7 @@ Currently has no effect on non-macOS runtimes.
 					</td>
 				
 					<td class="pkg-synopsis">
-						
+						Package staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
 					</td>
 				</tr>
 			
@@ -275,7 +278,7 @@ Currently has no effect on non-macOS runtimes.
 					</td>
 				
 					<td class="pkg-synopsis">
-						
+						Package testhelpers contains a test DNS server lifecycle manager.
 					</td>
 				</tr>
 			

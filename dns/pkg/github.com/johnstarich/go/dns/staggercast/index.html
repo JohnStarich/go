@@ -89,7 +89,11 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				
+				<p>
+Package staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
+For ease of use in a DNS resolver Dial func, all connections implement both net.Conn and net.PacketConn.
+</p>
+
 				
 			</div>
 		</div>
@@ -189,7 +193,7 @@
 		
 			
 			
-			<h2 id="Conn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L33">Conn</a>
+			<h2 id="Conn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L32">Conn</a>
 				<a class="permalink" href="#Conn">&#xb6;</a>
 				
 				
@@ -214,7 +218,7 @@ Conn fires out all Writes to all outgoing connections, Reads return the first su
 
 			
 				
-				<h3 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L54">New</a>
+				<h3 id="New">func <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L53">New</a>
 					<a class="permalink" href="#New">&#xb6;</a>
 					
 					
@@ -230,7 +234,7 @@ New combines multiple packet connections (net.Conn or net.PacketConn) and return
 
 			
 				
-				<h3 id="Conn.Close">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L320">Close</a>
+				<h3 id="Conn.Close">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L319">Close</a>
 					<a class="permalink" href="#Conn.Close">&#xb6;</a>
 					
 					
@@ -245,7 +249,7 @@ Close implements PacketConn
 				
 			
 				
-				<h3 id="Conn.LocalAddr">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L335">LocalAddr</a>
+				<h3 id="Conn.LocalAddr">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L334">LocalAddr</a>
 					<a class="permalink" href="#Conn.LocalAddr">&#xb6;</a>
 					
 					
@@ -260,7 +264,7 @@ LocalAddr implements PacketConn
 				
 			
 				
-				<h3 id="Conn.Read">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L213">Read</a>
+				<h3 id="Conn.Read">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L212">Read</a>
 					<a class="permalink" href="#Conn.Read">&#xb6;</a>
 					
 					
@@ -272,7 +276,7 @@ LocalAddr implements PacketConn
 				
 			
 				
-				<h3 id="Conn.ReadFrom">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L264">ReadFrom</a>
+				<h3 id="Conn.ReadFrom">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L263">ReadFrom</a>
 					<a class="permalink" href="#Conn.ReadFrom">&#xb6;</a>
 					
 					
@@ -287,7 +291,7 @@ ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May requi
 				
 			
 				
-				<h3 id="Conn.RemoteAddr">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L341">RemoteAddr</a>
+				<h3 id="Conn.RemoteAddr">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L340">RemoteAddr</a>
 					<a class="permalink" href="#Conn.RemoteAddr">&#xb6;</a>
 					
 					
@@ -302,7 +306,7 @@ RemoteAddr implements PacketConn
 				
 			
 				
-				<h3 id="Conn.SetDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L347">SetDeadline</a>
+				<h3 id="Conn.SetDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L346">SetDeadline</a>
 					<a class="permalink" href="#Conn.SetDeadline">&#xb6;</a>
 					
 					
@@ -317,7 +321,7 @@ SetDeadline implements PacketConn
 				
 			
 				
-				<h3 id="Conn.SetReadDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L357">SetReadDeadline</a>
+				<h3 id="Conn.SetReadDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L356">SetReadDeadline</a>
 					<a class="permalink" href="#Conn.SetReadDeadline">&#xb6;</a>
 					
 					
@@ -332,7 +336,7 @@ SetReadDeadline implements PacketConn
 				
 			
 				
-				<h3 id="Conn.SetWriteDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L367">SetWriteDeadline</a>
+				<h3 id="Conn.SetWriteDeadline">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L366">SetWriteDeadline</a>
 					<a class="permalink" href="#Conn.SetWriteDeadline">&#xb6;</a>
 					
 					
@@ -347,7 +351,7 @@ SetWriteDeadline implements PacketConn
 				
 			
 				
-				<h3 id="Conn.Stagger">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L82">Stagger</a>
+				<h3 id="Conn.Stagger">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L81">Stagger</a>
 					<a class="permalink" href="#Conn.Stagger">&#xb6;</a>
 					
 					
@@ -369,7 +373,7 @@ Once a connection succeeds, the result is returned immediately from Read.
 				
 			
 				
-				<h3 id="Conn.Stats">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L120">Stats</a>
+				<h3 id="Conn.Stats">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L119">Stats</a>
 					<a class="permalink" href="#Conn.Stats">&#xb6;</a>
 					
 					
@@ -384,7 +388,7 @@ Stats returns statistics from a staggercast execution
 				
 			
 				
-				<h3 id="Conn.Write">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L241">Write</a>
+				<h3 id="Conn.Write">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L240">Write</a>
 					<a class="permalink" href="#Conn.Write">&#xb6;</a>
 					
 					
@@ -396,7 +400,7 @@ Stats returns statistics from a staggercast execution
 				
 			
 				
-				<h3 id="Conn.WriteTo">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L296">WriteTo</a>
+				<h3 id="Conn.WriteTo">func (*Conn) <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L295">WriteTo</a>
 					<a class="permalink" href="#Conn.WriteTo">&#xb6;</a>
 					
 					
@@ -413,7 +417,7 @@ WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May requir
 		
 			
 			
-			<h2 id="PacketConn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L18">PacketConn</a>
+			<h2 id="PacketConn">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L17">PacketConn</a>
 				<a class="permalink" href="#PacketConn">&#xb6;</a>
 				
 				
@@ -443,7 +447,7 @@ PacketConn implements both net.Conn and net.PacketConn
 		
 			
 			
-			<h2 id="Stats">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L26">Stats</a>
+			<h2 id="Stats">type <a href="/go/dns/src/github.com/johnstarich/go/dns/staggercast/conn.go#L25">Stats</a>
 				<a class="permalink" href="#Stats">&#xb6;</a>
 				
 				

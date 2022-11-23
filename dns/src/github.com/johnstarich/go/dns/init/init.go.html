@@ -55,18 +55,19 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span>package init
-<span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span>import (
-<span id="L4" class="ln">     4  </span>	&#34;net&#34;
-<span id="L5" class="ln">     5  </span>
-<span id="L6" class="ln">     6  </span>	&#34;github.com/johnstarich/go/dns&#34;
-<span id="L7" class="ln">     7  </span>)
-<span id="L8" class="ln">     8  </span>
-<span id="L9" class="ln">     9  </span>func init() { <span class="comment">// nolint:gochecknoinits // This package&#39;s purpose is an implicit init().</span>
-<span id="L10" class="ln">    10  </span>	net.DefaultResolver = dns.New()
-<span id="L11" class="ln">    11  </span>}
-<span id="L12" class="ln">    12  </span>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Package init provides a convenient side-effecting import to set the custom DNS resolver.</span>
+<span id="L2" class="ln">     2  </span>package init
+<span id="L3" class="ln">     3  </span>
+<span id="L4" class="ln">     4  </span>import (
+<span id="L5" class="ln">     5  </span>	&#34;net&#34;
+<span id="L6" class="ln">     6  </span>
+<span id="L7" class="ln">     7  </span>	&#34;github.com/johnstarich/go/dns&#34;
+<span id="L8" class="ln">     8  </span>)
+<span id="L9" class="ln">     9  </span>
+<span id="L10" class="ln">    10  </span>func init() { <span class="comment">//nolint:gochecknoinits // This package&#39;s purpose is an implicit init().</span>
+<span id="L11" class="ln">    11  </span>	net.DefaultResolver = dns.New()
+<span id="L12" class="ln">    12  </span>}
+<span id="L13" class="ln">    13  </span>
 </pre><p></p>
 
 <div id="footer">
