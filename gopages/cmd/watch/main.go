@@ -89,8 +89,9 @@ func main() {
 	})
 
 	server := http.Server{
-		Addr:    ":8080",
-		Handler: mux,
+		Addr:              ":8080",
+		Handler:           mux,
+		ReadHeaderTimeout: time.Minute,
 	}
 	fmt.Println("Starting demo server on :8080...")
 	_ = server.ListenAndServe()

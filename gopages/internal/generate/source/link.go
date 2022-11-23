@@ -1,3 +1,4 @@
+// Package source defines interfaces for generating URL links in documentation.
 package source
 
 import (

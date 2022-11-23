@@ -2,7 +2,7 @@ package flags
 
 import (
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -13,7 +13,7 @@ import (
 func testFile(t *testing.T, contents string) string {
 	t.Helper()
 	p := filepath.Join(t.TempDir(), "file")
-	err := ioutil.WriteFile(p, []byte(contents), 0600)
+	err := os.WriteFile(p, []byte(contents), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
