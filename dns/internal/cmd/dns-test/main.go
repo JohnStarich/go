@@ -1,3 +1,4 @@
+// Command dns-test runs the custom resolver with the given query args.
 package main
 
 import (

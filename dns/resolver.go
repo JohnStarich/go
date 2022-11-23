@@ -1,3 +1,4 @@
+// Package dns implements a working macOS DNS resolver (really just a `Dial`er) for projects that must cross-compile from Linux systems or just don't want CGO.
 package dns
 
 import (

@@ -13,7 +13,7 @@ import (
 
 const testTimeout = 5 * time.Second
 
-func dialUDP(t *testing.T, address string) PacketConn { // nolint:ireturn // Returned interface is a convenience wrapper for tests calling New()
+func dialUDP(t *testing.T, address string) PacketConn { //nolint:ireturn // Returned interface is a convenience wrapper for tests calling New()
 	conn, err := net.Dial("udp", address)
 	require.NoError(t, err)
 	require.Implements(t, (*PacketConn)(nil), conn)
