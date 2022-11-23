@@ -1,3 +1,4 @@
+// Package generate generates documentation pages for a given package.
 package generate
 
 import (

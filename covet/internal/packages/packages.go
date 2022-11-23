@@ -1,3 +1,4 @@
+// Package packages finds files related to a package pattern string.
 package packages
 
 import (

@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/johnstarich/go/gopages/cmd"
@@ -14,13 +15,18 @@ import (
 
 func TestDocUpToDate(t *testing.T) {
 	t.Parallel()
-	templateBytes, err := ioutil.ReadFile("doc.go")
+	targetGoVersion := os.Getenv("COVERAGE_VERSION")
+	if targetGoVersion == "" || !strings.HasPrefix(runtime.Version(), "go"+targetGoVersion) {
+		t.Skip("Skipping doc check. Will run on primary version of Go in CI. Current version:", runtime.Version())
+	}
+
+	templateBytes, err := os.ReadFile("doc.go")
 	require.NoError(t, err)
 	var newDoc bytes.Buffer
 	err = genDoc(templateBytes, &newDoc)
 	require.NoError(t, err)
 
-	currentDoc, err := ioutil.ReadFile("../../doc.go")
+	currentDoc, err := os.ReadFile("../../doc.go")
 	require.NoError(t, err)
 	if !assert.Equal(t, newDoc.String(), string(currentDoc)) {
 		t.Log("Usage docs are out of date: Run `go generate ./...` to regenerate them.")
@@ -46,10 +52,10 @@ func TestRun(t *testing.T) {
 
 	t.Run("invalid template", func(t *testing.T) {
 		t.Parallel()
-		tmpl, err := ioutil.TempFile("", "")
+		tmpl, err := os.CreateTemp("", "")
 		require.NoError(t, err)
 		defer os.Remove(tmpl.Name())
-		output, err := ioutil.TempFile("", "")
+		output, err := os.CreateTemp("", "")
 		require.NoError(t, err)
 		defer os.Remove(output.Name())
 
@@ -60,7 +66,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
-		file, err := ioutil.TempFile("", "")
+		file, err := os.CreateTemp("", "")
 		require.NoError(t, err)
 		defer os.Remove(file.Name())
 

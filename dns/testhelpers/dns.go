@@ -1,3 +1,4 @@
+// Package testhelpers contains a test DNS server lifecycle manager.
 package testhelpers
 
 import (

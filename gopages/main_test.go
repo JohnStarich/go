@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +25,7 @@ func TestMain(t *testing.T) {
 func TestMainArgs(t *testing.T) {
 	t.Parallel()
 	cmd.SetupTestExiter(t)
-	tmp, err := ioutil.TempDir("", "")
+	tmp, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(tmp)
 
@@ -79,7 +78,7 @@ func TestMainArgs(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
+func TestRun(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
 	for _, tc := range []struct {
 		description string
 		args        []string
@@ -95,7 +94,7 @@ func TestRun(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			// create dummy repo to enable cloning
-			ghPagesDir, err := ioutil.TempDir("", "")
+			ghPagesDir, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
 			defer os.RemoveAll(ghPagesDir)
 			ghPagesRepo, err := git.PlainInit(ghPagesDir, false)
@@ -111,7 +110,7 @@ func TestRun(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a
 				Create: true,
 			}))
 
-			modulePath, err := ioutil.TempDir("", "")
+			modulePath, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
 			defer os.RemoveAll(modulePath)
 			wd, err := os.Getwd()
@@ -131,7 +130,7 @@ func TestRun(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a
 				path = filepath.Join(modulePath, path)
 				err := os.MkdirAll(filepath.Dir(path), 0700)
 				require.NoError(t, err)
-				err = ioutil.WriteFile(path, []byte(contents), 0600)
+				err = os.WriteFile(path, []byte(contents), 0600)
 				require.NoError(t, err)
 			}
 
