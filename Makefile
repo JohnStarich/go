@@ -1,5 +1,5 @@
 SHELL := /usr/bin/env bash
-LINT_VERSION=1.46.2
+LINT_VERSION=1.50.1
 
 MODULES = $(sort $(patsubst %/,%,$(dir $(wildcard */go.mod))))
 GOLANGCI_FLAGS =
