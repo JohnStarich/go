@@ -1,3 +1,4 @@
+// Package fspath contains FS path manipulation tools, much like the standard library's "path/filepath" package.
 package fspath
 
 import (
