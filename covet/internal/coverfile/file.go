@@ -1,3 +1,4 @@
+// Package coverfile parses Covet reports and formats files in the diff
 package coverfile
 
 import (

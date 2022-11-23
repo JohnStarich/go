@@ -1,10 +1,12 @@
+// Command gendoc generates the root package's documentation.
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"text/template"
@@ -28,7 +30,7 @@ func run(templatePath, outPath string) error {
 	if templatePath == "" || outPath == "" {
 		return errors.New("Provide doc template and output file paths")
 	}
-	templateBytes, err := ioutil.ReadFile(templatePath)
+	templateBytes, err := os.ReadFile(templatePath)
 	if err != nil {
 		return err
 	}
@@ -58,9 +60,19 @@ func genDoc(templateBytes []byte, w io.Writer) error {
 		return err
 	}
 
-	return docTemplate.Execute(w, map[string]interface{}{
+	var doc bytes.Buffer
+	err = docTemplate.Execute(&doc, map[string]interface{}{
 		"Usage": usageOutput,
 	})
+	if err != nil {
+		return err
+	}
+	formattedDoc, err := format.Source(doc.Bytes())
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(formattedDoc)
+	return err
 }
 
 func funcMap() template.FuncMap {

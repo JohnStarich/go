@@ -1,7 +1,7 @@
+// Package module finds a module's package path for a given file path.
 package module
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -20,7 +20,7 @@ var packagePipe = pipe.New(pipe.Options{}).
 		return goMod, pipe.CheckErrorf(os.IsNotExist(err), "go.mod not found in the current directory")
 	}).
 	Append(func(goMod string) (string, string, error) {
-		buf, err := ioutil.ReadFile(goMod)
+		buf, err := os.ReadFile(goMod)
 		modulePackage := modfile.ModulePath(buf)
 		return goMod, modulePackage, err
 	}).

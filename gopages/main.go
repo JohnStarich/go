@@ -5,7 +5,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -52,7 +52,7 @@ func mainArgs(
 		cmd.Exit(cmd.ExitCodeInvalidUsage)
 	}
 
-	log.SetOutput(ioutil.Discard) // disable godoc's internal logging
+	log.SetOutput(io.Discard) // disable godoc's internal logging
 
 	modulePath, err := getWD()
 	if err != nil {

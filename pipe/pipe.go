@@ -1,3 +1,5 @@
+// Package pipe handles errors so you don't have to.
+// A `Pipe` is a series of functions that pass data to one another, in-order. These functions can also fail with an error, which stops the flow and returns immediately.
 package pipe
 
 import (

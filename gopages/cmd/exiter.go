@@ -1,3 +1,4 @@
+// Package cmd provides an Exiter and a test exiter, great for testing command main() functions.
 package cmd
 
 import (
@@ -13,7 +14,7 @@ const (
 	ExitCodeInvalidUsage = 2
 )
 
-// nolint:gochecknoglobals // Enables os.Exit() to be swapped out in tests for a slightly safer variant. Required for sane test results in older Go versions.
+//nolint:gochecknoglobals // Enables os.Exit() to be swapped out in tests for a slightly safer variant. Required for sane test results in older Go versions.
 var (
 	exiter          = os.Exit
 	setupExiterOnce sync.Once

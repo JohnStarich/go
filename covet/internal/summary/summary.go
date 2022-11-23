@@ -1,3 +1,4 @@
+// Package summary generates summary reports in various formats.
 package summary
 
 import (

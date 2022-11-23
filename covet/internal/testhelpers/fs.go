@@ -1,3 +1,4 @@
+// Package testhelpers contains file system generators for use in tests.
 package testhelpers
 
 import (

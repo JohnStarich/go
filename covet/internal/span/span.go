@@ -1,3 +1,4 @@
+// Package span contains Span, a numeric range.
 package span
 
 import (

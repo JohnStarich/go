@@ -1,6 +1,6 @@
 package flags
 
-import "io/ioutil"
+import "os"
 
 // FilePathContents is a flag that reads a file by the passed in path and contains its contents
 type FilePathContents struct {
@@ -21,7 +21,7 @@ func (f *FilePathContents) String() string {
 
 // Set implements flag.Value
 func (f *FilePathContents) Set(s string) error {
-	contents, err := ioutil.ReadFile(s)
+	contents, err := os.ReadFile(s)
 	if err != nil {
 		return err
 	}
