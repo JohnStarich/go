@@ -18,17 +18,24 @@ jobs:
       run: make -k lint
 
   test:
-    name: Test with Go ${{ matrix.go }}
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     strategy:
       matrix:
+        platform:
+        - ubuntu-latest
         go:
           - 1.16.x
           - 1.17.x
           - 1.18.x
           - 1.19.x
+        include:
+        - platform: macos-latest
+          go: 1.19.x
+        - platform: windows-latest
+          go: 1.19.x
+    name: Test (Go ${{ matrix.go }} on ${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      pull-requests: write
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
@@ -36,6 +43,7 @@ jobs:
         go-version: ${{ matrix.go }}
         check-latest: true
     - name: checkout-more
+      if: "! startsWith(matrix.platform, 'windows-')"
       run: |
         # If running coverage report tools, fetch more commits for coverage diff.
         commits=${{ github.event.pull_request.commits }}
