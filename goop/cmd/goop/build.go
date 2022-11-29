@@ -40,7 +40,7 @@ func (a App) buildOS(ctx context.Context, name string, pkg Package, alwaysBuild 
 }
 
 func systemExt(goos string) string {
-	if goos == "windows" {
+	if goos == goosWindows {
 		return ".exe"
 	}
 	return ""

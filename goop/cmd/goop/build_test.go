@@ -14,7 +14,7 @@ import (
 
 func TestSystemExt(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, ".exe", systemExt("windows"))
+	assert.Equal(t, ".exe", systemExt(goosWindows))
 	assert.Equal(t, "", systemExt("foo"))
 }
 
@@ -91,7 +91,6 @@ func TestBuild(t *testing.T) {
 		t.Parallel()
 		const (
 			name        = "foo"
-			windowsOS   = "windows"
 			somePackage = "example.local/baz"
 		)
 		var commands [][]string
@@ -108,7 +107,7 @@ func TestBuild(t *testing.T) {
 		binaryPath, err := app.buildOS(context.Background(), name, Package{
 			Name: name,
 			Path: somePackage,
-		}, false, windowsOS)
+		}, false, goosWindows)
 		assert.NoError(t, err)
 		assert.Equal(t, "cache/install/"+name+"/"+name+".exe", binaryPath)
 		assert.Equal(t, [][]string{

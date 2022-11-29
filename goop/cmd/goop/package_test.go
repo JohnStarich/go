@@ -10,7 +10,7 @@ import (
 
 func rootFilePath() string {
 	root := "/"
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goosWindows {
 		root = `C:\`
 	}
 	return root
@@ -53,7 +53,7 @@ func TestParsePackagePattern(t *testing.T) {
 				Name: "bar",
 				Path: "~/foo/bar",
 			},
-			skip: runtime.GOOS == "windows", // Tilde '~' expansion is not supported on Windows yet.
+			skip: runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 		{
 			// Canonicalize home directory to '~' for better cross-machine bin support.
@@ -63,7 +63,7 @@ func TestParsePackagePattern(t *testing.T) {
 				Name: "bar",
 				Path: "~/foo/bar",
 			},
-			skip: runtime.GOOS == "windows", // Tilde '~' expansion is not supported on Windows yet.
+			skip: runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
 		tc := tc // enable parallel sub-tests
@@ -109,7 +109,7 @@ func TestPackageFilePath(t *testing.T) {
 			pkg:            Package{Path: "~/foo"},
 			expectFilePath: homeDir + "/foo",
 			expectOk:       true,
-			skip:           runtime.GOOS == "windows", // Tilde '~' expansion is not supported on Windows yet.
+			skip:           runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
 		tc := tc // enable parallel sub-tests
