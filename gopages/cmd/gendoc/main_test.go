@@ -15,6 +15,10 @@ import (
 
 func TestDocUpToDate(t *testing.T) {
 	t.Parallel()
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows 'go fmt' results vary from all other OSes in line endings and spacing.")
+	}
+
 	targetGoVersion := os.Getenv("LINT_GO_VERSION")
 	if targetGoVersion == "" || !strings.HasPrefix(runtime.Version(), "go"+targetGoVersion) {
 		t.Skip("Skipping doc check. Will run on primary version of Go in CI. Current version:", runtime.Version())
@@ -28,7 +32,6 @@ func TestDocUpToDate(t *testing.T) {
 
 	currentDoc, err := os.ReadFile("../../doc.go")
 	require.NoError(t, err)
-	currentDoc = bytes.ReplaceAll(currentDoc, []byte("\r\n"), []byte("\n")) // fix Windows-specific line endings for comparison
 	if !assert.Equal(t, newDoc.String(), string(currentDoc)) {
 		t.Log("Usage docs are out of date: Run `go generate ./...` to regenerate them.")
 	}

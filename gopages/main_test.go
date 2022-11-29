@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -83,6 +84,7 @@ func TestRun(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a 
 		description string
 		args        []string
 		expectErr   string
+		skip        bool
 	}{
 		{
 			description: "happy path, no flags",
@@ -90,9 +92,14 @@ func TestRun(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a 
 		{
 			description: "happy path, gh-pages",
 			args:        []string{"-gh-pages"},
+			skip:        os.Getenv("CI") == "true" && runtime.GOOS == "windows", // Windows in CI can't handle temp files with working directory ones because they're on different drive letters.
 		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
+			if tc.skip {
+				t.Skip("Skipped by test case param")
+			}
+
 			// create dummy repo to enable cloning
 			ghPagesDir, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
