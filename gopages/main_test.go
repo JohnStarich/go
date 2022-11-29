@@ -172,7 +172,8 @@ func Hello() {
 				files, err := headCommit.Files()
 				require.NoError(t, err)
 				err = files.ForEach(func(f *object.File) error {
-					name := strings.TrimPrefix(f.Name, "dist"+string(filepath.Separator))
+					name := filepath.ToSlash(f.Name)
+					name = strings.TrimPrefix(name, "dist/")
 					if strings.HasPrefix(name, "lib") {
 						foundLib = true
 					} else {
@@ -183,19 +184,20 @@ func Hello() {
 				require.NoError(t, err)
 			} else {
 				err := filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
-					prefix := strings.Join([]string{
-						modulePath,
-						"dist",
-						"",
-					}, string(filepath.Separator))
+					prefix := filepath.Join(modulePath, "dist")
+					prefix, absErr := filepath.Abs(prefix)
+					if absErr != nil {
+						return absErr
+					}
+					prefix += string(filepath.Separator)
 					name := strings.TrimPrefix(path, prefix)
 					if err == nil &&
 						!info.IsDir() &&
-						!strings.HasPrefix(name, string(filepath.Separator)) {
+						!filepath.IsAbs(name) {
 						if strings.HasPrefix(name, "lib") {
 							foundLib = true
 						} else {
-							fileNames = append(fileNames, name)
+							fileNames = append(fileNames, filepath.ToSlash(name))
 						}
 					}
 					return nil

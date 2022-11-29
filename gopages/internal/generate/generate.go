@@ -193,7 +193,7 @@ var (
 		}).
 		Append(func(args docsArgs, file string, isDir bool) (docsArgs, string, bool, error) {
 			// skip the destination directory if it's set to avoid infinite recursion
-			return args, file, isDir, pipe.CheckError(isDir && args.OutputPath != "" && strings.TrimPrefix(file, "/") == args.OutputPath, filepath.SkipDir)
+			return args, file, isDir, pipe.CheckError(isDir && args.OutputPath != "" && strings.TrimPrefix(file, string(filepath.Separator)) == args.OutputPath, filepath.SkipDir)
 		}).
 		Append(func(args docsArgs, file string, isDir bool) (docsArgs, string, bool, error) {
 			// only scrape directories and Go files
@@ -456,6 +456,7 @@ func walkFiles(fs billy.Filesystem, path string, visit func(path string, isDir b
 }
 
 func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
+	println("walking...", path)
 	info, err := fs.Lstat(path)
 	if err != nil {
 		return errors.Wrap(err, "Error looking up file")
