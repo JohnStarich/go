@@ -43,7 +43,7 @@ jobs:
         go-version: ${{ matrix.go }}
         check-latest: true
     - name: Test
-      run: make test
+      run: make -k test
       env:
         LINT_GO_VERSION: 1.19
     - name: Publish test coverage
