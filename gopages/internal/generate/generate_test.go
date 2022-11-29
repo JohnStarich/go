@@ -94,7 +94,7 @@ package mylib
 	var foundDocs []string
 	require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
 		if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
-			foundDocs = append(foundDocs, path)
+			foundDocs = append(foundDocs, filepath.ToSlash(path))
 		}
 		return nil
 	}))
