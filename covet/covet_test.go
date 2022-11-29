@@ -11,7 +11,6 @@ import (
 	"testing/iotest"
 
 	"github.com/hack-pad/hackpadfs"
-	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -134,9 +133,9 @@ func TestParseInvalidOptions(t *testing.T) {
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	var (
-		_, workingDirectory = testhelpers.FromOSToFS(t, wd)
-		baseDir             = path.Join(workingDirectory, "testdata")
-		coverFile           = path.Join(baseDir, "add2.out")
+		wdFS, workingDirectory = testhelpers.FromOSToFS(t, wd)
+		baseDir                = path.Join(workingDirectory, "testdata")
+		coverFile              = path.Join(baseDir, "add2.out")
 	)
 	for _, tc := range []struct {
 		description string
@@ -170,7 +169,7 @@ func TestParseInvalidOptions(t *testing.T) {
 		{
 			description: "go coverage base dir is optional",
 			options: Options{
-				FS:                os.NewFS(),
+				FS:                wdFS,
 				Diff:              bytes.NewReader(nil),
 				DiffBaseDir:       ".",
 				GoCoveragePath:    coverFile,
@@ -180,7 +179,7 @@ func TestParseInvalidOptions(t *testing.T) {
 		{
 			description: "invalid go coverage base dir",
 			options: Options{
-				FS:                os.NewFS(),
+				FS:                wdFS,
 				Diff:              bytes.NewReader(nil),
 				DiffBaseDir:       ".",
 				GoCoveragePath:    coverFile,
@@ -191,7 +190,7 @@ func TestParseInvalidOptions(t *testing.T) {
 		{
 			description: "diff is required",
 			options: Options{
-				FS:                os.NewFS(),
+				FS:                wdFS,
 				Diff:              nil,
 				DiffBaseDir:       ".",
 				GoCoveragePath:    coverFile,

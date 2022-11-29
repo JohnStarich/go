@@ -2,9 +2,13 @@
 package fspath
 
 import (
+	goos "os"
 	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 
+	"github.com/hack-pad/hackpadfs/os"
 	"github.com/pkg/errors"
 )
 
@@ -50,4 +54,22 @@ func Rel(basePath, targetPath string) (string, error) {
 		p := strings.Repeat("../", strings.Count(base, separator)+1)
 		return path.Join(p, target), nil
 	}
+}
+
+// WorkingDirectoryFS returns the os.FS for the current working directory.
+// If using Windows, the os.FS used will target the osPath's volume (e.g. C:\).
+func WorkingDirectoryFS() (*os.FS, error) {
+	fs := os.NewFS()
+	if runtime.GOOS == "windows" {
+		wd, err := goos.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		volFS, err := fs.SubVolume(filepath.VolumeName(wd))
+		if err != nil {
+			return nil, err
+		}
+		fs = volFS.(*os.FS)
+	}
+	return fs, nil
 }

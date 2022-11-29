@@ -4,8 +4,6 @@ package testhelpers
 import (
 	goos "os"
 	"path"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -13,6 +11,7 @@ import (
 	"github.com/hack-pad/hackpadfs/mem"
 	"github.com/hack-pad/hackpadfs/mount"
 	"github.com/hack-pad/hackpadfs/os"
+	"github.com/johnstarich/go/covet/internal/fspath"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,12 +20,8 @@ const testDirPermission = 0700
 // FromOSToFS returns the FS and FS path for the given OS path.
 // If using Windows, the os.FS used will target the osPath's volume (e.g. C:\) before converting.
 func FromOSToFS(t *testing.T, osPath string) (*os.FS, string) {
-	fs := os.NewFS()
-	if runtime.GOOS == "windows" {
-		volFS, err := fs.SubVolume(filepath.VolumeName(osPath))
-		require.NoError(t, err)
-		fs = volFS.(*os.FS)
-	}
+	fs, err := fspath.WorkingDirectoryFS()
+	require.NoError(t, err)
 	fsPath, err := fs.FromOSPath(osPath)
 	require.NoError(t, err)
 	return fs, fsPath
