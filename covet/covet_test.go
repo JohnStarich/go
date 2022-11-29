@@ -96,7 +96,7 @@ foo
 			if tc.diffReader == nil {
 				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
 			}
-			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t, "")
+			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
 
 			coverFile := path.Join(tmpDir, "cover.out")
 			{
@@ -134,7 +134,7 @@ func TestParseInvalidOptions(t *testing.T) {
 	wd, err := goos.Getwd()
 	require.NoError(t, err)
 	var (
-		workingDirectory, _ = os.NewFS().FromOSPath(wd)
+		_, workingDirectory = testhelpers.FromOSToFS(t, wd)
 		baseDir             = path.Join(workingDirectory, "testdata")
 		coverFile           = path.Join(baseDir, "add2.out")
 	)
