@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,11 @@ func TestFilePathContents(t *testing.T) {
 		set.Var(&f, "myflag", "")
 		err := set.Parse([]string{"-myflag", "/does/not/exist"})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "open /does/not/exist: no such file or directory")
+		if runtime.GOOS == "windows" {
+			assert.Contains(t, err.Error(), "open /does/not/exist: The system cannot find the path specified.")
+		} else {
+			assert.Contains(t, err.Error(), "open /does/not/exist: no such file or directory")
+		}
 		assert.Equal(t, "", f.String())
 	})
 }
