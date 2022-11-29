@@ -28,6 +28,7 @@ func TestDocUpToDate(t *testing.T) {
 
 	currentDoc, err := os.ReadFile("../../doc.go")
 	require.NoError(t, err)
+	currentDoc = bytes.ReplaceAll(currentDoc, []byte("\r\n"), []byte("\n")) // fix Windows-specific line endings for comparison
 	if !assert.Equal(t, newDoc.String(), string(currentDoc)) {
 		t.Log("Usage docs are out of date: Run `go generate ./...` to regenerate them.")
 	}
