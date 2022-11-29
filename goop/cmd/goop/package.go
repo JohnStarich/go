@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -25,7 +26,7 @@ func (a App) parsePackagePattern(packagePattern string) (Package, error) {
 	if strings.HasSuffix(pkg.Path, "/...") {
 		return pkg, fmt.Errorf("package pattern must not use the '/...' operator: %q", pkg.Path)
 	}
-	if strings.HasPrefix(pkg.Path, a.staticOSHomeDir+string(filepath.Separator)) {
+	if runtime.GOOS != "windows" && strings.HasPrefix(pkg.Path, a.staticOSHomeDir+"/") { // Tilde '~' expansion is not supported on Windows yet.
 		// Canonicalize home directory to '~' for better cross-machine bin support, as home directories can change from user to user.
 		pkg.Path = homeDir + strings.TrimPrefix(pkg.Path, a.staticOSHomeDir)
 	}
@@ -41,7 +42,7 @@ func (a App) parsePackagePattern(packagePattern string) (Package, error) {
 // Empty string and false otherwise.
 func (a App) packageFilePath(pkg Package) (string, bool) {
 	filePath := pkg.Path
-	if strings.HasPrefix(filePath, homeDir+string(filepath.Separator)) {
+	if runtime.GOOS != "windows" && strings.HasPrefix(filePath, homeDir+"/") { // Tilde '~' expansion is not supported on Windows yet.
 		// expand home directory '~' to full file path
 		filePath = a.staticOSHomeDir + strings.TrimPrefix(filePath, homeDir)
 	}
