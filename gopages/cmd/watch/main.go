@@ -1,3 +1,6 @@
+//go:build !windows
+// +build !windows
+
 // Command watch generates docs and starts an HTTP endpoint to serve them. Also runs a file watcher on the current module to regenerate docs on change events.
 //
 // watch is useful for testing godoc code comments and while developing on gopages itself.
