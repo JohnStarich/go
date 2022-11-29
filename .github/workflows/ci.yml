@@ -42,17 +42,19 @@ jobs:
       with:
         go-version: ${{ matrix.go }}
         check-latest: true
-    - name: checkout-more
-      if: "! startsWith(matrix.platform, 'windows-')"
-      run: |
-        # If running coverage report tools, fetch more commits for coverage diff.
-        commits=${{ github.event.pull_request.commits }}
-        if [[ -n "$commits" && "$(go version)" == *"go${COVERAGE_VERSION}"* ]]; then
-          # Prepare enough depth for diffs with master
-          git fetch --depth="$(( commits + 1 ))"
-        fi
     - name: Test
       run: make test
       env:
+        LINT_GO_VERSION: 1.19
+    - name: Publish test coverage
+      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.19.x'"
+      run: |
+        # Fetch more commits for coverage diff.
+        commits=${{ github.event.pull_request.commits }}
+        if [[ -n "$commits" ]]; then
+          # Prepare enough depth for diffs with master
+          git fetch --depth="$(( commits + 1 ))"
+        fi
+        make test-publish-coverage
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERAGE_VERSION: 1.19
