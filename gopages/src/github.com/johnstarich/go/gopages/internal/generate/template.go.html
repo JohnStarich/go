@@ -181,15 +181,21 @@
 <span id="L124" class="ln">   124  </span>
 <span id="L125" class="ln">   125  </span><span class="comment">// nodeHTML runs the original &#39;node_html&#39; template func, then rewrites any links inside it</span>
 <span id="L126" class="ln">   126  </span>func nodeHTML(original nodeHTMLFunc, baseURL string, modulePackage string) nodeHTMLFunc {
-<span id="L127" class="ln">   127  </span>	pkgURL := fmt.Sprintf(`&lt;a href=&#34;%s/%s`, path.Join(baseURL, &#34;/pkg&#34;), modulePackage)
-<span id="L128" class="ln">   128  </span>	moduleURL := fmt.Sprintf(`&lt;a href=&#34;/pkg/%s`, modulePackage)
-<span id="L129" class="ln">   129  </span>	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
-<span id="L130" class="ln">   130  </span>		s := original(info, node, linkify)
-<span id="L131" class="ln">   131  </span>		internal := strings.ReplaceAll(s, moduleURL, pkgURL)
-<span id="L132" class="ln">   132  </span>		return strings.ReplaceAll(internal, `&lt;a href=&#34;/pkg/`, `&lt;a href=&#34;https://pkg.go.dev/`)
-<span id="L133" class="ln">   133  </span>	}
-<span id="L134" class="ln">   134  </span>}
-<span id="L135" class="ln">   135  </span>
+<span id="L127" class="ln">   127  </span>	var (
+<span id="L128" class="ln">   128  </span>		defaultPackagePrefix = `&lt;a href=&#34;/pkg/`
+<span id="L129" class="ln">   129  </span>		defaultModulePrefix  = defaultPackagePrefix + modulePackage
+<span id="L130" class="ln">   130  </span>		gopagesModulePrefix  = fmt.Sprintf(`&lt;a href=&#34;%s`, path.Join(baseURL, &#34;/pkg&#34;, modulePackage))
+<span id="L131" class="ln">   131  </span>		publicDocPrefix      = `&lt;a href=&#34;https://pkg.go.dev/`
+<span id="L132" class="ln">   132  </span>	)
+<span id="L133" class="ln">   133  </span>	replacer := strings.NewReplacer(
+<span id="L134" class="ln">   134  </span>		defaultModulePrefix, gopagesModulePrefix, <span class="comment">// /pkg/mypkg/foo -&gt; /base/pkg/mypkg/foo</span>
+<span id="L135" class="ln">   135  </span>		defaultPackagePrefix, publicDocPrefix, <span class="comment">// /pkg/bar -&gt; https://pkg.go.dev/bar</span>
+<span id="L136" class="ln">   136  </span>	)
+<span id="L137" class="ln">   137  </span>	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
+<span id="L138" class="ln">   138  </span>		return replacer.Replace(original(info, node, linkify))
+<span id="L139" class="ln">   139  </span>	}
+<span id="L140" class="ln">   140  </span>}
+<span id="L141" class="ln">   141  </span>
 </pre><p></p>
 
 <div id="footer">
