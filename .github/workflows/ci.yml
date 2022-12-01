@@ -47,7 +47,7 @@ jobs:
       env:
         LINT_GO_VERSION: 1.19
     - name: Publish test coverage
-      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.19.x'"
+      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.16.x'"
       run: |
         # Fetch more commits for coverage diff.
         commits=${{ github.event.pull_request.commits }}
