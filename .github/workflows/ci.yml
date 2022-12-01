@@ -46,6 +46,7 @@ jobs:
       run: make -k test test-publish-coverage
       env:
         LINT_GO_VERSION: 1.19
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish test coverage
       if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.19.x'"
       run: |
