@@ -232,7 +232,7 @@ Covet generates reports for a diff and coverage combination
 					
 					
 				</h3>
-				<pre>func Parse(options <a href="#Options">Options</a>) (covet *<a href="#Covet">Covet</a>, err <a href="/go/covet/pkg/builtin/#error">error</a>)</pre>
+				<pre>func Parse(options <a href="#Options">Options</a>) (covet *<a href="#Covet">Covet</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 Parse reads and parses both a diff file and Go coverage file, then returns a Covet instance to render reports
 </p>
@@ -264,7 +264,7 @@ These files can be used to display diff coverage information.
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) DiffCovered() <a href="/go/covet/pkg/builtin/#float64">float64</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) DiffCovered() <a href="https://pkg.go.dev/builtin/#float64">float64</a></pre>
 				<p>
 DiffCovered returns the percentage of covered lines in the diff.
 </p>
@@ -279,7 +279,7 @@ DiffCovered returns the percentage of covered lines in the diff.
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) PriorityUncoveredFiles(target <a href="/go/covet/pkg/builtin/#uint">uint</a>) []<a href="#File">File</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) PriorityUncoveredFiles(target <a href="https://pkg.go.dev/builtin/#uint">uint</a>) []<a href="#File">File</a></pre>
 				<p>
 PriorityUncoveredFiles returns a list of Files prioritized by the largest uncovered sections of the diff.
 The list contains just enough Files worth of uncovered lines necessary to meet the provided &#39;target&#39; coverage.
@@ -295,7 +295,7 @@ The list contains just enough Files worth of uncovered lines necessary to meet t
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) ReportFileCoverage(w <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Writer">Writer</a>, f <a href="#File">File</a>, options <a href="#ReportFileCoverageOptions">ReportFileCoverageOptions</a>) <a href="/go/covet/pkg/builtin/#error">error</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) ReportFileCoverage(w <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>, f <a href="#File">File</a>, options <a href="#ReportFileCoverageOptions">ReportFileCoverageOptions</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 ReportFileCoverage writes a diff-like plain text report with color to &#39;w&#39;.
 </p>
@@ -310,7 +310,7 @@ ReportFileCoverage writes a diff-like plain text report with color to &#39;w&#39
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) ReportSummaryColorTerminal(w <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Writer">Writer</a>, options <a href="#ReportSummaryOptions">ReportSummaryOptions</a>) <a href="/go/covet/pkg/builtin/#error">error</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) ReportSummaryColorTerminal(w <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>, options <a href="#ReportSummaryOptions">ReportSummaryOptions</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 ReportSummaryColorTerminal writes a plain text report with color to &#39;w&#39;.
 </p>
@@ -325,7 +325,7 @@ ReportSummaryColorTerminal writes a plain text report with color to &#39;w&#39;.
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) ReportSummaryMarkdown(w <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Writer">Writer</a>, options <a href="#ReportSummaryOptions">ReportSummaryOptions</a>) <a href="/go/covet/pkg/builtin/#error">error</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) ReportSummaryMarkdown(w <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>, options <a href="#ReportSummaryOptions">ReportSummaryOptions</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 ReportSummaryMarkdown writes a markdown report to &#39;w&#39;.
 To capture as a string, write to a bytes.Buffer, then call buf.String().
@@ -365,7 +365,7 @@ Includes the associated beginning and end line numbers of the chunk and the diff
 					
 					
 				</h3>
-				<pre>func DiffChunks(file <a href="#File">File</a>, fileReader <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Reader">Reader</a>) ([]<a href="#DiffChunk">DiffChunk</a>, <a href="/go/covet/pkg/builtin/#error">error</a>)</pre>
+				<pre>func DiffChunks(file <a href="#File">File</a>, fileReader <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Reader">Reader</a>) ([]<a href="#DiffChunk">DiffChunk</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 DiffChunks return diff-like Chunks from a covet.File and the file contents&#39; Reader.
 </p>
@@ -440,15 +440,15 @@ Options contains parse options
 			<pre>type Options struct {
 <span id="Options.FS"></span>    <span class="comment">// FS is the file system to read files, Go package information, and more.</span>
     <span class="comment">// Defaults to hackpadfs&#39;s os.NewFS(). If on Windows, the default targets the current working directory&#39;s volume (e.g. C:\).</span>
-    FS <a href="/go/covet/pkg/io/fs/">fs</a>.<a href="/go/covet/pkg/io/fs/#FS">FS</a>
+    FS <a href="https://pkg.go.dev/io/fs/">fs</a>.<a href="https://pkg.go.dev/io/fs/#FS">FS</a>
 <span id="Options.Diff"></span>    <span class="comment">// Diff is a reader with patch or diff formatted contents</span>
-    Diff <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Reader">Reader</a>
+    Diff <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Reader">Reader</a>
 <span id="Options.DiffBaseDir"></span>    <span class="comment">// DiffBaseDir is the FS path to the repo&#39;s root directory</span>
-    DiffBaseDir <a href="/go/covet/pkg/builtin/#string">string</a>
+    DiffBaseDir <a href="https://pkg.go.dev/builtin/#string">string</a>
     <span class="comment">// GoCoverage is the FS path to a Go coverage file</span>
-<span id="Options.GoCoveragePath"></span>    GoCoveragePath <a href="/go/covet/pkg/builtin/#string">string</a>
+<span id="Options.GoCoveragePath"></span>    GoCoveragePath <a href="https://pkg.go.dev/builtin/#string">string</a>
 <span id="Options.GoCoverageBaseDir"></span>    <span class="comment">// GoCoverageBaseDir is the FS path to the coverage file&#39;s module. Defaults to the coverage file&#39;s directory.</span>
-    GoCoverageBaseDir <a href="/go/covet/pkg/builtin/#string">string</a>
+    GoCoverageBaseDir <a href="https://pkg.go.dev/builtin/#string">string</a>
 }
 </pre>
 
@@ -503,7 +503,7 @@ ReportSummaryOptions contains summary report options
 </p>
 
 			<pre>type ReportSummaryOptions struct {
-<span id="ReportSummaryOptions.Target"></span>    Target <a href="/go/covet/pkg/builtin/#uint">uint</a>
+<span id="ReportSummaryOptions.Target"></span>    Target <a href="https://pkg.go.dev/builtin/#uint">uint</a>
 }
 </pre>
 

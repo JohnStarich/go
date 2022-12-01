@@ -171,8 +171,8 @@ Avoid exporting any methods or unnecessary data fields.
 </p>
 
 			<pre>type DiffChunk struct {
-<span id="DiffChunk.FirstLine"></span>    FirstLine, LastLine <a href="/go/covet/pkg/builtin/#uint">uint</a>
-<span id="DiffChunk.Lines"></span>    Lines               []<a href="/go/covet/pkg/builtin/#string">string</a>
+<span id="DiffChunk.FirstLine"></span>    FirstLine, LastLine <a href="https://pkg.go.dev/builtin/#uint">uint</a>
+<span id="DiffChunk.Lines"></span>    Lines               []<a href="https://pkg.go.dev/builtin/#string">string</a>
 }
 </pre>
 
@@ -191,7 +191,7 @@ Avoid exporting any methods or unnecessary data fields.
 					
 					
 				</h3>
-				<pre>func DiffChunks(file <a href="#File">File</a>, fileReader <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Reader">Reader</a>) ([]<a href="#DiffChunk">DiffChunk</a>, <a href="/go/covet/pkg/builtin/#error">error</a>)</pre>
+				<pre>func DiffChunks(file <a href="#File">File</a>, fileReader <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Reader">Reader</a>) ([]<a href="#DiffChunk">DiffChunk</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 DiffChunks return diff-like Chunks from a covet.File and the file contents&#39; Reader.
 </p>
@@ -218,9 +218,9 @@ Avoid exporting any methods or unnecessary data fields.
 </p>
 
 			<pre>type File struct {
-<span id="File.Name"></span>    Name      <a href="/go/covet/pkg/builtin/#string">string</a>
-<span id="File.Covered"></span>    Covered   <a href="/go/covet/pkg/builtin/#uint">uint</a>
-<span id="File.Uncovered"></span>    Uncovered <a href="/go/covet/pkg/builtin/#uint">uint</a>
+<span id="File.Name"></span>    Name      <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="File.Covered"></span>    Covered   <a href="https://pkg.go.dev/builtin/#uint">uint</a>
+<span id="File.Uncovered"></span>    Uncovered <a href="https://pkg.go.dev/builtin/#uint">uint</a>
 <span id="File.Lines"></span>    Lines     []<a href="#Line">Line</a>
 }
 </pre>
@@ -253,8 +253,8 @@ Avoid exporting any methods or unnecessary data fields.
 </p>
 
 			<pre>type Line struct {
-<span id="Line.Covered"></span>    Covered    <a href="/go/covet/pkg/builtin/#bool">bool</a>
-<span id="Line.LineNumber"></span>    LineNumber <a href="/go/covet/pkg/builtin/#uint">uint</a>
+<span id="Line.Covered"></span>    Covered    <a href="https://pkg.go.dev/builtin/#bool">bool</a>
+<span id="Line.LineNumber"></span>    LineNumber <a href="https://pkg.go.dev/builtin/#uint">uint</a>
 }
 </pre>
 

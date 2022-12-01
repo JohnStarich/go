@@ -173,7 +173,7 @@ Package summary generates summary reports in various formats.
 				
 				
 			</h2>
-			<pre>func FileCoverage(f <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>) <a href="/go/covet/pkg/builtin/#float64">float64</a></pre>
+			<pre>func FileCoverage(f <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>) <a href="https://pkg.go.dev/builtin/#float64">float64</a></pre>
 			<p>
 FileCoverage returns a File&#39;s coverage percentage between 0 and 1
 </p>
@@ -189,7 +189,7 @@ FileCoverage returns a File&#39;s coverage percentage between 0 and 1
 				
 				
 			</h2>
-			<pre>func FormatPercent(f <a href="/go/covet/pkg/builtin/#float64">float64</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+			<pre>func FormatPercent(f <a href="https://pkg.go.dev/builtin/#float64">float64</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 			<p>
 FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
 </p>
@@ -205,7 +205,7 @@ FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
 				
 				
 			</h2>
-			<pre>func New(uncoveredFiles []<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>, targetCoverage <a href="/go/covet/pkg/builtin/#uint">uint</a>, format <a href="#Format">Format</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+			<pre>func New(uncoveredFiles []<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>, targetCoverage <a href="https://pkg.go.dev/builtin/#uint">uint</a>, format <a href="#Format">Format</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 			<p>
 New generates a new summary report in the given format
 </p>
@@ -226,7 +226,7 @@ New generates a new summary report in the given format
 Format represents a summary report&#39;s format
 </p>
 
-			<pre>type Format <a href="/go/covet/pkg/builtin/#int">int</a></pre>
+			<pre>type Format <a href="https://pkg.go.dev/builtin/#int">int</a></pre>
 
 			
 				<p>
@@ -234,7 +234,7 @@ Supported formats
 </p>
 
 				<pre>const (
-    <span id="FormatColorTerminal">FormatColorTerminal</span> <a href="#Format">Format</a> = <a href="/go/covet/pkg/builtin/#iota">iota</a>
+    <span id="FormatColorTerminal">FormatColorTerminal</span> <a href="#Format">Format</a> = <a href="https://pkg.go.dev/builtin/#iota">iota</a>
     <span id="FormatMarkdown">FormatMarkdown</span>
 )</pre>
 			
@@ -254,7 +254,7 @@ Supported formats
 					
 					
 				</h3>
-				<pre>func (f <a href="#Format">Format</a>) Colorize(c *<a href="/go/covet/pkg/github.com/fatih/color/">color</a>.<a href="/go/covet/pkg/github.com/fatih/color/#Color">Color</a>, s <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (f <a href="#Format">Format</a>) Colorize(c *<a href="https://pkg.go.dev/github.com/fatih/color/">color</a>.<a href="https://pkg.go.dev/github.com/fatih/color/#Color">Color</a>, s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 Colorize returns &#39;s&#39; and optionally wraps with color &#39;c&#39; according to the format&#39;s rules
 </p>
@@ -269,7 +269,7 @@ Colorize returns &#39;s&#39; and optionally wraps with color &#39;c&#39; accordi
 					
 					
 				</h3>
-				<pre>func (f <a href="#Format">Format</a>) ColorizeStatus(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>, s <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (f <a href="#Format">Format</a>) ColorizeStatus(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>, s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 ColorizeStatus returns &#39;s&#39; and optionally wraps with the coverage status&#39;s color according to the format&#39;s rules
 </p>
@@ -284,7 +284,7 @@ ColorizeStatus returns &#39;s&#39; and optionally wraps with the coverage status
 					
 					
 				</h3>
-				<pre>func (f <a href="#Format">Format</a>) FormatTable(tbl <a href="/go/covet/pkg/github.com/jedib0t/go-pretty/v6/table/">table</a>.<a href="/go/covet/pkg/github.com/jedib0t/go-pretty/v6/table/#Writer">Writer</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (f <a href="#Format">Format</a>) FormatTable(tbl <a href="https://pkg.go.dev/github.com/jedib0t/go-pretty/v6/table/">table</a>.<a href="https://pkg.go.dev/github.com/jedib0t/go-pretty/v6/table/#Writer">Writer</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 FormatTable returns a formatted table according to the format&#39;s rules
 </p>
@@ -299,7 +299,7 @@ FormatTable returns a formatted table according to the format&#39;s rules
 					
 					
 				</h3>
-				<pre>func (f <a href="#Format">Format</a>) Monospace(s <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (f <a href="#Format">Format</a>) Monospace(s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 Monospace returns a monospaced string according to the format&#39;s rules.
 Markdown uses code blocks with non-breaking spaces to ensure proper spacing.
@@ -315,7 +315,7 @@ Markdown uses code blocks with non-breaking spaces to ensure proper spacing.
 					
 					
 				</h3>
-				<pre>func (f <a href="#Format">Format</a>) StatusIcon(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (f <a href="#Format">Format</a>) StatusIcon(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 StatusIcon returns a coverage status icon according to the format&#39;s rules.
 Markdown returns an emoji, terminal returns empty string.

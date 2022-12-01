@@ -164,7 +164,7 @@ Package coverstatus contains coverage color-coding and labeling for generating r
 Status represents a coverage status level, ranging from &#34;excellent&#34; to &#34;error&#34;
 </p>
 
-			<pre>type Status <a href="/go/covet/pkg/builtin/#int">int</a></pre>
+			<pre>type Status <a href="https://pkg.go.dev/builtin/#int">int</a></pre>
 
 			
 
@@ -181,7 +181,7 @@ Status represents a coverage status level, ranging from &#34;excellent&#34; to &
 					
 					
 				</h3>
-				<pre>func New(f <a href="/go/covet/pkg/builtin/#float64">float64</a>) <a href="#Status">Status</a></pre>
+				<pre>func New(f <a href="https://pkg.go.dev/builtin/#float64">float64</a>) <a href="#Status">Status</a></pre>
 				<p>
 New categorizes the given percentage (between 0 and 1) as a coverage status
 </p>
@@ -197,7 +197,7 @@ New categorizes the given percentage (between 0 and 1) as a coverage status
 					
 					
 				</h3>
-				<pre>func (s <a href="#Status">Status</a>) Colorize(str <a href="/go/covet/pkg/builtin/#string">string</a>) <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (s <a href="#Status">Status</a>) Colorize(str <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 Colorize formats &#39;str&#39; with this status&#39;s assigned color
 </p>
@@ -212,7 +212,7 @@ Colorize formats &#39;str&#39; with this status&#39;s assigned color
 					
 					
 				</h3>
-				<pre>func (s <a href="#Status">Status</a>) Emoji() <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (s <a href="#Status">Status</a>) Emoji() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 Emoji returns this status&#39;s assigned emoji
 </p>
@@ -227,7 +227,7 @@ Emoji returns this status&#39;s assigned emoji
 					
 					
 				</h3>
-				<pre>func (s <a href="#Status">Status</a>) WorkflowCommand() <a href="/go/covet/pkg/builtin/#string">string</a></pre>
+				<pre>func (s <a href="#Status">Status</a>) WorkflowCommand() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 WorkflowCommand returns a GitHub Actions workflow command for this coverage status.
 These are specifically the log &#34;level&#34; commands.
