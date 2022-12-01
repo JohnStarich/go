@@ -86,7 +86,6 @@ var makePresentationPipe = pipe.New(pipe.Options{}).
 			return mode
 		}
 		// attempt to override URLs for source code links
-		// TODO fix links from source pages back to docs
 		pres.URLForSrc = func(src string) string {
 			// seems godoc lib documentation is incorrect here, 'src' is actually the whole package path to the file
 			src = strings.TrimPrefix(src, "/")
