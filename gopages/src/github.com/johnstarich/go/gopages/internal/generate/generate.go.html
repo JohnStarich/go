@@ -513,53 +513,52 @@
 <span id="L456" class="ln">   456  </span>}
 <span id="L457" class="ln">   457  </span>
 <span id="L458" class="ln">   458  </span>func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
-<span id="L459" class="ln">   459  </span>	println(&#34;walking...&#34;, path)
-<span id="L460" class="ln">   460  </span>	info, err := fs.Lstat(path)
-<span id="L461" class="ln">   461  </span>	if err != nil {
-<span id="L462" class="ln">   462  </span>		return errors.Wrap(err, &#34;Error looking up file&#34;)
-<span id="L463" class="ln">   463  </span>	}
-<span id="L464" class="ln">   464  </span>
-<span id="L465" class="ln">   465  </span>	if info.Mode()&amp;os.ModeSymlink == os.ModeSymlink {
-<span id="L466" class="ln">   466  </span>		<span class="comment">// ignore symlinks to avoid infinite recursion</span>
-<span id="L467" class="ln">   467  </span>		return nil
-<span id="L468" class="ln">   468  </span>	}
-<span id="L469" class="ln">   469  </span>
-<span id="L470" class="ln">   470  </span>	isDir := info.IsDir()
-<span id="L471" class="ln">   471  </span>	if err := visit(path, isDir); err != nil {
-<span id="L472" class="ln">   472  </span>		return err
-<span id="L473" class="ln">   473  </span>	}
-<span id="L474" class="ln">   474  </span>
-<span id="L475" class="ln">   475  </span>	if !isDir {
-<span id="L476" class="ln">   476  </span>		return nil
-<span id="L477" class="ln">   477  </span>	}
-<span id="L478" class="ln">   478  </span>
-<span id="L479" class="ln">   479  </span>	dir, err := fs.ReadDir(path)
-<span id="L480" class="ln">   480  </span>	if err != nil {
-<span id="L481" class="ln">   481  </span>		return errors.Wrapf(err, &#34;Error reading directory %q&#34;, path)
-<span id="L482" class="ln">   482  </span>	}
-<span id="L483" class="ln">   483  </span>	for _, info = range dir {
-<span id="L484" class="ln">   484  </span>		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
-<span id="L485" class="ln">   485  </span>		if errors.Is(err, filepath.SkipDir) {
-<span id="L486" class="ln">   486  </span>			if !info.IsDir() {
-<span id="L487" class="ln">   487  </span>				break <span class="comment">// for SkipDir on a file, skip remaining files in directory</span>
-<span id="L488" class="ln">   488  </span>			}
-<span id="L489" class="ln">   489  </span>			<span class="comment">// otherwise continue recursing other files in this dir</span>
-<span id="L490" class="ln">   490  </span>		} else if err != nil {
-<span id="L491" class="ln">   491  </span>			return err
-<span id="L492" class="ln">   492  </span>		}
-<span id="L493" class="ln">   493  </span>	}
-<span id="L494" class="ln">   494  </span>	return nil
-<span id="L495" class="ln">   495  </span>}
-<span id="L496" class="ln">   496  </span>
-<span id="L497" class="ln">   497  </span>func makePath(path string) billy.Filesystem {
-<span id="L498" class="ln">   498  </span>	fs := safememfs.New()
-<span id="L499" class="ln">   499  </span>	err := fs.MkdirAll(path, scrapeDirPermission)
-<span id="L500" class="ln">   500  </span>	if err != nil {
-<span id="L501" class="ln">   501  </span>		panic(err)
-<span id="L502" class="ln">   502  </span>	}
-<span id="L503" class="ln">   503  </span>	return fs
-<span id="L504" class="ln">   504  </span>}
-<span id="L505" class="ln">   505  </span>
+<span id="L459" class="ln">   459  </span>	info, err := fs.Lstat(path)
+<span id="L460" class="ln">   460  </span>	if err != nil {
+<span id="L461" class="ln">   461  </span>		return errors.Wrap(err, &#34;Error looking up file&#34;)
+<span id="L462" class="ln">   462  </span>	}
+<span id="L463" class="ln">   463  </span>
+<span id="L464" class="ln">   464  </span>	if info.Mode()&amp;os.ModeSymlink == os.ModeSymlink {
+<span id="L465" class="ln">   465  </span>		<span class="comment">// ignore symlinks to avoid infinite recursion</span>
+<span id="L466" class="ln">   466  </span>		return nil
+<span id="L467" class="ln">   467  </span>	}
+<span id="L468" class="ln">   468  </span>
+<span id="L469" class="ln">   469  </span>	isDir := info.IsDir()
+<span id="L470" class="ln">   470  </span>	if err := visit(path, isDir); err != nil {
+<span id="L471" class="ln">   471  </span>		return err
+<span id="L472" class="ln">   472  </span>	}
+<span id="L473" class="ln">   473  </span>
+<span id="L474" class="ln">   474  </span>	if !isDir {
+<span id="L475" class="ln">   475  </span>		return nil
+<span id="L476" class="ln">   476  </span>	}
+<span id="L477" class="ln">   477  </span>
+<span id="L478" class="ln">   478  </span>	dir, err := fs.ReadDir(path)
+<span id="L479" class="ln">   479  </span>	if err != nil {
+<span id="L480" class="ln">   480  </span>		return errors.Wrapf(err, &#34;Error reading directory %q&#34;, path)
+<span id="L481" class="ln">   481  </span>	}
+<span id="L482" class="ln">   482  </span>	for _, info = range dir {
+<span id="L483" class="ln">   483  </span>		err := walkFilesFn(fs, filepath.Join(path, info.Name()), visit)
+<span id="L484" class="ln">   484  </span>		if errors.Is(err, filepath.SkipDir) {
+<span id="L485" class="ln">   485  </span>			if !info.IsDir() {
+<span id="L486" class="ln">   486  </span>				break <span class="comment">// for SkipDir on a file, skip remaining files in directory</span>
+<span id="L487" class="ln">   487  </span>			}
+<span id="L488" class="ln">   488  </span>			<span class="comment">// otherwise continue recursing other files in this dir</span>
+<span id="L489" class="ln">   489  </span>		} else if err != nil {
+<span id="L490" class="ln">   490  </span>			return err
+<span id="L491" class="ln">   491  </span>		}
+<span id="L492" class="ln">   492  </span>	}
+<span id="L493" class="ln">   493  </span>	return nil
+<span id="L494" class="ln">   494  </span>}
+<span id="L495" class="ln">   495  </span>
+<span id="L496" class="ln">   496  </span>func makePath(path string) billy.Filesystem {
+<span id="L497" class="ln">   497  </span>	fs := safememfs.New()
+<span id="L498" class="ln">   498  </span>	err := fs.MkdirAll(path, scrapeDirPermission)
+<span id="L499" class="ln">   499  </span>	if err != nil {
+<span id="L500" class="ln">   500  </span>		panic(err)
+<span id="L501" class="ln">   501  </span>	}
+<span id="L502" class="ln">   502  </span>	return fs
+<span id="L503" class="ln">   503  </span>}
+<span id="L504" class="ln">   504  </span>
 </pre><p></p>
 
 <div id="footer">
