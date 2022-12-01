@@ -239,7 +239,7 @@ New combines multiple packet connections (net.Conn or net.PacketConn) and return
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) Close() <a href="/go/dns/pkg/builtin/#error">error</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) Close() <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 Close implements PacketConn
 </p>
@@ -254,7 +254,7 @@ Close implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) LocalAddr() <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) LocalAddr() <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a></pre>
 				<p>
 LocalAddr implements PacketConn
 </p>
@@ -269,7 +269,7 @@ LocalAddr implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) Read(b []<a href="/go/dns/pkg/builtin/#byte">byte</a>) (n <a href="/go/dns/pkg/builtin/#int">int</a>, err <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) Read(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				
 				
 				
@@ -281,7 +281,7 @@ LocalAddr implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) ReadFrom(b []<a href="/go/dns/pkg/builtin/#byte">byte</a>) (n <a href="/go/dns/pkg/builtin/#int">int</a>, addr <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a>, err <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) ReadFrom(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, addr <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
 </p>
@@ -296,7 +296,7 @@ ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May requi
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) RemoteAddr() <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) RemoteAddr() <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a></pre>
 				<p>
 RemoteAddr implements PacketConn
 </p>
@@ -311,7 +311,7 @@ RemoteAddr implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) SetDeadline(t <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Time">Time</a>) <a href="/go/dns/pkg/builtin/#error">error</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) SetDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 SetDeadline implements PacketConn
 </p>
@@ -326,7 +326,7 @@ SetDeadline implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) SetReadDeadline(t <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Time">Time</a>) <a href="/go/dns/pkg/builtin/#error">error</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) SetReadDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 SetReadDeadline implements PacketConn
 </p>
@@ -341,7 +341,7 @@ SetReadDeadline implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) SetWriteDeadline(t <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Time">Time</a>) <a href="/go/dns/pkg/builtin/#error">error</a></pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) SetWriteDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 SetWriteDeadline implements PacketConn
 </p>
@@ -356,7 +356,7 @@ SetWriteDeadline implements PacketConn
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) Stagger(ticker &lt;-chan struct{}, cancel <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#CancelFunc">CancelFunc</a>)</pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) Stagger(ticker &lt;-chan struct{}, cancel <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#CancelFunc">CancelFunc</a>)</pre>
 				<p>
 Stagger controls when secondary connections are attempted after the first. For any new enabled connection, the last Write and SetDeadlines are replayed onto it.
 If Stagger is called after the connection is started, then the behavior is undefined.
@@ -393,7 +393,7 @@ Stats returns statistics from a staggercast execution
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) Write(b []<a href="/go/dns/pkg/builtin/#byte">byte</a>) (n <a href="/go/dns/pkg/builtin/#int">int</a>, err <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) Write(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				
 				
 				
@@ -405,7 +405,7 @@ Stats returns statistics from a staggercast execution
 					
 					
 				</h3>
-				<pre>func (s *<a href="#Conn">Conn</a>) WriteTo(b []<a href="/go/dns/pkg/builtin/#byte">byte</a>, addr <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a>) (n <a href="/go/dns/pkg/builtin/#int">int</a>, err <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
+				<pre>func (s *<a href="#Conn">Conn</a>) WriteTo(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, addr <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
 </p>
@@ -427,10 +427,10 @@ PacketConn implements both net.Conn and net.PacketConn
 </p>
 
 			<pre>type PacketConn interface {
-    <a href="/go/dns/pkg/io/">io</a>.<a href="/go/dns/pkg/io/#Reader">Reader</a>
-    <a href="/go/dns/pkg/io/">io</a>.<a href="/go/dns/pkg/io/#Writer">Writer</a>
-    RemoteAddr() <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a>
-    <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#PacketConn">PacketConn</a>
+    <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Reader">Reader</a>
+    <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>
+    RemoteAddr() <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>
+    <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#PacketConn">PacketConn</a>
 }</pre>
 
 			
@@ -457,8 +457,8 @@ Stats contains statistics from a staggercast execution
 </p>
 
 			<pre>type Stats struct {
-<span id="Stats.FastestRemoteIndex"></span>    FastestRemoteIndex <a href="/go/dns/pkg/builtin/#int">int</a>
-<span id="Stats.FastestRemote"></span>    FastestRemote      <a href="/go/dns/pkg/net/">net</a>.<a href="/go/dns/pkg/net/#Addr">Addr</a>
+<span id="Stats.FastestRemoteIndex"></span>    FastestRemoteIndex <a href="https://pkg.go.dev/builtin/#int">int</a>
+<span id="Stats.FastestRemote"></span>    FastestRemote      <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>
 }
 </pre>
 

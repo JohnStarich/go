@@ -197,7 +197,7 @@ Config is a parsed scutil DNS config
 					
 					
 				</h3>
-				<pre>func ReadMacOSDNS(ctx <a href="/go/dns/pkg/context/">context</a>.<a href="/go/dns/pkg/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="/go/dns/pkg/builtin/#error">error</a>)</pre>
+				<pre>func ReadMacOSDNS(ctx <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 ReadMacOSDNS reads and parses the current macOS scutil DNS settings
 </p>
@@ -219,7 +219,7 @@ ReadMacOSDNS reads and parses the current macOS scutil DNS settings
 Flag is an scutil flag value. See possible Flag enum values for examples.
 </p>
 
-			<pre>type Flag <a href="/go/dns/pkg/builtin/#string">string</a></pre>
+			<pre>type Flag <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 
 			
 				<p>
@@ -256,7 +256,7 @@ Common flag values for convenient comparisons
 Reach is an scutil &#34;reach&#34; value. See possible Reach enum values for examples.
 </p>
 
-			<pre>type Reach <a href="/go/dns/pkg/builtin/#string">string</a></pre>
+			<pre>type Reach <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 
 			
 				
@@ -312,18 +312,18 @@ Resolver is an scutil resolver entry
 </p>
 
 			<pre>type Resolver struct {
-<span id="Resolver.Domain"></span>    Domain         <a href="/go/dns/pkg/builtin/#string">string</a>
+<span id="Resolver.Domain"></span>    Domain         <a href="https://pkg.go.dev/builtin/#string">string</a>
 <span id="Resolver.Flags"></span>    Flags          []<a href="#Flag">Flag</a>
-<span id="Resolver.InterfaceIndex"></span>    InterfaceIndex <a href="/go/dns/pkg/builtin/#int">int</a>
-<span id="Resolver.InterfaceName"></span>    InterfaceName  <a href="/go/dns/pkg/builtin/#string">string</a>
-<span id="Resolver.MulticastDNS"></span>    MulticastDNS   <a href="/go/dns/pkg/builtin/#bool">bool</a>
-<span id="Resolver.Nameservers"></span>    Nameservers    []<a href="/go/dns/pkg/builtin/#string">string</a>
-<span id="Resolver.Order"></span>    Order          <a href="/go/dns/pkg/builtin/#int">int</a>
-<span id="Resolver.Port"></span>    Port           <a href="/go/dns/pkg/builtin/#int">int</a>
+<span id="Resolver.InterfaceIndex"></span>    InterfaceIndex <a href="https://pkg.go.dev/builtin/#int">int</a>
+<span id="Resolver.InterfaceName"></span>    InterfaceName  <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Resolver.MulticastDNS"></span>    MulticastDNS   <a href="https://pkg.go.dev/builtin/#bool">bool</a>
+<span id="Resolver.Nameservers"></span>    Nameservers    []<a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Resolver.Order"></span>    Order          <a href="https://pkg.go.dev/builtin/#int">int</a>
+<span id="Resolver.Port"></span>    Port           <a href="https://pkg.go.dev/builtin/#int">int</a>
 <span id="Resolver.Reach"></span>    Reach          []<a href="#Reach">Reach</a>
 
-<span id="Resolver.SearchDomain"></span>    SearchDomain []<a href="/go/dns/pkg/builtin/#string">string</a>
-<span id="Resolver.Timeout"></span>    Timeout      <a href="/go/dns/pkg/time/">time</a>.<a href="/go/dns/pkg/time/#Duration">Duration</a>
+<span id="Resolver.SearchDomain"></span>    SearchDomain []<a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Resolver.Timeout"></span>    Timeout      <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Duration">Duration</a>
     <span class="comment">// contains filtered or unexported fields</span>
 }
 </pre>
@@ -345,7 +345,7 @@ Resolver is an scutil resolver entry
 					
 					
 				</h3>
-				<pre>func (r <a href="#Resolver">Resolver</a>) Reachable() <a href="/go/dns/pkg/builtin/#bool">bool</a></pre>
+				<pre>func (r <a href="#Resolver">Resolver</a>) Reachable() <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
 				<p>
 Reachable returns whether this resolver is reachable.
 </p>
