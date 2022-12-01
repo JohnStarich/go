@@ -456,7 +456,6 @@ func walkFiles(fs billy.Filesystem, path string, visit func(path string, isDir b
 }
 
 func walkFilesFn(fs billy.Filesystem, path string, visit func(path string, isDir bool) error) error {
-	println("walking...", path)
 	info, err := fs.Lstat(path)
 	if err != nil {
 		return errors.Wrap(err, "Error looking up file")
