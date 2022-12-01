@@ -1,7 +1,6 @@
-package staggercast
-
-// Staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
+// Package staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
 // For ease of use in a DNS resolver Dial func, all connections implement both net.Conn and net.PacketConn.
+package staggercast
 
 import (
 	"context"

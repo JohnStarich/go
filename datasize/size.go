@@ -1,3 +1,4 @@
+// Package datasize parses, formats, and converts to differents units in bytes.
 package datasize
 
 import (
@@ -5,7 +6,7 @@ import (
 	"math/big"
 )
 
-// nolint:gochecknoglobals,gomnd // These are all effectively constants as big.Int types.
+//nolint:gochecknoglobals,gomnd // These are all effectively constants as big.Int types.
 var (
 	kilobytes  = big.NewInt(1e3)
 	megabytes  = big.NewInt(1e6)

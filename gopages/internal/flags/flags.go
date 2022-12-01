@@ -1,3 +1,4 @@
+// Package flags parses args and returns them as a struct.
 package flags
 
 import (
@@ -42,7 +43,7 @@ func Parse(osArgs ...string) (Args, string, error) {
 }
 
 // Linker returns an appropriate source.Linker for the given command line args
-func (a Args) Linker(modulePackage string) (source.Linker, error) { // nolint:ireturn // This method's purpose is to determine the correct implementation of source.Linker to return
+func (a Args) Linker(modulePackage string) (source.Linker, error) { //nolint:ireturn // This method's purpose is to determine the correct implementation of source.Linker to return
 	if a.SourceLinkTemplate != "" {
 		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)
 	}

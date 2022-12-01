@@ -1,3 +1,4 @@
+// Package generate generates documentation pages for a given package.
 package generate
 
 import (
@@ -192,7 +193,7 @@ var (
 		}).
 		Append(func(args docsArgs, file string, isDir bool) (docsArgs, string, bool, error) {
 			// skip the destination directory if it's set to avoid infinite recursion
-			return args, file, isDir, pipe.CheckError(isDir && args.OutputPath != "" && strings.TrimPrefix(file, "/") == args.OutputPath, filepath.SkipDir)
+			return args, file, isDir, pipe.CheckError(isDir && args.OutputPath != "" && strings.TrimPrefix(file, string(filepath.Separator)) == args.OutputPath, filepath.SkipDir)
 		}).
 		Append(func(args docsArgs, file string, isDir bool) (docsArgs, string, bool, error) {
 			// only scrape directories and Go files

@@ -12,7 +12,6 @@ import (
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
 	"github.com/fatih/color"
 	"github.com/hack-pad/hackpadfs"
-	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet/internal/fspath"
 	"github.com/johnstarich/go/covet/internal/packages"
 	"github.com/johnstarich/go/covet/internal/span"
@@ -31,7 +30,7 @@ type Covet struct {
 // Options contains parse options
 type Options struct {
 	// FS is the file system to read files, Go package information, and more.
-	// Defaults to hackpadfs's os.NewFS().
+	// Defaults to hackpadfs's os.NewFS(). If on Windows, the default targets the current working directory's volume (e.g. C:\).
 	FS fs.FS
 	// Diff is a reader with patch or diff formatted contents
 	Diff io.Reader
@@ -59,7 +58,10 @@ func Parse(options Options) (covet *Covet, err error) {
 		return nil, errors.Errorf("invalid coverage base directory FS path: %s", options.GoCoverageBaseDir)
 	}
 	if options.FS == nil {
-		options.FS = os.NewFS()
+		options.FS, err = fspath.WorkingDirectoryFS()
+		if err != nil {
+			return nil, err
+		}
 	}
 	if options.Diff == nil {
 		return nil, errors.New("diff reader must not be nil")

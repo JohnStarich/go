@@ -1,9 +1,15 @@
+// Package fspath contains FS path manipulation tools, much like the standard library's "path/filepath" package.
 package fspath
 
 import (
+	goOS "os"
 	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 
+	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/os"
 	"github.com/pkg/errors"
 )
 
@@ -49,4 +55,32 @@ func Rel(basePath, targetPath string) (string, error) {
 		p := strings.Repeat("../", strings.Count(base, separator)+1)
 		return path.Join(p, target), nil
 	}
+}
+
+// WorkingDirectoryFS returns the os.FS for the current working directory.
+// If using Windows, the os.FS used will target the osPath's volume (e.g. C:\).
+func WorkingDirectoryFS() (*os.FS, error) {
+	fs := os.NewFS()
+	volFS, err := workingDirectoryFS(fs, runtime.GOOS, goOS.Getwd, fs.SubVolume, filepath.VolumeName)
+	if err == nil {
+		fs = volFS.(*os.FS)
+	}
+	return fs, err
+}
+
+func workingDirectoryFS(
+	fs hackpadfs.FS,
+	goos string,
+	getWorkingDirectory func() (string, error),
+	subVolume func(string) (hackpadfs.FS, error),
+	volumeName func(string) string,
+) (hackpadfs.FS, error) {
+	if goos != "windows" {
+		return fs, nil
+	}
+	wd, err := getWorkingDirectory()
+	if err != nil {
+		return nil, err
+	}
+	return subVolume(volumeName(wd))
 }

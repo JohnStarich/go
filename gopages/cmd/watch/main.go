@@ -1,3 +1,6 @@
+//go:build !windows
+// +build !windows
+
 // Command watch generates docs and starts an HTTP endpoint to serve them. Also runs a file watcher on the current module to regenerate docs on change events.
 //
 // watch is useful for testing godoc code comments and while developing on gopages itself.
@@ -89,8 +92,9 @@ func main() {
 	})
 
 	server := http.Server{
-		Addr:    ":8080",
-		Handler: mux,
+		Addr:              ":8080",
+		Handler:           mux,
+		ReadHeaderTimeout: time.Minute,
 	}
 	fmt.Println("Starting demo server on :8080...")
 	_ = server.ListenAndServe()

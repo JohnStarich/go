@@ -1,3 +1,4 @@
+// Package minmax contains several type-specific min and max functions.
 package minmax
 
 // MinInt64 returns the smallest of a and b

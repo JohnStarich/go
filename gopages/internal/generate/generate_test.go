@@ -1,7 +1,7 @@
 package generate
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -15,9 +15,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateDocs(t *testing.T) { // nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
+func TestGenerateDocs(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
 	// create a new package "thing" and generate docs for it
-	thing, err := ioutil.TempDir("", "")
+	thing, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(thing)
 	wd, err := os.Getwd()
@@ -33,7 +33,7 @@ func TestGenerateDocs(t *testing.T) { // nolint:paralleltest // TODO: Remove chd
 		path = filepath.Join(thing, path)
 		err := os.MkdirAll(filepath.Dir(path), 0700)
 		require.NoError(t, err)
-		err = ioutil.WriteFile(path, []byte(contents), 0600)
+		err = os.WriteFile(path, []byte(contents), 0600)
 		require.NoError(t, err)
 	}
 
@@ -94,7 +94,7 @@ package mylib
 	var foundDocs []string
 	require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
 		if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
-			foundDocs = append(foundDocs, path)
+			foundDocs = append(foundDocs, filepath.ToSlash(path))
 		}
 		return nil
 	}))
@@ -103,7 +103,7 @@ package mylib
 
 	f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
 	require.NoError(t, err)
-	indexContents, err := ioutil.ReadAll(f)
+	indexContents, err := io.ReadAll(f)
 	require.NoError(t, err)
 	assert.Contains(t, string(indexContents), "mylib")
 }

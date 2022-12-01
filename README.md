@@ -3,9 +3,10 @@
 This is a collection of my Go utilities in one easy-to-import and easy-to-share place.
 
 * [covet](./covet): Reports PR diff coverage to encourage writing more tests, includes GitHub integrations
-* [dns](./dns): Implements a drop-in replacement for DNS, since Go's DNS on macOS doesn't always work
+* [goop](./goop): Runs Go scripts without the fuss. Automatically builds installed Go commands when you run them.
 * [gopages](./gopages): Generates static Go documentation, includes a GitHub Pages integration
 * [datasize](./datasize): Parse, format, and convert to differents units in bytes
+* [dns](./dns): Implements a drop-in replacement for DNS, since Go's DNS on macOS doesn't always work
 * [pipe](./pipe): Simplify error handling while keeping the original intent clear
 * [regext](./regext): Ignore whitespace and in-line comments in your regular expressions
 

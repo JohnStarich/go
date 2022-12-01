@@ -5,7 +5,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hack-pad/hackpadfs"
+	"github.com/hack-pad/hackpadfs/mem"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func noSlashes(s string) string {
@@ -107,6 +111,92 @@ func TestRel(t *testing.T) {
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectPath, p)
+		})
+	}
+}
+
+func TestWorkingDirectoryFS(t *testing.T) {
+	t.Parallel()
+	t.Run("default fs for current OS", func(t *testing.T) {
+		t.Parallel()
+		fs, err := WorkingDirectoryFS()
+		assert.NoError(t, err)
+		assert.NotNil(t, fs)
+	})
+
+	fs1, err := mem.NewFS()
+	require.NoError(t, err)
+	fs2, err := mem.NewFS()
+	require.NoError(t, err)
+	for _, tc := range []struct {
+		description         string
+		fs                  hackpadfs.FS
+		goos                string
+		workingDirectory    string
+		workingDirectoryErr error
+		volumeName          string
+		subVolume           hackpadfs.FS
+		subVolumeErr        error
+		expectFS            hackpadfs.FS
+		expectErr           string
+	}{
+		{
+			description:  "non-windows OS",
+			goos:         "not-windows",
+			fs:           fs1,
+			subVolumeErr: errors.New("some error"),
+			expectFS:     fs1,
+		},
+		{
+			description:      "windows OS",
+			goos:             "windows",
+			fs:               fs1,
+			workingDirectory: "foo",
+			volumeName:       "bar",
+			subVolume:        fs2,
+			expectFS:         fs2,
+			expectErr:        "",
+		},
+		{
+			description:         "windows working dir error",
+			goos:                "windows",
+			workingDirectoryErr: errors.New("some error"),
+			expectErr:           "some error",
+		},
+		{
+			description:  "windows sub volume error",
+			goos:         "windows",
+			subVolumeErr: errors.New("some error"),
+			expectErr:    "some error",
+		},
+	} {
+		tc := tc // enable parallel sub-tests
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			getWorkingDirectory := func() (string, error) {
+				return tc.workingDirectory, tc.workingDirectoryErr
+			}
+			subVolume := func(path string) (hackpadfs.FS, error) {
+				assert.Equal(t, tc.volumeName, path)
+				return tc.subVolume, tc.subVolumeErr
+			}
+			volumeName := func(path string) string {
+				assert.Equal(t, tc.workingDirectory, path)
+				return tc.volumeName
+			}
+			fs, err := workingDirectoryFS(
+				tc.fs,
+				tc.goos,
+				getWorkingDirectory,
+				subVolume,
+				volumeName,
+			)
+			if tc.expectErr != "" {
+				assert.EqualError(t, err, tc.expectErr)
+				return
+			}
+			require.NoError(t, err)
+			assert.Same(t, tc.expectFS, fs)
 		})
 	}
 }

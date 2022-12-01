@@ -89,7 +89,7 @@ Diff coverage is below target. Add tests for these files:
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			diffReader := strings.NewReader(strings.TrimSpace(tc.diff))
-			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t, "")
+			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
 
 			coverFile := path.Join(tmpDir, "cover.out")
 			{

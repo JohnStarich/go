@@ -1,3 +1,4 @@
+// Package coverstatus contains coverage color-coding and labeling for generating reports.
 package coverstatus
 
 import "github.com/fatih/color"
@@ -15,7 +16,7 @@ const (
 
 // New categorizes the given percentage (between 0 and 1) as a coverage status
 func New(f float64) Status {
-	// nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
+	//nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we're ok.
 	switch {
 	case f < 0.50:
 		return coverageError

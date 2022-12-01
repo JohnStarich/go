@@ -2,8 +2,9 @@ package flags
 
 import (
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,7 +14,7 @@ import (
 func testFile(t *testing.T, contents string) string {
 	t.Helper()
 	p := filepath.Join(t.TempDir(), "file")
-	err := ioutil.WriteFile(p, []byte(contents), 0600)
+	err := os.WriteFile(p, []byte(contents), 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +54,11 @@ func TestFilePathContents(t *testing.T) {
 		set.Var(&f, "myflag", "")
 		err := set.Parse([]string{"-myflag", "/does/not/exist"})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "open /does/not/exist: no such file or directory")
+		if runtime.GOOS == "windows" {
+			assert.Contains(t, err.Error(), "open /does/not/exist: The system cannot find the path specified.")
+		} else {
+			assert.Contains(t, err.Error(), "open /does/not/exist: no such file or directory")
+		}
 		assert.Equal(t, "", f.String())
 	})
 }
