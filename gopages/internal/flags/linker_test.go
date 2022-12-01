@@ -29,19 +29,19 @@ func TestGoPagesLinkToSource(t *testing.T) {
 		{
 			description: "simple path",
 			pkgPath:     "github.com/org/repo/mypkg/myfile.go",
-			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go",
+			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go.html",
 		},
 		{
 			description: "base URL",
 			baseURL:     "/some/base",
 			pkgPath:     "github.com/org/repo/mypkg/myfile.go",
-			expectLink:  "/some/base/src/github.com/org/repo/mypkg/myfile.go",
+			expectLink:  "/some/base/src/github.com/org/repo/mypkg/myfile.go.html",
 		},
 		{
 			description: "line number",
 			pkgPath:     "github.com/org/repo/mypkg/myfile.go",
 			options:     source.LinkOptions{Line: 10},
-			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go#L10",
+			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go.html#L10",
 		},
 	} {
 		tc := tc // enable parallel sub-tests

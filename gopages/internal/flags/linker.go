@@ -27,6 +27,9 @@ func (l *GoPagesLinker) LinkToSource(packagePath string, options source.LinkOpti
 	u := url.URL{
 		Path: path.Join(l.baseURL, "/src", packagePath),
 	}
+	if path.Ext(u.Path) == ".go" {
+		u.Path += ".html"
+	}
 	if options.Line > 0 {
 		u.Fragment = fmt.Sprintf("L%d", options.Line)
 	}
