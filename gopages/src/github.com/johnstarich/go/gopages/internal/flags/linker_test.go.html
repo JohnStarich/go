@@ -86,19 +86,19 @@
 <span id="L29" class="ln">    29  </span>		{
 <span id="L30" class="ln">    30  </span>			description: &#34;simple path&#34;,
 <span id="L31" class="ln">    31  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L32" class="ln">    32  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L32" class="ln">    32  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go.html&#34;,
 <span id="L33" class="ln">    33  </span>		},
 <span id="L34" class="ln">    34  </span>		{
 <span id="L35" class="ln">    35  </span>			description: &#34;base URL&#34;,
 <span id="L36" class="ln">    36  </span>			baseURL:     &#34;/some/base&#34;,
 <span id="L37" class="ln">    37  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
-<span id="L38" class="ln">    38  </span>			expectLink:  &#34;/some/base/src/github.com/org/repo/mypkg/myfile.go&#34;,
+<span id="L38" class="ln">    38  </span>			expectLink:  &#34;/some/base/src/github.com/org/repo/mypkg/myfile.go.html&#34;,
 <span id="L39" class="ln">    39  </span>		},
 <span id="L40" class="ln">    40  </span>		{
 <span id="L41" class="ln">    41  </span>			description: &#34;line number&#34;,
 <span id="L42" class="ln">    42  </span>			pkgPath:     &#34;github.com/org/repo/mypkg/myfile.go&#34;,
 <span id="L43" class="ln">    43  </span>			options:     source.LinkOptions{Line: 10},
-<span id="L44" class="ln">    44  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go#L10&#34;,
+<span id="L44" class="ln">    44  </span>			expectLink:  &#34;/src/github.com/org/repo/mypkg/myfile.go.html#L10&#34;,
 <span id="L45" class="ln">    45  </span>		},
 <span id="L46" class="ln">    46  </span>	} {
 <span id="L47" class="ln">    47  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>

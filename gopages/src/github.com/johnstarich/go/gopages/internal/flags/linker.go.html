@@ -84,65 +84,68 @@
 <span id="L27" class="ln">    27  </span>	u := url.URL{
 <span id="L28" class="ln">    28  </span>		Path: path.Join(l.baseURL, &#34;/src&#34;, packagePath),
 <span id="L29" class="ln">    29  </span>	}
-<span id="L30" class="ln">    30  </span>	if options.Line &gt; 0 {
-<span id="L31" class="ln">    31  </span>		u.Fragment = fmt.Sprintf(&#34;L%d&#34;, options.Line)
+<span id="L30" class="ln">    30  </span>	if path.Ext(u.Path) == &#34;.go&#34; {
+<span id="L31" class="ln">    31  </span>		u.Path += &#34;.html&#34;
 <span id="L32" class="ln">    32  </span>	}
-<span id="L33" class="ln">    33  </span>	return u
-<span id="L34" class="ln">    34  </span>}
-<span id="L35" class="ln">    35  </span>
-<span id="L36" class="ln">    36  </span><span class="comment">// TemplateLinker is a custom template-based source.Linker, which links to external source pages</span>
-<span id="L37" class="ln">    37  </span>type TemplateLinker struct {
-<span id="L38" class="ln">    38  </span>	template      *template.Template
-<span id="L39" class="ln">    39  </span>	modulePackage string
-<span id="L40" class="ln">    40  </span>}
-<span id="L41" class="ln">    41  </span>
-<span id="L42" class="ln">    42  </span>var _ source.Linker = &amp;TemplateLinker{}
-<span id="L43" class="ln">    43  </span>var _ source.ScrapeChecker = &amp;TemplateLinker{}
+<span id="L33" class="ln">    33  </span>	if options.Line &gt; 0 {
+<span id="L34" class="ln">    34  </span>		u.Fragment = fmt.Sprintf(&#34;L%d&#34;, options.Line)
+<span id="L35" class="ln">    35  </span>	}
+<span id="L36" class="ln">    36  </span>	return u
+<span id="L37" class="ln">    37  </span>}
+<span id="L38" class="ln">    38  </span>
+<span id="L39" class="ln">    39  </span><span class="comment">// TemplateLinker is a custom template-based source.Linker, which links to external source pages</span>
+<span id="L40" class="ln">    40  </span>type TemplateLinker struct {
+<span id="L41" class="ln">    41  </span>	template      *template.Template
+<span id="L42" class="ln">    42  </span>	modulePackage string
+<span id="L43" class="ln">    43  </span>}
 <span id="L44" class="ln">    44  </span>
-<span id="L45" class="ln">    45  </span>func newTemplateLinker(modulePackageURL, tmpl string) (*TemplateLinker, error) {
-<span id="L46" class="ln">    46  </span>	var l TemplateLinker
-<span id="L47" class="ln">    47  </span>	modulePackage, err := url.Parse(modulePackageURL)
-<span id="L48" class="ln">    48  </span>	if err == nil {
-<span id="L49" class="ln">    49  </span>		l.modulePackage = path.Join(modulePackage.Host, modulePackage.Path)
-<span id="L50" class="ln">    50  </span>		l.template, err = template.New(&#34;&#34;).Parse(tmpl)
-<span id="L51" class="ln">    51  </span>	}
-<span id="L52" class="ln">    52  </span>	return &amp;l, err
-<span id="L53" class="ln">    53  </span>}
-<span id="L54" class="ln">    54  </span>
-<span id="L55" class="ln">    55  </span><span class="comment">// LinkToSource implements source.Linker</span>
-<span id="L56" class="ln">    56  </span>func (l *TemplateLinker) LinkToSource(packagePath string, options source.LinkOptions) url.URL {
-<span id="L57" class="ln">    57  </span>	filePath := strings.TrimPrefix(packagePath, l.modulePackage)
-<span id="L58" class="ln">    58  </span>	filePath = strings.TrimPrefix(filePath, &#34;/&#34;)
-<span id="L59" class="ln">    59  </span>	if filePath == packagePath {
-<span id="L60" class="ln">    60  </span>		return url.URL{}
-<span id="L61" class="ln">    61  </span>	}
-<span id="L62" class="ln">    62  </span>	var args = struct {
-<span id="L63" class="ln">    63  </span>		Path string
-<span id="L64" class="ln">    64  </span>		source.LinkOptions
-<span id="L65" class="ln">    65  </span>	}{
-<span id="L66" class="ln">    66  </span>		Path:        filePath,
-<span id="L67" class="ln">    67  </span>		LinkOptions: options,
-<span id="L68" class="ln">    68  </span>	}
-<span id="L69" class="ln">    69  </span>	var buf bytes.Buffer
-<span id="L70" class="ln">    70  </span>	err := l.template.Execute(&amp;buf, args)
-<span id="L71" class="ln">    71  </span>	panicIfErr(err)
-<span id="L72" class="ln">    72  </span>	var u url.URL
-<span id="L73" class="ln">    73  </span>	err = u.UnmarshalBinary(buf.Bytes())
+<span id="L45" class="ln">    45  </span>var _ source.Linker = &amp;TemplateLinker{}
+<span id="L46" class="ln">    46  </span>var _ source.ScrapeChecker = &amp;TemplateLinker{}
+<span id="L47" class="ln">    47  </span>
+<span id="L48" class="ln">    48  </span>func newTemplateLinker(modulePackageURL, tmpl string) (*TemplateLinker, error) {
+<span id="L49" class="ln">    49  </span>	var l TemplateLinker
+<span id="L50" class="ln">    50  </span>	modulePackage, err := url.Parse(modulePackageURL)
+<span id="L51" class="ln">    51  </span>	if err == nil {
+<span id="L52" class="ln">    52  </span>		l.modulePackage = path.Join(modulePackage.Host, modulePackage.Path)
+<span id="L53" class="ln">    53  </span>		l.template, err = template.New(&#34;&#34;).Parse(tmpl)
+<span id="L54" class="ln">    54  </span>	}
+<span id="L55" class="ln">    55  </span>	return &amp;l, err
+<span id="L56" class="ln">    56  </span>}
+<span id="L57" class="ln">    57  </span>
+<span id="L58" class="ln">    58  </span><span class="comment">// LinkToSource implements source.Linker</span>
+<span id="L59" class="ln">    59  </span>func (l *TemplateLinker) LinkToSource(packagePath string, options source.LinkOptions) url.URL {
+<span id="L60" class="ln">    60  </span>	filePath := strings.TrimPrefix(packagePath, l.modulePackage)
+<span id="L61" class="ln">    61  </span>	filePath = strings.TrimPrefix(filePath, &#34;/&#34;)
+<span id="L62" class="ln">    62  </span>	if filePath == packagePath {
+<span id="L63" class="ln">    63  </span>		return url.URL{}
+<span id="L64" class="ln">    64  </span>	}
+<span id="L65" class="ln">    65  </span>	var args = struct {
+<span id="L66" class="ln">    66  </span>		Path string
+<span id="L67" class="ln">    67  </span>		source.LinkOptions
+<span id="L68" class="ln">    68  </span>	}{
+<span id="L69" class="ln">    69  </span>		Path:        filePath,
+<span id="L70" class="ln">    70  </span>		LinkOptions: options,
+<span id="L71" class="ln">    71  </span>	}
+<span id="L72" class="ln">    72  </span>	var buf bytes.Buffer
+<span id="L73" class="ln">    73  </span>	err := l.template.Execute(&amp;buf, args)
 <span id="L74" class="ln">    74  </span>	panicIfErr(err)
-<span id="L75" class="ln">    75  </span>	return u
-<span id="L76" class="ln">    76  </span>}
-<span id="L77" class="ln">    77  </span>
-<span id="L78" class="ln">    78  </span><span class="comment">// ShouldScrapePackage implements source.ScrapeChecker</span>
-<span id="L79" class="ln">    79  </span>func (l *TemplateLinker) ShouldScrapePackage(packagePath string) bool {
-<span id="L80" class="ln">    80  </span>	return strings.HasPrefix(packagePath, l.modulePackage+&#34;/&#34;)
-<span id="L81" class="ln">    81  </span>}
-<span id="L82" class="ln">    82  </span>
-<span id="L83" class="ln">    83  </span>func panicIfErr(err error) {
-<span id="L84" class="ln">    84  </span>	if err != nil {
-<span id="L85" class="ln">    85  </span>		panic(err)
-<span id="L86" class="ln">    86  </span>	}
-<span id="L87" class="ln">    87  </span>}
-<span id="L88" class="ln">    88  </span>
+<span id="L75" class="ln">    75  </span>	var u url.URL
+<span id="L76" class="ln">    76  </span>	err = u.UnmarshalBinary(buf.Bytes())
+<span id="L77" class="ln">    77  </span>	panicIfErr(err)
+<span id="L78" class="ln">    78  </span>	return u
+<span id="L79" class="ln">    79  </span>}
+<span id="L80" class="ln">    80  </span>
+<span id="L81" class="ln">    81  </span><span class="comment">// ShouldScrapePackage implements source.ScrapeChecker</span>
+<span id="L82" class="ln">    82  </span>func (l *TemplateLinker) ShouldScrapePackage(packagePath string) bool {
+<span id="L83" class="ln">    83  </span>	return strings.HasPrefix(packagePath, l.modulePackage+&#34;/&#34;)
+<span id="L84" class="ln">    84  </span>}
+<span id="L85" class="ln">    85  </span>
+<span id="L86" class="ln">    86  </span>func panicIfErr(err error) {
+<span id="L87" class="ln">    87  </span>	if err != nil {
+<span id="L88" class="ln">    88  </span>		panic(err)
+<span id="L89" class="ln">    89  </span>	}
+<span id="L90" class="ln">    90  </span>}
+<span id="L91" class="ln">    91  </span>
 </pre><p></p>
 
 <div id="footer">
