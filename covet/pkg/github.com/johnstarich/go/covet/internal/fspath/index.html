@@ -116,6 +116,9 @@ Package fspath contains FS path manipulation tools, much like the standard libra
 				
 				<dd><a href="#Rel">func Rel(basePath, targetPath string) (string, error)</a></dd>
 			
+				
+				<dd><a href="#WorkingDirectoryFS">func WorkingDirectoryFS() (*os.FS, error)</a></dd>
+			
 			
 			
 			</dl>
@@ -143,7 +146,7 @@ Package fspath contains FS path manipulation tools, much like the standard libra
 		
 			
 			
-			<h2 id="CommonBase">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L15">CommonBase</a>
+			<h2 id="CommonBase">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L20">CommonBase</a>
 				<a class="permalink" href="#CommonBase">&#xb6;</a>
 				
 				
@@ -160,7 +163,7 @@ Returns &#34;.&#34; if there are no common path elements.
 		
 			
 			
-			<h2 id="Rel">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L29">Rel</a>
+			<h2 id="Rel">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L34">Rel</a>
 				<a class="permalink" href="#Rel">&#xb6;</a>
 				
 				
@@ -169,6 +172,23 @@ Returns &#34;.&#34; if there are no common path elements.
 			<p>
 Rel returns the relative FS path from basePath to targetPath.
 Similar to filepath.Rel without including OS-dependent behavior.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="WorkingDirectoryFS">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/fspath/fspath.go#L62">WorkingDirectoryFS</a>
+				<a class="permalink" href="#WorkingDirectoryFS">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func WorkingDirectoryFS() (*<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/os/">os</a>.<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/os/#FS">FS</a>, <a href="/go/covet/pkg/builtin/#error">error</a>)</pre>
+			<p>
+WorkingDirectoryFS returns the os.FS for the current working directory.
+If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\).
 </p>
 
 			

@@ -114,7 +114,10 @@ Package testhelpers contains file system generators for use in tests.
 				<dd><a href="#FSWithFiles">func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS</a></dd>
 			
 				
-				<dd><a href="#OSFSWithTemp">func OSFSWithTemp(t *testing.T, relPathToModuleDir string) (_ hackpadfs.FS, workingDirectory, tempDirectory string)</a></dd>
+				<dd><a href="#FromOSToFS">func FromOSToFS(t *testing.T, osPath string) (*os.FS, string)</a></dd>
+			
+				
+				<dd><a href="#OSFSWithTemp">func OSFSWithTemp(t *testing.T) (fs hackpadfs.FS, workingDir, tempDir string)</a></dd>
 			
 			
 			
@@ -143,7 +146,7 @@ Package testhelpers contains file system generators for use in tests.
 		
 			
 			
-			<h2 id="FSWithFiles">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/testhelpers/fs.go#L37">FSWithFiles</a>
+			<h2 id="FSWithFiles">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/testhelpers/fs.go#L57">FSWithFiles</a>
 				<a class="permalink" href="#FSWithFiles">&#xb6;</a>
 				
 				
@@ -160,12 +163,29 @@ The contents are trimmed and a newline appended for convenient comparisons.
 		
 			
 			
-			<h2 id="OSFSWithTemp">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/testhelpers/fs.go#L20">OSFSWithTemp</a>
+			<h2 id="FromOSToFS">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/testhelpers/fs.go#L22">FromOSToFS</a>
+				<a class="permalink" href="#FromOSToFS">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func FromOSToFS(t *<a href="/go/covet/pkg/testing/">testing</a>.<a href="/go/covet/pkg/testing/#T">T</a>, osPath <a href="/go/covet/pkg/builtin/#string">string</a>) (*<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/os/">os</a>.<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/os/#FS">FS</a>, <a href="/go/covet/pkg/builtin/#string">string</a>)</pre>
+			<p>
+FromOSToFS returns the FS and FS path for the given OS path.
+If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\) before converting.
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="OSFSWithTemp">func <a href="/go/covet/src/github.com/johnstarich/go/covet/internal/testhelpers/fs.go#L32">OSFSWithTemp</a>
 				<a class="permalink" href="#OSFSWithTemp">&#xb6;</a>
 				
 				
 			</h2>
-			<pre>func OSFSWithTemp(t *<a href="/go/covet/pkg/testing/">testing</a>.<a href="/go/covet/pkg/testing/#T">T</a>, relPathToModuleDir <a href="/go/covet/pkg/builtin/#string">string</a>) (_ <a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/">hackpadfs</a>.<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/#FS">FS</a>, workingDirectory, tempDirectory <a href="/go/covet/pkg/builtin/#string">string</a>)</pre>
+			<pre>func OSFSWithTemp(t *<a href="/go/covet/pkg/testing/">testing</a>.<a href="/go/covet/pkg/testing/#T">T</a>) (fs <a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/">hackpadfs</a>.<a href="/go/covet/pkg/github.com/hack-pad/hackpadfs/#FS">FS</a>, workingDir, tempDir <a href="/go/covet/pkg/builtin/#string">string</a>)</pre>
 			<p>
 OSFSWithTemp returns an os.FS instance with 1) the current module&#39;s directory and 2) a temporary directory mounted inside.
 Returns the FS paths to both mounts.

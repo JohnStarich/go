@@ -65,7 +65,7 @@
 <span id="L8" class="ln">     8  </span>	&#34;sync&#34;
 <span id="L9" class="ln">     9  </span>
 <span id="L10" class="ln">    10  </span>	&#34;github.com/fatih/color&#34;
-<span id="L11" class="ln">    11  </span>	osfs &#34;github.com/hack-pad/hackpadfs/os&#34;
+<span id="L11" class="ln">    11  </span>	&#34;github.com/johnstarich/go/covet/internal/fspath&#34;
 <span id="L12" class="ln">    12  </span>)
 <span id="L13" class="ln">    13  </span>
 <span id="L14" class="ln">    14  </span><span class="comment">//nolint:gochecknoglobals // These globals are required to handle pre-existing globals in other libraries. Access to them is tightly controlled and minimized.</span>
@@ -85,20 +85,24 @@
 <span id="L28" class="ln">    28  </span>	if os.Getenv(&#34;CI&#34;) == &#34;true&#34; {
 <span id="L29" class="ln">    29  </span>		setColorOnce(true)
 <span id="L30" class="ln">    30  </span>	}
-<span id="L31" class="ln">    31  </span>	err := run(
-<span id="L32" class="ln">    32  </span>		os.Args[1:],
-<span id="L33" class="ln">    33  </span>		os.Stdin,
-<span id="L34" class="ln">    34  </span>		os.Stdout,
-<span id="L35" class="ln">    35  </span>		osErr,
-<span id="L36" class="ln">    36  </span>		osfs.NewFS(),
-<span id="L37" class="ln">    37  </span>	)
-<span id="L38" class="ln">    38  </span>	if err != nil {
-<span id="L39" class="ln">    39  </span>		fmt.Fprintln(osErr, err)
-<span id="L40" class="ln">    40  </span>		osExiter(1)
-<span id="L41" class="ln">    41  </span>		return
-<span id="L42" class="ln">    42  </span>	}
-<span id="L43" class="ln">    43  </span>}
-<span id="L44" class="ln">    44  </span>
+<span id="L31" class="ln">    31  </span>	osFS, err := fspath.WorkingDirectoryFS()
+<span id="L32" class="ln">    32  </span>	if err != nil {
+<span id="L33" class="ln">    33  </span>		panic(err)
+<span id="L34" class="ln">    34  </span>	}
+<span id="L35" class="ln">    35  </span>	err = run(
+<span id="L36" class="ln">    36  </span>		os.Args[1:],
+<span id="L37" class="ln">    37  </span>		os.Stdin,
+<span id="L38" class="ln">    38  </span>		os.Stdout,
+<span id="L39" class="ln">    39  </span>		osErr,
+<span id="L40" class="ln">    40  </span>		osFS,
+<span id="L41" class="ln">    41  </span>	)
+<span id="L42" class="ln">    42  </span>	if err != nil {
+<span id="L43" class="ln">    43  </span>		fmt.Fprintln(osErr, err)
+<span id="L44" class="ln">    44  </span>		osExiter(1)
+<span id="L45" class="ln">    45  </span>		return
+<span id="L46" class="ln">    46  </span>	}
+<span id="L47" class="ln">    47  </span>}
+<span id="L48" class="ln">    48  </span>
 </pre><p></p>
 
 <div id="footer">

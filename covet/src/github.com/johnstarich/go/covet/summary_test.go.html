@@ -146,7 +146,7 @@
 <span id="L89" class="ln">    89  </span>		t.Run(tc.description, func(t *testing.T) {
 <span id="L90" class="ln">    90  </span>			t.Parallel()
 <span id="L91" class="ln">    91  </span>			diffReader := strings.NewReader(strings.TrimSpace(tc.diff))
-<span id="L92" class="ln">    92  </span>			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t, &#34;&#34;)
+<span id="L92" class="ln">    92  </span>			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
 <span id="L93" class="ln">    93  </span>
 <span id="L94" class="ln">    94  </span>			coverFile := path.Join(tmpDir, &#34;cover.out&#34;)
 <span id="L95" class="ln">    95  </span>			{

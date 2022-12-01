@@ -203,7 +203,7 @@ Package covet reads version control diffs and Go coverage files to generate repo
 		
 			
 			
-			<h2 id="Covet">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L24">Covet</a>
+			<h2 id="Covet">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L23">Covet</a>
 				<a class="permalink" href="#Covet">&#xb6;</a>
 				
 				
@@ -227,7 +227,7 @@ Covet generates reports for a diff and coverage combination
 
 			
 				
-				<h3 id="Parse">func <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L47">Parse</a>
+				<h3 id="Parse">func <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L46">Parse</a>
 					<a class="permalink" href="#Parse">&#xb6;</a>
 					
 					
@@ -243,7 +243,7 @@ Parse reads and parses both a diff file and Go coverage file, then returns a Cov
 
 			
 				
-				<h3 id="Covet.DiffCoverageFiles">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L202">DiffCoverageFiles</a>
+				<h3 id="Covet.DiffCoverageFiles">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L204">DiffCoverageFiles</a>
 					<a class="permalink" href="#Covet.DiffCoverageFiles">&#xb6;</a>
 					
 					
@@ -259,7 +259,7 @@ These files can be used to display diff coverage information.
 				
 			
 				
-				<h3 id="Covet.DiffCovered">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L184">DiffCovered</a>
+				<h3 id="Covet.DiffCovered">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L186">DiffCovered</a>
 					<a class="permalink" href="#Covet.DiffCovered">&#xb6;</a>
 					
 					
@@ -290,7 +290,7 @@ The list contains just enough Files worth of uncovered lines necessary to meet t
 				
 			
 				
-				<h3 id="Covet.ReportFileCoverage">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L241">ReportFileCoverage</a>
+				<h3 id="Covet.ReportFileCoverage">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L243">ReportFileCoverage</a>
 					<a class="permalink" href="#Covet.ReportFileCoverage">&#xb6;</a>
 					
 					
@@ -428,7 +428,7 @@ Line represents a line in a file parsed in a Covet report
 		
 			
 			
-			<h2 id="Options">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L32">Options</a>
+			<h2 id="Options">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L31">Options</a>
 				<a class="permalink" href="#Options">&#xb6;</a>
 				
 				
@@ -439,7 +439,7 @@ Options contains parse options
 
 			<pre>type Options struct {
 <span id="Options.FS"></span>    <span class="comment">// FS is the file system to read files, Go package information, and more.</span>
-    <span class="comment">// Defaults to hackpadfs&#39;s os.NewFS().</span>
+    <span class="comment">// Defaults to hackpadfs&#39;s os.NewFS(). If on Windows, the default targets the current working directory&#39;s volume (e.g. C:\).</span>
     FS <a href="/go/covet/pkg/io/fs/">fs</a>.<a href="/go/covet/pkg/io/fs/#FS">FS</a>
 <span id="Options.Diff"></span>    <span class="comment">// Diff is a reader with patch or diff formatted contents</span>
     Diff <a href="/go/covet/pkg/io/">io</a>.<a href="/go/covet/pkg/io/#Reader">Reader</a>
@@ -466,7 +466,7 @@ Options contains parse options
 		
 			
 			
-			<h2 id="ReportFileCoverageOptions">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L238">ReportFileCoverageOptions</a>
+			<h2 id="ReportFileCoverageOptions">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go#L240">ReportFileCoverageOptions</a>
 				<a class="permalink" href="#ReportFileCoverageOptions">&#xb6;</a>
 				
 				
