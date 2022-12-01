@@ -8,6 +8,7 @@ import (
 )
 
 func TestNodeHTML(t *testing.T) {
+	t.Parallel()
 	htmlFunc := func(*godoc.PageInfo, interface{}, bool) string {
 		return `
 <html>
