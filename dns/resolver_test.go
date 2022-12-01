@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest"
 )
 
 const testTimeout = 5 * time.Second
@@ -106,7 +105,7 @@ func TestEnsureNameservers(t *testing.T) {
 }
 
 func testDialer(t *testing.T) *macOSDialer {
-	return newMacOSDialer(Config{Logger: zaptest.NewLogger(t)})
+	return newMacOSDialer(Config{Logger: newTestLogger(t)})
 }
 
 func TestDNSLookupHost(t *testing.T) {
@@ -242,7 +241,7 @@ func TestReorderNameservers(t *testing.T) {
 	const initialDelay = 3 * time.Second
 	dialer := newMacOSDialer(Config{
 		InitialNameserverDelay: initialDelay,
-		Logger:                 zaptest.NewLogger(t),
+		Logger:                 newTestLogger(t),
 	})
 	dialer.nameservers = []string{"1.2.3.4:53", addr}
 	res := &net.Resolver{PreferGo: true, Dial: dialer.DialContext}

@@ -18,33 +18,43 @@ jobs:
       run: make -k lint
 
   test:
-    name: Test with Go ${{ matrix.go }}
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     strategy:
       matrix:
+        platform:
+        - ubuntu-latest
         go:
           - 1.16.x
           - 1.17.x
           - 1.18.x
           - 1.19.x
+        include:
+        - platform: macos-latest
+          go: 1.19.x
+        - platform: windows-latest
+          go: 1.19.x
+    name: Test (Go ${{ matrix.go }} on ${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      pull-requests: write
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
         check-latest: true
-    - name: checkout-more
+    - name: Test
+      run: make -k test
+      env:
+        LINT_GO_VERSION: 1.19
+    - name: Publish test coverage
+      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.19.x'"
       run: |
-        # If running coverage report tools, fetch more commits for coverage diff.
+        # Fetch more commits for coverage diff.
         commits=${{ github.event.pull_request.commits }}
-        if [[ -n "$commits" && "$(go version)" == *"go${COVERAGE_VERSION}"* ]]; then
+        if [[ -n "$commits" ]]; then
           # Prepare enough depth for diffs with master
           git fetch --depth="$(( commits + 1 ))"
         fi
-    - name: Test
-      run: make test
+        make test-publish-coverage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERAGE_VERSION: 1.19

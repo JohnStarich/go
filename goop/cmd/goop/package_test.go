@@ -1,17 +1,29 @@
 package main
 
 import (
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func rootFilePath() string {
+	root := "/"
+	if runtime.GOOS == goosWindows {
+		root = `C:\`
+	}
+	return root
+}
+
 func TestParsePackagePattern(t *testing.T) {
 	t.Parallel()
-	const homeDir = "/homes/me"
+	root := rootFilePath()
+	homeDir := filepath.Join(root, "homes", "me")
 	for _, tc := range []struct {
 		pattern string
 		expect  Package
+		skip    bool
 	}{
 		{
 			pattern: "foo",
@@ -41,6 +53,7 @@ func TestParsePackagePattern(t *testing.T) {
 				Name: "bar",
 				Path: "~/foo/bar",
 			},
+			skip: runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 		{
 			// Canonicalize home directory to '~' for better cross-machine bin support.
@@ -50,11 +63,15 @@ func TestParsePackagePattern(t *testing.T) {
 				Name: "bar",
 				Path: "~/foo/bar",
 			},
+			skip: runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.pattern, func(t *testing.T) {
 			t.Parallel()
+			if tc.skip {
+				t.Skip("Skipped by test case param")
+			}
 			app := App{
 				staticOSHomeDir: homeDir,
 			}
@@ -67,12 +84,14 @@ func TestParsePackagePattern(t *testing.T) {
 
 func TestPackageFilePath(t *testing.T) {
 	t.Parallel()
-	const homeDir = "/homes/me"
+	root := rootFilePath()
+	homeDir := filepath.Join(root, "homes", "me")
 	for _, tc := range []struct {
 		description    string
 		pkg            Package
 		expectFilePath string
 		expectOk       bool
+		skip           bool
 	}{
 		{
 			description: "remote package",
@@ -81,8 +100,8 @@ func TestPackageFilePath(t *testing.T) {
 		},
 		{
 			description:    "local package",
-			pkg:            Package{Path: "/foo"},
-			expectFilePath: "/foo",
+			pkg:            Package{Path: filepath.Join(root, "foo")},
+			expectFilePath: filepath.Join(root, "foo"),
 			expectOk:       true,
 		},
 		{
@@ -90,11 +109,15 @@ func TestPackageFilePath(t *testing.T) {
 			pkg:            Package{Path: "~/foo"},
 			expectFilePath: homeDir + "/foo",
 			expectOk:       true,
+			skip:           runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
 		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
+			if tc.skip {
+				t.Skip("Skipped by test case param")
+			}
 			app := App{
 				staticOSHomeDir: homeDir,
 			}

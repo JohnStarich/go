@@ -38,9 +38,16 @@ test: $(MODULES:=-test)
 		printf '### Coverage is %6s ###\n' "$$coverage" >&2; \
 		printf '##########################\n' >&2; \
 		echo "$$coverage"
-	@if [[ -n "$$GITHUB_TOKEN" && "$$(go version)" == *"go$${COVERAGE_VERSION}"* ]]; then \
+
+.PHONY: test-publish-coverage
+test-publish-coverage:
+	if [[ -n "$$GITHUB_TOKEN" ]]; then \
 		set -ex; \
 		set -o pipefail; \
+		if [[ ! -f cover.out ]]; then \
+			echo 'Missing coverage profile cover.out' >&2; \
+			exit 1; \
+		fi; \
 		go install github.com/mattn/goveralls@v0.0.11; \
 		COVERALLS_TOKEN=$$GITHUB_TOKEN goveralls -coverprofile="cover.out" -service=github; \
 		(cd covet; go install ./cmd/covet); \
@@ -57,10 +64,11 @@ test: $(MODULES:=-test)
 
 .PHONY: %-test
 %-test: test-prep
+	WD="$$PWD"; \
 	cd $*; \
 	go test \
 		-race \
-		-cover -coverprofile "${PWD}/cover/$*.out" \
+		-cover -coverprofile "$$WD/cover/$*.out" \
 		./... >&2
 
 .PHONY: test-prep
@@ -68,10 +76,18 @@ test-prep:
 	rm -rf cover/
 	mkdir cover
 	# Remove DNS timeouts from CI builds, so DNS tests with bad nameservers fail as expected.
-	if [[ "${CI}" == true ]]; then \
-		set -e; \
-		sudo sed -i'' -e '/options timeout:/d' /etc/resolv.conf; \
-		cat /etc/resolv.conf; \
+	@if [[ "${CI}" == true ]]; then \
+		set -ex; \
+		SED_ARGS=(-e '/options timeout:/d'); \
+		if [[ "$$(uname)" == Linux ]]; then \
+			sudo sed -i'' "$${SED_ARGS[@]}" /etc/resolv.conf; \
+			cat /etc/resolv.conf; \
+		elif [[ "$$(uname)" == Darwin ]]; then \
+			sudo cp /etc/resolv.conf /etc/resolv.conf.new; \
+			sudo sed -i '' "$${SED_ARGS[@]}" /etc/resolv.conf.new; \
+			sudo mv /etc/resolv.conf.new /etc/resolv.conf; \
+			cat /etc/resolv.conf; \
+		fi; \
 	fi
 
 out:

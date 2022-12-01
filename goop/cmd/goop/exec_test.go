@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -46,20 +47,21 @@ func TestExec(t *testing.T) {
 			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
 				commandsToRun = append(commandsToRun, cmd.Args)
 				commandPaths = append(commandPaths, cmd.Path)
-				switch cmd.Args[0] {
+				arg0 := strings.TrimSuffix(cmd.Args[0], path.Ext(cmd.Args[0]))
+				switch arg0 {
 				case "go":
 					assert.Equal(t, []string{
-						"go",
+						arg0,
 						"install",
 						thisPackage + "@latest",
 					}, cmd.Args)
-					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
+					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name+systemExt(runtime.GOOS)))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
 				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
-					t.Errorf("Unexpected command: %q", cmd.Args[0])
+					t.Errorf("Unexpected command: %q", arg0)
 				}
 				return nil
 			},
@@ -77,13 +79,13 @@ Build successful.
 
 		assert.Equal(t, [][]string{
 			{"go", "install", thisPackage + "@latest"},
-			{name},
+			{name + systemExt(runtime.GOOS)},
 		}, commandsToRun)
 		const goCmdIndex = 0
-		assert.Equal(t, "go", filepath.Base(commandPaths[goCmdIndex]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[goCmdIndex]))
 		commandPaths = append(commandPaths[:goCmdIndex], commandPaths[goCmdIndex+1:]...)
 		assert.Equal(t, []string{
-			"cache/install/foo/foo",
+			"cache/install/foo/foo" + systemExt(runtime.GOOS),
 		}, commandPaths)
 	})
 
@@ -107,7 +109,7 @@ Build successful.
 			},
 		})
 		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
-		f, err := hackpadfs.Create(app.fs, path.Join(app.packageInstallDir(name), name))
+		f, err := hackpadfs.Create(app.fs, path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS)))
 		require.NoError(t, err)
 		require.NoError(t, f.Close())
 
@@ -124,7 +126,7 @@ Build successful.
 			{name, "-bar"},
 		}, commandsToRun)
 		assert.Equal(t, []string{
-			"cache/install/foo/foo",
+			"cache/install/foo/foo" + systemExt(runtime.GOOS),
 		}, commandPaths)
 	})
 
@@ -141,7 +143,8 @@ Build successful.
 			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
 				commandsToRun = append(commandsToRun, cmd.Args)
 				commandPaths = append(commandPaths, cmd.Path)
-				switch cmd.Args[0] {
+				arg0 := strings.TrimSuffix(cmd.Args[0], path.Ext(cmd.Args[0]))
+				switch arg0 {
 				case "go":
 					assert.Equal(t, thisDir, cmd.Dir)
 					assert.Equal(t, []string{
@@ -149,13 +152,13 @@ Build successful.
 						"install",
 						".",
 					}, cmd.Args)
-					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
+					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name+systemExt(runtime.GOOS)))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
 				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
-					t.Errorf("Unexpected command: %q", cmd.Args[0])
+					t.Errorf("Unexpected command: %q", arg0)
 				}
 				return nil
 			},
@@ -173,13 +176,13 @@ Build successful.
 
 		assert.Equal(t, [][]string{
 			{"go", "install", "."},
-			{name},
+			{name + systemExt(runtime.GOOS)},
 		}, commandsToRun)
 		const goCmdIndex = 0
-		assert.Equal(t, "go", filepath.Base(commandPaths[goCmdIndex]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[goCmdIndex]))
 		commandPaths = append(commandPaths[:goCmdIndex], commandPaths[goCmdIndex+1:]...)
 		assert.Equal(t, []string{
-			"cache/install/foo/foo",
+			"cache/install/foo/foo" + systemExt(runtime.GOOS),
 		}, commandPaths)
 	})
 
@@ -199,7 +202,8 @@ Build successful.
 			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
 				commandsToRun = append(commandsToRun, cmd.Args)
 				commandPaths = append(commandPaths, cmd.Path)
-				switch cmd.Args[0] {
+				arg0 := strings.TrimSuffix(cmd.Args[0], path.Ext(cmd.Args[0]))
+				switch arg0 {
 				case "go":
 					assert.Equal(t, thisDir, cmd.Dir)
 					assert.Equal(t, []string{
@@ -207,13 +211,13 @@ Build successful.
 						"install",
 						".",
 					}, cmd.Args)
-					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name))
+					f, err := hackpadfs.Create(app.fs, path.Join(fromEnv(cmd.Env)["GOBIN"], name+systemExt(runtime.GOOS)))
 					require.NoError(t, err)
 					require.NoError(t, f.Close())
 				case name:
 					fmt.Fprintln(cmd.Stdout, "Running foo!")
 				default:
-					t.Errorf("Unexpected command: %q", cmd.Args[0])
+					t.Errorf("Unexpected command: %q", arg0)
 				}
 				return nil
 			},
@@ -231,7 +235,7 @@ func main() {}
 
 		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
 		// set really oudated bin file that needs an update
-		filePath := path.Join(app.packageInstallDir(name), name)
+		filePath := path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS))
 		err = hackpadfs.WriteFullFile(app.fs, filePath, nil, 0700)
 		require.NoError(t, err)
 		year2000 := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -250,13 +254,13 @@ Build successful.
 
 		assert.Equal(t, [][]string{
 			{"go", "install", "."},
-			{name},
+			{name + systemExt(runtime.GOOS)},
 		}, commandsToRun)
 		const goCmdIndex = 0
-		assert.Equal(t, "go", filepath.Base(commandPaths[goCmdIndex]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[goCmdIndex]))
 		commandPaths = append(commandPaths[:goCmdIndex], commandPaths[goCmdIndex+1:]...)
 		assert.Equal(t, []string{
-			"cache/install/foo/foo",
+			"cache/install/foo/foo" + systemExt(runtime.GOOS),
 		}, commandPaths)
 	})
 }

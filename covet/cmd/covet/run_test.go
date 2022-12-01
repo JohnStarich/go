@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"github.com/hack-pad/hackpadfs/mem"
-	osfs "github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
 	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/johnstarich/go/covet/internal/testhelpers"
@@ -536,8 +535,7 @@ func TestParseArgs(t *testing.T) {
 
 		wd, err := os.Getwd()
 		require.NoError(t, err)
-		workingDir, err := osfs.NewFS().FromOSPath(wd)
-		require.NoError(t, err)
+		_, workingDir := testhelpers.FromOSToFS(t, wd)
 
 		assert.Equal(t, Args{
 			DiffFile:           path.Join(workingDir, someDiffPath),

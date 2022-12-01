@@ -3,6 +3,7 @@ package scutil
 import (
 	"context"
 	"errors"
+	"runtime"
 	"testing"
 	"time"
 
@@ -12,10 +13,14 @@ import (
 
 func TestRealSCUtilDNS(t *testing.T) {
 	t.Parallel()
+	if runtime.GOOS != "darwin" {
+		t.Skip("scutil only available on macOS")
+	}
+
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
-		// will fail on non-macOS runs, so just run it for a sanity check
-		_, _ = ReadMacOSDNS(context.Background())
+		_, err := ReadMacOSDNS(context.Background())
+		assert.NoError(t, err)
 	})
 
 	t.Run("canceled context", func(t *testing.T) {

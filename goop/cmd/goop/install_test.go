@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -85,13 +86,13 @@ Build successful.
 		assert.Equal(t, [][]string{
 			{"go", "install", thisPackage + "@latest"},
 		}, commandsToRun)
-		assert.Equal(t, "go", filepath.Base(commandPaths[0]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[0]))
 
 		dir, err := hackpadfs.ReadDir(app.fs, "cache/install/foo")
 		require.NoError(t, err)
 		require.Len(t, dir, 1)
 		binary := dir[0]
-		assert.Equal(t, name, binary.Name())
+		assert.Equal(t, name+systemExt(runtime.GOOS), binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/foo")
 		assert.NoError(t, err)
 		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Zm9v --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
@@ -135,13 +136,13 @@ Build successful.
 		assert.Equal(t, [][]string{
 			{"go", "install", thisPackage + "@latest"},
 		}, commandsToRun)
-		assert.Equal(t, "go", filepath.Base(commandPaths[0]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[0]))
 
 		dir, err := hackpadfs.ReadDir(app.fs, "cache/install/goop")
 		require.NoError(t, err)
 		require.Len(t, dir, 1)
 		binary := dir[0]
-		assert.Equal(t, appName, binary.Name())
+		assert.Equal(t, appName+systemExt(runtime.GOOS), binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
 		assert.NoError(t, err)
 		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Z29vcA== --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))
@@ -188,13 +189,13 @@ Build successful.
 		assert.Equal(t, [][]string{
 			{"go", "install", thisPackage + "@latest"},
 		}, commandsToRun)
-		assert.Equal(t, "go", filepath.Base(commandPaths[0]))
+		assert.Equal(t, "go"+systemExt(runtime.GOOS), filepath.Base(commandPaths[0]))
 
 		dir, err := hackpadfs.ReadDir(app.fs, "cache/install/goop")
 		require.NoError(t, err)
 		require.Len(t, dir, 1)
 		binary := dir[0]
-		assert.Equal(t, appName, binary.Name())
+		assert.Equal(t, appName+systemExt(runtime.GOOS), binary.Name())
 		binFile, err := hackpadfs.ReadFile(app.fs, "bin/goop")
 		assert.NoError(t, err)
 		assert.Equal(t, "#!/usr/bin/env -S goop exec --encoded-name Z29vcA== --encoded-package Z2l0aHViLmNvbS9qb2huc3RhcmljaC9nby9nb29wL2NtZC9nb29w --\n", string(binFile))

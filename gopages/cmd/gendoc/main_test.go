@@ -15,7 +15,11 @@ import (
 
 func TestDocUpToDate(t *testing.T) {
 	t.Parallel()
-	targetGoVersion := os.Getenv("COVERAGE_VERSION")
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows 'go fmt' results vary from all other OSes in line endings and spacing.")
+	}
+
+	targetGoVersion := os.Getenv("LINT_GO_VERSION")
 	if targetGoVersion == "" || !strings.HasPrefix(runtime.Version(), "go"+targetGoVersion) {
 		t.Skip("Skipping doc check. Will run on primary version of Go in CI. Current version:", runtime.Version())
 	}

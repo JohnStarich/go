@@ -16,6 +16,7 @@ import (
 	"github.com/hack-pad/hackpadfs/os"
 	"github.com/johnstarich/go/covet"
 	"github.com/johnstarich/go/covet/internal/coverstatus"
+	"github.com/johnstarich/go/covet/internal/fspath"
 	"github.com/johnstarich/go/covet/internal/span"
 	"github.com/johnstarich/go/covet/internal/summary"
 	"github.com/pkg/errors"
@@ -86,7 +87,10 @@ func parseArgs(strArgs []string, output io.Writer) (Args, error) {
 		return Args{}, err
 	}
 
-	osFS := os.NewFS()
+	osFS, err := fspath.WorkingDirectoryFS()
+	if err != nil {
+		return args, err
+	}
 	if args.DiffFile != "-" {
 		args.DiffFile = toFSPathSetErr(osFS, args.DiffFile, &err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"github.com/hack-pad/hackpadfs"
@@ -13,7 +14,7 @@ import (
 
 func TestSystemExt(t *testing.T) {
 	t.Parallel()
-	assert.Equal(t, ".exe", systemExt("windows"))
+	assert.Equal(t, ".exe", systemExt(goosWindows))
 	assert.Equal(t, "", systemExt("foo"))
 }
 
@@ -23,7 +24,7 @@ func TestBuild(t *testing.T) {
 		t.Parallel()
 		app := newTestApp(t, testAppOptions{})
 		_, err := app.build(context.Background(), "../../../../..", Package{}, false)
-		assert.EqualError(t, err, "stat ../../../../../../../..: invalid argument")
+		assert.EqualError(t, err, "stat ../../../../../../../.."+systemExt(runtime.GOOS)+": invalid argument")
 	})
 
 	t.Run("build latest *nix", func(t *testing.T) {
@@ -90,7 +91,6 @@ func TestBuild(t *testing.T) {
 		t.Parallel()
 		const (
 			name        = "foo"
-			windowsOS   = "windows"
 			somePackage = "example.local/baz"
 		)
 		var commands [][]string
@@ -107,7 +107,7 @@ func TestBuild(t *testing.T) {
 		binaryPath, err := app.buildOS(context.Background(), name, Package{
 			Name: name,
 			Path: somePackage,
-		}, false, windowsOS)
+		}, false, goosWindows)
 		assert.NoError(t, err)
 		assert.Equal(t, "cache/install/"+name+"/"+name+".exe", binaryPath)
 		assert.Equal(t, [][]string{
@@ -197,8 +197,8 @@ func TestFindBinary(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, f.Close())
 
-		_, _, err = findBinary(fs, "foo")
-		assert.EqualError(t, err, "readdir foo: not a directory")
+		_, ok, _ := findBinary(fs, "foo")
+		assert.False(t, ok, "Binary should not be found. Can't expect error though, as windows returns an empty dir listing")
 	})
 
 	t.Run("found", func(t *testing.T) {
