@@ -44,6 +44,10 @@ test-publish-coverage:
 	if [[ -n "$$GITHUB_TOKEN" ]]; then \
 		set -ex; \
 		set -o pipefail; \
+		if [[ ! -f cover.out ]]; then \
+			echo 'Missing coverage profile cover.out' >&2; \
+			exit 1; \
+		fi; \
 		go install github.com/mattn/goveralls@v0.0.11; \
 		COVERALLS_TOKEN=$$GITHUB_TOKEN goveralls -coverprofile="cover.out" -service=github; \
 		(cd covet; go install ./cmd/covet); \
