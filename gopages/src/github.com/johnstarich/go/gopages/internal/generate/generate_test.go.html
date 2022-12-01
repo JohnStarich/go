@@ -151,7 +151,7 @@
 <span id="L94" class="ln">    94  </span>	var foundDocs []string
 <span id="L95" class="ln">    95  </span>	require.NoError(t, walkFiles(outputFS, &#34;&#34;, func(path string, isDir bool) error {
 <span id="L96" class="ln">    96  </span>		if !isDir &amp;&amp; !strings.HasPrefix(path, filepath.Join(&#34;lib&#34;, &#34;godoc&#34;)) {
-<span id="L97" class="ln">    97  </span>			foundDocs = append(foundDocs, path)
+<span id="L97" class="ln">    97  </span>			foundDocs = append(foundDocs, filepath.ToSlash(path))
 <span id="L98" class="ln">    98  </span>		}
 <span id="L99" class="ln">    99  </span>		return nil
 <span id="L100" class="ln">   100  </span>	}))

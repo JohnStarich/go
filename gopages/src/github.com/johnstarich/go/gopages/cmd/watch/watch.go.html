@@ -55,92 +55,95 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span>package main
-<span id="L2" class="ln">     2  </span>
-<span id="L3" class="ln">     3  </span>import (
-<span id="L4" class="ln">     4  </span>	&#34;context&#34;
-<span id="L5" class="ln">     5  </span>	&#34;log&#34;
-<span id="L6" class="ln">     6  </span>	&#34;os&#34;
-<span id="L7" class="ln">     7  </span>	&#34;path/filepath&#34;
-<span id="L8" class="ln">     8  </span>	&#34;syscall&#34;
-<span id="L9" class="ln">     9  </span>	&#34;time&#34;
-<span id="L10" class="ln">    10  </span>
-<span id="L11" class="ln">    11  </span>	&#34;github.com/fsnotify/fsnotify&#34;
-<span id="L12" class="ln">    12  </span>	&#34;github.com/pkg/errors&#34;
-<span id="L13" class="ln">    13  </span>)
-<span id="L14" class="ln">    14  </span>
-<span id="L15" class="ln">    15  </span>const maxOpenFiles = 1 &lt;&lt; 14 <span class="comment">// 2^14 appears to be the maximum value for macOS and 2^20 on linux</span>
-<span id="L16" class="ln">    16  </span>
-<span id="L17" class="ln">    17  </span>func watch(ctx context.Context, path string, do func() error) error {
-<span id="L18" class="ln">    18  </span>	watcher, err := fsnotify.NewWatcher()
-<span id="L19" class="ln">    19  </span>	if err != nil {
-<span id="L20" class="ln">    20  </span>		return err
-<span id="L21" class="ln">    21  </span>	}
-<span id="L22" class="ln">    22  </span>
-<span id="L23" class="ln">    23  </span>	<span class="comment">// increase soft open file limit to maximum</span>
-<span id="L24" class="ln">    24  </span>	var rLimit syscall.Rlimit
-<span id="L25" class="ln">    25  </span>	if err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &amp;rLimit); err != nil {
-<span id="L26" class="ln">    26  </span>		return errors.Wrap(err, &#34;Failed to get open file limit&#34;)
-<span id="L27" class="ln">    27  </span>	}
-<span id="L28" class="ln">    28  </span>	if rLimit.Cur &lt; rLimit.Max &amp;&amp; rLimit.Cur &lt; maxOpenFiles {
-<span id="L29" class="ln">    29  </span>		rLimit.Cur = min(rLimit.Max, maxOpenFiles)
-<span id="L30" class="ln">    30  </span>		err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &amp;rLimit)
-<span id="L31" class="ln">    31  </span>		if err != nil {
-<span id="L32" class="ln">    32  </span>			return errors.Wrap(err, &#34;Failed to increase soft open file limit&#34;)
-<span id="L33" class="ln">    33  </span>		}
-<span id="L34" class="ln">    34  </span>	}
-<span id="L35" class="ln">    35  </span>
-<span id="L36" class="ln">    36  </span>	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-<span id="L37" class="ln">    37  </span>		if err != nil {
-<span id="L38" class="ln">    38  </span>			return err
-<span id="L39" class="ln">    39  </span>		}
-<span id="L40" class="ln">    40  </span>		if info.IsDir() {
-<span id="L41" class="ln">    41  </span>			return watcher.Add(path)
+<pre><span id="L1" class="ln">     1  </span><span class="comment">//go:build !windows</span>
+<span id="L2" class="ln">     2  </span><span class="comment">// +build !windows</span>
+<span id="L3" class="ln">     3  </span>
+<span id="L4" class="ln">     4  </span>package main
+<span id="L5" class="ln">     5  </span>
+<span id="L6" class="ln">     6  </span>import (
+<span id="L7" class="ln">     7  </span>	&#34;context&#34;
+<span id="L8" class="ln">     8  </span>	&#34;log&#34;
+<span id="L9" class="ln">     9  </span>	&#34;os&#34;
+<span id="L10" class="ln">    10  </span>	&#34;path/filepath&#34;
+<span id="L11" class="ln">    11  </span>	&#34;syscall&#34;
+<span id="L12" class="ln">    12  </span>	&#34;time&#34;
+<span id="L13" class="ln">    13  </span>
+<span id="L14" class="ln">    14  </span>	&#34;github.com/fsnotify/fsnotify&#34;
+<span id="L15" class="ln">    15  </span>	&#34;github.com/pkg/errors&#34;
+<span id="L16" class="ln">    16  </span>)
+<span id="L17" class="ln">    17  </span>
+<span id="L18" class="ln">    18  </span>const maxOpenFiles = 1 &lt;&lt; 14 <span class="comment">// 2^14 appears to be the maximum value for macOS and 2^20 on linux</span>
+<span id="L19" class="ln">    19  </span>
+<span id="L20" class="ln">    20  </span>func watch(ctx context.Context, path string, do func() error) error {
+<span id="L21" class="ln">    21  </span>	watcher, err := fsnotify.NewWatcher()
+<span id="L22" class="ln">    22  </span>	if err != nil {
+<span id="L23" class="ln">    23  </span>		return err
+<span id="L24" class="ln">    24  </span>	}
+<span id="L25" class="ln">    25  </span>
+<span id="L26" class="ln">    26  </span>	<span class="comment">// increase soft open file limit to maximum</span>
+<span id="L27" class="ln">    27  </span>	var rLimit syscall.Rlimit
+<span id="L28" class="ln">    28  </span>	if err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &amp;rLimit); err != nil {
+<span id="L29" class="ln">    29  </span>		return errors.Wrap(err, &#34;Failed to get open file limit&#34;)
+<span id="L30" class="ln">    30  </span>	}
+<span id="L31" class="ln">    31  </span>	if rLimit.Cur &lt; rLimit.Max &amp;&amp; rLimit.Cur &lt; maxOpenFiles {
+<span id="L32" class="ln">    32  </span>		rLimit.Cur = min(rLimit.Max, maxOpenFiles)
+<span id="L33" class="ln">    33  </span>		err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &amp;rLimit)
+<span id="L34" class="ln">    34  </span>		if err != nil {
+<span id="L35" class="ln">    35  </span>			return errors.Wrap(err, &#34;Failed to increase soft open file limit&#34;)
+<span id="L36" class="ln">    36  </span>		}
+<span id="L37" class="ln">    37  </span>	}
+<span id="L38" class="ln">    38  </span>
+<span id="L39" class="ln">    39  </span>	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+<span id="L40" class="ln">    40  </span>		if err != nil {
+<span id="L41" class="ln">    41  </span>			return err
 <span id="L42" class="ln">    42  </span>		}
-<span id="L43" class="ln">    43  </span>		return nil
-<span id="L44" class="ln">    44  </span>	})
-<span id="L45" class="ln">    45  </span>	if err != nil {
-<span id="L46" class="ln">    46  </span>		watcher.Close()
-<span id="L47" class="ln">    47  </span>		return err
-<span id="L48" class="ln">    48  </span>	}
-<span id="L49" class="ln">    49  </span>
-<span id="L50" class="ln">    50  </span>	go func() {
-<span id="L51" class="ln">    51  </span>		timer := time.NewTimer(0) <span class="comment">// fire watch right away</span>
-<span id="L52" class="ln">    52  </span>		defer timer.Stop()
-<span id="L53" class="ln">    53  </span>
-<span id="L54" class="ln">    54  </span>		const debounce = 2 * time.Second
-<span id="L55" class="ln">    55  </span>		for {
-<span id="L56" class="ln">    56  </span>			select {
-<span id="L57" class="ln">    57  </span>			case &lt;-timer.C:
-<span id="L58" class="ln">    58  </span>				log.Println(&#34;Running watch call...&#34;)
-<span id="L59" class="ln">    59  </span>				err := do()
-<span id="L60" class="ln">    60  </span>				if err != nil {
-<span id="L61" class="ln">    61  </span>					log.Println(&#34;Error running watch call:&#34;, err)
-<span id="L62" class="ln">    62  </span>				}
-<span id="L63" class="ln">    63  </span>			case &lt;-ctx.Done():
-<span id="L64" class="ln">    64  </span>				watcher.Close()
-<span id="L65" class="ln">    65  </span>				return
-<span id="L66" class="ln">    66  </span>			case event := &lt;-watcher.Events:
-<span id="L67" class="ln">    67  </span>				switch {
-<span id="L68" class="ln">    68  </span>				case event.Op&amp;fsnotify.Write == fsnotify.Write,
-<span id="L69" class="ln">    69  </span>					event.Op&amp;fsnotify.Create == fsnotify.Create:
-<span id="L70" class="ln">    70  </span>					timer.Reset(debounce)
-<span id="L71" class="ln">    71  </span>				}
-<span id="L72" class="ln">    72  </span>			case err := &lt;-watcher.Errors:
-<span id="L73" class="ln">    73  </span>				log.Println(&#34;error:&#34;, err)
-<span id="L74" class="ln">    74  </span>			}
-<span id="L75" class="ln">    75  </span>		}
-<span id="L76" class="ln">    76  </span>	}()
-<span id="L77" class="ln">    77  </span>	return nil
-<span id="L78" class="ln">    78  </span>}
-<span id="L79" class="ln">    79  </span>
-<span id="L80" class="ln">    80  </span>func min(a, b uint64) uint64 {
-<span id="L81" class="ln">    81  </span>	if a &lt; b {
-<span id="L82" class="ln">    82  </span>		return a
-<span id="L83" class="ln">    83  </span>	}
-<span id="L84" class="ln">    84  </span>	return b
-<span id="L85" class="ln">    85  </span>}
-<span id="L86" class="ln">    86  </span>
+<span id="L43" class="ln">    43  </span>		if info.IsDir() {
+<span id="L44" class="ln">    44  </span>			return watcher.Add(path)
+<span id="L45" class="ln">    45  </span>		}
+<span id="L46" class="ln">    46  </span>		return nil
+<span id="L47" class="ln">    47  </span>	})
+<span id="L48" class="ln">    48  </span>	if err != nil {
+<span id="L49" class="ln">    49  </span>		watcher.Close()
+<span id="L50" class="ln">    50  </span>		return err
+<span id="L51" class="ln">    51  </span>	}
+<span id="L52" class="ln">    52  </span>
+<span id="L53" class="ln">    53  </span>	go func() {
+<span id="L54" class="ln">    54  </span>		timer := time.NewTimer(0) <span class="comment">// fire watch right away</span>
+<span id="L55" class="ln">    55  </span>		defer timer.Stop()
+<span id="L56" class="ln">    56  </span>
+<span id="L57" class="ln">    57  </span>		const debounce = 2 * time.Second
+<span id="L58" class="ln">    58  </span>		for {
+<span id="L59" class="ln">    59  </span>			select {
+<span id="L60" class="ln">    60  </span>			case &lt;-timer.C:
+<span id="L61" class="ln">    61  </span>				log.Println(&#34;Running watch call...&#34;)
+<span id="L62" class="ln">    62  </span>				err := do()
+<span id="L63" class="ln">    63  </span>				if err != nil {
+<span id="L64" class="ln">    64  </span>					log.Println(&#34;Error running watch call:&#34;, err)
+<span id="L65" class="ln">    65  </span>				}
+<span id="L66" class="ln">    66  </span>			case &lt;-ctx.Done():
+<span id="L67" class="ln">    67  </span>				watcher.Close()
+<span id="L68" class="ln">    68  </span>				return
+<span id="L69" class="ln">    69  </span>			case event := &lt;-watcher.Events:
+<span id="L70" class="ln">    70  </span>				switch {
+<span id="L71" class="ln">    71  </span>				case event.Op&amp;fsnotify.Write == fsnotify.Write,
+<span id="L72" class="ln">    72  </span>					event.Op&amp;fsnotify.Create == fsnotify.Create:
+<span id="L73" class="ln">    73  </span>					timer.Reset(debounce)
+<span id="L74" class="ln">    74  </span>				}
+<span id="L75" class="ln">    75  </span>			case err := &lt;-watcher.Errors:
+<span id="L76" class="ln">    76  </span>				log.Println(&#34;error:&#34;, err)
+<span id="L77" class="ln">    77  </span>			}
+<span id="L78" class="ln">    78  </span>		}
+<span id="L79" class="ln">    79  </span>	}()
+<span id="L80" class="ln">    80  </span>	return nil
+<span id="L81" class="ln">    81  </span>}
+<span id="L82" class="ln">    82  </span>
+<span id="L83" class="ln">    83  </span>func min(a, b uint64) uint64 {
+<span id="L84" class="ln">    84  </span>	if a &lt; b {
+<span id="L85" class="ln">    85  </span>		return a
+<span id="L86" class="ln">    86  </span>	}
+<span id="L87" class="ln">    87  </span>	return b
+<span id="L88" class="ln">    88  </span>}
+<span id="L89" class="ln">    89  </span>
 </pre><p></p>
 
 <div id="footer">
