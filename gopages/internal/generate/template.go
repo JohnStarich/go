@@ -46,7 +46,7 @@ var (
 )
 
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
-	funcs["node_html"] = nodeHTML(funcs["node_html"].(nodeHTMLFunc), args.BaseURL)
+	funcs["node_html"] = nodeHTML(funcs["node_html"].(nodeHTMLFunc), args.BaseURL, modulePackage)
 
 	longTitle := fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
 	if args.SiteTitle == "" || args.SiteDescription == "" {
@@ -123,10 +123,12 @@ func parseTemplate(funcs template.FuncMap, name, data string) *template.Template
 type nodeHTMLFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) string
 
 // nodeHTML runs the original 'node_html' template func, then rewrites any links inside it
-func nodeHTML(original nodeHTMLFunc, baseURL string) nodeHTMLFunc {
-	pkgURL := path.Join(baseURL, "/pkg")
+func nodeHTML(original nodeHTMLFunc, baseURL string, modulePackage string) nodeHTMLFunc {
+	pkgURL := fmt.Sprintf(`<a href="%s/%s`, path.Join(baseURL, "/pkg"), modulePackage)
+	moduleURL := fmt.Sprintf(`<a href="/pkg/%s`, modulePackage)
 	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
 		s := original(info, node, linkify)
-		return strings.ReplaceAll(s, `<a href="/pkg/`, fmt.Sprintf(`<a href="%s/`, pkgURL))
+		internal := strings.ReplaceAll(s, moduleURL, pkgURL)
+		return strings.ReplaceAll(internal, `<a href="/pkg/`, `<a href="https://pkg.go.dev/`)
 	}
 }
