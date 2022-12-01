@@ -212,7 +212,7 @@ A `Pipe` is a series of functions that pass data to one another, in-order. These
 				
 				
 			</h2>
-			<pre>func CheckError(cond <a href="/go/pipe/pkg/builtin/#bool">bool</a>, err <a href="/go/pipe/pkg/builtin/#error">error</a>) <a href="/go/pipe/pkg/builtin/#error">error</a></pre>
+			<pre>func CheckError(cond <a href="https://pkg.go.dev/builtin/#bool">bool</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 			<p>
 CheckError returns &#39;err&#39; if &#39;cond&#39; is true, nil otherwise
 </p>
@@ -258,7 +258,7 @@ fmt.Println(err)
 				
 				
 			</h2>
-			<pre>func CheckErrorf(cond <a href="/go/pipe/pkg/builtin/#bool">bool</a>, format <a href="/go/pipe/pkg/builtin/#string">string</a>, args ...interface{}) <a href="/go/pipe/pkg/builtin/#error">error</a></pre>
+			<pre>func CheckErrorf(cond <a href="https://pkg.go.dev/builtin/#bool">bool</a>, format <a href="https://pkg.go.dev/builtin/#string">string</a>, args ...interface{}) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 			<p>
 CheckErrorf returns a new formatted error if &#39;cond&#39; is true, nil otherwise
 </p>
@@ -274,7 +274,7 @@ CheckErrorf returns a new formatted error if &#39;cond&#39; is true, nil otherwi
 				
 				
 			</h2>
-			<pre>func Filter(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
+			<pre>func Filter(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 			<p>
 Filter runs p.Do() for each provided slice of args.
 Returns a slice of all successful output results.
@@ -292,7 +292,7 @@ If none are successful, returns the last error.
 				
 				
 			</h2>
-			<pre>func Map(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
+			<pre>func Map(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 			<p>
 Map runs p.Do() for each provided slice of args.
 Returns a slice of all output slices, or the first error encountered.
@@ -337,7 +337,7 @@ Can contain 1 or more errors. Conforms to the standard library&#39;s errors pack
 					
 					
 				</h3>
-				<pre>func (e <a href="#Error">Error</a>) As(target interface{}) <a href="/go/pipe/pkg/builtin/#bool">bool</a></pre>
+				<pre>func (e <a href="#Error">Error</a>) As(target interface{}) <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
 				<p>
 As implements errors.As() defined interface
 </p>
@@ -352,7 +352,7 @@ As implements errors.As() defined interface
 					
 					
 				</h3>
-				<pre>func (e <a href="#Error">Error</a>) Error() <a href="/go/pipe/pkg/builtin/#string">string</a></pre>
+				<pre>func (e <a href="#Error">Error</a>) Error() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 				<p>
 Error implements the builtin error interface
 </p>
@@ -367,7 +367,7 @@ Error implements the builtin error interface
 					
 					
 				</h3>
-				<pre>func (e <a href="#Error">Error</a>) Is(target <a href="/go/pipe/pkg/builtin/#error">error</a>) <a href="/go/pipe/pkg/builtin/#bool">bool</a></pre>
+				<pre>func (e <a href="#Error">Error</a>) Is(target <a href="https://pkg.go.dev/builtin/#error">error</a>) <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
 				<p>
 Is implements errors.Is() defined interface
 </p>
@@ -382,7 +382,7 @@ Is implements errors.Is() defined interface
 					
 					
 				</h3>
-				<pre>func (e <a href="#Error">Error</a>) Unwrap() <a href="/go/pipe/pkg/builtin/#error">error</a></pre>
+				<pre>func (e <a href="#Error">Error</a>) Unwrap() <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>
 Unwrap implements errors.Unwrap() defined interface.
 Returns the first error. If there was not exactly 1 error, returns nil.
@@ -407,7 +407,7 @@ Options defines all available options to configure a Pipe
 			<pre>type Options struct {
 <span id="Options.KeepGoing"></span>    <span class="comment">// KeepGoing continues running later functions in a Pipe after an error is encountered.</span>
     <span class="comment">// The errors are collected into an Error and returned at the end.</span>
-    KeepGoing <a href="/go/pipe/pkg/builtin/#bool">bool</a>
+    KeepGoing <a href="https://pkg.go.dev/builtin/#bool">bool</a>
 }
 </pre>
 
@@ -546,7 +546,7 @@ Concat returns a new Pipe with the functions in &#39;other&#39; appended to its 
 					
 					
 				</h3>
-				<pre>func (p <a href="#Pipe">Pipe</a>) Do(args ...interface{}) ([]interface{}, <a href="/go/pipe/pkg/builtin/#error">error</a>)</pre>
+				<pre>func (p <a href="#Pipe">Pipe</a>) Do(args ...interface{}) ([]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
 				<p>
 Do executes this Pipe, running each appended function in-order and handling any errors
 </p>
