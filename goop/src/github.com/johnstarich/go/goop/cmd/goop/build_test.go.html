@@ -60,94 +60,94 @@
 <span id="L3" class="ln">     3  </span>import (
 <span id="L4" class="ln">     4  </span>	&#34;context&#34;
 <span id="L5" class="ln">     5  </span>	&#34;os/exec&#34;
-<span id="L6" class="ln">     6  </span>	&#34;testing&#34;
-<span id="L7" class="ln">     7  </span>
-<span id="L8" class="ln">     8  </span>	&#34;github.com/hack-pad/hackpadfs&#34;
-<span id="L9" class="ln">     9  </span>	&#34;github.com/hack-pad/hackpadfs/mem&#34;
-<span id="L10" class="ln">    10  </span>	&#34;github.com/stretchr/testify/assert&#34;
-<span id="L11" class="ln">    11  </span>	&#34;github.com/stretchr/testify/require&#34;
-<span id="L12" class="ln">    12  </span>)
-<span id="L13" class="ln">    13  </span>
-<span id="L14" class="ln">    14  </span>func TestSystemExt(t *testing.T) {
-<span id="L15" class="ln">    15  </span>	t.Parallel()
-<span id="L16" class="ln">    16  </span>	assert.Equal(t, &#34;.exe&#34;, systemExt(&#34;windows&#34;))
-<span id="L17" class="ln">    17  </span>	assert.Equal(t, &#34;&#34;, systemExt(&#34;foo&#34;))
-<span id="L18" class="ln">    18  </span>}
-<span id="L19" class="ln">    19  </span>
-<span id="L20" class="ln">    20  </span>func TestBuild(t *testing.T) {
-<span id="L21" class="ln">    21  </span>	t.Parallel()
-<span id="L22" class="ln">    22  </span>	t.Run(&#34;invalid stat&#34;, func(t *testing.T) {
-<span id="L23" class="ln">    23  </span>		t.Parallel()
-<span id="L24" class="ln">    24  </span>		app := newTestApp(t, testAppOptions{})
-<span id="L25" class="ln">    25  </span>		_, err := app.build(context.Background(), &#34;../../../../..&#34;, Package{}, false)
-<span id="L26" class="ln">    26  </span>		assert.EqualError(t, err, &#34;stat ../../../../../../../..: invalid argument&#34;)
-<span id="L27" class="ln">    27  </span>	})
-<span id="L28" class="ln">    28  </span>
-<span id="L29" class="ln">    29  </span>	t.Run(&#34;build latest *nix&#34;, func(t *testing.T) {
-<span id="L30" class="ln">    30  </span>		t.Parallel()
-<span id="L31" class="ln">    31  </span>		const (
-<span id="L32" class="ln">    32  </span>			name         = &#34;foo&#34;
-<span id="L33" class="ln">    33  </span>			nonWindowsOS = &#34;bar&#34;
-<span id="L34" class="ln">    34  </span>			somePackage  = &#34;example.local/baz&#34;
-<span id="L35" class="ln">    35  </span>		)
-<span id="L36" class="ln">    36  </span>		var commands [][]string
-<span id="L37" class="ln">    37  </span>		app := newTestApp(t, testAppOptions{
-<span id="L38" class="ln">    38  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
-<span id="L39" class="ln">    39  </span>				f, err := hackpadfs.Create(app.fs, &#34;cache/install/&#34;+name+&#34;/&#34;+name)
-<span id="L40" class="ln">    40  </span>				require.NoError(t, err)
-<span id="L41" class="ln">    41  </span>				require.NoError(t, f.Close())
-<span id="L42" class="ln">    42  </span>				commands = append(commands, cmd.Args)
-<span id="L43" class="ln">    43  </span>				return nil
-<span id="L44" class="ln">    44  </span>			},
-<span id="L45" class="ln">    45  </span>		})
-<span id="L46" class="ln">    46  </span>
-<span id="L47" class="ln">    47  </span>		binaryPath, err := app.buildOS(context.Background(), name, Package{
-<span id="L48" class="ln">    48  </span>			Name: name,
-<span id="L49" class="ln">    49  </span>			Path: somePackage,
-<span id="L50" class="ln">    50  </span>		}, false, nonWindowsOS)
-<span id="L51" class="ln">    51  </span>		assert.NoError(t, err)
-<span id="L52" class="ln">    52  </span>		assert.Equal(t, &#34;cache/install/&#34;+name+&#34;/&#34;+name, binaryPath)
-<span id="L53" class="ln">    53  </span>		assert.Equal(t, [][]string{
-<span id="L54" class="ln">    54  </span>			{&#34;go&#34;, &#34;install&#34;, somePackage + &#34;@latest&#34;},
-<span id="L55" class="ln">    55  </span>		}, commands)
-<span id="L56" class="ln">    56  </span>	})
-<span id="L57" class="ln">    57  </span>
-<span id="L58" class="ln">    58  </span>	t.Run(&#34;build semver *nix&#34;, func(t *testing.T) {
-<span id="L59" class="ln">    59  </span>		t.Parallel()
-<span id="L60" class="ln">    60  </span>		const (
-<span id="L61" class="ln">    61  </span>			name         = &#34;foo&#34;
-<span id="L62" class="ln">    62  </span>			nonWindowsOS = &#34;bar&#34;
-<span id="L63" class="ln">    63  </span>			somePackage  = &#34;example.local/baz&#34;
-<span id="L64" class="ln">    64  </span>			someVersion  = &#34;v0.1.2&#34;
-<span id="L65" class="ln">    65  </span>		)
-<span id="L66" class="ln">    66  </span>		var commands [][]string
-<span id="L67" class="ln">    67  </span>		app := newTestApp(t, testAppOptions{
-<span id="L68" class="ln">    68  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
-<span id="L69" class="ln">    69  </span>				f, err := hackpadfs.Create(app.fs, &#34;cache/install/&#34;+name+&#34;/&#34;+name)
-<span id="L70" class="ln">    70  </span>				require.NoError(t, err)
-<span id="L71" class="ln">    71  </span>				require.NoError(t, f.Close())
-<span id="L72" class="ln">    72  </span>				commands = append(commands, cmd.Args)
-<span id="L73" class="ln">    73  </span>				return nil
-<span id="L74" class="ln">    74  </span>			},
-<span id="L75" class="ln">    75  </span>		})
-<span id="L76" class="ln">    76  </span>
-<span id="L77" class="ln">    77  </span>		binaryPath, err := app.buildOS(context.Background(), name, Package{
-<span id="L78" class="ln">    78  </span>			Name:          name,
-<span id="L79" class="ln">    79  </span>			Path:          somePackage,
-<span id="L80" class="ln">    80  </span>			ModuleVersion: someVersion,
-<span id="L81" class="ln">    81  </span>		}, false, nonWindowsOS)
-<span id="L82" class="ln">    82  </span>		assert.NoError(t, err)
-<span id="L83" class="ln">    83  </span>		assert.Equal(t, &#34;cache/install/&#34;+name+&#34;/&#34;+name, binaryPath)
-<span id="L84" class="ln">    84  </span>		assert.Equal(t, [][]string{
-<span id="L85" class="ln">    85  </span>			{&#34;go&#34;, &#34;install&#34;, somePackage + &#34;@&#34; + someVersion},
-<span id="L86" class="ln">    86  </span>		}, commands)
-<span id="L87" class="ln">    87  </span>	})
-<span id="L88" class="ln">    88  </span>
-<span id="L89" class="ln">    89  </span>	t.Run(&#34;build latest windows&#34;, func(t *testing.T) {
-<span id="L90" class="ln">    90  </span>		t.Parallel()
-<span id="L91" class="ln">    91  </span>		const (
-<span id="L92" class="ln">    92  </span>			name        = &#34;foo&#34;
-<span id="L93" class="ln">    93  </span>			windowsOS   = &#34;windows&#34;
+<span id="L6" class="ln">     6  </span>	&#34;runtime&#34;
+<span id="L7" class="ln">     7  </span>	&#34;testing&#34;
+<span id="L8" class="ln">     8  </span>
+<span id="L9" class="ln">     9  </span>	&#34;github.com/hack-pad/hackpadfs&#34;
+<span id="L10" class="ln">    10  </span>	&#34;github.com/hack-pad/hackpadfs/mem&#34;
+<span id="L11" class="ln">    11  </span>	&#34;github.com/stretchr/testify/assert&#34;
+<span id="L12" class="ln">    12  </span>	&#34;github.com/stretchr/testify/require&#34;
+<span id="L13" class="ln">    13  </span>)
+<span id="L14" class="ln">    14  </span>
+<span id="L15" class="ln">    15  </span>func TestSystemExt(t *testing.T) {
+<span id="L16" class="ln">    16  </span>	t.Parallel()
+<span id="L17" class="ln">    17  </span>	assert.Equal(t, &#34;.exe&#34;, systemExt(goosWindows))
+<span id="L18" class="ln">    18  </span>	assert.Equal(t, &#34;&#34;, systemExt(&#34;foo&#34;))
+<span id="L19" class="ln">    19  </span>}
+<span id="L20" class="ln">    20  </span>
+<span id="L21" class="ln">    21  </span>func TestBuild(t *testing.T) {
+<span id="L22" class="ln">    22  </span>	t.Parallel()
+<span id="L23" class="ln">    23  </span>	t.Run(&#34;invalid stat&#34;, func(t *testing.T) {
+<span id="L24" class="ln">    24  </span>		t.Parallel()
+<span id="L25" class="ln">    25  </span>		app := newTestApp(t, testAppOptions{})
+<span id="L26" class="ln">    26  </span>		_, err := app.build(context.Background(), &#34;../../../../..&#34;, Package{}, false)
+<span id="L27" class="ln">    27  </span>		assert.EqualError(t, err, &#34;stat ../../../../../../../..&#34;+systemExt(runtime.GOOS)+&#34;: invalid argument&#34;)
+<span id="L28" class="ln">    28  </span>	})
+<span id="L29" class="ln">    29  </span>
+<span id="L30" class="ln">    30  </span>	t.Run(&#34;build latest *nix&#34;, func(t *testing.T) {
+<span id="L31" class="ln">    31  </span>		t.Parallel()
+<span id="L32" class="ln">    32  </span>		const (
+<span id="L33" class="ln">    33  </span>			name         = &#34;foo&#34;
+<span id="L34" class="ln">    34  </span>			nonWindowsOS = &#34;bar&#34;
+<span id="L35" class="ln">    35  </span>			somePackage  = &#34;example.local/baz&#34;
+<span id="L36" class="ln">    36  </span>		)
+<span id="L37" class="ln">    37  </span>		var commands [][]string
+<span id="L38" class="ln">    38  </span>		app := newTestApp(t, testAppOptions{
+<span id="L39" class="ln">    39  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+<span id="L40" class="ln">    40  </span>				f, err := hackpadfs.Create(app.fs, &#34;cache/install/&#34;+name+&#34;/&#34;+name)
+<span id="L41" class="ln">    41  </span>				require.NoError(t, err)
+<span id="L42" class="ln">    42  </span>				require.NoError(t, f.Close())
+<span id="L43" class="ln">    43  </span>				commands = append(commands, cmd.Args)
+<span id="L44" class="ln">    44  </span>				return nil
+<span id="L45" class="ln">    45  </span>			},
+<span id="L46" class="ln">    46  </span>		})
+<span id="L47" class="ln">    47  </span>
+<span id="L48" class="ln">    48  </span>		binaryPath, err := app.buildOS(context.Background(), name, Package{
+<span id="L49" class="ln">    49  </span>			Name: name,
+<span id="L50" class="ln">    50  </span>			Path: somePackage,
+<span id="L51" class="ln">    51  </span>		}, false, nonWindowsOS)
+<span id="L52" class="ln">    52  </span>		assert.NoError(t, err)
+<span id="L53" class="ln">    53  </span>		assert.Equal(t, &#34;cache/install/&#34;+name+&#34;/&#34;+name, binaryPath)
+<span id="L54" class="ln">    54  </span>		assert.Equal(t, [][]string{
+<span id="L55" class="ln">    55  </span>			{&#34;go&#34;, &#34;install&#34;, somePackage + &#34;@latest&#34;},
+<span id="L56" class="ln">    56  </span>		}, commands)
+<span id="L57" class="ln">    57  </span>	})
+<span id="L58" class="ln">    58  </span>
+<span id="L59" class="ln">    59  </span>	t.Run(&#34;build semver *nix&#34;, func(t *testing.T) {
+<span id="L60" class="ln">    60  </span>		t.Parallel()
+<span id="L61" class="ln">    61  </span>		const (
+<span id="L62" class="ln">    62  </span>			name         = &#34;foo&#34;
+<span id="L63" class="ln">    63  </span>			nonWindowsOS = &#34;bar&#34;
+<span id="L64" class="ln">    64  </span>			somePackage  = &#34;example.local/baz&#34;
+<span id="L65" class="ln">    65  </span>			someVersion  = &#34;v0.1.2&#34;
+<span id="L66" class="ln">    66  </span>		)
+<span id="L67" class="ln">    67  </span>		var commands [][]string
+<span id="L68" class="ln">    68  </span>		app := newTestApp(t, testAppOptions{
+<span id="L69" class="ln">    69  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+<span id="L70" class="ln">    70  </span>				f, err := hackpadfs.Create(app.fs, &#34;cache/install/&#34;+name+&#34;/&#34;+name)
+<span id="L71" class="ln">    71  </span>				require.NoError(t, err)
+<span id="L72" class="ln">    72  </span>				require.NoError(t, f.Close())
+<span id="L73" class="ln">    73  </span>				commands = append(commands, cmd.Args)
+<span id="L74" class="ln">    74  </span>				return nil
+<span id="L75" class="ln">    75  </span>			},
+<span id="L76" class="ln">    76  </span>		})
+<span id="L77" class="ln">    77  </span>
+<span id="L78" class="ln">    78  </span>		binaryPath, err := app.buildOS(context.Background(), name, Package{
+<span id="L79" class="ln">    79  </span>			Name:          name,
+<span id="L80" class="ln">    80  </span>			Path:          somePackage,
+<span id="L81" class="ln">    81  </span>			ModuleVersion: someVersion,
+<span id="L82" class="ln">    82  </span>		}, false, nonWindowsOS)
+<span id="L83" class="ln">    83  </span>		assert.NoError(t, err)
+<span id="L84" class="ln">    84  </span>		assert.Equal(t, &#34;cache/install/&#34;+name+&#34;/&#34;+name, binaryPath)
+<span id="L85" class="ln">    85  </span>		assert.Equal(t, [][]string{
+<span id="L86" class="ln">    86  </span>			{&#34;go&#34;, &#34;install&#34;, somePackage + &#34;@&#34; + someVersion},
+<span id="L87" class="ln">    87  </span>		}, commands)
+<span id="L88" class="ln">    88  </span>	})
+<span id="L89" class="ln">    89  </span>
+<span id="L90" class="ln">    90  </span>	t.Run(&#34;build latest windows&#34;, func(t *testing.T) {
+<span id="L91" class="ln">    91  </span>		t.Parallel()
+<span id="L92" class="ln">    92  </span>		const (
+<span id="L93" class="ln">    93  </span>			name        = &#34;foo&#34;
 <span id="L94" class="ln">    94  </span>			somePackage = &#34;example.local/baz&#34;
 <span id="L95" class="ln">    95  </span>		)
 <span id="L96" class="ln">    96  </span>		var commands [][]string
@@ -164,7 +164,7 @@
 <span id="L107" class="ln">   107  </span>		binaryPath, err := app.buildOS(context.Background(), name, Package{
 <span id="L108" class="ln">   108  </span>			Name: name,
 <span id="L109" class="ln">   109  </span>			Path: somePackage,
-<span id="L110" class="ln">   110  </span>		}, false, windowsOS)
+<span id="L110" class="ln">   110  </span>		}, false, goosWindows)
 <span id="L111" class="ln">   111  </span>		assert.NoError(t, err)
 <span id="L112" class="ln">   112  </span>		assert.Equal(t, &#34;cache/install/&#34;+name+&#34;/&#34;+name+&#34;.exe&#34;, binaryPath)
 <span id="L113" class="ln">   113  </span>		assert.Equal(t, [][]string{
@@ -254,8 +254,8 @@
 <span id="L197" class="ln">   197  </span>		require.NoError(t, err)
 <span id="L198" class="ln">   198  </span>		require.NoError(t, f.Close())
 <span id="L199" class="ln">   199  </span>
-<span id="L200" class="ln">   200  </span>		_, _, err = findBinary(fs, &#34;foo&#34;)
-<span id="L201" class="ln">   201  </span>		assert.EqualError(t, err, &#34;readdir foo: not a directory&#34;)
+<span id="L200" class="ln">   200  </span>		_, ok, _ := findBinary(fs, &#34;foo&#34;)
+<span id="L201" class="ln">   201  </span>		assert.False(t, ok, &#34;Binary should not be found. Can&#39;t expect error though, as windows returns an empty dir listing&#34;)
 <span id="L202" class="ln">   202  </span>	})
 <span id="L203" class="ln">   203  </span>
 <span id="L204" class="ln">   204  </span>	t.Run(&#34;found&#34;, func(t *testing.T) {

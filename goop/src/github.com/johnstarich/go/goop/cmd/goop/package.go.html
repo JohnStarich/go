@@ -60,69 +60,73 @@
 <span id="L3" class="ln">     3  </span>import (
 <span id="L4" class="ln">     4  </span>	&#34;fmt&#34;
 <span id="L5" class="ln">     5  </span>	&#34;path/filepath&#34;
-<span id="L6" class="ln">     6  </span>	&#34;strings&#34;
-<span id="L7" class="ln">     7  </span>)
-<span id="L8" class="ln">     8  </span>
-<span id="L9" class="ln">     9  </span><span class="comment">// Package represents a package pattern used in the install and exec commands. Example: github.com/johnstarich/go/goop/cmd/goop@latest</span>
-<span id="L10" class="ln">    10  </span>type Package struct {
-<span id="L11" class="ln">    11  </span>	Path          string
-<span id="L12" class="ln">    12  </span>	Name          string
-<span id="L13" class="ln">    13  </span>	ModuleVersion string
-<span id="L14" class="ln">    14  </span>}
-<span id="L15" class="ln">    15  </span>
-<span id="L16" class="ln">    16  </span>const homeDir = &#34;~&#34;
-<span id="L17" class="ln">    17  </span>
-<span id="L18" class="ln">    18  </span>func (a App) parsePackagePattern(packagePattern string) (Package, error) {
-<span id="L19" class="ln">    19  </span>	pkg := Package{
-<span id="L20" class="ln">    20  </span>		Path: packagePattern,
-<span id="L21" class="ln">    21  </span>	}
-<span id="L22" class="ln">    22  </span>	if i := strings.IndexRune(pkg.Path, &#39;@&#39;); i != -1 {
-<span id="L23" class="ln">    23  </span>		pkg.Path, pkg.ModuleVersion = pkg.Path[:i], pkg.Path[i+1:]
-<span id="L24" class="ln">    24  </span>	}
-<span id="L25" class="ln">    25  </span>	if strings.HasSuffix(pkg.Path, &#34;/...&#34;) {
-<span id="L26" class="ln">    26  </span>		return pkg, fmt.Errorf(&#34;package pattern must not use the &#39;/...&#39; operator: %q&#34;, pkg.Path)
-<span id="L27" class="ln">    27  </span>	}
-<span id="L28" class="ln">    28  </span>	if strings.HasPrefix(pkg.Path, a.staticOSHomeDir+string(filepath.Separator)) {
-<span id="L29" class="ln">    29  </span>		<span class="comment">// Canonicalize home directory to &#39;~&#39; for better cross-machine bin support, as home directories can change from user to user.</span>
-<span id="L30" class="ln">    30  </span>		pkg.Path = homeDir + strings.TrimPrefix(pkg.Path, a.staticOSHomeDir)
+<span id="L6" class="ln">     6  </span>	&#34;runtime&#34;
+<span id="L7" class="ln">     7  </span>	&#34;strings&#34;
+<span id="L8" class="ln">     8  </span>)
+<span id="L9" class="ln">     9  </span>
+<span id="L10" class="ln">    10  </span><span class="comment">// Package represents a package pattern used in the install and exec commands. Example: github.com/johnstarich/go/goop/cmd/goop@latest</span>
+<span id="L11" class="ln">    11  </span>type Package struct {
+<span id="L12" class="ln">    12  </span>	Path          string
+<span id="L13" class="ln">    13  </span>	Name          string
+<span id="L14" class="ln">    14  </span>	ModuleVersion string
+<span id="L15" class="ln">    15  </span>}
+<span id="L16" class="ln">    16  </span>
+<span id="L17" class="ln">    17  </span>const (
+<span id="L18" class="ln">    18  </span>	homeDir     = &#34;~&#34;
+<span id="L19" class="ln">    19  </span>	goosWindows = &#34;windows&#34;
+<span id="L20" class="ln">    20  </span>)
+<span id="L21" class="ln">    21  </span>
+<span id="L22" class="ln">    22  </span>func (a App) parsePackagePattern(packagePattern string) (Package, error) {
+<span id="L23" class="ln">    23  </span>	pkg := Package{
+<span id="L24" class="ln">    24  </span>		Path: packagePattern,
+<span id="L25" class="ln">    25  </span>	}
+<span id="L26" class="ln">    26  </span>	if i := strings.IndexRune(pkg.Path, &#39;@&#39;); i != -1 {
+<span id="L27" class="ln">    27  </span>		pkg.Path, pkg.ModuleVersion = pkg.Path[:i], pkg.Path[i+1:]
+<span id="L28" class="ln">    28  </span>	}
+<span id="L29" class="ln">    29  </span>	if strings.HasSuffix(pkg.Path, &#34;/...&#34;) {
+<span id="L30" class="ln">    30  </span>		return pkg, fmt.Errorf(&#34;package pattern must not use the &#39;/...&#39; operator: %q&#34;, pkg.Path)
 <span id="L31" class="ln">    31  </span>	}
-<span id="L32" class="ln">    32  </span>
-<span id="L33" class="ln">    33  </span>	pkg.Name = pkg.Path
-<span id="L34" class="ln">    34  </span>	if i := strings.LastIndexAny(pkg.Path, `\/`); i != -1 {
-<span id="L35" class="ln">    35  </span>		pkg.Name = pkg.Path[i+1:]
-<span id="L36" class="ln">    36  </span>	}
-<span id="L37" class="ln">    37  </span>	return pkg, nil
-<span id="L38" class="ln">    38  </span>}
-<span id="L39" class="ln">    39  </span>
-<span id="L40" class="ln">    40  </span><span class="comment">// packageFilePath returns pkg&#39;s local file path and true if it is a local module.</span>
-<span id="L41" class="ln">    41  </span><span class="comment">// Empty string and false otherwise.</span>
-<span id="L42" class="ln">    42  </span>func (a App) packageFilePath(pkg Package) (string, bool) {
-<span id="L43" class="ln">    43  </span>	filePath := pkg.Path
-<span id="L44" class="ln">    44  </span>	if strings.HasPrefix(filePath, homeDir+string(filepath.Separator)) {
-<span id="L45" class="ln">    45  </span>		<span class="comment">// expand home directory &#39;~&#39; to full file path</span>
-<span id="L46" class="ln">    46  </span>		filePath = a.staticOSHomeDir + strings.TrimPrefix(filePath, homeDir)
-<span id="L47" class="ln">    47  </span>	}
-<span id="L48" class="ln">    48  </span>	if filepath.IsAbs(filePath) {
-<span id="L49" class="ln">    49  </span>		return filePath, true
-<span id="L50" class="ln">    50  </span>	}
-<span id="L51" class="ln">    51  </span>	return &#34;&#34;, false
-<span id="L52" class="ln">    52  </span>}
-<span id="L53" class="ln">    53  </span>
-<span id="L54" class="ln">    54  </span><span class="comment">// packageInstallPaths returns this module&#39;s &#34;go install ...&#34; args and working directory.</span>
-<span id="L55" class="ln">    55  </span>func (a App) packageInstallPaths(pkg Package) (workingDir, installPattern string) {
-<span id="L56" class="ln">    56  </span>	if filePath, ok := a.packageFilePath(pkg); ok {
-<span id="L57" class="ln">    57  </span>		workingDir = filePath
-<span id="L58" class="ln">    58  </span>		installPattern = &#34;.&#34;
-<span id="L59" class="ln">    59  </span>	} else {
-<span id="L60" class="ln">    60  </span>		version := pkg.ModuleVersion
-<span id="L61" class="ln">    61  </span>		if version == &#34;&#34; {
-<span id="L62" class="ln">    62  </span>			version = &#34;latest&#34;
-<span id="L63" class="ln">    63  </span>		}
-<span id="L64" class="ln">    64  </span>		installPattern = pkg.Path + &#34;@&#34; + version
-<span id="L65" class="ln">    65  </span>	}
-<span id="L66" class="ln">    66  </span>	return
-<span id="L67" class="ln">    67  </span>}
-<span id="L68" class="ln">    68  </span>
+<span id="L32" class="ln">    32  </span>	if runtime.GOOS != goosWindows &amp;&amp; strings.HasPrefix(pkg.Path, a.staticOSHomeDir+&#34;/&#34;) { <span class="comment">// Tilde &#39;~&#39; expansion is not supported on Windows yet.</span>
+<span id="L33" class="ln">    33  </span>		<span class="comment">// Canonicalize home directory to &#39;~&#39; for better cross-machine bin support, as home directories can change from user to user.</span>
+<span id="L34" class="ln">    34  </span>		pkg.Path = homeDir + strings.TrimPrefix(pkg.Path, a.staticOSHomeDir)
+<span id="L35" class="ln">    35  </span>	}
+<span id="L36" class="ln">    36  </span>
+<span id="L37" class="ln">    37  </span>	pkg.Name = pkg.Path
+<span id="L38" class="ln">    38  </span>	if i := strings.LastIndexAny(pkg.Path, `\/`); i != -1 {
+<span id="L39" class="ln">    39  </span>		pkg.Name = pkg.Path[i+1:]
+<span id="L40" class="ln">    40  </span>	}
+<span id="L41" class="ln">    41  </span>	return pkg, nil
+<span id="L42" class="ln">    42  </span>}
+<span id="L43" class="ln">    43  </span>
+<span id="L44" class="ln">    44  </span><span class="comment">// packageFilePath returns pkg&#39;s local file path and true if it is a local module.</span>
+<span id="L45" class="ln">    45  </span><span class="comment">// Empty string and false otherwise.</span>
+<span id="L46" class="ln">    46  </span>func (a App) packageFilePath(pkg Package) (string, bool) {
+<span id="L47" class="ln">    47  </span>	filePath := pkg.Path
+<span id="L48" class="ln">    48  </span>	if runtime.GOOS != goosWindows &amp;&amp; strings.HasPrefix(filePath, homeDir+&#34;/&#34;) { <span class="comment">// Tilde &#39;~&#39; expansion is not supported on Windows yet.</span>
+<span id="L49" class="ln">    49  </span>		<span class="comment">// expand home directory &#39;~&#39; to full file path</span>
+<span id="L50" class="ln">    50  </span>		filePath = a.staticOSHomeDir + strings.TrimPrefix(filePath, homeDir)
+<span id="L51" class="ln">    51  </span>	}
+<span id="L52" class="ln">    52  </span>	if filepath.IsAbs(filePath) {
+<span id="L53" class="ln">    53  </span>		return filePath, true
+<span id="L54" class="ln">    54  </span>	}
+<span id="L55" class="ln">    55  </span>	return &#34;&#34;, false
+<span id="L56" class="ln">    56  </span>}
+<span id="L57" class="ln">    57  </span>
+<span id="L58" class="ln">    58  </span><span class="comment">// packageInstallPaths returns this module&#39;s &#34;go install ...&#34; args and working directory.</span>
+<span id="L59" class="ln">    59  </span>func (a App) packageInstallPaths(pkg Package) (workingDir, installPattern string) {
+<span id="L60" class="ln">    60  </span>	if filePath, ok := a.packageFilePath(pkg); ok {
+<span id="L61" class="ln">    61  </span>		workingDir = filePath
+<span id="L62" class="ln">    62  </span>		installPattern = &#34;.&#34;
+<span id="L63" class="ln">    63  </span>	} else {
+<span id="L64" class="ln">    64  </span>		version := pkg.ModuleVersion
+<span id="L65" class="ln">    65  </span>		if version == &#34;&#34; {
+<span id="L66" class="ln">    66  </span>			version = &#34;latest&#34;
+<span id="L67" class="ln">    67  </span>		}
+<span id="L68" class="ln">    68  </span>		installPattern = pkg.Path + &#34;@&#34; + version
+<span id="L69" class="ln">    69  </span>	}
+<span id="L70" class="ln">    70  </span>	return
+<span id="L71" class="ln">    71  </span>}
+<span id="L72" class="ln">    72  </span>
 </pre><p></p>
 
 <div id="footer">
