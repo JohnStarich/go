@@ -113,6 +113,7 @@ package mylib
 }
 
 func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
+	t.Parallel()
 	generateDocs := func(t *testing.T, outputFS billy.Filesystem, outputDir string) error {
 		moduleFS := memfs.New()
 		args := flags.Args{OutputPath: outputDir}
@@ -126,6 +127,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 	const outputPathOKError = "pipe: Are there any Go files present? Failed to initialize corpus: godoc: corpus fstree is nil"
 
 	t.Run("output dir does not exist", func(t *testing.T) {
+		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
 		err := generateDocs(t, outputFS, outputDir)
@@ -133,6 +135,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 	})
 
 	t.Run("empty output dir is OK", func(t *testing.T) {
+		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
 		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
@@ -141,6 +144,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 	})
 
 	t.Run("unexpected files in output dir should fail", func(t *testing.T) {
+		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
 		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0700))
@@ -149,6 +153,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 	})
 
 	t.Run("expected files in output dir should succeed", func(t *testing.T) {
+		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
 		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
