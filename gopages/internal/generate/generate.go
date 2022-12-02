@@ -55,6 +55,27 @@ var makePresentationPipe = pipe.New(pipe.Options{}).
 		dArgs := args[0].(docsArgs)
 		return dArgs
 	}).
+	Append(func(args docsArgs) (docsArgs, []os.FileInfo, error) {
+		infos, err := args.FS.ReadDir(args.OutputPath)
+		return args, infos, pipe.CheckError(!errors.Is(err, os.ErrNotExist), err)
+	}).
+	Append(func(args docsArgs, infos []os.FileInfo) (docsArgs, error) {
+		fileNames := make(map[string]bool)
+		for _, info := range infos {
+			fileNames[info.Name()] = info.IsDir()
+		}
+		hasMinimalFiles := true
+		for fileName, shouldBeDir := range map[string]bool{ // file base name -> isDir
+			"lib":        true,
+			"pkg":        true,
+			"src":        true,
+			"index.html": false,
+		} {
+			isDir, exists := fileNames[fileName]
+			hasMinimalFiles = hasMinimalFiles && exists && (isDir == shouldBeDir)
+		}
+		return args, pipe.CheckError(len(infos) > 0 && !hasMinimalFiles, errors.Errorf("refusing to clean output directory %q - directory does not resemble a gopages result; remove the directory to continue", args.OutputPath))
+	}).
 	Append(func(args docsArgs) (docsArgs, error) {
 		return args, errors.Wrap(util.RemoveAll(args.FS, args.OutputPath), "Failed to clean output directory")
 	}).
