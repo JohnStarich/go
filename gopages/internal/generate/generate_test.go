@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/johnstarich/go/gopages/internal/flags"
@@ -106,4 +107,64 @@ package mylib
 	indexContents, err := io.ReadAll(f)
 	require.NoError(t, err)
 	assert.Contains(t, string(indexContents), "mylib")
+
+	// verify you can run again without removing the output dir
+	assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, args, linker))
+}
+
+func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
+	generateDocs := func(t *testing.T, outputFS billy.Filesystem, outputDir string) error {
+		moduleFS := memfs.New()
+		args := flags.Args{OutputPath: outputDir}
+
+		const modulePackage = "github.com/my/thing"
+		linker, err := args.Linker(modulePackage)
+		require.NoError(t, err)
+
+		return Docs(".", modulePackage, moduleFS, outputFS, args, linker)
+	}
+	const outputPathOKError = "pipe: Are there any Go files present? Failed to initialize corpus: godoc: corpus fstree is nil"
+
+	t.Run("output dir does not exist", func(t *testing.T) {
+		outputFS := memfs.New()
+		const outputDir = "foo"
+		err := generateDocs(t, outputFS, outputDir)
+		assert.EqualError(t, err, outputPathOKError)
+	})
+
+	t.Run("empty output dir is OK", func(t *testing.T) {
+		outputFS := memfs.New()
+		const outputDir = "foo"
+		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
+		err := generateDocs(t, outputFS, outputDir)
+		assert.EqualError(t, err, outputPathOKError)
+	})
+
+	t.Run("unexpected files in output dir should fail", func(t *testing.T) {
+		outputFS := memfs.New()
+		const outputDir = "foo"
+		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0700))
+		err := generateDocs(t, outputFS, outputDir)
+		assert.EqualError(t, err, `pipe: refusing to clean output directory "foo" - directory does not resemble a gopages result; remove the directory to continue`)
+	})
+
+	t.Run("expected files in output dir should succeed", func(t *testing.T) {
+		outputFS := memfs.New()
+		const outputDir = "foo"
+		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
+		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0700)) // include other contents, which are ignored if expected files present
+		f, err := outputFS.Create(outputFS.Join(outputDir, "index.html"))
+		require.NoError(t, err)
+		require.NoError(t, f.Close())
+		for _, dirName := range []string{
+			"lib",
+			"pkg",
+			"src",
+		} {
+			require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, dirName), 0700))
+		}
+
+		err = generateDocs(t, outputFS, outputDir)
+		assert.EqualError(t, err, outputPathOKError)
+	})
 }
