@@ -17,99 +17,118 @@ import (
 )
 
 func TestGenerateDocs(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
-	// create a new package "thing" and generate docs for it
-	thing, err := os.MkdirTemp("", "")
-	require.NoError(t, err)
-	defer os.RemoveAll(thing)
 	wd, err := os.Getwd()
 	require.NoError(t, err)
-	defer func() {
+	t.Cleanup(func() {
 		require.NoError(t, os.Chdir(wd))
-	}()
-	require.NoError(t, os.Chdir(thing))
+	})
 
-	thingFS := osfs.New("")
-	outputFS := memfs.New()
-	writeFile := func(path, contents string) {
-		path = filepath.Join(thing, path)
-		err := os.MkdirAll(filepath.Dir(path), 0700)
-		require.NoError(t, err)
-		err = os.WriteFile(path, []byte(contents), 0600)
-		require.NoError(t, err)
-	}
-
-	writeFile("go.mod", `module github.com/my/thing`)
-	writeFile("main.go", `
+	const modulePackage = "github.com/my/thing"
+	for _, tc := range []struct { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
+		description string
+		args        flags.Args
+		files       map[string]string
+		expectDocs  []string
+	}{
+		{
+			description: "basic docs",
+			args:        flags.Args{},
+			files: map[string]string{
+				"go.mod": `module github.com/my/thing`,
+				"main.go": `
 package main
 
 func main() {
 	println("Hello world")
 }
-`)
-	writeFile("internal/hello/hello.go", `
+`,
+				"internal/hello/hello.go": `
 package lib
 
 // Hello says hello
 func Hello() {
 	println("Hello world")
 }
-`)
-	writeFile("mylib/lib.go", `
+`,
+				"mylib/lib.go": `
 package mylib
-`)
-	writeFile(".git/something", `ignored dot dir`)
-	writeFile(".dotfile", `ignored dot file`)
-	writeFile("%name.PascalCased%/other.go", `package bad_url_decode`)
+`,
+				".git/something":              `ignored dot dir`,
+				".dotfile":                    `ignored dot file`,
+				"%name.PascalCased%/other.go": `package bad_url_decode`,
+			},
+			expectDocs: []string{
+				"404.html",
+				"index.html",
+				"pkg/github.com/index.html",
+				"pkg/github.com/my/index.html",
+				"pkg/github.com/my/thing/%name.PascalCased%/index.html", // Verifies fix for https://github.com/JohnStarich/go/issues/7
+				"pkg/github.com/my/thing/index.html",
+				"pkg/github.com/my/thing/internal/hello/index.html",
+				"pkg/github.com/my/thing/internal/index.html",
+				"pkg/github.com/my/thing/mylib/index.html",
+				"pkg/index.html",
+				"src/github.com/index.html",
+				"src/github.com/my/index.html",
+				"src/github.com/my/thing/%name.PascalCased%/index.html",
+				"src/github.com/my/thing/%name.PascalCased%/other.go.html",
+				"src/github.com/my/thing/index.html",
+				"src/github.com/my/thing/internal/hello/hello.go.html",
+				"src/github.com/my/thing/internal/hello/index.html",
+				"src/github.com/my/thing/internal/index.html",
+				"src/github.com/my/thing/main.go.html",
+				"src/github.com/my/thing/mylib/index.html",
+				"src/github.com/my/thing/mylib/lib.go.html",
+				"src/index.html",
+			},
+		},
+	} {
+		t.Run(tc.description, func(t *testing.T) {
+			// create a new package "thing" and generate docs for it
+			thing := t.TempDir()
+			require.NoError(t, os.Chdir(thing))
+			t.Cleanup(func() {
+				os.RemoveAll(thing)
+			})
+			thingFS := osfs.New("")
+			outputFS := memfs.New()
+			writeFile := func(path, contents string) {
+				path = filepath.Join(thing, path)
+				err := os.MkdirAll(filepath.Dir(path), 0700)
+				require.NoError(t, err)
+				err = os.WriteFile(path, []byte(contents), 0600)
+				require.NoError(t, err)
+			}
 
-	args := flags.Args{}
-	const modulePackage = "github.com/my/thing"
-	linker, err := args.Linker(modulePackage)
-	require.NoError(t, err)
-	err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
-	assert.NoError(t, err)
+			for filePath, contents := range tc.files {
+				writeFile(filePath, contents)
+			}
 
-	expectedDocs := []string{
-		"404.html",
-		"index.html",
-		"pkg/github.com/index.html",
-		"pkg/github.com/my/index.html",
-		"pkg/github.com/my/thing/%name.PascalCased%/index.html", // Verifies fix for https://github.com/JohnStarich/go/issues/7
-		"pkg/github.com/my/thing/index.html",
-		"pkg/github.com/my/thing/internal/hello/index.html",
-		"pkg/github.com/my/thing/internal/index.html",
-		"pkg/github.com/my/thing/mylib/index.html",
-		"pkg/index.html",
-		"src/github.com/index.html",
-		"src/github.com/my/index.html",
-		"src/github.com/my/thing/%name.PascalCased%/index.html",
-		"src/github.com/my/thing/%name.PascalCased%/other.go.html",
-		"src/github.com/my/thing/index.html",
-		"src/github.com/my/thing/internal/hello/hello.go.html",
-		"src/github.com/my/thing/internal/hello/index.html",
-		"src/github.com/my/thing/internal/index.html",
-		"src/github.com/my/thing/main.go.html",
-		"src/github.com/my/thing/mylib/index.html",
-		"src/github.com/my/thing/mylib/lib.go.html",
-		"src/index.html",
+			args := flags.Args{}
+			linker, err := args.Linker(modulePackage)
+			require.NoError(t, err)
+			err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
+			assert.NoError(t, err)
+
+			var foundDocs []string
+			require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
+				if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
+					foundDocs = append(foundDocs, filepath.ToSlash(path))
+				}
+				return nil
+			}))
+			sort.Strings(foundDocs)
+			assert.Equal(t, tc.expectDocs, foundDocs)
+
+			f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
+			require.NoError(t, err)
+			indexContents, err := io.ReadAll(f)
+			require.NoError(t, err)
+			assert.Contains(t, string(indexContents), "mylib")
+
+			assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, args, linker), "Should not fail to re-run doc generation on same output directory.")
+		})
 	}
-	var foundDocs []string
-	require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
-		if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
-			foundDocs = append(foundDocs, filepath.ToSlash(path))
-		}
-		return nil
-	}))
-	sort.Strings(foundDocs)
-	assert.Equal(t, expectedDocs, foundDocs)
-
-	f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
-	require.NoError(t, err)
-	indexContents, err := io.ReadAll(f)
-	require.NoError(t, err)
-	assert.Contains(t, string(indexContents), "mylib")
-
-	// verify you can run again without removing the output dir
-	assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, args, linker))
 }
 
 func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
