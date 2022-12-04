@@ -25,10 +25,12 @@ func TestGenerateDocs(t *testing.T) { //nolint:paralleltest // TODO: Remove chdi
 
 	const modulePackage = "github.com/my/thing"
 	for _, tc := range []struct { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
-		description string
-		args        flags.Args
-		files       map[string]string
-		expectDocs  []string
+		description            string
+		args                   flags.Args
+		files                  map[string]string
+		expectIndexContains    []string
+		expectIndexNotContains []string
+		expectDocs             []string
 	}{
 		{
 			description: "basic docs",
@@ -43,7 +45,7 @@ func main() {
 }
 `,
 				"internal/hello/hello.go": `
-package lib
+package hello
 
 // Hello says hello
 func Hello() {
@@ -53,16 +55,20 @@ func Hello() {
 				"mylib/lib.go": `
 package mylib
 `,
-				".git/something":              `ignored dot dir`,
-				".dotfile":                    `ignored dot file`,
-				"%name.PascalCased%/other.go": `package bad_url_decode`,
+				".git/something": `ignored dot dir`,
+				".dotfile":       `ignored dot file`,
+			},
+			expectIndexContains: []string{
+				"mylib",
+			},
+			expectIndexNotContains: []string{
+				"internal",
 			},
 			expectDocs: []string{
 				"404.html",
 				"index.html",
 				"pkg/github.com/index.html",
 				"pkg/github.com/my/index.html",
-				"pkg/github.com/my/thing/%name.PascalCased%/index.html", // Verifies fix for https://github.com/JohnStarich/go/issues/7
 				"pkg/github.com/my/thing/index.html",
 				"pkg/github.com/my/thing/internal/hello/index.html",
 				"pkg/github.com/my/thing/internal/index.html",
@@ -70,8 +76,6 @@ package mylib
 				"pkg/index.html",
 				"src/github.com/index.html",
 				"src/github.com/my/index.html",
-				"src/github.com/my/thing/%name.PascalCased%/index.html",
-				"src/github.com/my/thing/%name.PascalCased%/other.go.html",
 				"src/github.com/my/thing/index.html",
 				"src/github.com/my/thing/internal/hello/hello.go.html",
 				"src/github.com/my/thing/internal/hello/index.html",
@@ -79,6 +83,38 @@ package mylib
 				"src/github.com/my/thing/main.go.html",
 				"src/github.com/my/thing/mylib/index.html",
 				"src/github.com/my/thing/mylib/lib.go.html",
+				"src/index.html",
+			},
+		},
+		{
+			// Verifies fix for https://github.com/JohnStarich/go/issues/7
+			description: "file paths are URL encoded",
+			args:        flags.Args{},
+			files: map[string]string{
+				"go.mod": `module github.com/my/thing`,
+				"main.go": `
+package main
+
+func main() {
+	println("Hello world")
+}
+`,
+				"%name.PascalCased%/other.go": `package bad_url_decode`,
+			},
+			expectDocs: []string{
+				"404.html",
+				"index.html",
+				"pkg/github.com/index.html",
+				"pkg/github.com/my/index.html",
+				"pkg/github.com/my/thing/%name.PascalCased%/index.html",
+				"pkg/github.com/my/thing/index.html",
+				"pkg/index.html",
+				"src/github.com/index.html",
+				"src/github.com/my/index.html",
+				"src/github.com/my/thing/%name.PascalCased%/index.html",
+				"src/github.com/my/thing/%name.PascalCased%/other.go.html",
+				"src/github.com/my/thing/index.html",
+				"src/github.com/my/thing/main.go.html",
 				"src/index.html",
 			},
 		},
@@ -110,6 +146,18 @@ package mylib
 			err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
 			assert.NoError(t, err)
 
+			f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
+			require.NoError(t, err)
+			indexContents, err := io.ReadAll(f)
+			require.NoError(t, err)
+			indexContentsStr := string(indexContents)
+			for _, s := range tc.expectIndexContains {
+				assert.Contains(t, indexContentsStr, s)
+			}
+			for _, s := range tc.expectIndexNotContains {
+				assert.NotContains(t, indexContentsStr, s)
+			}
+
 			var foundDocs []string
 			require.NoError(t, walkFiles(outputFS, "", func(path string, isDir bool) error {
 				if !isDir && !strings.HasPrefix(path, filepath.Join("lib", "godoc")) {
@@ -119,12 +167,6 @@ package mylib
 			}))
 			sort.Strings(foundDocs)
 			assert.Equal(t, tc.expectDocs, foundDocs)
-
-			f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
-			require.NoError(t, err)
-			indexContents, err := io.ReadAll(f)
-			require.NoError(t, err)
-			assert.Contains(t, string(indexContents), "mylib")
 
 			assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, args, linker), "Should not fail to re-run doc generation on same output directory.")
 		})
