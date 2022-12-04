@@ -118,6 +118,43 @@ func main() {
 				"src/index.html",
 			},
 		},
+		{
+			description: "include internal in index",
+			args: flags.Args{
+				IndexInternalPackages: true,
+			},
+			files: map[string]string{
+				"go.mod": `module github.com/my/thing`,
+				"internal/hello/hello.go": `
+package hello
+
+// Hello says hello
+func Hello() {
+	println("Hello world")
+}
+`,
+			},
+			expectIndexContains: []string{
+				"internal/hello",
+			},
+			expectDocs: []string{
+				"404.html",
+				"index.html",
+				"pkg/github.com/index.html",
+				"pkg/github.com/my/index.html",
+				"pkg/github.com/my/thing/index.html",
+				"pkg/github.com/my/thing/internal/hello/index.html",
+				"pkg/github.com/my/thing/internal/index.html",
+				"pkg/index.html",
+				"src/github.com/index.html",
+				"src/github.com/my/index.html",
+				"src/github.com/my/thing/index.html",
+				"src/github.com/my/thing/internal/hello/hello.go.html",
+				"src/github.com/my/thing/internal/hello/index.html",
+				"src/github.com/my/thing/internal/index.html",
+				"src/index.html",
+			},
+		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			// create a new package "thing" and generate docs for it
@@ -140,10 +177,9 @@ func main() {
 				writeFile(filePath, contents)
 			}
 
-			args := flags.Args{}
-			linker, err := args.Linker(modulePackage)
+			linker, err := tc.args.Linker(modulePackage)
 			require.NoError(t, err)
-			err = Docs(thing, modulePackage, thingFS, outputFS, args, linker)
+			err = Docs(thing, modulePackage, thingFS, outputFS, tc.args, linker)
 			assert.NoError(t, err)
 
 			f, err := outputFS.Open("pkg/github.com/my/thing/index.html")
@@ -168,7 +204,7 @@ func main() {
 			sort.Strings(foundDocs)
 			assert.Equal(t, tc.expectDocs, foundDocs)
 
-			assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, args, linker), "Should not fail to re-run doc generation on same output directory.")
+			assert.NoError(t, Docs(thing, modulePackage, thingFS, outputFS, tc.args, linker), "Should not fail to re-run doc generation on same output directory.")
 		})
 	}
 }

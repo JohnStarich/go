@@ -29,6 +29,11 @@
 //	-include-head value
 //	  	Includes the given HTML file's contents in every page's '<head></head>'. Useful
 //	  	for including custom analytics scripts. Must be valid HTML.
+//	-internal
+//	  	Includes 'internal' packages in the package index and unexported functions.
+//	  	Useful for sharing documentation within the same development team. Note: This
+//	  	only affects page generation for non-internal packages, like package lists.
+//	  	Internal package docs are always generated.
 //	-out string
 //	  	Output path for static files (default "dist")
 //	-source-link string
