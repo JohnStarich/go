@@ -10,16 +10,17 @@ import (
 
 // Args contains all command-line options for gopages
 type Args struct {
-	BaseURL            string
-	GitHubPages        bool
-	GitHubPagesToken   string
-	GitHubPagesUser    string
-	IncludeInHead      FilePathContents
-	SourceLinkTemplate string
-	OutputPath         string
-	SiteDescription    string
-	SiteTitle          string
-	Watch              bool // not added as a flag, only enabled when running from ./cmd/watch
+	BaseURL               string
+	GitHubPages           bool
+	GitHubPagesToken      string
+	GitHubPagesUser       string
+	IncludeInHead         FilePathContents
+	IndexInternalPackages bool
+	SourceLinkTemplate    string
+	OutputPath            string
+	SiteDescription       string
+	SiteTitle             string
+	Watch                 bool // not added as a flag, only enabled when running from ./cmd/watch
 }
 
 // Parse parses the given command line arguments into Args values and returns any output to send to the user
@@ -32,6 +33,7 @@ func Parse(osArgs ...string) (Args, string, error) {
 	commandLine.StringVar(&args.SiteDescription, "brand-description", "", "Branding description in the top left of documentation")
 	commandLine.StringVar(&args.SourceLinkTemplate, "source-link", "", `Custom source code link template. Disables built-in source code pages. For example, "https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}" generates links compatible with GitHub and GitLab. Must be a valid Go template and must generate valid URLs.`)
 	commandLine.Var(&args.IncludeInHead, "include-head", "Includes the given HTML file's contents in every page's '<head></head>'. Useful for including custom analytics scripts. Must be valid HTML.")
+	commandLine.BoolVar(&args.IndexInternalPackages, "internal", false, "Includes 'internal' packages in the package index and unexported functions. Useful for sharing documentation within the same development team. Note: This only affects page generation for non-internal packages, like package lists. Internal package docs are always generated.")
 
 	commandLine.BoolVar(&args.GitHubPages, "gh-pages", false, "Automatically commit the output path to the gh-pages branch. The current branch must be clean.")
 	commandLine.StringVar(&args.GitHubPagesUser, "gh-pages-user", "", "The Git username to push with")
