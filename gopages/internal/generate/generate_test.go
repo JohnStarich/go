@@ -158,7 +158,8 @@ func Hello() {
 	} {
 		t.Run(tc.description, func(t *testing.T) {
 			// create a new package "thing" and generate docs for it
-			thing := t.TempDir()
+			thing, err := os.MkdirTemp("", "")
+			require.NoError(t, err)
 			require.NoError(t, os.Chdir(thing))
 			t.Cleanup(func() {
 				os.RemoveAll(thing)
