@@ -107,6 +107,11 @@ Usage of gopages:
 -include-head value
   	Includes the given HTML file&#39;s contents in every page&#39;s &#39;&lt;head&gt;&lt;/head&gt;&#39;. Useful
   	for including custom analytics scripts. Must be valid HTML.
+-internal
+  	Includes &#39;internal&#39; packages in the package index and unexported functions.
+  	Useful for sharing documentation within the same development team. Note: This
+  	only affects page generation for non-internal packages, like package lists.
+  	Internal package docs are always generated.
 -out string
   	Output path for static files (default &#34;dist&#34;)
 -source-link string

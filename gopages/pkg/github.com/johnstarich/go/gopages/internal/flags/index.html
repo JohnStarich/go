@@ -196,16 +196,17 @@ Args contains all command-line options for gopages
 </p>
 
 			<pre>type Args struct {
-<span id="Args.BaseURL"></span>    BaseURL            <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.GitHubPages"></span>    GitHubPages        <a href="https://pkg.go.dev/builtin/#bool">bool</a>
-<span id="Args.GitHubPagesToken"></span>    GitHubPagesToken   <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.GitHubPagesUser"></span>    GitHubPagesUser    <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.IncludeInHead"></span>    IncludeInHead      <a href="#FilePathContents">FilePathContents</a>
-<span id="Args.SourceLinkTemplate"></span>    SourceLinkTemplate <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.OutputPath"></span>    OutputPath         <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.SiteDescription"></span>    SiteDescription    <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.SiteTitle"></span>    SiteTitle          <a href="https://pkg.go.dev/builtin/#string">string</a>
-<span id="Args.Watch"></span>    Watch              <a href="https://pkg.go.dev/builtin/#bool">bool</a> <span class="comment">// not added as a flag, only enabled when running from ./cmd/watch</span>
+<span id="Args.BaseURL"></span>    BaseURL               <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.GitHubPages"></span>    GitHubPages           <a href="https://pkg.go.dev/builtin/#bool">bool</a>
+<span id="Args.GitHubPagesToken"></span>    GitHubPagesToken      <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.GitHubPagesUser"></span>    GitHubPagesUser       <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.IncludeInHead"></span>    IncludeInHead         <a href="#FilePathContents">FilePathContents</a>
+<span id="Args.IndexInternalPackages"></span>    IndexInternalPackages <a href="https://pkg.go.dev/builtin/#bool">bool</a>
+<span id="Args.SourceLinkTemplate"></span>    SourceLinkTemplate    <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.OutputPath"></span>    OutputPath            <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.SiteDescription"></span>    SiteDescription       <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.SiteTitle"></span>    SiteTitle             <a href="https://pkg.go.dev/builtin/#string">string</a>
+<span id="Args.Watch"></span>    Watch                 <a href="https://pkg.go.dev/builtin/#bool">bool</a> <span class="comment">// not added as a flag, only enabled when running from ./cmd/watch</span>
 }
 </pre>
 
@@ -219,7 +220,7 @@ Args contains all command-line options for gopages
 
 			
 				
-				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go.html#L26">Parse</a>
+				<h3 id="Parse">func <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go.html#L27">Parse</a>
 					<a class="permalink" href="#Parse">&#xb6;</a>
 					
 					
@@ -235,7 +236,7 @@ Parse parses the given command line arguments into Args values and returns any o
 
 			
 				
-				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go.html#L46">Linker</a>
+				<h3 id="Args.Linker">func (Args) <a href="/go/gopages/src/github.com/johnstarich/go/gopages/internal/flags/flags.go.html#L48">Linker</a>
 					<a class="permalink" href="#Args.Linker">&#xb6;</a>
 					
 					
