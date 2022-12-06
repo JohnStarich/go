@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Changes</key>
+	<array>
+		<dict>
+			<key>AddedItem</key>
+			<dict>
+				<key>Path</key>
+				<string>/some/file/path</string>
+				<key>Size</key>
+				<integer>153</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>RemovedItem</key>
+			<dict>
+				<key>Path</key>
+				<string>/some/other/file/path</string>
+				<key>Size</key>
+				<integer>854071</integer>
+			</dict>
+		</dict>
+	</array>
+	<key>Totals</key>
+	<dict>
+		<key>AddedSize</key>
+		<integer>500382415</integer>
+		<key>ChangedSize</key>
+		<integer>0</integer>
+		<key>RemovedSize</key>
+		<integer>492709651</integer>
+	</dict>
+</dict>
+</plist>
