@@ -13,6 +13,7 @@ import (
 )
 
 func TestToJSON(t *testing.T) {
+	t.Parallel()
 	/*
 		testdata layout:
 		- *.plist - Opened as a reader for ToJSON.
@@ -22,8 +23,10 @@ func TestToJSON(t *testing.T) {
 	testFiles, err := filepath.Glob(filepath.Join("testdata", "*.plist"))
 	require.NoError(t, err)
 	for _, testFilePath := range testFiles {
+		testFilePath := testFilePath // enable parallel sub-tests
 		baseName := filepath.Base(testFilePath)
 		t.Run(baseName, func(t *testing.T) {
+			t.Parallel()
 			rootName := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 			expectedFilePath := filepath.Join("testdata", rootName+".json")
 			expectedErrFilePath := filepath.Join("testdata", rootName+".error")
@@ -56,6 +59,7 @@ func TestToJSON(t *testing.T) {
 }
 
 func TestToGo(t *testing.T) {
+	t.Parallel()
 	for _, tc := range []struct {
 		fileName string
 		expected interface{}
@@ -97,7 +101,9 @@ func TestToGo(t *testing.T) {
 			},
 		},
 	} {
+		tc := tc // enable parallel sub-tests
 		t.Run(tc.fileName, func(t *testing.T) {
+			t.Parallel()
 			f, err := os.Open(filepath.Join("testdata", tc.fileName))
 			require.NoError(t, err)
 			t.Cleanup(func() {

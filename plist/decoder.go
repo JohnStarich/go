@@ -1,3 +1,4 @@
+// Package plist decodes XML *.plist files and transforms them into easier-to-use formats.
 package plist
 
 import (
@@ -24,7 +25,7 @@ import (
 // is returned as `[1, "foo"]`.
 func ToJSON(r io.Reader) ([]byte, error) {
 	value, err := newDecoder(r).toGo()
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, err
 	}
 	return json.Marshal(value)
@@ -44,13 +45,13 @@ func newDecoder(r io.Reader) *decoder {
 
 func (d *decoder) toGo() (value interface{}, err error) {
 	_, _, err = d.decodeGo(d.xmlDecoder, 0)
-	if err == nil || err == foundPListError {
+	if err == nil || errors.Is(err, errFoundPList) {
 		value, _, err = d.decodeGo(d.xmlDecoder, 0)
 	}
 	return value, err
 }
 
-var foundPListError = errors.New("found plist root")
+var errFoundPList = errors.New("found plist root")
 
 func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{}, endedBeforeDecode bool, err error) {
 	elem, foundEnd, err := decodeStartElement(decoder)
@@ -68,7 +69,7 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 
 	switch elem.Name.Local {
 	case "plist":
-		return nil, false, foundPListError
+		return nil, false, errFoundPList
 	case "array":
 		var elems []interface{}
 		for {
