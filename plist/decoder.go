@@ -52,7 +52,7 @@ func (d *decoder) toGo() (value interface{}, err error) {
 
 var foundPListError = errors.New("found plist root")
 
-func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{}, foundEndImmediately bool, err error) {
+func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{}, endedBeforeDecode bool, err error) {
 	elem, foundEnd, err := decodeStartElement(decoder)
 	if foundEnd || err != nil {
 		return nil, foundEnd, err
@@ -72,8 +72,8 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 	case "array":
 		var elems []interface{}
 		for {
-			elem, foundEndImmediately, err := d.decodeGo(decoder, depth+1)
-			if foundEndImmediately || err != nil {
+			elem, endedBeforeDecode, err := d.decodeGo(decoder, depth+1)
+			if endedBeforeDecode || err != nil {
 				return elems, false, err
 			}
 			elems = append(elems, elem)
@@ -90,8 +90,8 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 			if err != nil {
 				return elems, false, err
 			}
-			value, foundEndImmediately, err := d.decodeGo(decoder, depth+1)
-			if foundEndImmediately || err != nil {
+			value, endedBeforeDecode, err := d.decodeGo(decoder, depth+1)
+			if endedBeforeDecode || err != nil {
 				return elems, false, err
 			}
 			elems[key] = value
