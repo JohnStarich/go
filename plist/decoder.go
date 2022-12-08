@@ -1,4 +1,4 @@
-// Package plist decodes XML *.plist files and transforms them into easier-to-use formats.
+// Package plist parses XML *.plist files and transforms them into easier-to-use formats.
 package plist
 
 import (
