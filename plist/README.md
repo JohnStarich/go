@@ -1,6 +1,6 @@
 # plist <a href="https://johnstarich.com/go/plist"><img src="https://img.shields.io/badge/gopages-reference-%235272B4" /></a>
 
-Plist parses macOS `*.plist` input data and formats them into JSON.
+Plist parses macOS `*.plist` input data and formats them as JSON.
 
 NOTE: Currently only supports XML based plists, not the binary format.
 
