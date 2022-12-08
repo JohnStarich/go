@@ -44,17 +44,17 @@ func newDecoder(r io.Reader) *decoder {
 }
 
 func (d *decoder) toGo() (value interface{}, err error) {
-	_, _, err = d.decodeGo(d.xmlDecoder, 0)
+	_, _, err = d.decodeGo(0)
 	if err == nil || errors.Is(err, errFoundPList) {
-		value, _, err = d.decodeGo(d.xmlDecoder, 0)
+		value, _, err = d.decodeGo(0)
 	}
 	return value, err
 }
 
 var errFoundPList = errors.New("found plist root")
 
-func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{}, endedBeforeDecode bool, err error) {
-	elem, foundEnd, err := decodeStartElement(decoder)
+func (d *decoder) decodeGo(depth int) (result interface{}, endedBeforeDecode bool, err error) {
+	elem, foundEnd, err := d.decodeStartElement()
 	if foundEnd || err != nil {
 		return nil, foundEnd, err
 	}
@@ -73,7 +73,7 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 	case "array":
 		var elems []interface{}
 		for {
-			elem, endedBeforeDecode, err := d.decodeGo(decoder, depth+1)
+			elem, endedBeforeDecode, err := d.decodeGo(depth + 1)
 			if endedBeforeDecode || err != nil {
 				return elems, false, err
 			}
@@ -82,40 +82,31 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 	case "dict":
 		elems := make(map[string]interface{})
 		for {
-			keyElem, foundEnd, err := decodeStartElement(decoder)
+			key, value, foundEnd, err := d.decodeKeyValue(depth + 1)
 			if foundEnd || err != nil {
-				return elems, false, err
-			}
-			var key string
-			err = decoder.DecodeElement(&key, &keyElem)
-			if err != nil {
-				return elems, false, err
-			}
-			value, endedBeforeDecode, err := d.decodeGo(decoder, depth+1)
-			if endedBeforeDecode || err != nil {
 				return elems, false, err
 			}
 			elems[key] = value
 		}
 	case "true":
-		return true, false, decoder.Skip()
+		return true, false, d.xmlDecoder.Skip()
 	case "false":
-		return false, false, decoder.Skip()
+		return false, false, d.xmlDecoder.Skip()
 	case "integer":
 		var value int64
-		err := decoder.DecodeElement(&value, &elem)
+		err := d.xmlDecoder.DecodeElement(&value, &elem)
 		return value, false, err
 	case "real":
 		var value float64
-		err := decoder.DecodeElement(&value, &elem)
+		err := d.xmlDecoder.DecodeElement(&value, &elem)
 		return value, false, err
 	case "string":
 		var value string
-		err := decoder.DecodeElement(&value, &elem)
+		err := d.xmlDecoder.DecodeElement(&value, &elem)
 		return value, false, err
 	case "data":
 		var value string
-		err := decoder.DecodeElement(&value, &elem)
+		err := d.xmlDecoder.DecodeElement(&value, &elem)
 		if err != nil {
 			return nil, false, err
 		}
@@ -123,7 +114,7 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 		return decoded, false, err
 	case "date":
 		var value string
-		err := decoder.DecodeElement(&value, &elem)
+		err := d.xmlDecoder.DecodeElement(&value, &elem)
 		if err != nil {
 			return nil, false, err
 		}
@@ -134,10 +125,10 @@ func (d *decoder) decodeGo(decoder *xml.Decoder, depth int) (result interface{},
 	}
 }
 
-func decodeStartElement(decoder *xml.Decoder) (startElement xml.StartElement, foundEnd bool, err error) {
+func (d *decoder) decodeStartElement() (startElement xml.StartElement, foundEnd bool, err error) {
 	for {
 		var token xml.Token
-		token, err = decoder.Token()
+		token, err = d.xmlDecoder.Token()
 		if err != nil {
 			return
 		}
@@ -148,4 +139,20 @@ func decodeStartElement(decoder *xml.Decoder) (startElement xml.StartElement, fo
 			return xml.StartElement{}, true, nil
 		}
 	}
+}
+
+func (d *decoder) decodeKeyValue(depth int) (key string, value interface{}, foundEnd bool, err error) {
+	keyElem, foundEnd, err := d.decodeStartElement()
+	if foundEnd || err != nil {
+		return "", nil, foundEnd, err
+	}
+	err = d.xmlDecoder.DecodeElement(&key, &keyElem)
+	if err != nil {
+		return "", nil, false, err
+	}
+	value, endedBeforeDecode, err := d.decodeGo(depth)
+	if endedBeforeDecode || err != nil {
+		return "", nil, endedBeforeDecode, err
+	}
+	return key, value, false, nil
 }
