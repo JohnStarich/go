@@ -1,0 +1,21 @@
+{
+	"Changes": [
+		{
+			"AddedItem": {
+				"Path": "/some/file/path",
+				"Size": 153
+			}
+		},
+		{
+			"RemovedItem": {
+				"Path": "/some/other/file/path",
+				"Size": 854071
+			}
+		}
+	],
+	"Totals": {
+		"AddedSize": 500382415,
+		"ChangedSize": 0,
+		"RemovedSize": 492709651
+	}
+}

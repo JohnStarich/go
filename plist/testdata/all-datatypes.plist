@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<array>
+    <!-- Data types pulled from https://en.wikipedia.org/wiki/Property_list#Format -->
+    <true />
+    <false />
+    <integer>123</integer>
+    <real>123e10</real>
+    <string>some string</string>
+    <data>YmFzZTY0IGRhdGE=</data>
+    <date>2020-01-01T01:00:00Z</date>
+</array>
+</plist>
