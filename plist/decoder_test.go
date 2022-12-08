@@ -22,6 +22,7 @@ func TestToJSON(t *testing.T) {
 	*/
 	testFiles, err := filepath.Glob(filepath.Join("testdata", "*.plist"))
 	require.NoError(t, err)
+	require.NotEmpty(t, testFiles, "Ensure glob matches something.")
 	for _, testFilePath := range testFiles {
 		testFilePath := testFilePath // enable parallel sub-tests
 		baseName := filepath.Base(testFilePath)
