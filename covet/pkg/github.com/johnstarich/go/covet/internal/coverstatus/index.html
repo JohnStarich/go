@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package coverstatus contains coverage color-coding and labeling for generating reports.
-</p>
+				<p>Package coverstatus contains coverage color-coding and labeling for generating reports.
 
 				
 			</div>
@@ -160,9 +158,7 @@ Package coverstatus contains coverage color-coding and labeling for generating r
 				
 				
 			</h2>
-			<p>
-Status represents a coverage status level, ranging from &#34;excellent&#34; to &#34;error&#34;
-</p>
+			<p>Status represents a coverage status level, ranging from &quot;excellent&quot; to &quot;error&quot;
 
 			<pre>type Status <a href="https://pkg.go.dev/builtin/#int">int</a></pre>
 
@@ -182,9 +178,7 @@ Status represents a coverage status level, ranging from &#34;excellent&#34; to &
 					
 				</h3>
 				<pre>func New(f <a href="https://pkg.go.dev/builtin/#float64">float64</a>) <a href="#Status">Status</a></pre>
-				<p>
-New categorizes the given percentage (between 0 and 1) as a coverage status
-</p>
+				<p>New categorizes the given percentage (between 0 and 1) as a coverage status
 
 				
 				
@@ -198,9 +192,7 @@ New categorizes the given percentage (between 0 and 1) as a coverage status
 					
 				</h3>
 				<pre>func (s <a href="#Status">Status</a>) Colorize(str <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-Colorize formats &#39;str&#39; with this status&#39;s assigned color
-</p>
+				<p>Colorize formats &apos;str&apos; with this status&apos;s assigned color
 
 				
 				
@@ -213,9 +205,7 @@ Colorize formats &#39;str&#39; with this status&#39;s assigned color
 					
 				</h3>
 				<pre>func (s <a href="#Status">Status</a>) Emoji() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-Emoji returns this status&#39;s assigned emoji
-</p>
+				<p>Emoji returns this status&apos;s assigned emoji
 
 				
 				
@@ -228,10 +218,8 @@ Emoji returns this status&#39;s assigned emoji
 					
 				</h3>
 				<pre>func (s <a href="#Status">Status</a>) WorkflowCommand() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-WorkflowCommand returns a GitHub Actions workflow command for this coverage status.
-These are specifically the log &#34;level&#34; commands.
-</p>
+				<p>WorkflowCommand returns a GitHub Actions workflow command for this coverage status.
+These are specifically the log &quot;level&quot; commands.
 
 				
 				
@@ -249,7 +237,7 @@ These are specifically the log &#34;level&#34; commands.
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

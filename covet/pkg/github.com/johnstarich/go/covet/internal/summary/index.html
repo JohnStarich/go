@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package summary generates summary reports in various formats.
-</p>
+				<p>Package summary generates summary reports in various formats.
 
 				
 			</div>
@@ -174,9 +172,7 @@ Package summary generates summary reports in various formats.
 				
 			</h2>
 			<pre>func FileCoverage(f <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>) <a href="https://pkg.go.dev/builtin/#float64">float64</a></pre>
-			<p>
-FileCoverage returns a File&#39;s coverage percentage between 0 and 1
-</p>
+			<p>FileCoverage returns a File&apos;s coverage percentage between 0 and 1
 
 			
 			
@@ -190,9 +186,7 @@ FileCoverage returns a File&#39;s coverage percentage between 0 and 1
 				
 			</h2>
 			<pre>func FormatPercent(f <a href="https://pkg.go.dev/builtin/#float64">float64</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-			<p>
-FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
-</p>
+			<p>FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
 
 			
 			
@@ -206,9 +200,7 @@ FormatPercent formats a percentage of 0 to 1 with ABC.X% magnitude and precision
 				
 			</h2>
 			<pre>func New(uncoveredFiles []<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/">coverfile</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverfile/#File">File</a>, targetCoverage <a href="https://pkg.go.dev/builtin/#uint">uint</a>, format <a href="#Format">Format</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-			<p>
-New generates a new summary report in the given format
-</p>
+			<p>New generates a new summary report in the given format
 
 			
 			
@@ -222,16 +214,12 @@ New generates a new summary report in the given format
 				
 				
 			</h2>
-			<p>
-Format represents a summary report&#39;s format
-</p>
+			<p>Format represents a summary report&apos;s format
 
 			<pre>type Format <a href="https://pkg.go.dev/builtin/#int">int</a></pre>
 
 			
-				<p>
-Supported formats
-</p>
+				<p>Supported formats
 
 				<pre>const (
     <span id="FormatColorTerminal">FormatColorTerminal</span> <a href="#Format">Format</a> = <a href="https://pkg.go.dev/builtin/#iota">iota</a>
@@ -255,9 +243,7 @@ Supported formats
 					
 				</h3>
 				<pre>func (f <a href="#Format">Format</a>) Colorize(c *<a href="https://pkg.go.dev/github.com/fatih/color/">color</a>.<a href="https://pkg.go.dev/github.com/fatih/color/#Color">Color</a>, s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-Colorize returns &#39;s&#39; and optionally wraps with color &#39;c&#39; according to the format&#39;s rules
-</p>
+				<p>Colorize returns &apos;s&apos; and optionally wraps with color &apos;c&apos; according to the format&apos;s rules
 
 				
 				
@@ -270,9 +256,7 @@ Colorize returns &#39;s&#39; and optionally wraps with color &#39;c&#39; accordi
 					
 				</h3>
 				<pre>func (f <a href="#Format">Format</a>) ColorizeStatus(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>, s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-ColorizeStatus returns &#39;s&#39; and optionally wraps with the coverage status&#39;s color according to the format&#39;s rules
-</p>
+				<p>ColorizeStatus returns &apos;s&apos; and optionally wraps with the coverage status&apos;s color according to the format&apos;s rules
 
 				
 				
@@ -285,9 +269,7 @@ ColorizeStatus returns &#39;s&#39; and optionally wraps with the coverage status
 					
 				</h3>
 				<pre>func (f <a href="#Format">Format</a>) FormatTable(tbl <a href="https://pkg.go.dev/github.com/jedib0t/go-pretty/v6/table/">table</a>.<a href="https://pkg.go.dev/github.com/jedib0t/go-pretty/v6/table/#Writer">Writer</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-FormatTable returns a formatted table according to the format&#39;s rules
-</p>
+				<p>FormatTable returns a formatted table according to the format&apos;s rules
 
 				
 				
@@ -300,10 +282,8 @@ FormatTable returns a formatted table according to the format&#39;s rules
 					
 				</h3>
 				<pre>func (f <a href="#Format">Format</a>) Monospace(s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-Monospace returns a monospaced string according to the format&#39;s rules.
+				<p>Monospace returns a monospaced string according to the format&apos;s rules.
 Markdown uses code blocks with non-breaking spaces to ensure proper spacing.
-</p>
 
 				
 				
@@ -316,10 +296,8 @@ Markdown uses code blocks with non-breaking spaces to ensure proper spacing.
 					
 				</h3>
 				<pre>func (f <a href="#Format">Format</a>) StatusIcon(status <a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/">coverstatus</a>.<a href="/go/covet/pkg/github.com/johnstarich/go/covet/internal/coverstatus/#Status">Status</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-StatusIcon returns a coverage status icon according to the format&#39;s rules.
+				<p>StatusIcon returns a coverage status icon according to the format&apos;s rules.
 Markdown returns an emoji, terminal returns empty string.
-</p>
 
 				
 				
@@ -337,7 +315,7 @@ Markdown returns an emoji, terminal returns empty string.
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

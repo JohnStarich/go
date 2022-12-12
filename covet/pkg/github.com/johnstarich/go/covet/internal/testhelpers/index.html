@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package testhelpers contains file system generators for use in tests.
-</p>
+				<p>Package testhelpers contains file system generators for use in tests.
 
 				
 			</div>
@@ -152,10 +150,8 @@ Package testhelpers contains file system generators for use in tests.
 				
 			</h2>
 			<pre>func FSWithFiles(t *<a href="https://pkg.go.dev/testing/">testing</a>.<a href="https://pkg.go.dev/testing/#T">T</a>, files map[<a href="https://pkg.go.dev/builtin/#string">string</a>]<a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/">hackpadfs</a>.<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/#FS">FS</a></pre>
-			<p>
-FSWithFiles returns an FS with the given files contents generated inside it.
+			<p>FSWithFiles returns an FS with the given files contents generated inside it.
 The contents are trimmed and a newline appended for convenient comparisons.
-</p>
 
 			
 			
@@ -169,10 +165,8 @@ The contents are trimmed and a newline appended for convenient comparisons.
 				
 			</h2>
 			<pre>func FromOSToFS(t *<a href="https://pkg.go.dev/testing/">testing</a>.<a href="https://pkg.go.dev/testing/#T">T</a>, osPath <a href="https://pkg.go.dev/builtin/#string">string</a>) (*<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/os/">os</a>.<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/os/#FS">FS</a>, <a href="https://pkg.go.dev/builtin/#string">string</a>)</pre>
-			<p>
-FromOSToFS returns the FS and FS path for the given OS path.
-If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\) before converting.
-</p>
+			<p>FromOSToFS returns the FS and FS path for the given OS path.
+If using Windows, the os.FS used will target the osPath&apos;s volume (e.g. C:\) before converting.
 
 			
 			
@@ -186,10 +180,8 @@ If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\) 
 				
 			</h2>
 			<pre>func OSFSWithTemp(t *<a href="https://pkg.go.dev/testing/">testing</a>.<a href="https://pkg.go.dev/testing/#T">T</a>) (fs <a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/">hackpadfs</a>.<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/#FS">FS</a>, workingDir, tempDir <a href="https://pkg.go.dev/builtin/#string">string</a>)</pre>
-			<p>
-OSFSWithTemp returns an os.FS instance with 1) the current module&#39;s directory and 2) a temporary directory mounted inside.
+			<p>OSFSWithTemp returns an os.FS instance with 1) the current module&apos;s directory and 2) a temporary directory mounted inside.
 Returns the FS paths to both mounts.
-</p>
 
 			
 			
@@ -207,7 +199,7 @@ Returns the FS paths to both mounts.
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

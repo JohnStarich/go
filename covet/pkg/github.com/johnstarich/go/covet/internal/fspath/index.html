@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package fspath contains FS path manipulation tools, much like the standard library&#39;s &#34;path/filepath&#34; package.
-</p>
+				<p>Package fspath contains FS path manipulation tools, much like the standard library&apos;s &quot;path/filepath&quot; package.
 
 				
 			</div>
@@ -152,10 +150,8 @@ Package fspath contains FS path manipulation tools, much like the standard libra
 				
 			</h2>
 			<pre>func CommonBase(a, b <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-			<p>
-CommonBase returns the common base path between a and b.
-Returns &#34;.&#34; if there are no common path elements.
-</p>
+			<p>CommonBase returns the common base path between a and b.
+Returns &quot;.&quot; if there are no common path elements.
 
 			
 			
@@ -169,10 +165,8 @@ Returns &#34;.&#34; if there are no common path elements.
 				
 			</h2>
 			<pre>func Rel(basePath, targetPath <a href="https://pkg.go.dev/builtin/#string">string</a>) (<a href="https://pkg.go.dev/builtin/#string">string</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-			<p>
-Rel returns the relative FS path from basePath to targetPath.
+			<p>Rel returns the relative FS path from basePath to targetPath.
 Similar to filepath.Rel without including OS-dependent behavior.
-</p>
 
 			
 			
@@ -186,10 +180,8 @@ Similar to filepath.Rel without including OS-dependent behavior.
 				
 			</h2>
 			<pre>func WorkingDirectoryFS() (*<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/os/">os</a>.<a href="https://pkg.go.dev/github.com/hack-pad/hackpadfs/os/#FS">FS</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-			<p>
-WorkingDirectoryFS returns the os.FS for the current working directory.
-If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\).
-</p>
+			<p>WorkingDirectoryFS returns the os.FS for the current working directory.
+If using Windows, the os.FS used will target the osPath&apos;s volume (e.g. C:\).
 
 			
 			
@@ -207,7 +199,7 @@ If using Windows, the os.FS used will target the osPath&#39;s volume (e.g. C:\).
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->
