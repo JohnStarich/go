@@ -1,18 +1,21 @@
-// gopages generates static files for Go documentation, formatted with godoc.
+// Command gopages generates static files for Go documentation, formatted with godoc.
 //
-// Installation:
+// # Installation
 //
-//	go get github.com/johnstarich/go/gopages
+// To install gopages, run the following command:
 //
-// Generate documentation for your module by running without any flags.
+//	go install github.com/johnstarich/go/gopages@latest
+//
+// # Getting started
+//
+// Generate documentation for your module by running gopages without any flags.
 //
 // A 'go.mod' file must be present in the current directory.
 //
 //	cd ./mymodule
 //	gopages
 //
-// NOTE: Install gopages with Go v1.19 or higher to generate documentation with custom links, lists, headings, and more.
-// See: https://pkg.go.dev/go/doc/comment
+// NOTE: Install gopages with Go v1.19 or higher to generate documentation with [improved formatting].
 //
 // Usage of gopages:
 //
@@ -44,4 +47,6 @@
 //	  	example, "https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}"
 //	  	generates links compatible with GitHub and GitLab. Must be a valid Go template
 //	  	and must generate valid URLs.
+//
+// [improved formatting]: https://pkg.go.dev/go/doc/comment
 package main
