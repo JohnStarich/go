@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,10 +89,8 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
+				<p>Package staggercast implements a one-to-many net.Conn for easy scattering of the same request to multiple endpoints with control on when new connections are attempted.
 For ease of use in a DNS resolver Dial func, all connections implement both net.Conn and net.PacketConn.
-</p>
 
 				
 			</div>
@@ -198,10 +196,8 @@ For ease of use in a DNS resolver Dial func, all connections implement both net.
 				
 				
 			</h2>
-			<p>
-Conn is a staggerable packet connection.
+			<p>Conn is a staggerable packet connection.
 Conn fires out all Writes to all outgoing connections, Reads return the first successful read.
-</p>
 
 			<pre>type Conn struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -224,9 +220,7 @@ Conn fires out all Writes to all outgoing connections, Reads return the first su
 					
 				</h3>
 				<pre>func New(conns []<a href="#PacketConn">PacketConn</a>) *<a href="#Conn">Conn</a></pre>
-				<p>
-New combines multiple packet connections (net.Conn or net.PacketConn) and returns a single, staggerable connection
-</p>
+				<p>New combines multiple packet connections (net.Conn or net.PacketConn) and returns a single, staggerable connection
 
 				
 				
@@ -240,9 +234,7 @@ New combines multiple packet connections (net.Conn or net.PacketConn) and return
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) Close() <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-Close implements PacketConn
-</p>
+				<p>Close implements PacketConn
 
 				
 				
@@ -255,9 +247,7 @@ Close implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) LocalAddr() <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a></pre>
-				<p>
-LocalAddr implements PacketConn
-</p>
+				<p>LocalAddr implements PacketConn
 
 				
 				
@@ -282,9 +272,7 @@ LocalAddr implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) ReadFrom(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, addr <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
-</p>
+				<p>ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
 
 				
 				
@@ -297,9 +285,7 @@ ReadFrom implements net.PacketConn, but is unused for UDP DNS queries. May requi
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) RemoteAddr() <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a></pre>
-				<p>
-RemoteAddr implements PacketConn
-</p>
+				<p>RemoteAddr implements PacketConn
 
 				
 				
@@ -312,9 +298,7 @@ RemoteAddr implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) SetDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-SetDeadline implements PacketConn
-</p>
+				<p>SetDeadline implements PacketConn
 
 				
 				
@@ -327,9 +311,7 @@ SetDeadline implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) SetReadDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-SetReadDeadline implements PacketConn
-</p>
+				<p>SetReadDeadline implements PacketConn
 
 				
 				
@@ -342,9 +324,7 @@ SetReadDeadline implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) SetWriteDeadline(t <a href="https://pkg.go.dev/time/">time</a>.<a href="https://pkg.go.dev/time/#Time">Time</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-SetWriteDeadline implements PacketConn
-</p>
+				<p>SetWriteDeadline implements PacketConn
 
 				
 				
@@ -357,16 +337,12 @@ SetWriteDeadline implements PacketConn
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) Stagger(ticker &lt;-chan struct{}, cancel <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#CancelFunc">CancelFunc</a>)</pre>
-				<p>
-Stagger controls when secondary connections are attempted after the first. For any new enabled connection, the last Write and SetDeadlines are replayed onto it.
+				<p>Stagger controls when secondary connections are attempted after the first. For any new enabled connection, the last Write and SetDeadlines are replayed onto it.
 If Stagger is called after the connection is started, then the behavior is undefined.
 First connection is attempted immediately, then all future connections will be enabled when receiving from ticker.
-</p>
-<p>
-Example: Create and wrap a &#39;time.Ticker.C&#39; with a duration of 1 second.
-The first connection is attempted immediately. For every 1 second the Read hasn&#39;t returned, an additional connection is attempted.
+<p>Example: Create and wrap a &apos;time.Ticker.C&apos; with a duration of 1 second.
+The first connection is attempted immediately. For every 1 second the Read hasn&apos;t returned, an additional connection is attempted.
 Once a connection succeeds, the result is returned immediately from Read.
-</p>
 
 				
 				
@@ -379,9 +355,7 @@ Once a connection succeeds, the result is returned immediately from Read.
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) Stats() <a href="#Stats">Stats</a></pre>
-				<p>
-Stats returns statistics from a staggercast execution
-</p>
+				<p>Stats returns statistics from a staggercast execution
 
 				
 				
@@ -406,9 +380,7 @@ Stats returns statistics from a staggercast execution
 					
 				</h3>
 				<pre>func (s *<a href="#Conn">Conn</a>) WriteTo(b []<a href="https://pkg.go.dev/builtin/#byte">byte</a>, addr <a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Addr">Addr</a>) (n <a href="https://pkg.go.dev/builtin/#int">int</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
-</p>
+				<p>WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May require further testing for other use cases.
 
 				
 				
@@ -422,9 +394,7 @@ WriteTo implements net.PacketConn, but is unused for UDP DNS queries. May requir
 				
 				
 			</h2>
-			<p>
-PacketConn implements both net.Conn and net.PacketConn
-</p>
+			<p>PacketConn implements both net.Conn and net.PacketConn
 
 			<pre>type PacketConn interface {
     <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Reader">Reader</a>
@@ -452,9 +422,7 @@ PacketConn implements both net.Conn and net.PacketConn
 				
 				
 			</h2>
-			<p>
-Stats contains statistics from a staggercast execution
-</p>
+			<p>Stats contains statistics from a staggercast execution
 
 			<pre>type Stats struct {
 <span id="Stats.FastestRemoteIndex"></span>    FastestRemoteIndex <a href="https://pkg.go.dev/builtin/#int">int</a>
@@ -485,7 +453,7 @@ Stats contains statistics from a staggercast execution
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

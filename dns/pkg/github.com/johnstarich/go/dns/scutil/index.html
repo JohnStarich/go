@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package scutil provides a complete model and parser for &#39;scutil --dns&#39; output.
-</p>
+				<p>Package scutil provides a complete model and parser for &apos;scutil --dns&apos; output.
 
 				
 			</div>
@@ -173,9 +171,7 @@ Package scutil provides a complete model and parser for &#39;scutil --dns&#39; o
 				
 				
 			</h2>
-			<p>
-Config is a parsed scutil DNS config
-</p>
+			<p>Config is a parsed scutil DNS config
 
 			<pre>type Config struct {
 <span id="Config.Resolvers"></span>    Resolvers []<a href="#Resolver">Resolver</a>
@@ -198,9 +194,7 @@ Config is a parsed scutil DNS config
 					
 				</h3>
 				<pre>func ReadMacOSDNS(ctx <a href="https://pkg.go.dev/context/">context</a>.<a href="https://pkg.go.dev/context/#Context">Context</a>) (<a href="#Config">Config</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-ReadMacOSDNS reads and parses the current macOS scutil DNS settings
-</p>
+				<p>ReadMacOSDNS reads and parses the current macOS scutil DNS settings
 
 				
 				
@@ -215,16 +209,12 @@ ReadMacOSDNS reads and parses the current macOS scutil DNS settings
 				
 				
 			</h2>
-			<p>
-Flag is an scutil flag value. See possible Flag enum values for examples.
-</p>
+			<p>Flag is an scutil flag value. See possible Flag enum values for examples.
 
 			<pre>type Flag <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 
 			
-				<p>
-Common flag values for convenient comparisons
-</p>
+				<p>Common flag values for convenient comparisons
 
 				<pre>const (
     <span class="comment">// Scoped requires a resolver to only send queries on the specified interface</span>
@@ -252,9 +242,7 @@ Common flag values for convenient comparisons
 				
 				
 			</h2>
-			<p>
-Reach is an scutil &#34;reach&#34; value. See possible Reach enum values for examples.
-</p>
+			<p>Reach is an scutil &quot;reach&quot; value. See possible Reach enum values for examples.
 
 			<pre>type Reach <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
 
@@ -307,9 +295,7 @@ Reach is an scutil &#34;reach&#34; value. See possible Reach enum values for exa
 				
 				
 			</h2>
-			<p>
-Resolver is an scutil resolver entry
-</p>
+			<p>Resolver is an scutil resolver entry
 
 			<pre>type Resolver struct {
 <span id="Resolver.Domain"></span>    Domain         <a href="https://pkg.go.dev/builtin/#string">string</a>
@@ -346,12 +332,8 @@ Resolver is an scutil resolver entry
 					
 				</h3>
 				<pre>func (r <a href="#Resolver">Resolver</a>) Reachable() <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
-				<p>
-Reachable returns whether this resolver is reachable.
-</p>
-<p>
-scutil defines it as: The specified nodename/address can be reached using the current network configuration.
-</p>
+				<p>Reachable returns whether this resolver is reachable.
+<p>scutil defines it as: The specified nodename/address can be reached using the current network configuration.
 
 				
 				
@@ -369,7 +351,7 @@ scutil defines it as: The specified nodename/address can be reached using the cu
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -91,9 +91,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package dns implements a working macOS DNS resolver (really just a `Dial`er) for projects that must cross-compile from Linux systems or just don&#39;t want CGO.
-</p>
+				<p>Package dns implements a working macOS DNS resolver (really just a `Dial`er) for projects that must cross-compile from Linux systems or just don&apos;t want CGO.
 
 				
 			</div>
@@ -156,9 +154,7 @@ Package dns implements a working macOS DNS resolver (really just a `Dial`er) for
 				
 			</h2>
 			<pre>func New() *<a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Resolver">Resolver</a></pre>
-			<p>
-New returns a default DNS resolver for this runtime
-</p>
+			<p>New returns a default DNS resolver for this runtime
 
 			
 			
@@ -172,9 +168,7 @@ New returns a default DNS resolver for this runtime
 				
 			</h2>
 			<pre>func NewWithConfig(config <a href="#Config">Config</a>) *<a href="https://pkg.go.dev/net/">net</a>.<a href="https://pkg.go.dev/net/#Resolver">Resolver</a></pre>
-			<p>
-NewWithConfig returns a DNS resolver with the given config for this runtime
-</p>
+			<p>NewWithConfig returns a DNS resolver with the given config for this runtime
 
 			
 			
@@ -188,10 +182,8 @@ NewWithConfig returns a DNS resolver with the given config for this runtime
 				
 				
 			</h2>
-			<p>
-Config contains options for configuring a DNS resolver.
+			<p>Config contains options for configuring a DNS resolver.
 Currently has no effect on non-macOS runtimes.
-</p>
 
 			<pre>type Config struct {
 <span id="Config.Logger"></span>    Logger                 *<a href="https://pkg.go.dev/go.uber.org/zap/">zap</a>.<a href="https://pkg.go.dev/go.uber.org/zap/#Logger">Logger</a>
@@ -288,7 +280,7 @@ Currently has no effect on non-macOS runtimes.
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->
