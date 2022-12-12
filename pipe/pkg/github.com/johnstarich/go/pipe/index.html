@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/pipe/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -91,10 +91,8 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package pipe handles errors so you don&#39;t have to.
+				<p>Package pipe handles errors so you don&apos;t have to.
 A `Pipe` is a series of functions that pass data to one another, in-order. These functions can also fail with an error, which stops the flow and returns immediately.
-</p>
 
 				
 			</div>
@@ -213,9 +211,7 @@ A `Pipe` is a series of functions that pass data to one another, in-order. These
 				
 			</h2>
 			<pre>func CheckError(cond <a href="https://pkg.go.dev/builtin/#bool">bool</a>, err <a href="https://pkg.go.dev/builtin/#error">error</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-			<p>
-CheckError returns &#39;err&#39; if &#39;cond&#39; is true, nil otherwise
-</p>
+			<p>CheckError returns &apos;err&apos; if &apos;cond&apos; is true, nil otherwise
 
 			<div id="example_CheckError" class="toggle">
 	<div class="collapsed">
@@ -259,9 +255,7 @@ fmt.Println(err)
 				
 			</h2>
 			<pre>func CheckErrorf(cond <a href="https://pkg.go.dev/builtin/#bool">bool</a>, format <a href="https://pkg.go.dev/builtin/#string">string</a>, args ...interface{}) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-			<p>
-CheckErrorf returns a new formatted error if &#39;cond&#39; is true, nil otherwise
-</p>
+			<p>CheckErrorf returns a new formatted error if &apos;cond&apos; is true, nil otherwise
 
 			
 			
@@ -275,11 +269,9 @@ CheckErrorf returns a new formatted error if &#39;cond&#39; is true, nil otherwi
 				
 			</h2>
 			<pre>func Filter(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-			<p>
-Filter runs p.Do() for each provided slice of args.
+			<p>Filter runs p.Do() for each provided slice of args.
 Returns a slice of all successful output results.
 If none are successful, returns the last error.
-</p>
 
 			
 			
@@ -293,10 +285,8 @@ If none are successful, returns the last error.
 				
 			</h2>
 			<pre>func Map(p <a href="#Pipe">Pipe</a>, multiArgs [][]interface{}) ([][]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-			<p>
-Map runs p.Do() for each provided slice of args.
+			<p>Map runs p.Do() for each provided slice of args.
 Returns a slice of all output slices, or the first error encountered.
-</p>
 
 			
 			
@@ -310,10 +300,8 @@ Returns a slice of all output slices, or the first error encountered.
 				
 				
 			</h2>
-			<p>
-Error is an error returned from Pipe.Do().
-Can contain 1 or more errors. Conforms to the standard library&#39;s errors package interfaces like errors.As().
-</p>
+			<p>Error is an error returned from Pipe.Do().
+Can contain 1 or more errors. Conforms to the standard library&apos;s errors package interfaces like errors.As().
 
 			<pre>type Error struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -338,9 +326,7 @@ Can contain 1 or more errors. Conforms to the standard library&#39;s errors pack
 					
 				</h3>
 				<pre>func (e <a href="#Error">Error</a>) As(target interface{}) <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
-				<p>
-As implements errors.As() defined interface
-</p>
+				<p>As implements errors.As() defined interface
 
 				
 				
@@ -353,9 +339,7 @@ As implements errors.As() defined interface
 					
 				</h3>
 				<pre>func (e <a href="#Error">Error</a>) Error() <a href="https://pkg.go.dev/builtin/#string">string</a></pre>
-				<p>
-Error implements the builtin error interface
-</p>
+				<p>Error implements the builtin error interface
 
 				
 				
@@ -368,9 +352,7 @@ Error implements the builtin error interface
 					
 				</h3>
 				<pre>func (e <a href="#Error">Error</a>) Is(target <a href="https://pkg.go.dev/builtin/#error">error</a>) <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
-				<p>
-Is implements errors.Is() defined interface
-</p>
+				<p>Is implements errors.Is() defined interface
 
 				
 				
@@ -383,10 +365,8 @@ Is implements errors.Is() defined interface
 					
 				</h3>
 				<pre>func (e <a href="#Error">Error</a>) Unwrap() <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-Unwrap implements errors.Unwrap() defined interface.
+				<p>Unwrap implements errors.Unwrap() defined interface.
 Returns the first error. If there was not exactly 1 error, returns nil.
-</p>
 
 				
 				
@@ -400,9 +380,7 @@ Returns the first error. If there was not exactly 1 error, returns nil.
 				
 				
 			</h2>
-			<p>
-Options defines all available options to configure a Pipe
-</p>
+			<p>Options defines all available options to configure a Pipe
 
 			<pre>type Options struct {
 <span id="Options.KeepGoing"></span>    <span class="comment">// KeepGoing continues running later functions in a Pipe after an error is encountered.</span>
@@ -430,14 +408,10 @@ Options defines all available options to configure a Pipe
 				
 				
 			</h2>
-			<p>
-Pipe combines several functions together into a pipeline.
-Each appended function&#39;s return values are passed as parameters to the next function.
-</p>
-<p>
-If a function returns an error, then the pipe&#39;s execution is halted and immediately returns.
+			<p>Pipe combines several functions together into a pipeline.
+Each appended function&apos;s return values are passed as parameters to the next function.
+<p>If a function returns an error, then the pipe&apos;s execution is halted and immediately returns.
 See Options for modifications to this behavior.
-</p>
 
 			<pre>type Pipe struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -497,9 +471,7 @@ true
 					
 				</h3>
 				<pre>func New(options <a href="#Options">Options</a>) <a href="#Pipe">Pipe</a></pre>
-				<p>
-New returns a Pipe with the provided options, ready to Append new functions
-</p>
+				<p>New returns a Pipe with the provided options, ready to Append new functions
 
 				
 				
@@ -513,13 +485,9 @@ New returns a Pipe with the provided options, ready to Append new functions
 					
 				</h3>
 				<pre>func (p <a href="#Pipe">Pipe</a>) Append(fn interface{}) <a href="#Pipe">Pipe</a></pre>
-				<p>
-Append returns a new Pipe with the fn function appended to its operations.
-</p>
-<p>
-The very first function in a Pipe must accept []interface{} as it&#39;s only parameter.
+				<p>Append returns a new Pipe with the fn function appended to its operations.
+<p>The very first function in a Pipe must accept []interface{} as it&apos;s only parameter.
 The return types of a function must match the parameter types of the next appended function, panicking otherwise.
-</p>
 
 				
 				
@@ -532,9 +500,7 @@ The return types of a function must match the parameter types of the next append
 					
 				</h3>
 				<pre>func (p <a href="#Pipe">Pipe</a>) Concat(other <a href="#Pipe">Pipe</a>) <a href="#Pipe">Pipe</a></pre>
-				<p>
-Concat returns a new Pipe with the functions in &#39;other&#39; appended to its operations
-</p>
+				<p>Concat returns a new Pipe with the functions in &apos;other&apos; appended to its operations
 
 				
 				
@@ -547,9 +513,7 @@ Concat returns a new Pipe with the functions in &#39;other&#39; appended to its 
 					
 				</h3>
 				<pre>func (p <a href="#Pipe">Pipe</a>) Do(args ...interface{}) ([]interface{}, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-Do executes this Pipe, running each appended function in-order and handling any errors
-</p>
+				<p>Do executes this Pipe, running each appended function in-order and handling any errors
 
 				
 				
@@ -567,7 +531,7 @@ Do executes this Pipe, running each appended function in-order and handling any 
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->
