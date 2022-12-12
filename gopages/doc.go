@@ -11,6 +11,9 @@
 //	cd ./mymodule
 //	gopages
 //
+// NOTE: Install gopages with Go v1.19 or higher to generate documentation with custom links, lists, headings, and more.
+// See: https://pkg.go.dev/go/doc/comment
+//
 // Usage of gopages:
 //
 //	-base string
