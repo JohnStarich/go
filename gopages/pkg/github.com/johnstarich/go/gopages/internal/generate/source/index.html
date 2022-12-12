@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package source defines interfaces for generating URL links in documentation.
-</p>
+				<p>Package source defines interfaces for generating URL links in documentation.
 
 				
 			</div>
@@ -158,9 +156,7 @@ Package source defines interfaces for generating URL links in documentation.
 				
 				
 			</h2>
-			<p>
-LinkOptions contains options for configuring hyperlinks to source files
-</p>
+			<p>LinkOptions contains options for configuring hyperlinks to source files
 
 			<pre>type LinkOptions struct {
 <span id="LinkOptions.Line"></span>    Line <a href="https://pkg.go.dev/builtin/#int">int</a>
@@ -186,9 +182,7 @@ LinkOptions contains options for configuring hyperlinks to source files
 				
 				
 			</h2>
-			<p>
-Linker can generate hyperlinks for any given package&#39;s file
-</p>
+			<p>Linker can generate hyperlinks for any given package&apos;s file
 
 			<pre>type Linker interface {
     LinkToSource(packagePath <a href="https://pkg.go.dev/builtin/#string">string</a>, options <a href="#LinkOptions">LinkOptions</a>) <a href="https://pkg.go.dev/net/url/">url</a>.<a href="https://pkg.go.dev/net/url/#URL">URL</a>
@@ -213,9 +207,7 @@ Linker can generate hyperlinks for any given package&#39;s file
 				
 				
 			</h2>
-			<p>
-ScrapeChecker returns whether or not a given package&#39;s path should be scraped and included in the output
-</p>
+			<p>ScrapeChecker returns whether or not a given package&apos;s path should be scraped and included in the output
 
 			<pre>type ScrapeChecker interface {
     ShouldScrapePackage(packagePath <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#bool">bool</a>
@@ -244,7 +236,7 @@ ScrapeChecker returns whether or not a given package&#39;s path should be scrape
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

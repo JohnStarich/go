@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package flags parses args and returns them as a struct.
-</p>
+				<p>Package flags parses args and returns them as a struct.
 
 				
 			</div>
@@ -191,9 +189,7 @@ Package flags parses args and returns them as a struct.
 				
 				
 			</h2>
-			<p>
-Args contains all command-line options for gopages
-</p>
+			<p>Args contains all command-line options for gopages
 
 			<pre>type Args struct {
 <span id="Args.BaseURL"></span>    BaseURL               <a href="https://pkg.go.dev/builtin/#string">string</a>
@@ -226,9 +222,7 @@ Args contains all command-line options for gopages
 					
 				</h3>
 				<pre>func Parse(osArgs ...<a href="https://pkg.go.dev/builtin/#string">string</a>) (<a href="#Args">Args</a>, <a href="https://pkg.go.dev/builtin/#string">string</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-Parse parses the given command line arguments into Args values and returns any output to send to the user
-</p>
+				<p>Parse parses the given command line arguments into Args values and returns any output to send to the user
 
 				
 				
@@ -242,9 +236,7 @@ Parse parses the given command line arguments into Args values and returns any o
 					
 				</h3>
 				<pre>func (a <a href="#Args">Args</a>) Linker(modulePackage <a href="https://pkg.go.dev/builtin/#string">string</a>) (<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#Linker">Linker</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-Linker returns an appropriate source.Linker for the given command line args
-</p>
+				<p>Linker returns an appropriate source.Linker for the given command line args
 
 				
 				
@@ -258,9 +250,7 @@ Linker returns an appropriate source.Linker for the given command line args
 				
 				
 			</h2>
-			<p>
-FilePathContents is a flag that reads a file by the passed in path and contains its contents
-</p>
+			<p>FilePathContents is a flag that reads a file by the passed in path and contains its contents
 
 			<pre>type FilePathContents struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -285,9 +275,7 @@ FilePathContents is a flag that reads a file by the passed in path and contains 
 					
 				</h3>
 				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Contents() []<a href="https://pkg.go.dev/builtin/#byte">byte</a></pre>
-				<p>
-Contents returns the contents of this flag&#39;s file
-</p>
+				<p>Contents returns the contents of this flag&apos;s file
 
 				
 				
@@ -300,9 +288,7 @@ Contents returns the contents of this flag&#39;s file
 					
 				</h3>
 				<pre>func (f *<a href="#FilePathContents">FilePathContents</a>) Set(s <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
-				<p>
-Set implements flag.Value
-</p>
+				<p>Set implements flag.Value
 
 				
 				
@@ -328,9 +314,7 @@ Set implements flag.Value
 				
 				
 			</h2>
-			<p>
-GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc source pages
-</p>
+			<p>GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc source pages
 
 			<pre>type GoPagesLinker struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -355,9 +339,7 @@ GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc
 					
 				</h3>
 				<pre>func (l *<a href="#GoPagesLinker">GoPagesLinker</a>) LinkToSource(packagePath <a href="https://pkg.go.dev/builtin/#string">string</a>, options <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#LinkOptions">LinkOptions</a>) <a href="https://pkg.go.dev/net/url/">url</a>.<a href="https://pkg.go.dev/net/url/#URL">URL</a></pre>
-				<p>
-LinkToSource implements source.Linker
-</p>
+				<p>LinkToSource implements source.Linker
 
 				
 				
@@ -371,9 +353,7 @@ LinkToSource implements source.Linker
 				
 				
 			</h2>
-			<p>
-TemplateLinker is a custom template-based source.Linker, which links to external source pages
-</p>
+			<p>TemplateLinker is a custom template-based source.Linker, which links to external source pages
 
 			<pre>type TemplateLinker struct {
     <span class="comment">// contains filtered or unexported fields</span>
@@ -398,9 +378,7 @@ TemplateLinker is a custom template-based source.Linker, which links to external
 					
 				</h3>
 				<pre>func (l *<a href="#TemplateLinker">TemplateLinker</a>) LinkToSource(packagePath <a href="https://pkg.go.dev/builtin/#string">string</a>, options <a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/">source</a>.<a href="/go/gopages/pkg/github.com/johnstarich/go/gopages/internal/generate/source/#LinkOptions">LinkOptions</a>) <a href="https://pkg.go.dev/net/url/">url</a>.<a href="https://pkg.go.dev/net/url/#URL">URL</a></pre>
-				<p>
-LinkToSource implements source.Linker
-</p>
+				<p>LinkToSource implements source.Linker
 
 				
 				
@@ -413,9 +391,7 @@ LinkToSource implements source.Linker
 					
 				</h3>
 				<pre>func (l *<a href="#TemplateLinker">TemplateLinker</a>) ShouldScrapePackage(packagePath <a href="https://pkg.go.dev/builtin/#string">string</a>) <a href="https://pkg.go.dev/builtin/#bool">bool</a></pre>
-				<p>
-ShouldScrapePackage implements source.ScrapeChecker
-</p>
+				<p>ShouldScrapePackage implements source.ScrapeChecker
 
 				
 				
@@ -433,7 +409,7 @@ ShouldScrapePackage implements source.ScrapeChecker
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

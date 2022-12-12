@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -71,26 +71,19 @@
 
 	
 		
-		<p>
-gopages generates static files for Go documentation, formatted with godoc.
-</p>
-<p>
-Installation:
-</p>
-<pre>go get github.com/johnstarich/go/gopages
+		<p>Command gopages generates static files for Go documentation, formatted with godoc.
+<h3 id="hdr-Installation">Installation</h3>
+<p>To install gopages, run the following command:
+<pre>go install github.com/johnstarich/go/gopages@latest
 </pre>
-<p>
-Generate documentation for your module by running without any flags.
-</p>
-<p>
-A &#39;go.mod&#39; file must be present in the current directory.
-</p>
+<h3 id="hdr-Getting_started">Getting started</h3>
+<p>Generate documentation for your module by running gopages without any flags.
+<p>A &apos;go.mod&apos; file must be present in the current directory.
 <pre>cd ./mymodule
 gopages
 </pre>
-<p>
-Usage of gopages:
-</p>
+<p>NOTE: Install gopages with Go v1.19 or higher to generate documentation with <a href="https://pkg.go.dev/go/doc/comment">improved formatting</a>.
+<p>Usage of gopages:
 <pre>-base string
   	Base URL to use for static assets
 -brand-description string
@@ -105,18 +98,18 @@ Usage of gopages:
 -gh-pages-user string
   	The Git username to push with
 -include-head value
-  	Includes the given HTML file&#39;s contents in every page&#39;s &#39;&lt;head&gt;&lt;/head&gt;&#39;. Useful
+  	Includes the given HTML file&apos;s contents in every page&apos;s &apos;&lt;head&gt;&lt;/head&gt;&apos;. Useful
   	for including custom analytics scripts. Must be valid HTML.
 -internal
-  	Includes &#39;internal&#39; packages in the package index and unexported functions.
+  	Includes &apos;internal&apos; packages in the package index and unexported functions.
   	Useful for sharing documentation within the same development team. Note: This
   	only affects page generation for non-internal packages, like package lists.
   	Internal package docs are always generated.
 -out string
-  	Output path for static files (default &#34;dist&#34;)
+  	Output path for static files (default &quot;dist&quot;)
 -source-link string
   	Custom source code link template. Disables built-in source code pages. For
-  	example, &#34;<a href="https://github.com/johnstarich/go/blob/master/gopages/">https://github.com/johnstarich/go/blob/master/gopages/</a>{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&#34;
+  	example, &quot;https://github.com/johnstarich/go/blob/master/gopages/{{.Path}}{{if .Line}}#L{{.Line}}{{end}}&quot;
   	generates links compatible with GitHub and GitLab. Must be a valid Go template
   	and must generate valid URLs.
 </pre>
@@ -186,7 +179,7 @@ Usage of gopages:
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

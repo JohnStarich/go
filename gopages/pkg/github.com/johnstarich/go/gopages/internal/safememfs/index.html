@@ -15,7 +15,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer></script>
 
 </head>
@@ -89,9 +89,7 @@
 			</div>
 			<div class="expanded">
 				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
-				<p>
-Package safememfs wraps go-billy/memfs&#39;s Open to correctly handle opening directories
-</p>
+				<p>Package safememfs wraps go-billy/memfs&apos;s Open to correctly handle opening directories
 
 				
 			</div>
@@ -154,9 +152,7 @@ Package safememfs wraps go-billy/memfs&#39;s Open to correctly handle opening di
 				
 				
 			</h2>
-			<p>
-SafeOpener is a billy.Filesystem that fixes Open() behavior on directories with a work-around
-</p>
+			<p>SafeOpener is a billy.Filesystem that fixes Open() behavior on directories with a work-around
 
 			<pre>type SafeOpener struct {
     billy.<a href="#Filesystem">Filesystem</a>
@@ -179,9 +175,7 @@ SafeOpener is a billy.Filesystem that fixes Open() behavior on directories with 
 					
 				</h3>
 				<pre>func New() *<a href="#SafeOpener">SafeOpener</a></pre>
-				<p>
-New creates a new billy/memfs file system that can handle opening directories
-</p>
+				<p>New creates a new billy/memfs file system that can handle opening directories
 
 				
 				
@@ -195,9 +189,7 @@ New creates a new billy/memfs file system that can handle opening directories
 					
 				</h3>
 				<pre>func (s *<a href="#SafeOpener">SafeOpener</a>) Open(name <a href="https://pkg.go.dev/builtin/#string">string</a>) (billy.<a href="#File">File</a>, <a href="https://pkg.go.dev/builtin/#error">error</a>)</pre>
-				<p>
-Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
-</p>
+				<p>Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
 
 				
 				
@@ -215,7 +207,7 @@ Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
 
 
 <div id="footer">
-Build version go1.16.15.<br>
+Build version go1.19.3.<br>
 </div>
 
 </div><!-- .container -->

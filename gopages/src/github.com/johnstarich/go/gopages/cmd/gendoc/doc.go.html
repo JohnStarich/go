@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.16.15";</script>
+<script>var goVersion = "go1.19.3";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -55,26 +55,34 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span><span class="comment">// gopages generates static files for Go documentation, formatted with godoc.</span>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Command gopages generates static files for Go documentation, formatted with godoc.</span>
 <span id="L2" class="ln">     2  </span><span class="comment">//</span>
-<span id="L3" class="ln">     3  </span><span class="comment">// Installation:</span>
-<span id="L4" class="ln">     4  </span><span class="comment">//   go get github.com/johnstarich/go/gopages</span>
-<span id="L5" class="ln">     5  </span><span class="comment">//</span>
-<span id="L6" class="ln">     6  </span><span class="comment">// Generate documentation for your module by running without any flags.</span>
+<span id="L3" class="ln">     3  </span><span class="comment">// # Installation</span>
+<span id="L4" class="ln">     4  </span><span class="comment">//</span>
+<span id="L5" class="ln">     5  </span><span class="comment">// To install gopages, run the following command:</span>
+<span id="L6" class="ln">     6  </span><span class="comment">//   go install github.com/johnstarich/go/gopages@latest</span>
 <span id="L7" class="ln">     7  </span><span class="comment">//</span>
-<span id="L8" class="ln">     8  </span><span class="comment">// A &#39;go.mod&#39; file must be present in the current directory.</span>
-<span id="L9" class="ln">     9  </span><span class="comment">//   cd ./mymodule</span>
-<span id="L10" class="ln">    10  </span><span class="comment">//   gopages</span>
+<span id="L8" class="ln">     8  </span><span class="comment">// # Getting started</span>
+<span id="L9" class="ln">     9  </span><span class="comment">//</span>
+<span id="L10" class="ln">    10  </span><span class="comment">// Generate documentation for your module by running gopages without any flags.</span>
 <span id="L11" class="ln">    11  </span><span class="comment">//</span>
-<span id="L12" class="ln">    12  </span><span class="comment">// {{.Usage | wordWrap 80 | comment}}</span>
-<span id="L13" class="ln">    13  </span><span class="comment">// {{- /* Do not remove the blank line below, otherwise this template is incorrectly displayed for the cmd/gendoc package. */}}</span>
-<span id="L14" class="ln">    14  </span>
-<span id="L15" class="ln">    15  </span>package main
-<span id="L16" class="ln">    16  </span>
+<span id="L12" class="ln">    12  </span><span class="comment">// A &#39;go.mod&#39; file must be present in the current directory.</span>
+<span id="L13" class="ln">    13  </span><span class="comment">//   cd ./mymodule</span>
+<span id="L14" class="ln">    14  </span><span class="comment">//   gopages</span>
+<span id="L15" class="ln">    15  </span><span class="comment">//</span>
+<span id="L16" class="ln">    16  </span><span class="comment">// NOTE: Install gopages with Go v1.19 or higher to generate documentation with [improved formatting].</span>
+<span id="L17" class="ln">    17  </span><span class="comment">//</span>
+<span id="L18" class="ln">    18  </span><span class="comment">// [improved formatting]: https://pkg.go.dev/go/doc/comment</span>
+<span id="L19" class="ln">    19  </span><span class="comment">//</span>
+<span id="L20" class="ln">    20  </span><span class="comment">// {{.Usage | wordWrap 80 | comment}}</span>
+<span id="L21" class="ln">    21  </span><span class="comment">// {{- /* Do not remove the blank line below, otherwise this template is incorrectly displayed for the cmd/gendoc package. */}}</span>
+<span id="L22" class="ln">    22  </span>
+<span id="L23" class="ln">    23  </span>package main
+<span id="L24" class="ln">    24  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.16.15.<br/>
+Build version go1.19.3.<br/>
 </div>
 
 </div><!-- .container -->
