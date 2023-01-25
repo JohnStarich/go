@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/johnstarich/go/gopages/internal/generate/source"
+	"github.com/therve/go/gopages/internal/generate/source"
 )
 
 // GoPagesLinker is the default GoPages source.Linker, which links to scraped godoc source pages

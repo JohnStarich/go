@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"flag"
 
-	"github.com/johnstarich/go/gopages/internal/generate/source"
+	"github.com/therve/go/gopages/internal/generate/source"
 )
 
 // Args contains all command-line options for gopages

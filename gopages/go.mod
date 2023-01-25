@@ -1,4 +1,4 @@
-module github.com/johnstarich/go/gopages
+module github.com/therve/go/gopages
 
 go 1.19
 

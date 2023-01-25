@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/johnstarich/go/gopages/cmd"
-	"github.com/johnstarich/go/gopages/internal/flags"
+	"github.com/therve/go/gopages/cmd"
+	"github.com/therve/go/gopages/internal/flags"
 	"github.com/pkg/errors"
 )
 

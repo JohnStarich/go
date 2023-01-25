@@ -3,7 +3,7 @@
 // # Installation
 //
 // To install gopages, run the following command:
-//   go install github.com/johnstarich/go/gopages@latest
+//   go install github.com/therve/go/gopages@latest
 //
 // # Getting started
 //
