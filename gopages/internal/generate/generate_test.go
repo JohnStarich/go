@@ -172,7 +172,8 @@ func Hello() {
 				"src/github.com/my/thing/internal/index.html",
 				"src/index.html",
 			},
-		}, {
+		},
+		{
 			description: "doclinks rendering",
 			args:        flags.Args{},
 			trySkip:     skipIfNotGo19OrLater,
