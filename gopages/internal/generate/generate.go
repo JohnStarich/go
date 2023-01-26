@@ -158,7 +158,7 @@ var crawlerStaticPipe = pipe.New(pipe.Options{}).
 	}).
 	Append(func(args docsArgs) (docsArgs, error) {
 		// Generate main index to redirect to actual content page. Important to separate from 'lib' top-level dir.
-		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/"+args.ModulePackage)), scrapeFilePermission)
+		return args, util.WriteFile(args.FS, filepath.Join(args.OutputPath, "index.html"), []byte(redirect("pkg/"+args.ModulePackage+"/")), scrapeFilePermission)
 	}).
 	Append(func(args docsArgs) (docsArgs, []byte, error) {
 		// Generate a custom 404 page as a catch-all

@@ -47,6 +47,7 @@ var (
 
 func addGoPagesFuncs(funcs template.FuncMap, modulePackage string, args flags.Args) {
 	funcs["node_html"] = nodeHTML(funcs["node_html"].(nodeHTMLFunc), args.BaseURL, modulePackage)
+	funcs["comment_html"] = commentToHTML(funcs["comment_html"].(commentHTMLFunc), args.BaseURL, modulePackage)
 
 	longTitle := fmt.Sprintf("%s | %s", args.SiteTitle, args.SiteDescription)
 	if args.SiteTitle == "" || args.SiteDescription == "" {
@@ -124,17 +125,35 @@ type nodeHTMLFunc = func(info *godoc.PageInfo, node interface{}, linkify bool) s
 
 // nodeHTML runs the original 'node_html' template func, then rewrites any links inside it
 func nodeHTML(original nodeHTMLFunc, baseURL string, modulePackage string) nodeHTMLFunc {
+	// /pkg/mypkg/foo -> /base/pkg/mypkg/foo
+	// /pkg/bar -> https://pkg.go.dev/bar
+	replacer := linkReplacer("/pkg/", baseURL, modulePackage)
+	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
+		return replacer.Replace(original(info, node, linkify))
+	}
+}
+
+type commentHTMLFunc = func(info *godoc.PageInfo, comment string) string
+
+// commentToHTML runs the original 'commentToHTML' template func, then rewrites any links inside it
+func commentToHTML(original commentHTMLFunc, baseURL string, modulePackage string) commentHTMLFunc {
+	// /mypkg/foo -> /base/pkg/mypkg/foo
+	// /bar -> https://pkg.go.dev/bar
+	replacer := linkReplacer("/", baseURL, modulePackage)
+	return func(info *godoc.PageInfo, comment string) string {
+		return replacer.Replace(original(info, comment))
+	}
+}
+
+func linkReplacer(srcRoot, baseURL, modulePackage string) *strings.Replacer {
 	var (
-		defaultPackagePrefix = `<a href="/pkg/`
+		defaultPackagePrefix = `<a href="` + srcRoot
 		defaultModulePrefix  = defaultPackagePrefix + modulePackage
 		gopagesModulePrefix  = fmt.Sprintf(`<a href="%s`, path.Join(baseURL, "/pkg", modulePackage))
 		publicDocPrefix      = `<a href="https://pkg.go.dev/`
 	)
-	replacer := strings.NewReplacer(
-		defaultModulePrefix, gopagesModulePrefix, // /pkg/mypkg/foo -> /base/pkg/mypkg/foo
-		defaultPackagePrefix, publicDocPrefix, // /pkg/bar -> https://pkg.go.dev/bar
+	return strings.NewReplacer(
+		defaultModulePrefix, gopagesModulePrefix, // /mypkg/foo -> /base/pkg/mypkg/foo
+		defaultPackagePrefix, publicDocPrefix, // /bar -> https://pkg.go.dev/bar
 	)
-	return func(info *godoc.PageInfo, node interface{}, linkify bool) string {
-		return replacer.Replace(original(info, node, linkify))
-	}
 }

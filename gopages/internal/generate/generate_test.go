@@ -4,7 +4,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -15,6 +18,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var reGoVersion = regexp.MustCompile(`^go(\d+)\.(\d+)(\.(\d+))?.*$`)
+
+func skipIfNotGo19OrLater(t *testing.T) {
+	matches := reGoVersion.FindStringSubmatch(runtime.Version())
+	if len(matches) > 2 {
+		major, _ := strconv.Atoi(matches[1]) // skip err check, major will be 0 on error
+		minor, _ := strconv.Atoi(matches[2]) // skip err check, minor will be 0 on error
+		if major > 1 || major == 1 && minor >= 19 {
+			return
+		}
+	}
+	t.Skipf("%s not supported prior to go 1.19 (current version: %s)", t.Name(), runtime.Version())
+}
 
 func TestGenerateDocs(t *testing.T) { //nolint:paralleltest // TODO: Remove chdir, use a io/fs.FS implementation to work around billy's limitations.
 	wd, err := os.Getwd()
@@ -31,6 +48,7 @@ func TestGenerateDocs(t *testing.T) { //nolint:paralleltest // TODO: Remove chdi
 		expectIndexContains    []string
 		expectIndexNotContains []string
 		expectDocs             []string
+		trySkip                func(*testing.T)
 	}{
 		{
 			description: "basic docs",
@@ -155,8 +173,97 @@ func Hello() {
 				"src/index.html",
 			},
 		},
+		{
+			description: "doclinks rendering",
+			args:        flags.Args{},
+			trySkip:     skipIfNotGo19OrLater,
+			files: map[string]string{
+				"go.mod": `module github.com/my/thing`,
+				"hello/hello.go": `
+package hello
+type Hello struct {}
+func (*Hello) Method(){}
+func Function() {}
+`,
+				"foo/foo.go": `
+package foo
+type Foo struct {}
+func (*Foo) Bar(){}
+func Baz() {}
+`,
+				"thing.go": `
+// Package example is a dummy package showing how comments doc is rendered.
+//
+// Here are some random doc links:
+//   - Std library: [os.File] [*os.File] [encoding/xml.Encoder]
+//   - Std imported: [json.Decoder] [json.Encoder]
+//   - Packages: [os] [json] [encoding/xml]
+//   - This package: [JSONFunc] 
+//   - Module Package: [github.com/my/thing/hello]
+//   - Module Package Type: [github.com/my/thing/hello.Hello]
+//   - Module Package Func: [github.com/my/thing/hello.Function]
+//   - Module Package method: [github.com/my/thing/hello.Hello.Method]
+//   - Imported Module Package: [foo]
+//   - Imported Module Package Type: [foo.Foo]
+//   - Imported Module Package Method: [foo.Foo.Bar]
+//   - Imported Module Func: [foo.Baz]
+package thing
+
+import (
+	"encoding/json"
+	"github.com/my/thing/foo"
+)
+
+// JSONFunc does random stuff with [json.Decoder] and [json.Encoder]
+func JSONFunc() {
+	json.Marshal("foobar") // Just to import json
+	foo.Baz() // Just to import foo
+}`,
+			},
+			expectIndexContains: []string{
+				"thing",
+				`Std library: <a href="https://pkg.go.dev/os#File">os.File</a> <a href="https://pkg.go.dev/os#File">*os.File</a> <a href="https://pkg.go.dev/encoding/xml#Encoder">encoding/xml.Encoder</a>`,
+				`Std imported: <a href="https://pkg.go.dev/encoding/json#Decoder">json.Decoder</a> <a href="https://pkg.go.dev/encoding/json#Encoder">json.Encoder</a>`,
+				`Packages: <a href="https://pkg.go.dev/os">os</a> <a href="https://pkg.go.dev/encoding/json">json</a> <a href="https://pkg.go.dev/encoding/xml">encoding/xml</a>`,
+				`This package: <a href="#JSONFunc">JSONFunc</a>`,
+
+				// Function docstring
+				`JSONFunc does random stuff with <a href="https://pkg.go.dev/encoding/json#Decoder">json.Decoder</a> and <a href="https://pkg.go.dev/encoding/json#Encoder">json.Encoder</a>`,
+
+				`Module Package: <a href="/pkg/github.com/my/thing/hello">github.com/my/thing/hello</a>`,
+				`Module Package Type: <a href="/pkg/github.com/my/thing/hello#Hello">github.com/my/thing/hello.Hello</a>`,
+				`Module Package Func: <a href="/pkg/github.com/my/thing/hello#Function">github.com/my/thing/hello.Function</a>`,
+				`Module Package method: <a href="/pkg/github.com/my/thing/hello#Hello.Method">github.com/my/thing/hello.Hello.Method</a>`,
+				`Imported Module Package: <a href="/pkg/github.com/my/thing/foo">foo</a>`,
+				`Imported Module Package Type: <a href="/pkg/github.com/my/thing/foo#Foo">foo.Foo</a>`,
+				`Imported Module Package Method: <a href="/pkg/github.com/my/thing/foo#Foo.Bar">foo.Foo.Bar</a>`,
+				`Imported Module Func: <a href="/pkg/github.com/my/thing/foo#Baz">foo.Baz</a>`,
+			},
+			expectDocs: []string{
+				"404.html",
+				"index.html",
+				"pkg/github.com/index.html",
+				"pkg/github.com/my/index.html",
+				"pkg/github.com/my/thing/foo/index.html",
+				"pkg/github.com/my/thing/hello/index.html",
+				"pkg/github.com/my/thing/index.html",
+				"pkg/index.html",
+				"src/github.com/index.html",
+				"src/github.com/my/index.html",
+				"src/github.com/my/thing/foo/foo.go.html",
+				"src/github.com/my/thing/foo/index.html",
+				"src/github.com/my/thing/hello/hello.go.html",
+				"src/github.com/my/thing/hello/index.html",
+				"src/github.com/my/thing/index.html",
+				"src/github.com/my/thing/thing.go.html",
+				"src/index.html",
+			},
+		},
 	} {
 		t.Run(tc.description, func(t *testing.T) {
+			if tc.trySkip != nil {
+				tc.trySkip(t)
+			}
 			// create a new package "thing" and generate docs for it
 			thing, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
