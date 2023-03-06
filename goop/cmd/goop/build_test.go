@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os/exec"
+	"path"
 	"runtime"
 	"testing"
 
@@ -35,12 +36,14 @@ func TestBuild(t *testing.T) {
 			somePackage  = "example.local/baz"
 		)
 		var commands [][]string
+		var env [][]string
 		app := newTestApp(t, testAppOptions{
 			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
 				f, err := hackpadfs.Create(app.fs, "cache/install/"+name+"/"+name)
 				require.NoError(t, err)
 				require.NoError(t, f.Close())
 				commands = append(commands, cmd.Args)
+				env = append(env, cmd.Env)
 				return nil
 			},
 		})
@@ -54,6 +57,12 @@ func TestBuild(t *testing.T) {
 		assert.Equal(t, [][]string{
 			{"go", "install", somePackage + "@latest"},
 		}, commands)
+		if assert.Len(t, env, 1) {
+			env0 := env[0]
+			assert.Contains(t, env0, "GOARCH=")
+			assert.Contains(t, env0, "GOBIN="+path.Dir(binaryPath))
+			assert.Contains(t, env0, "GOOS=")
+		}
 	})
 
 	t.Run("build semver *nix", func(t *testing.T) {
