@@ -74,7 +74,9 @@ var buildAtPathPipe = pipe.New(pipe.Options{}).
 		cmd := exec.CommandContext(args.Context, "go", cmdArgs...)
 		cmd.Dir = workingDir
 		cmd.Env = append(os.Environ(), toEnv(map[string]string{
-			"GOBIN": gobin,
+			"GOARCH": "",
+			"GOBIN":  gobin,
+			"GOOS":   "",
 		})...)
 		err := args.App.runCmd(cmd)
 		return args, errors.WithMessage(err, formatCmd(cmd))
