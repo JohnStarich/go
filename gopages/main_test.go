@@ -247,6 +247,7 @@ func contains(strs []string, s string) bool {
 }
 
 func TestAuth(t *testing.T) {
+	t.Parallel()
 	assert.Nil(t, getAuth(flags.Args{}))
 	assert.Equal(t,
 		&gitHTTP.BasicAuth{Username: "user", Password: "token"},
