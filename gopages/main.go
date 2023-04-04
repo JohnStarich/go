@@ -154,7 +154,7 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 	})
 
 func getAuth(args flags.Args) *gitHTTP.BasicAuth {
-	var auth *gitHTTP.BasicAuth = nil
+	var auth *gitHTTP.BasicAuth
 	if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
 		auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
 	}
