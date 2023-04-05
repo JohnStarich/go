@@ -10,6 +10,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	gitHTTP "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/johnstarich/go/gopages/cmd"
 	"github.com/johnstarich/go/gopages/internal/flags"
 	"github.com/pkg/errors"
@@ -243,4 +244,15 @@ func contains(strs []string, s string) bool {
 		}
 	}
 	return false
+}
+
+func TestAuth(t *testing.T) {
+	t.Parallel()
+	assert.Nil(t, getAuth(flags.Args{}))
+	assert.Equal(t,
+		&gitHTTP.BasicAuth{Username: "user", Password: "token"},
+		getAuth(flags.Args{
+			GitHubPagesToken: "token",
+			GitHubPagesUser:  "user",
+		}))
 }
