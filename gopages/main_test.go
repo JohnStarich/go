@@ -119,7 +119,8 @@ func testRun(t *testing.T, tc testRunTestCase) {
 	workTree, err := ghPagesRepo.Worktree()
 	require.NoError(t, err)
 	_, err = workTree.Commit("Initial commit", &git.CommitOptions{
-		Author: commitAuthor(),
+		Author:            commitAuthor(),
+		AllowEmptyCommits: true,
 	})
 	require.NoError(t, err)
 	require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
