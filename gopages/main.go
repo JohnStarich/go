@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -146,8 +147,13 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 		})
 		return args, repo, errors.Wrap(err, "Failed to commit gopages files")
 	}).
-	Append(func(args memfsDocsArgs, repo *git.Repository) error {
-		pushOpts := &git.PushOptions{}
+	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *url.URL, error) {
+		remoteURL, err := url.Parse(args.Remote)
+		return args, repo, remoteURL, err
+	}).
+	Append(func(args memfsDocsArgs, repo *git.Repository, remoteURL *url.URL) error {
+		remoteURL.User = nil
+		pushOpts := &git.PushOptions{RemoteURL: remoteURL.String()}
 		pushOpts.Auth = getAuth(args.Flags)
 		err := repo.Push(pushOpts)
 		return errors.Wrap(err, "Failed to push gopages commit")
