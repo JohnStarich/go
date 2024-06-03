@@ -114,17 +114,26 @@ func testRun(t *testing.T, tc testRunTestCase) {
 	ghPagesDir, err := os.MkdirTemp("", "")
 	require.NoError(t, err)
 	defer os.RemoveAll(ghPagesDir)
-	ghPagesRepo, err := git.PlainInit(ghPagesDir, false)
+	const defaultBranch = "refs/heads/main"
+	ghPagesRepo, err := git.PlainInitWithOptions(ghPagesDir, &git.PlainInitOptions{
+		InitOptions: git.InitOptions{
+			DefaultBranch: defaultBranch,
+		},
+	})
 	require.NoError(t, err)
 	workTree, err := ghPagesRepo.Worktree()
 	require.NoError(t, err)
 	_, err = workTree.Commit("Initial commit", &git.CommitOptions{
-		Author: commitAuthor(),
+		Author:            commitAuthor(),
+		AllowEmptyCommits: true,
 	})
 	require.NoError(t, err)
 	require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
 		Create: true,
+	}))
+	require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
+		Branch: defaultBranch,
 	}))
 
 	modulePath, err := os.MkdirTemp("", "")
@@ -145,9 +154,9 @@ func testRun(t *testing.T, tc testRunTestCase) {
 
 	writeFile := func(path, contents string) {
 		path = filepath.Join(modulePath, path)
-		err := os.MkdirAll(filepath.Dir(path), 0700)
+		err := os.MkdirAll(filepath.Dir(path), 0o700)
 		require.NoError(t, err)
-		err = os.WriteFile(path, []byte(contents), 0600)
+		err = os.WriteFile(path, []byte(contents), 0o600)
 		require.NoError(t, err)
 	}
 
@@ -182,6 +191,9 @@ func Hello() {
 	var fileNames []string
 	if contains(tc.args, "-gh-pages") {
 		// fetch the new head commit and walk the files in the diff
+		require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
+			Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
+		}))
 		head, err := ghPagesRepo.Head()
 		require.NoError(t, err)
 		headCommit, err := ghPagesRepo.CommitObject(head.Hash())
@@ -248,11 +260,20 @@ func contains(strs []string, s string) bool {
 
 func TestAuth(t *testing.T) {
 	t.Parallel()
-	assert.Nil(t, getAuth(flags.Args{}))
-	assert.Equal(t,
-		&gitHTTP.BasicAuth{Username: "user", Password: "token"},
-		getAuth(flags.Args{
+	t.Run("no auth flags", func(t *testing.T) {
+		t.Parallel()
+		basicAuth, ok := getAuth(flags.Args{})
+		assert.Nil(t, basicAuth)
+		assert.False(t, ok)
+	})
+
+	t.Run("basic auth flags", func(t *testing.T) {
+		t.Parallel()
+		basicAuth, ok := getAuth(flags.Args{
 			GitHubPagesToken: "token",
 			GitHubPagesUser:  "user",
-		}))
+		})
+		assert.Equal(t, &gitHTTP.BasicAuth{Username: "user", Password: "token"}, basicAuth)
+		assert.True(t, ok)
+	})
 }

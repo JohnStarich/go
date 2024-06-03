@@ -23,14 +23,15 @@ jobs:
         platform:
         - ubuntu-latest
         go:
-          - 1.17.x
-          - 1.18.x
           - 1.19.x
+          - 1.20.x
+          - 1.21.x
+          - 1.22.x
         include:
         - platform: macos-latest
-          go: 1.19.x
+          go: 1.22.x
         - platform: windows-latest
-          go: 1.19.x
+          go: 1.22.x
     name: Test (Go ${{ matrix.go }} on ${{ matrix.platform }})
     runs-on: ${{ matrix.platform }}
     permissions:

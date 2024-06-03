@@ -114,12 +114,16 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 		return args[0].(memfsDocsArgs)
 	}).
 	Append(func(args memfsDocsArgs) (memfsDocsArgs, *git.Repository, error) {
-		repo, err := git.Clone(memory.NewStorage(), args.FS, &git.CloneOptions{
+		cloneOpts := &git.CloneOptions{
 			URL:           args.Remote,
 			ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
 			SingleBranch:  true,
-			Auth:          getAuth(args.Flags),
-		})
+		}
+		basicAuth, ok := getAuth(args.Flags)
+		if ok {
+			cloneOpts.Auth = basicAuth
+		}
+		repo, err := git.Clone(memory.NewStorage(), args.FS, cloneOpts)
 		return args, repo, errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
 	}).
 	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
@@ -148,17 +152,18 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 	}).
 	Append(func(args memfsDocsArgs, repo *git.Repository) error {
 		pushOpts := &git.PushOptions{}
-		pushOpts.Auth = getAuth(args.Flags)
+		if basicAuth, ok := getAuth(args.Flags); ok {
+			pushOpts.Auth = basicAuth
+		}
 		err := repo.Push(pushOpts)
 		return errors.Wrap(err, "Failed to push gopages commit")
 	})
 
-func getAuth(args flags.Args) *gitHTTP.BasicAuth {
-	var auth *gitHTTP.BasicAuth
+func getAuth(args flags.Args) (*gitHTTP.BasicAuth, bool) {
 	if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
-		auth = &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
+		return &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}, true
 	}
-	return auth
+	return nil, false
 }
 
 func run(modulePath string, args flags.Args) error {

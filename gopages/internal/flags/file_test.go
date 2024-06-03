@@ -14,7 +14,7 @@ import (
 func testFile(t *testing.T, contents string) string {
 	t.Helper()
 	p := filepath.Join(t.TempDir(), "file")
-	err := os.WriteFile(p, []byte(contents), 0600)
+	err := os.WriteFile(p, []byte(contents), 0o600)
 	if err != nil {
 		t.Fatal(err)
 	}
