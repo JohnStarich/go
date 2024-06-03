@@ -332,9 +332,9 @@
 <span id="L275" class="ln">   275  </span>			outputFS := memfs.New()
 <span id="L276" class="ln">   276  </span>			writeFile := func(path, contents string) {
 <span id="L277" class="ln">   277  </span>				path = filepath.Join(thing, path)
-<span id="L278" class="ln">   278  </span>				err := os.MkdirAll(filepath.Dir(path), 0700)
+<span id="L278" class="ln">   278  </span>				err := os.MkdirAll(filepath.Dir(path), 0o700)
 <span id="L279" class="ln">   279  </span>				require.NoError(t, err)
-<span id="L280" class="ln">   280  </span>				err = os.WriteFile(path, []byte(contents), 0600)
+<span id="L280" class="ln">   280  </span>				err = os.WriteFile(path, []byte(contents), 0o600)
 <span id="L281" class="ln">   281  </span>				require.NoError(t, err)
 <span id="L282" class="ln">   282  </span>			}
 <span id="L283" class="ln">   283  </span>
@@ -400,7 +400,7 @@
 <span id="L343" class="ln">   343  </span>		t.Parallel()
 <span id="L344" class="ln">   344  </span>		outputFS := memfs.New()
 <span id="L345" class="ln">   345  </span>		const outputDir = &#34;foo&#34;
-<span id="L346" class="ln">   346  </span>		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
+<span id="L346" class="ln">   346  </span>		require.NoError(t, outputFS.MkdirAll(outputDir, 0o700))
 <span id="L347" class="ln">   347  </span>		err := generateDocs(t, outputFS, outputDir)
 <span id="L348" class="ln">   348  </span>		assert.EqualError(t, err, outputPathOKError)
 <span id="L349" class="ln">   349  </span>	})
@@ -409,7 +409,7 @@
 <span id="L352" class="ln">   352  </span>		t.Parallel()
 <span id="L353" class="ln">   353  </span>		outputFS := memfs.New()
 <span id="L354" class="ln">   354  </span>		const outputDir = &#34;foo&#34;
-<span id="L355" class="ln">   355  </span>		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, &#34;bar&#34;), 0700))
+<span id="L355" class="ln">   355  </span>		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, &#34;bar&#34;), 0o700))
 <span id="L356" class="ln">   356  </span>		err := generateDocs(t, outputFS, outputDir)
 <span id="L357" class="ln">   357  </span>		assert.EqualError(t, err, `pipe: refusing to clean output directory &#34;foo&#34; - directory does not resemble a gopages result; remove the directory to continue`)
 <span id="L358" class="ln">   358  </span>	})
@@ -418,8 +418,8 @@
 <span id="L361" class="ln">   361  </span>		t.Parallel()
 <span id="L362" class="ln">   362  </span>		outputFS := memfs.New()
 <span id="L363" class="ln">   363  </span>		const outputDir = &#34;foo&#34;
-<span id="L364" class="ln">   364  </span>		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
-<span id="L365" class="ln">   365  </span>		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, &#34;bar&#34;), 0700)) <span class="comment">// include other contents, which are ignored if expected files present</span>
+<span id="L364" class="ln">   364  </span>		require.NoError(t, outputFS.MkdirAll(outputDir, 0o700))
+<span id="L365" class="ln">   365  </span>		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, &#34;bar&#34;), 0o700)) <span class="comment">// include other contents, which are ignored if expected files present</span>
 <span id="L366" class="ln">   366  </span>		f, err := outputFS.Create(outputFS.Join(outputDir, &#34;index.html&#34;))
 <span id="L367" class="ln">   367  </span>		require.NoError(t, err)
 <span id="L368" class="ln">   368  </span>		require.NoError(t, f.Close())
@@ -428,7 +428,7 @@
 <span id="L371" class="ln">   371  </span>			&#34;pkg&#34;,
 <span id="L372" class="ln">   372  </span>			&#34;src&#34;,
 <span id="L373" class="ln">   373  </span>		} {
-<span id="L374" class="ln">   374  </span>			require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, dirName), 0700))
+<span id="L374" class="ln">   374  </span>			require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, dirName), 0o700))
 <span id="L375" class="ln">   375  </span>		}
 <span id="L376" class="ln">   376  </span>
 <span id="L377" class="ln">   377  </span>		err = generateDocs(t, outputFS, outputDir)

@@ -171,149 +171,170 @@
 <span id="L114" class="ln">   114  </span>	ghPagesDir, err := os.MkdirTemp(&#34;&#34;, &#34;&#34;)
 <span id="L115" class="ln">   115  </span>	require.NoError(t, err)
 <span id="L116" class="ln">   116  </span>	defer os.RemoveAll(ghPagesDir)
-<span id="L117" class="ln">   117  </span>	ghPagesRepo, err := git.PlainInit(ghPagesDir, false)
-<span id="L118" class="ln">   118  </span>	require.NoError(t, err)
-<span id="L119" class="ln">   119  </span>	workTree, err := ghPagesRepo.Worktree()
-<span id="L120" class="ln">   120  </span>	require.NoError(t, err)
-<span id="L121" class="ln">   121  </span>	_, err = workTree.Commit(&#34;Initial commit&#34;, &amp;git.CommitOptions{
-<span id="L122" class="ln">   122  </span>		Author: commitAuthor(),
-<span id="L123" class="ln">   123  </span>	})
-<span id="L124" class="ln">   124  </span>	require.NoError(t, err)
-<span id="L125" class="ln">   125  </span>	require.NoError(t, workTree.Checkout(&amp;git.CheckoutOptions{
-<span id="L126" class="ln">   126  </span>		Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
-<span id="L127" class="ln">   127  </span>		Create: true,
-<span id="L128" class="ln">   128  </span>	}))
-<span id="L129" class="ln">   129  </span>
-<span id="L130" class="ln">   130  </span>	modulePath, err := os.MkdirTemp(&#34;&#34;, &#34;&#34;)
-<span id="L131" class="ln">   131  </span>	require.NoError(t, err)
-<span id="L132" class="ln">   132  </span>	defer os.RemoveAll(modulePath)
-<span id="L133" class="ln">   133  </span>	wd, err := os.Getwd()
-<span id="L134" class="ln">   134  </span>	require.NoError(t, err)
-<span id="L135" class="ln">   135  </span>	require.NoError(t, os.Chdir(modulePath))
-<span id="L136" class="ln">   136  </span>	defer func() {
-<span id="L137" class="ln">   137  </span>		require.NoError(t, os.Chdir(wd))
-<span id="L138" class="ln">   138  </span>	}()
-<span id="L139" class="ln">   139  </span>
-<span id="L140" class="ln">   140  </span>	<span class="comment">// prepare origin remote pointing to dummy repo</span>
-<span id="L141" class="ln">   141  </span>	_, err = git.PlainClone(modulePath, false, &amp;git.CloneOptions{
-<span id="L142" class="ln">   142  </span>		URL: ghPagesDir,
-<span id="L143" class="ln">   143  </span>	})
-<span id="L144" class="ln">   144  </span>	require.NoError(t, err)
-<span id="L145" class="ln">   145  </span>
-<span id="L146" class="ln">   146  </span>	writeFile := func(path, contents string) {
-<span id="L147" class="ln">   147  </span>		path = filepath.Join(modulePath, path)
-<span id="L148" class="ln">   148  </span>		err := os.MkdirAll(filepath.Dir(path), 0700)
-<span id="L149" class="ln">   149  </span>		require.NoError(t, err)
-<span id="L150" class="ln">   150  </span>		err = os.WriteFile(path, []byte(contents), 0600)
-<span id="L151" class="ln">   151  </span>		require.NoError(t, err)
-<span id="L152" class="ln">   152  </span>	}
-<span id="L153" class="ln">   153  </span>
-<span id="L154" class="ln">   154  </span>	writeFile(&#34;go.mod&#34;, `module thing`)
-<span id="L155" class="ln">   155  </span>	writeFile(&#34;main.go&#34;, `
-<span id="L156" class="ln">   156  </span>package main
-<span id="L157" class="ln">   157  </span>
-<span id="L158" class="ln">   158  </span>func main() {
-<span id="L159" class="ln">   159  </span>	println(&#34;Hello world&#34;)
-<span id="L160" class="ln">   160  </span>}
-<span id="L161" class="ln">   161  </span>`)
-<span id="L162" class="ln">   162  </span>	writeFile(&#34;lib/lib.go&#34;, `
-<span id="L163" class="ln">   163  </span>package lib
-<span id="L164" class="ln">   164  </span>
-<span id="L165" class="ln">   165  </span>// Hello says hi
-<span id="L166" class="ln">   166  </span>func Hello() {
-<span id="L167" class="ln">   167  </span>	println(&#34;Hello world&#34;)
-<span id="L168" class="ln">   168  </span>}
-<span id="L169" class="ln">   169  </span>`)
-<span id="L170" class="ln">   170  </span>
-<span id="L171" class="ln">   171  </span>	args, _, err := flags.Parse(tc.args...)
-<span id="L172" class="ln">   172  </span>	require.NoError(t, err)
+<span id="L117" class="ln">   117  </span>	const defaultBranch = &#34;refs/heads/main&#34;
+<span id="L118" class="ln">   118  </span>	ghPagesRepo, err := git.PlainInitWithOptions(ghPagesDir, &amp;git.PlainInitOptions{
+<span id="L119" class="ln">   119  </span>		InitOptions: git.InitOptions{
+<span id="L120" class="ln">   120  </span>			DefaultBranch: defaultBranch,
+<span id="L121" class="ln">   121  </span>		},
+<span id="L122" class="ln">   122  </span>	})
+<span id="L123" class="ln">   123  </span>	require.NoError(t, err)
+<span id="L124" class="ln">   124  </span>	workTree, err := ghPagesRepo.Worktree()
+<span id="L125" class="ln">   125  </span>	require.NoError(t, err)
+<span id="L126" class="ln">   126  </span>	_, err = workTree.Commit(&#34;Initial commit&#34;, &amp;git.CommitOptions{
+<span id="L127" class="ln">   127  </span>		Author:            commitAuthor(),
+<span id="L128" class="ln">   128  </span>		AllowEmptyCommits: true,
+<span id="L129" class="ln">   129  </span>	})
+<span id="L130" class="ln">   130  </span>	require.NoError(t, err)
+<span id="L131" class="ln">   131  </span>	require.NoError(t, workTree.Checkout(&amp;git.CheckoutOptions{
+<span id="L132" class="ln">   132  </span>		Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
+<span id="L133" class="ln">   133  </span>		Create: true,
+<span id="L134" class="ln">   134  </span>	}))
+<span id="L135" class="ln">   135  </span>	require.NoError(t, workTree.Checkout(&amp;git.CheckoutOptions{
+<span id="L136" class="ln">   136  </span>		Branch: defaultBranch,
+<span id="L137" class="ln">   137  </span>	}))
+<span id="L138" class="ln">   138  </span>
+<span id="L139" class="ln">   139  </span>	modulePath, err := os.MkdirTemp(&#34;&#34;, &#34;&#34;)
+<span id="L140" class="ln">   140  </span>	require.NoError(t, err)
+<span id="L141" class="ln">   141  </span>	defer os.RemoveAll(modulePath)
+<span id="L142" class="ln">   142  </span>	wd, err := os.Getwd()
+<span id="L143" class="ln">   143  </span>	require.NoError(t, err)
+<span id="L144" class="ln">   144  </span>	require.NoError(t, os.Chdir(modulePath))
+<span id="L145" class="ln">   145  </span>	defer func() {
+<span id="L146" class="ln">   146  </span>		require.NoError(t, os.Chdir(wd))
+<span id="L147" class="ln">   147  </span>	}()
+<span id="L148" class="ln">   148  </span>
+<span id="L149" class="ln">   149  </span>	<span class="comment">// prepare origin remote pointing to dummy repo</span>
+<span id="L150" class="ln">   150  </span>	_, err = git.PlainClone(modulePath, false, &amp;git.CloneOptions{
+<span id="L151" class="ln">   151  </span>		URL: ghPagesDir,
+<span id="L152" class="ln">   152  </span>	})
+<span id="L153" class="ln">   153  </span>	require.NoError(t, err)
+<span id="L154" class="ln">   154  </span>
+<span id="L155" class="ln">   155  </span>	writeFile := func(path, contents string) {
+<span id="L156" class="ln">   156  </span>		path = filepath.Join(modulePath, path)
+<span id="L157" class="ln">   157  </span>		err := os.MkdirAll(filepath.Dir(path), 0o700)
+<span id="L158" class="ln">   158  </span>		require.NoError(t, err)
+<span id="L159" class="ln">   159  </span>		err = os.WriteFile(path, []byte(contents), 0o600)
+<span id="L160" class="ln">   160  </span>		require.NoError(t, err)
+<span id="L161" class="ln">   161  </span>	}
+<span id="L162" class="ln">   162  </span>
+<span id="L163" class="ln">   163  </span>	writeFile(&#34;go.mod&#34;, `module thing`)
+<span id="L164" class="ln">   164  </span>	writeFile(&#34;main.go&#34;, `
+<span id="L165" class="ln">   165  </span>package main
+<span id="L166" class="ln">   166  </span>
+<span id="L167" class="ln">   167  </span>func main() {
+<span id="L168" class="ln">   168  </span>	println(&#34;Hello world&#34;)
+<span id="L169" class="ln">   169  </span>}
+<span id="L170" class="ln">   170  </span>`)
+<span id="L171" class="ln">   171  </span>	writeFile(&#34;lib/lib.go&#34;, `
+<span id="L172" class="ln">   172  </span>package lib
 <span id="L173" class="ln">   173  </span>
-<span id="L174" class="ln">   174  </span>	err = run(modulePath, args)
-<span id="L175" class="ln">   175  </span>	if tc.expectErr != &#34;&#34; {
-<span id="L176" class="ln">   176  </span>		assert.EqualError(t, err, tc.expectErr)
-<span id="L177" class="ln">   177  </span>		return
-<span id="L178" class="ln">   178  </span>	}
-<span id="L179" class="ln">   179  </span>	require.NoError(t, err)
-<span id="L180" class="ln">   180  </span>
-<span id="L181" class="ln">   181  </span>	var foundLib bool
-<span id="L182" class="ln">   182  </span>	var fileNames []string
-<span id="L183" class="ln">   183  </span>	if contains(tc.args, &#34;-gh-pages&#34;) {
-<span id="L184" class="ln">   184  </span>		<span class="comment">// fetch the new head commit and walk the files in the diff</span>
-<span id="L185" class="ln">   185  </span>		head, err := ghPagesRepo.Head()
-<span id="L186" class="ln">   186  </span>		require.NoError(t, err)
-<span id="L187" class="ln">   187  </span>		headCommit, err := ghPagesRepo.CommitObject(head.Hash())
-<span id="L188" class="ln">   188  </span>		require.NoError(t, err)
-<span id="L189" class="ln">   189  </span>		files, err := headCommit.Files()
-<span id="L190" class="ln">   190  </span>		require.NoError(t, err)
-<span id="L191" class="ln">   191  </span>		err = files.ForEach(func(f *object.File) error {
-<span id="L192" class="ln">   192  </span>			name := filepath.ToSlash(f.Name)
-<span id="L193" class="ln">   193  </span>			name = strings.TrimPrefix(name, &#34;dist/&#34;)
-<span id="L194" class="ln">   194  </span>			if strings.HasPrefix(name, &#34;lib&#34;) {
-<span id="L195" class="ln">   195  </span>				foundLib = true
-<span id="L196" class="ln">   196  </span>			} else {
-<span id="L197" class="ln">   197  </span>				fileNames = append(fileNames, name)
-<span id="L198" class="ln">   198  </span>			}
-<span id="L199" class="ln">   199  </span>			return nil
-<span id="L200" class="ln">   200  </span>		})
-<span id="L201" class="ln">   201  </span>		require.NoError(t, err)
-<span id="L202" class="ln">   202  </span>	} else {
-<span id="L203" class="ln">   203  </span>		err := filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
-<span id="L204" class="ln">   204  </span>			prefix := filepath.Join(modulePath, &#34;dist&#34;)
-<span id="L205" class="ln">   205  </span>			prefix, absErr := filepath.Abs(prefix)
-<span id="L206" class="ln">   206  </span>			if absErr != nil {
-<span id="L207" class="ln">   207  </span>				return absErr
-<span id="L208" class="ln">   208  </span>			}
-<span id="L209" class="ln">   209  </span>			prefix += string(filepath.Separator)
-<span id="L210" class="ln">   210  </span>			name := strings.TrimPrefix(path, prefix)
-<span id="L211" class="ln">   211  </span>			if err == nil &amp;&amp;
-<span id="L212" class="ln">   212  </span>				!info.IsDir() &amp;&amp;
-<span id="L213" class="ln">   213  </span>				!filepath.IsAbs(name) {
-<span id="L214" class="ln">   214  </span>				if strings.HasPrefix(name, &#34;lib&#34;) {
-<span id="L215" class="ln">   215  </span>					foundLib = true
-<span id="L216" class="ln">   216  </span>				} else {
-<span id="L217" class="ln">   217  </span>					fileNames = append(fileNames, filepath.ToSlash(name))
-<span id="L218" class="ln">   218  </span>				}
-<span id="L219" class="ln">   219  </span>			}
-<span id="L220" class="ln">   220  </span>			return nil
-<span id="L221" class="ln">   221  </span>		})
-<span id="L222" class="ln">   222  </span>		require.NoError(t, err)
-<span id="L223" class="ln">   223  </span>	}
-<span id="L224" class="ln">   224  </span>	require.NoError(t, err)
-<span id="L225" class="ln">   225  </span>	assert.True(t, foundLib)
-<span id="L226" class="ln">   226  </span>	assert.Equal(t, []string{
-<span id="L227" class="ln">   227  </span>		&#34;404.html&#34;,
-<span id="L228" class="ln">   228  </span>		&#34;index.html&#34;,
-<span id="L229" class="ln">   229  </span>		&#34;pkg/index.html&#34;,
-<span id="L230" class="ln">   230  </span>		&#34;pkg/thing/index.html&#34;,
-<span id="L231" class="ln">   231  </span>		&#34;pkg/thing/lib/index.html&#34;,
-<span id="L232" class="ln">   232  </span>		&#34;src/index.html&#34;,
-<span id="L233" class="ln">   233  </span>		&#34;src/thing/index.html&#34;,
-<span id="L234" class="ln">   234  </span>		&#34;src/thing/lib/index.html&#34;,
-<span id="L235" class="ln">   235  </span>		&#34;src/thing/lib/lib.go.html&#34;,
-<span id="L236" class="ln">   236  </span>		&#34;src/thing/main.go.html&#34;,
-<span id="L237" class="ln">   237  </span>	}, fileNames)
-<span id="L238" class="ln">   238  </span>}
-<span id="L239" class="ln">   239  </span>
-<span id="L240" class="ln">   240  </span>func contains(strs []string, s string) bool {
-<span id="L241" class="ln">   241  </span>	for _, str := range strs {
-<span id="L242" class="ln">   242  </span>		if str == s {
-<span id="L243" class="ln">   243  </span>			return true
-<span id="L244" class="ln">   244  </span>		}
-<span id="L245" class="ln">   245  </span>	}
-<span id="L246" class="ln">   246  </span>	return false
-<span id="L247" class="ln">   247  </span>}
-<span id="L248" class="ln">   248  </span>
-<span id="L249" class="ln">   249  </span>func TestAuth(t *testing.T) {
-<span id="L250" class="ln">   250  </span>	t.Parallel()
-<span id="L251" class="ln">   251  </span>	assert.Nil(t, getAuth(flags.Args{}))
-<span id="L252" class="ln">   252  </span>	assert.Equal(t,
-<span id="L253" class="ln">   253  </span>		&amp;gitHTTP.BasicAuth{Username: &#34;user&#34;, Password: &#34;token&#34;},
-<span id="L254" class="ln">   254  </span>		getAuth(flags.Args{
-<span id="L255" class="ln">   255  </span>			GitHubPagesToken: &#34;token&#34;,
-<span id="L256" class="ln">   256  </span>			GitHubPagesUser:  &#34;user&#34;,
-<span id="L257" class="ln">   257  </span>		}))
-<span id="L258" class="ln">   258  </span>}
-<span id="L259" class="ln">   259  </span>
+<span id="L174" class="ln">   174  </span>// Hello says hi
+<span id="L175" class="ln">   175  </span>func Hello() {
+<span id="L176" class="ln">   176  </span>	println(&#34;Hello world&#34;)
+<span id="L177" class="ln">   177  </span>}
+<span id="L178" class="ln">   178  </span>`)
+<span id="L179" class="ln">   179  </span>
+<span id="L180" class="ln">   180  </span>	args, _, err := flags.Parse(tc.args...)
+<span id="L181" class="ln">   181  </span>	require.NoError(t, err)
+<span id="L182" class="ln">   182  </span>
+<span id="L183" class="ln">   183  </span>	err = run(modulePath, args)
+<span id="L184" class="ln">   184  </span>	if tc.expectErr != &#34;&#34; {
+<span id="L185" class="ln">   185  </span>		assert.EqualError(t, err, tc.expectErr)
+<span id="L186" class="ln">   186  </span>		return
+<span id="L187" class="ln">   187  </span>	}
+<span id="L188" class="ln">   188  </span>	require.NoError(t, err)
+<span id="L189" class="ln">   189  </span>
+<span id="L190" class="ln">   190  </span>	var foundLib bool
+<span id="L191" class="ln">   191  </span>	var fileNames []string
+<span id="L192" class="ln">   192  </span>	if contains(tc.args, &#34;-gh-pages&#34;) {
+<span id="L193" class="ln">   193  </span>		<span class="comment">// fetch the new head commit and walk the files in the diff</span>
+<span id="L194" class="ln">   194  </span>		require.NoError(t, workTree.Checkout(&amp;git.CheckoutOptions{
+<span id="L195" class="ln">   195  </span>			Branch: plumbing.NewBranchReferenceName(ghPagesBranch),
+<span id="L196" class="ln">   196  </span>		}))
+<span id="L197" class="ln">   197  </span>		head, err := ghPagesRepo.Head()
+<span id="L198" class="ln">   198  </span>		require.NoError(t, err)
+<span id="L199" class="ln">   199  </span>		headCommit, err := ghPagesRepo.CommitObject(head.Hash())
+<span id="L200" class="ln">   200  </span>		require.NoError(t, err)
+<span id="L201" class="ln">   201  </span>		files, err := headCommit.Files()
+<span id="L202" class="ln">   202  </span>		require.NoError(t, err)
+<span id="L203" class="ln">   203  </span>		err = files.ForEach(func(f *object.File) error {
+<span id="L204" class="ln">   204  </span>			name := filepath.ToSlash(f.Name)
+<span id="L205" class="ln">   205  </span>			name = strings.TrimPrefix(name, &#34;dist/&#34;)
+<span id="L206" class="ln">   206  </span>			if strings.HasPrefix(name, &#34;lib&#34;) {
+<span id="L207" class="ln">   207  </span>				foundLib = true
+<span id="L208" class="ln">   208  </span>			} else {
+<span id="L209" class="ln">   209  </span>				fileNames = append(fileNames, name)
+<span id="L210" class="ln">   210  </span>			}
+<span id="L211" class="ln">   211  </span>			return nil
+<span id="L212" class="ln">   212  </span>		})
+<span id="L213" class="ln">   213  </span>		require.NoError(t, err)
+<span id="L214" class="ln">   214  </span>	} else {
+<span id="L215" class="ln">   215  </span>		err := filepath.Walk(modulePath, func(path string, info os.FileInfo, err error) error {
+<span id="L216" class="ln">   216  </span>			prefix := filepath.Join(modulePath, &#34;dist&#34;)
+<span id="L217" class="ln">   217  </span>			prefix, absErr := filepath.Abs(prefix)
+<span id="L218" class="ln">   218  </span>			if absErr != nil {
+<span id="L219" class="ln">   219  </span>				return absErr
+<span id="L220" class="ln">   220  </span>			}
+<span id="L221" class="ln">   221  </span>			prefix += string(filepath.Separator)
+<span id="L222" class="ln">   222  </span>			name := strings.TrimPrefix(path, prefix)
+<span id="L223" class="ln">   223  </span>			if err == nil &amp;&amp;
+<span id="L224" class="ln">   224  </span>				!info.IsDir() &amp;&amp;
+<span id="L225" class="ln">   225  </span>				!filepath.IsAbs(name) {
+<span id="L226" class="ln">   226  </span>				if strings.HasPrefix(name, &#34;lib&#34;) {
+<span id="L227" class="ln">   227  </span>					foundLib = true
+<span id="L228" class="ln">   228  </span>				} else {
+<span id="L229" class="ln">   229  </span>					fileNames = append(fileNames, filepath.ToSlash(name))
+<span id="L230" class="ln">   230  </span>				}
+<span id="L231" class="ln">   231  </span>			}
+<span id="L232" class="ln">   232  </span>			return nil
+<span id="L233" class="ln">   233  </span>		})
+<span id="L234" class="ln">   234  </span>		require.NoError(t, err)
+<span id="L235" class="ln">   235  </span>	}
+<span id="L236" class="ln">   236  </span>	require.NoError(t, err)
+<span id="L237" class="ln">   237  </span>	assert.True(t, foundLib)
+<span id="L238" class="ln">   238  </span>	assert.Equal(t, []string{
+<span id="L239" class="ln">   239  </span>		&#34;404.html&#34;,
+<span id="L240" class="ln">   240  </span>		&#34;index.html&#34;,
+<span id="L241" class="ln">   241  </span>		&#34;pkg/index.html&#34;,
+<span id="L242" class="ln">   242  </span>		&#34;pkg/thing/index.html&#34;,
+<span id="L243" class="ln">   243  </span>		&#34;pkg/thing/lib/index.html&#34;,
+<span id="L244" class="ln">   244  </span>		&#34;src/index.html&#34;,
+<span id="L245" class="ln">   245  </span>		&#34;src/thing/index.html&#34;,
+<span id="L246" class="ln">   246  </span>		&#34;src/thing/lib/index.html&#34;,
+<span id="L247" class="ln">   247  </span>		&#34;src/thing/lib/lib.go.html&#34;,
+<span id="L248" class="ln">   248  </span>		&#34;src/thing/main.go.html&#34;,
+<span id="L249" class="ln">   249  </span>	}, fileNames)
+<span id="L250" class="ln">   250  </span>}
+<span id="L251" class="ln">   251  </span>
+<span id="L252" class="ln">   252  </span>func contains(strs []string, s string) bool {
+<span id="L253" class="ln">   253  </span>	for _, str := range strs {
+<span id="L254" class="ln">   254  </span>		if str == s {
+<span id="L255" class="ln">   255  </span>			return true
+<span id="L256" class="ln">   256  </span>		}
+<span id="L257" class="ln">   257  </span>	}
+<span id="L258" class="ln">   258  </span>	return false
+<span id="L259" class="ln">   259  </span>}
+<span id="L260" class="ln">   260  </span>
+<span id="L261" class="ln">   261  </span>func TestAuth(t *testing.T) {
+<span id="L262" class="ln">   262  </span>	t.Parallel()
+<span id="L263" class="ln">   263  </span>	t.Run(&#34;no auth flags&#34;, func(t *testing.T) {
+<span id="L264" class="ln">   264  </span>		t.Parallel()
+<span id="L265" class="ln">   265  </span>		basicAuth, ok := getAuth(flags.Args{})
+<span id="L266" class="ln">   266  </span>		assert.Nil(t, basicAuth)
+<span id="L267" class="ln">   267  </span>		assert.False(t, ok)
+<span id="L268" class="ln">   268  </span>	})
+<span id="L269" class="ln">   269  </span>
+<span id="L270" class="ln">   270  </span>	t.Run(&#34;basic auth flags&#34;, func(t *testing.T) {
+<span id="L271" class="ln">   271  </span>		t.Parallel()
+<span id="L272" class="ln">   272  </span>		basicAuth, ok := getAuth(flags.Args{
+<span id="L273" class="ln">   273  </span>			GitHubPagesToken: &#34;token&#34;,
+<span id="L274" class="ln">   274  </span>			GitHubPagesUser:  &#34;user&#34;,
+<span id="L275" class="ln">   275  </span>		})
+<span id="L276" class="ln">   276  </span>		assert.Equal(t, &amp;gitHTTP.BasicAuth{Username: &#34;user&#34;, Password: &#34;token&#34;}, basicAuth)
+<span id="L277" class="ln">   277  </span>		assert.True(t, ok)
+<span id="L278" class="ln">   278  </span>	})
+<span id="L279" class="ln">   279  </span>}
+<span id="L280" class="ln">   280  </span>
 </pre><p></p>
 
 <div id="footer">

@@ -171,124 +171,129 @@
 <span id="L114" class="ln">   114  </span>		return args[0].(memfsDocsArgs)
 <span id="L115" class="ln">   115  </span>	}).
 <span id="L116" class="ln">   116  </span>	Append(func(args memfsDocsArgs) (memfsDocsArgs, *git.Repository, error) {
-<span id="L117" class="ln">   117  </span>		repo, err := git.Clone(memory.NewStorage(), args.FS, &amp;git.CloneOptions{
+<span id="L117" class="ln">   117  </span>		cloneOpts := &amp;git.CloneOptions{
 <span id="L118" class="ln">   118  </span>			URL:           args.Remote,
 <span id="L119" class="ln">   119  </span>			ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
 <span id="L120" class="ln">   120  </span>			SingleBranch:  true,
-<span id="L121" class="ln">   121  </span>			Auth:          getAuth(args.Flags),
-<span id="L122" class="ln">   122  </span>		})
-<span id="L123" class="ln">   123  </span>		return args, repo, errors.Wrap(err, &#34;Failed to clone in-memory copy of repo. Be sure the &#39;gh-pages&#39; orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site&#34;)
-<span id="L124" class="ln">   124  </span>	}).
-<span id="L125" class="ln">   125  </span>	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
-<span id="L126" class="ln">   126  </span>		workTree, err := repo.Worktree()
-<span id="L127" class="ln">   127  </span>		return args, repo, workTree, err
+<span id="L121" class="ln">   121  </span>		}
+<span id="L122" class="ln">   122  </span>		basicAuth, ok := getAuth(args.Flags)
+<span id="L123" class="ln">   123  </span>		if ok {
+<span id="L124" class="ln">   124  </span>			cloneOpts.Auth = basicAuth
+<span id="L125" class="ln">   125  </span>		}
+<span id="L126" class="ln">   126  </span>		repo, err := git.Clone(memory.NewStorage(), args.FS, cloneOpts)
+<span id="L127" class="ln">   127  </span>		return args, repo, errors.Wrap(err, &#34;Failed to clone in-memory copy of repo. Be sure the &#39;gh-pages&#39; orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site&#34;)
 <span id="L128" class="ln">   128  </span>	}).
-<span id="L129" class="ln">   129  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
-<span id="L130" class="ln">   130  </span>		_, _ = workTree.Remove(args.Flags.OutputPath) <span class="comment">// remove old files on a best-effort basis. if the path doesn&#39;t exist, it could error</span>
-<span id="L131" class="ln">   131  </span>		err := generate.Docs(args.ModulePath, args.ModulePackage, args.SrcFS, args.FS, args.Flags, args.Linker)
-<span id="L132" class="ln">   132  </span>		return args, repo, workTree, err
-<span id="L133" class="ln">   133  </span>	}).
-<span id="L134" class="ln">   134  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
-<span id="L135" class="ln">   135  </span>		fmt.Println(&#34;Committing and pushing changes to gh-pages branch...&#34;)
-<span id="L136" class="ln">   136  </span>		_, err := workTree.Add(args.Flags.OutputPath)
-<span id="L137" class="ln">   137  </span>		return args, repo, workTree, errors.Wrap(err, &#34;Failed to add output dir to git&#34;)
-<span id="L138" class="ln">   138  </span>	}).
-<span id="L139" class="ln">   139  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, error) {
-<span id="L140" class="ln">   140  </span>		commitMessage := &#34;Update GoPages&#34;
-<span id="L141" class="ln">   141  </span>		if args.Flags.SiteTitle != &#34;&#34; {
-<span id="L142" class="ln">   142  </span>			commitMessage += &#34;: &#34; + args.Flags.SiteTitle
-<span id="L143" class="ln">   143  </span>		}
-<span id="L144" class="ln">   144  </span>		_, err := workTree.Commit(commitMessage, &amp;git.CommitOptions{
-<span id="L145" class="ln">   145  </span>			Author: commitAuthor(),
-<span id="L146" class="ln">   146  </span>		})
-<span id="L147" class="ln">   147  </span>		return args, repo, errors.Wrap(err, &#34;Failed to commit gopages files&#34;)
-<span id="L148" class="ln">   148  </span>	}).
-<span id="L149" class="ln">   149  </span>	Append(func(args memfsDocsArgs, repo *git.Repository) error {
-<span id="L150" class="ln">   150  </span>		pushOpts := &amp;git.PushOptions{}
-<span id="L151" class="ln">   151  </span>		pushOpts.Auth = getAuth(args.Flags)
-<span id="L152" class="ln">   152  </span>		err := repo.Push(pushOpts)
-<span id="L153" class="ln">   153  </span>		return errors.Wrap(err, &#34;Failed to push gopages commit&#34;)
-<span id="L154" class="ln">   154  </span>	})
-<span id="L155" class="ln">   155  </span>
-<span id="L156" class="ln">   156  </span>func getAuth(args flags.Args) *gitHTTP.BasicAuth {
-<span id="L157" class="ln">   157  </span>	var auth *gitHTTP.BasicAuth
-<span id="L158" class="ln">   158  </span>	if args.GitHubPagesUser != &#34;&#34; || args.GitHubPagesToken != &#34;&#34; {
-<span id="L159" class="ln">   159  </span>		auth = &amp;gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
-<span id="L160" class="ln">   160  </span>	}
-<span id="L161" class="ln">   161  </span>	return auth
-<span id="L162" class="ln">   162  </span>}
-<span id="L163" class="ln">   163  </span>
-<span id="L164" class="ln">   164  </span>func run(modulePath string, args flags.Args) error {
-<span id="L165" class="ln">   165  </span>	out, err := makeLinkerPipe.Do(args, modulePath)
-<span id="L166" class="ln">   166  </span>	if err != nil {
-<span id="L167" class="ln">   167  </span>		return err
-<span id="L168" class="ln">   168  </span>	}
-<span id="L169" class="ln">   169  </span>	modulePackage := out[0].(string)
-<span id="L170" class="ln">   170  </span>	linker := out[1].(source.Linker)
-<span id="L171" class="ln">   171  </span>
-<span id="L172" class="ln">   172  </span>	fmt.Println(&#34;Generating godoc static pages for module...&#34;, modulePackage)
-<span id="L173" class="ln">   173  </span>	if !args.GitHubPages {
-<span id="L174" class="ln">   174  </span>		fs := osfs.New(&#34;&#34;)
-<span id="L175" class="ln">   175  </span>		return generate.Docs(modulePath, modulePackage, fs, fs, args, linker)
-<span id="L176" class="ln">   176  </span>	}
-<span id="L177" class="ln">   177  </span>
-<span id="L178" class="ln">   178  </span>	out, err = findOutputPathPipe.Do(args, modulePath)
-<span id="L179" class="ln">   179  </span>	if err != nil {
-<span id="L180" class="ln">   180  </span>		return err
+<span id="L129" class="ln">   129  </span>	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+<span id="L130" class="ln">   130  </span>		workTree, err := repo.Worktree()
+<span id="L131" class="ln">   131  </span>		return args, repo, workTree, err
+<span id="L132" class="ln">   132  </span>	}).
+<span id="L133" class="ln">   133  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+<span id="L134" class="ln">   134  </span>		_, _ = workTree.Remove(args.Flags.OutputPath) <span class="comment">// remove old files on a best-effort basis. if the path doesn&#39;t exist, it could error</span>
+<span id="L135" class="ln">   135  </span>		err := generate.Docs(args.ModulePath, args.ModulePackage, args.SrcFS, args.FS, args.Flags, args.Linker)
+<span id="L136" class="ln">   136  </span>		return args, repo, workTree, err
+<span id="L137" class="ln">   137  </span>	}).
+<span id="L138" class="ln">   138  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {
+<span id="L139" class="ln">   139  </span>		fmt.Println(&#34;Committing and pushing changes to gh-pages branch...&#34;)
+<span id="L140" class="ln">   140  </span>		_, err := workTree.Add(args.Flags.OutputPath)
+<span id="L141" class="ln">   141  </span>		return args, repo, workTree, errors.Wrap(err, &#34;Failed to add output dir to git&#34;)
+<span id="L142" class="ln">   142  </span>	}).
+<span id="L143" class="ln">   143  </span>	Append(func(args memfsDocsArgs, repo *git.Repository, workTree *git.Worktree) (memfsDocsArgs, *git.Repository, error) {
+<span id="L144" class="ln">   144  </span>		commitMessage := &#34;Update GoPages&#34;
+<span id="L145" class="ln">   145  </span>		if args.Flags.SiteTitle != &#34;&#34; {
+<span id="L146" class="ln">   146  </span>			commitMessage += &#34;: &#34; + args.Flags.SiteTitle
+<span id="L147" class="ln">   147  </span>		}
+<span id="L148" class="ln">   148  </span>		_, err := workTree.Commit(commitMessage, &amp;git.CommitOptions{
+<span id="L149" class="ln">   149  </span>			Author: commitAuthor(),
+<span id="L150" class="ln">   150  </span>		})
+<span id="L151" class="ln">   151  </span>		return args, repo, errors.Wrap(err, &#34;Failed to commit gopages files&#34;)
+<span id="L152" class="ln">   152  </span>	}).
+<span id="L153" class="ln">   153  </span>	Append(func(args memfsDocsArgs, repo *git.Repository) error {
+<span id="L154" class="ln">   154  </span>		pushOpts := &amp;git.PushOptions{}
+<span id="L155" class="ln">   155  </span>		if basicAuth, ok := getAuth(args.Flags); ok {
+<span id="L156" class="ln">   156  </span>			pushOpts.Auth = basicAuth
+<span id="L157" class="ln">   157  </span>		}
+<span id="L158" class="ln">   158  </span>		err := repo.Push(pushOpts)
+<span id="L159" class="ln">   159  </span>		return errors.Wrap(err, &#34;Failed to push gopages commit&#34;)
+<span id="L160" class="ln">   160  </span>	})
+<span id="L161" class="ln">   161  </span>
+<span id="L162" class="ln">   162  </span>func getAuth(args flags.Args) (*gitHTTP.BasicAuth, bool) {
+<span id="L163" class="ln">   163  </span>	if args.GitHubPagesUser != &#34;&#34; || args.GitHubPagesToken != &#34;&#34; {
+<span id="L164" class="ln">   164  </span>		return &amp;gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}, true
+<span id="L165" class="ln">   165  </span>	}
+<span id="L166" class="ln">   166  </span>	return nil, false
+<span id="L167" class="ln">   167  </span>}
+<span id="L168" class="ln">   168  </span>
+<span id="L169" class="ln">   169  </span>func run(modulePath string, args flags.Args) error {
+<span id="L170" class="ln">   170  </span>	out, err := makeLinkerPipe.Do(args, modulePath)
+<span id="L171" class="ln">   171  </span>	if err != nil {
+<span id="L172" class="ln">   172  </span>		return err
+<span id="L173" class="ln">   173  </span>	}
+<span id="L174" class="ln">   174  </span>	modulePackage := out[0].(string)
+<span id="L175" class="ln">   175  </span>	linker := out[1].(source.Linker)
+<span id="L176" class="ln">   176  </span>
+<span id="L177" class="ln">   177  </span>	fmt.Println(&#34;Generating godoc static pages for module...&#34;, modulePackage)
+<span id="L178" class="ln">   178  </span>	if !args.GitHubPages {
+<span id="L179" class="ln">   179  </span>		fs := osfs.New(&#34;&#34;)
+<span id="L180" class="ln">   180  </span>		return generate.Docs(modulePath, modulePackage, fs, fs, args, linker)
 <span id="L181" class="ln">   181  </span>	}
-<span id="L182" class="ln">   182  </span>	args = out[0].(flags.Args)
-<span id="L183" class="ln">   183  </span>	remote := out[1].(string)
-<span id="L184" class="ln">   184  </span>
-<span id="L185" class="ln">   185  </span>	_, err = generateMemfsDocsPipe.Do(memfsDocsArgs{
-<span id="L186" class="ln">   186  </span>		Flags:         args,
-<span id="L187" class="ln">   187  </span>		Linker:        linker,
-<span id="L188" class="ln">   188  </span>		ModulePackage: modulePackage,
-<span id="L189" class="ln">   189  </span>		ModulePath:    modulePath,
-<span id="L190" class="ln">   190  </span>		Remote:        remote,
-<span id="L191" class="ln">   191  </span>		SrcFS:         osfs.New(&#34;&#34;),
-<span id="L192" class="ln">   192  </span>		FS:            memfs.New(),
-<span id="L193" class="ln">   193  </span>	})
-<span id="L194" class="ln">   194  </span>	return err
-<span id="L195" class="ln">   195  </span>}
-<span id="L196" class="ln">   196  </span>
-<span id="L197" class="ln">   197  </span>var currentPathAndRemotePipe = pipe.New(pipe.Options{}).
-<span id="L198" class="ln">   198  </span>	Append(func(args []interface{}) string {
-<span id="L199" class="ln">   199  </span>		return args[0].(string)
-<span id="L200" class="ln">   200  </span>	}).
-<span id="L201" class="ln">   201  </span>	Append(func(repoPath string) (*git.Repository, error) {
-<span id="L202" class="ln">   202  </span>		repo, err := git.PlainOpenWithOptions(repoPath, &amp;git.PlainOpenOptions{
-<span id="L203" class="ln">   203  </span>			DetectDotGit: true,
-<span id="L204" class="ln">   204  </span>		})
-<span id="L205" class="ln">   205  </span>		return repo, errors.Wrapf(err, &#34;Failed to open repo at %q&#34;, repoPath)
-<span id="L206" class="ln">   206  </span>	}).
-<span id="L207" class="ln">   207  </span>	Append(func(repo *git.Repository) (*git.Repository, *git.Worktree, error) {
-<span id="L208" class="ln">   208  </span>		workTree, err := repo.Worktree()
-<span id="L209" class="ln">   209  </span>		return repo, workTree, errors.Wrap(err, &#34;Failed to set up work tree for repo&#34;)
-<span id="L210" class="ln">   210  </span>	}).
-<span id="L211" class="ln">   211  </span>	Append(func(repo *git.Repository, workTree *git.Worktree) (*git.Repository, string, error) {
-<span id="L212" class="ln">   212  </span>		repoRoot, err := filepath.EvalSymlinks(workTree.Filesystem.Root())
-<span id="L213" class="ln">   213  </span>		return repo, repoRoot, err
-<span id="L214" class="ln">   214  </span>	}).
-<span id="L215" class="ln">   215  </span>	Append(func(repo *git.Repository, repoRoot string) (string, string, error) {
-<span id="L216" class="ln">   216  </span>		remote, err := repo.Remote(git.DefaultRemoteName)
-<span id="L217" class="ln">   217  </span>		remoteURL := remote.Config().URLs[0]
-<span id="L218" class="ln">   218  </span>		return repoRoot, remoteURL, errors.Wrap(err, &#34;Failed to get repo remote&#34;)
-<span id="L219" class="ln">   219  </span>	})
-<span id="L220" class="ln">   220  </span>
-<span id="L221" class="ln">   221  </span>func getCurrentPathAndRemote(repoPath string) (string, string, error) {
-<span id="L222" class="ln">   222  </span>	out, err := currentPathAndRemotePipe.Do(repoPath)
-<span id="L223" class="ln">   223  </span>	var repoRoot, remoteURL string
-<span id="L224" class="ln">   224  </span>	if err == nil {
-<span id="L225" class="ln">   225  </span>		repoRoot = out[0].(string)
-<span id="L226" class="ln">   226  </span>		remoteURL = out[1].(string)
-<span id="L227" class="ln">   227  </span>	}
-<span id="L228" class="ln">   228  </span>	return repoRoot, remoteURL, err
-<span id="L229" class="ln">   229  </span>}
-<span id="L230" class="ln">   230  </span>
-<span id="L231" class="ln">   231  </span>func commitAuthor() *object.Signature {
-<span id="L232" class="ln">   232  </span>	return &amp;object.Signature{Name: &#34;GoPages&#34;, When: time.Now()}
-<span id="L233" class="ln">   233  </span>}
-<span id="L234" class="ln">   234  </span>
+<span id="L182" class="ln">   182  </span>
+<span id="L183" class="ln">   183  </span>	out, err = findOutputPathPipe.Do(args, modulePath)
+<span id="L184" class="ln">   184  </span>	if err != nil {
+<span id="L185" class="ln">   185  </span>		return err
+<span id="L186" class="ln">   186  </span>	}
+<span id="L187" class="ln">   187  </span>	args = out[0].(flags.Args)
+<span id="L188" class="ln">   188  </span>	remote := out[1].(string)
+<span id="L189" class="ln">   189  </span>
+<span id="L190" class="ln">   190  </span>	_, err = generateMemfsDocsPipe.Do(memfsDocsArgs{
+<span id="L191" class="ln">   191  </span>		Flags:         args,
+<span id="L192" class="ln">   192  </span>		Linker:        linker,
+<span id="L193" class="ln">   193  </span>		ModulePackage: modulePackage,
+<span id="L194" class="ln">   194  </span>		ModulePath:    modulePath,
+<span id="L195" class="ln">   195  </span>		Remote:        remote,
+<span id="L196" class="ln">   196  </span>		SrcFS:         osfs.New(&#34;&#34;),
+<span id="L197" class="ln">   197  </span>		FS:            memfs.New(),
+<span id="L198" class="ln">   198  </span>	})
+<span id="L199" class="ln">   199  </span>	return err
+<span id="L200" class="ln">   200  </span>}
+<span id="L201" class="ln">   201  </span>
+<span id="L202" class="ln">   202  </span>var currentPathAndRemotePipe = pipe.New(pipe.Options{}).
+<span id="L203" class="ln">   203  </span>	Append(func(args []interface{}) string {
+<span id="L204" class="ln">   204  </span>		return args[0].(string)
+<span id="L205" class="ln">   205  </span>	}).
+<span id="L206" class="ln">   206  </span>	Append(func(repoPath string) (*git.Repository, error) {
+<span id="L207" class="ln">   207  </span>		repo, err := git.PlainOpenWithOptions(repoPath, &amp;git.PlainOpenOptions{
+<span id="L208" class="ln">   208  </span>			DetectDotGit: true,
+<span id="L209" class="ln">   209  </span>		})
+<span id="L210" class="ln">   210  </span>		return repo, errors.Wrapf(err, &#34;Failed to open repo at %q&#34;, repoPath)
+<span id="L211" class="ln">   211  </span>	}).
+<span id="L212" class="ln">   212  </span>	Append(func(repo *git.Repository) (*git.Repository, *git.Worktree, error) {
+<span id="L213" class="ln">   213  </span>		workTree, err := repo.Worktree()
+<span id="L214" class="ln">   214  </span>		return repo, workTree, errors.Wrap(err, &#34;Failed to set up work tree for repo&#34;)
+<span id="L215" class="ln">   215  </span>	}).
+<span id="L216" class="ln">   216  </span>	Append(func(repo *git.Repository, workTree *git.Worktree) (*git.Repository, string, error) {
+<span id="L217" class="ln">   217  </span>		repoRoot, err := filepath.EvalSymlinks(workTree.Filesystem.Root())
+<span id="L218" class="ln">   218  </span>		return repo, repoRoot, err
+<span id="L219" class="ln">   219  </span>	}).
+<span id="L220" class="ln">   220  </span>	Append(func(repo *git.Repository, repoRoot string) (string, string, error) {
+<span id="L221" class="ln">   221  </span>		remote, err := repo.Remote(git.DefaultRemoteName)
+<span id="L222" class="ln">   222  </span>		remoteURL := remote.Config().URLs[0]
+<span id="L223" class="ln">   223  </span>		return repoRoot, remoteURL, errors.Wrap(err, &#34;Failed to get repo remote&#34;)
+<span id="L224" class="ln">   224  </span>	})
+<span id="L225" class="ln">   225  </span>
+<span id="L226" class="ln">   226  </span>func getCurrentPathAndRemote(repoPath string) (string, string, error) {
+<span id="L227" class="ln">   227  </span>	out, err := currentPathAndRemotePipe.Do(repoPath)
+<span id="L228" class="ln">   228  </span>	var repoRoot, remoteURL string
+<span id="L229" class="ln">   229  </span>	if err == nil {
+<span id="L230" class="ln">   230  </span>		repoRoot = out[0].(string)
+<span id="L231" class="ln">   231  </span>		remoteURL = out[1].(string)
+<span id="L232" class="ln">   232  </span>	}
+<span id="L233" class="ln">   233  </span>	return repoRoot, remoteURL, err
+<span id="L234" class="ln">   234  </span>}
+<span id="L235" class="ln">   235  </span>
+<span id="L236" class="ln">   236  </span>func commitAuthor() *object.Signature {
+<span id="L237" class="ln">   237  </span>	return &amp;object.Signature{Name: &#34;GoPages&#34;, When: time.Now()}
+<span id="L238" class="ln">   238  </span>}
+<span id="L239" class="ln">   239  </span>
 </pre><p></p>
 
 <div id="footer">
