@@ -271,9 +271,9 @@ func JSONFunc() {
 			outputFS := memfs.New()
 			writeFile := func(path, contents string) {
 				path = filepath.Join(thing, path)
-				err := os.MkdirAll(filepath.Dir(path), 0700)
+				err := os.MkdirAll(filepath.Dir(path), 0o700)
 				require.NoError(t, err)
-				err = os.WriteFile(path, []byte(contents), 0600)
+				err = os.WriteFile(path, []byte(contents), 0o600)
 				require.NoError(t, err)
 			}
 
@@ -339,7 +339,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
-		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
+		require.NoError(t, outputFS.MkdirAll(outputDir, 0o700))
 		err := generateDocs(t, outputFS, outputDir)
 		assert.EqualError(t, err, outputPathOKError)
 	})
@@ -348,7 +348,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
-		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0700))
+		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0o700))
 		err := generateDocs(t, outputFS, outputDir)
 		assert.EqualError(t, err, `pipe: refusing to clean output directory "foo" - directory does not resemble a gopages result; remove the directory to continue`)
 	})
@@ -357,8 +357,8 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 		t.Parallel()
 		outputFS := memfs.New()
 		const outputDir = "foo"
-		require.NoError(t, outputFS.MkdirAll(outputDir, 0700))
-		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0700)) // include other contents, which are ignored if expected files present
+		require.NoError(t, outputFS.MkdirAll(outputDir, 0o700))
+		require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, "bar"), 0o700)) // include other contents, which are ignored if expected files present
 		f, err := outputFS.Create(outputFS.Join(outputDir, "index.html"))
 		require.NoError(t, err)
 		require.NoError(t, f.Close())
@@ -367,7 +367,7 @@ func TestGenerateDocsAvoidOverwritingExistingOutput(t *testing.T) {
 			"pkg",
 			"src",
 		} {
-			require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, dirName), 0700))
+			require.NoError(t, outputFS.MkdirAll(outputFS.Join(outputDir, dirName), 0o700))
 		}
 
 		err = generateDocs(t, outputFS, outputDir)

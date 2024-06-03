@@ -29,8 +29,8 @@ import (
 )
 
 const (
-	scrapeDirPermission  = 0700
-	scrapeFilePermission = 0600
+	scrapeDirPermission  = 0o700
+	scrapeFilePermission = 0o600
 )
 
 var (
