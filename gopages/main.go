@@ -17,7 +17,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-git/v5/plumbing/transport"
 	gitHTTP "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/johnstarich/go/gopages/cmd"
@@ -149,16 +148,18 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 	}).
 	Append(func(args memfsDocsArgs, repo *git.Repository) error {
 		pushOpts := &git.PushOptions{}
-		pushOpts.Auth = getAuth(args.Flags)
+		if basicAuth, ok := getAuth(args.Flags); ok {
+			pushOpts.Auth = basicAuth
+		}
 		err := repo.Push(pushOpts)
 		return errors.Wrap(err, "Failed to push gopages commit")
 	})
 
-func getAuth(args flags.Args) transport.AuthMethod {
+func getAuth(args flags.Args) (*gitHTTP.BasicAuth, bool) {
 	if args.GitHubPagesUser != "" || args.GitHubPagesToken != "" {
-		return &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}
+		return &gitHTTP.BasicAuth{Username: args.GitHubPagesUser, Password: args.GitHubPagesToken}, true
 	}
-	return nil
+	return nil, false
 }
 
 func run(modulePath string, args flags.Args) error {
