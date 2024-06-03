@@ -114,12 +114,16 @@ var generateMemfsDocsPipe = pipe.New(pipe.Options{}).
 		return args[0].(memfsDocsArgs)
 	}).
 	Append(func(args memfsDocsArgs) (memfsDocsArgs, *git.Repository, error) {
-		repo, err := git.Clone(memory.NewStorage(), args.FS, &git.CloneOptions{
+		cloneOpts := &git.CloneOptions{
 			URL:           args.Remote,
 			ReferenceName: plumbing.NewBranchReferenceName(ghPagesBranch),
 			SingleBranch:  true,
-			Auth:          getAuth(args.Flags),
-		})
+		}
+		basicAuth, ok := getAuth(args.Flags)
+		if ok {
+			cloneOpts.Auth = basicAuth
+		}
+		repo, err := git.Clone(memory.NewStorage(), args.FS, cloneOpts)
 		return args, repo, errors.Wrap(err, "Failed to clone in-memory copy of repo. Be sure the 'gh-pages' orphaned branch exists: https://help.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll#creating-your-site")
 	}).
 	Append(func(args memfsDocsArgs, repo *git.Repository) (memfsDocsArgs, *git.Repository, *git.Worktree, error) {

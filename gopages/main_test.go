@@ -260,11 +260,20 @@ func contains(strs []string, s string) bool {
 
 func TestAuth(t *testing.T) {
 	t.Parallel()
-	assert.Nil(t, getAuth(flags.Args{}))
-	assert.Equal(t,
-		&gitHTTP.BasicAuth{Username: "user", Password: "token"},
-		getAuth(flags.Args{
+	t.Run("no auth flags", func(t *testing.T) {
+		t.Parallel()
+		basicAuth, ok := getAuth(flags.Args{})
+		assert.Nil(t, basicAuth)
+		assert.False(t, ok)
+	})
+
+	t.Run("basic auth flags", func(t *testing.T) {
+		t.Parallel()
+		basicAuth, ok := getAuth(flags.Args{
 			GitHubPagesToken: "token",
 			GitHubPagesUser:  "user",
-		}))
+		})
+		assert.Equal(t, &gitHTTP.BasicAuth{Username: "user", Password: "token"}, basicAuth)
+		assert.True(t, ok)
+	})
 }
