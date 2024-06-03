@@ -119,7 +119,8 @@ func testRun(t *testing.T, tc testRunTestCase) {
 	workTree, err := ghPagesRepo.Worktree()
 	require.NoError(t, err)
 	_, err = workTree.Commit("Initial commit", &git.CommitOptions{
-		Author: commitAuthor(),
+		Author:            commitAuthor(),
+		AllowEmptyCommits: true,
 	})
 	require.NoError(t, err)
 	require.NoError(t, workTree.Checkout(&git.CheckoutOptions{
@@ -145,9 +146,9 @@ func testRun(t *testing.T, tc testRunTestCase) {
 
 	writeFile := func(path, contents string) {
 		path = filepath.Join(modulePath, path)
-		err := os.MkdirAll(filepath.Dir(path), 0700)
+		err := os.MkdirAll(filepath.Dir(path), 0o700)
 		require.NoError(t, err)
-		err = os.WriteFile(path, []byte(contents), 0600)
+		err = os.WriteFile(path, []byte(contents), 0o600)
 		require.NoError(t, err)
 	}
 
