@@ -265,8 +265,12 @@ func JSONFunc() {
 				tc.trySkip(t)
 			}
 			// create a new package "thing" and generate docs for it
-			thing := t.TempDir()
+			thing, err := os.MkdirTemp("", "")
+			require.NoError(t, err)
 			require.NoError(t, os.Chdir(thing))
+			t.Cleanup(func() {
+				os.RemoveAll(thing)
+			})
 			thingFS := osfs.New("")
 			outputFS := memfs.New()
 			writeFile := func(path, contents string) {
