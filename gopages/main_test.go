@@ -27,9 +27,6 @@ func TestMain(t *testing.T) {
 func TestMainArgs(t *testing.T) {
 	t.Parallel()
 	cmd.SetupTestExiter(t)
-	tmp, err := os.MkdirTemp("", "")
-	require.NoError(t, err)
-	defer os.RemoveAll(tmp)
 
 	for _, tc := range []struct {
 		description string
@@ -64,6 +61,7 @@ func TestMainArgs(t *testing.T) {
 			runner := func(string, flags.Args) error {
 				return tc.runnerErr
 			}
+			tmp := t.TempDir()
 			getWD := func() (string, error) {
 				return tmp, tc.wdErr
 			}
@@ -111,9 +109,7 @@ func testRun(t *testing.T, tc testRunTestCase) {
 	}
 
 	// create dummy repo to enable cloning
-	ghPagesDir, err := os.MkdirTemp("", "")
-	require.NoError(t, err)
-	defer os.RemoveAll(ghPagesDir)
+	ghPagesDir := t.TempDir()
 	const defaultBranch = "refs/heads/main"
 	ghPagesRepo, err := git.PlainInitWithOptions(ghPagesDir, &git.PlainInitOptions{
 		InitOptions: git.InitOptions{
@@ -136,9 +132,7 @@ func testRun(t *testing.T, tc testRunTestCase) {
 		Branch: defaultBranch,
 	}))
 
-	modulePath, err := os.MkdirTemp("", "")
-	require.NoError(t, err)
-	defer os.RemoveAll(modulePath)
+	modulePath := t.TempDir()
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	require.NoError(t, os.Chdir(modulePath))
