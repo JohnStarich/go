@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"io"
 
+	"github.com/johnstarich/go/covet/internal/minmax"
 	"github.com/johnstarich/go/covet/internal/span"
 )
 
@@ -26,9 +27,13 @@ func (f File) findContextSpans(contextLines uint) []span.Span {
 
 	var overlappingSpans []span.Span
 	for _, line := range f.Lines {
+		var start uint = 1
+		if contextLines < line.LineNumber { // prevent uint underflow
+			start = line.LineNumber - contextLines
+		}
 		overlappingSpans = append(overlappingSpans, span.Span{
-			Start: max(1, int64(line.LineNumber)-int64(contextLines)),
-			End:   int64(line.LineNumber + contextLines + 1), // may be beyond end of file, but can stop line iteration at EOF
+			Start: minmax.Max(1, start),
+			End:   line.LineNumber + contextLines + 1, // may be beyond end of file, but can stop line iteration at EOF
 		})
 	}
 	spans := []span.Span{overlappingSpans[0]}
@@ -77,7 +82,7 @@ func DiffChunks(file File, fileReader io.Reader) ([]DiffChunk, error) {
 	var chunks []DiffChunk
 	iter := newLineIterator(fileReader)
 	const contextLines = 2
-	var lineNumber int64 = 1
+	var lineNumber uint = 1
 	diffLineIndex := 0
 	for _, s := range file.findContextSpans(contextLines) {
 		if lineNumber < s.Start {
@@ -95,7 +100,7 @@ func DiffChunks(file File, fileReader io.Reader) ([]DiffChunk, error) {
 			op := noOpPrefix
 			if diffLineIndex < len(file.Lines) {
 				diffLine := file.Lines[diffLineIndex]
-				if lineNumber == int64(diffLine.LineNumber) {
+				if lineNumber == diffLine.LineNumber {
 					op = diffLine.diffOpPrefix()
 					diffLineIndex++
 				}
@@ -104,19 +109,12 @@ func DiffChunks(file File, fileReader io.Reader) ([]DiffChunk, error) {
 			lineNumber++
 		}
 		chunks = append(chunks, DiffChunk{
-			FirstLine: uint(s.Start),
-			LastLine:  uint(lineNumber - 1),
+			FirstLine: s.Start,
+			LastLine:  lineNumber - 1,
 			Lines:     lines,
 		})
 	}
 	return chunks, nil
-}
-
-func max(a, b int64) int64 {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 type lineIterator struct {
@@ -129,17 +127,17 @@ func newLineIterator(r io.Reader) *lineIterator {
 	}
 }
 
-func (l *lineIterator) SkipLines(n int64) error {
+func (l *lineIterator) SkipLines(n uint) error {
 	more := true
-	for i := int64(0); i < n && more; i++ {
+	for i := uint(0); i < n && more; i++ {
 		more = l.scanner.Scan()
 	}
 	return l.scanner.Err()
 }
 
-func (l *lineIterator) NextLines(n int64) ([]string, error) {
+func (l *lineIterator) NextLines(n uint) ([]string, error) {
 	lines := make([]string, 0, n)
-	for i := int64(0); i < n; i++ {
+	for i := uint(0); i < n; i++ {
 		more := l.scanner.Scan()
 		if !more {
 			return lines, l.scanner.Err()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"path"
 	"sort"
 	"strings"
@@ -107,10 +108,26 @@ func (c *Covet) addDiff(diffFiles []*gitdiff.File) {
 	}
 }
 
+type signedInteger interface {
+	~int | ~int64
+}
+
+// uintFromBoundedSignedInt converts i to a uint.
+// If i is outside 0 to [math.MaxUint32], then it is capped at those bounds.
+func uintFromBoundedSignedInt[integer signedInteger](i integer) uint {
+	if i < 0 {
+		return 0
+	}
+	if i > math.MaxUint32 {
+		return math.MaxUint32
+	}
+	return uint(i)
+}
+
 func findDiffAddSpans(fragments []*gitdiff.TextFragment) []span.Span {
 	var spans []span.Span
 	for _, fragment := range fragments {
-		lineNumber := fragment.NewPosition
+		lineNumber := uintFromBoundedSignedInt(fragment.NewPosition)
 		for _, line := range fragment.Lines {
 			if line.Op == gitdiff.OpAdd {
 				if len(spans) == 0 || spans[len(spans)-1].End < lineNumber {
@@ -136,13 +153,13 @@ func (c *Covet) addCoverage(fs hackpadfs.FS, baseDir string, coverageFiles []*co
 			}
 			if block.Count > 0 {
 				c.coveredLines[coverageFile] = append(c.coveredLines[coverageFile], span.Span{
-					Start: int64(block.StartLine),
-					End:   int64(block.EndLine + 1),
+					Start: uintFromBoundedSignedInt(block.StartLine),
+					End:   uintFromBoundedSignedInt(block.EndLine + 1),
 				})
 			} else {
 				c.uncoveredLines[coverageFile] = append(c.uncoveredLines[coverageFile], span.Span{
-					Start: int64(block.StartLine),
-					End:   int64(block.EndLine + 1),
+					Start: uintFromBoundedSignedInt(block.StartLine),
+					End:   uintFromBoundedSignedInt(block.EndLine + 1),
 				})
 			}
 		}
@@ -213,19 +230,19 @@ func (c *Covet) DiffCoverageFiles() []File {
 			for i := s.Start; i < s.End; i++ {
 				coveredFile.Lines = append(coveredFile.Lines, Line{
 					Covered:    true,
-					LineNumber: uint(i),
+					LineNumber: i,
 				})
 			}
-			coveredFile.Covered += uint(s.Len())
+			coveredFile.Covered += s.Len()
 		}
 		for _, s := range uncovered {
 			for i := s.Start; i < s.End; i++ {
 				coveredFile.Lines = append(coveredFile.Lines, Line{
 					Covered:    false,
-					LineNumber: uint(i),
+					LineNumber: i,
 				})
 			}
-			coveredFile.Uncovered += uint(s.Len())
+			coveredFile.Uncovered += s.Len()
 		}
 		sort.Slice(coveredFile.Lines, func(a, b int) bool {
 			return coveredFile.Lines[a].LineNumber < coveredFile.Lines[b].LineNumber
@@ -240,7 +257,7 @@ func (c *Covet) DiffCoverageFiles() []File {
 type ReportFileCoverageOptions struct{}
 
 // ReportFileCoverage writes a diff-like plain text report with color to 'w'.
-func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error {
+func (c *Covet) ReportFileCoverage(w io.Writer, f File, _ ReportFileCoverageOptions) error {
 	name := path.Join(c.options.GoCoverageBaseDir, f.Name)
 	r, err := c.options.FS.Open(name)
 	if err != nil {

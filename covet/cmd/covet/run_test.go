@@ -60,7 +60,7 @@ func TestRun(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()
 			require.NoError(t, err)
-			require.NoError(t, fs.Mkdir("tmp", 0700))
+			require.NoError(t, fs.Mkdir("tmp", 0o700))
 			var output bytes.Buffer
 			err = run(
 				tc.args,
@@ -428,7 +428,7 @@ Diff coverage is below target. Add tests for these files:
 			}
 
 			if args.GitHubEndpoint == "replace-me" {
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusInternalServerError)
 				}))
 				args.GitHubEndpoint = server.URL
