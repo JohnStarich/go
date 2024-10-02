@@ -236,7 +236,7 @@ resolver #2
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			ctx := context.Background()
-			getSCUtilDNS := func(ctx context.Context) ([]byte, error) {
+			getSCUtilDNS := func(context.Context) ([]byte, error) {
 				return []byte(tc.scutilOutput), tc.scutilErr
 			}
 			cfg, err := readMacOSDNS(ctx, getSCUtilDNS)
