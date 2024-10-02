@@ -77,7 +77,7 @@ func (a App) packageInstallDir(name string) string {
 	return path.Join(a.staticCacheDir, "install", name)
 }
 
-func (a App) exec(cmd *cobra.Command, args []string) error {
+func (a App) exec(cmd *cobra.Command, _ []string) error {
 	_, err := execPipe.Do(cmd, a)
 	return err
 }

@@ -25,12 +25,12 @@ func TestRemove(t *testing.T) {
 		const name = "foo"
 		var binDir, installDir string
 		app := newTestApp(t, testAppOptions{
-			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+			runCmd: func(app *TestApp, _ *exec.Cmd) error {
 				binDir = app.staticBinDir
 				installDir = app.packageInstallDir(name)
-				require.NoError(t, hackpadfs.MkdirAll(app.fs, binDir, 0700))
-				require.NoError(t, hackpadfs.MkdirAll(app.fs, installDir, 0700))
-				return hackpadfs.WriteFullFile(app.fs, path.Join(installDir, name), nil, 0700)
+				require.NoError(t, hackpadfs.MkdirAll(app.fs, binDir, 0o700))
+				require.NoError(t, hackpadfs.MkdirAll(app.fs, installDir, 0o700))
+				return hackpadfs.WriteFullFile(app.fs, path.Join(installDir, name), nil, 0o700)
 			},
 		})
 		err := app.Run([]string{"install", "--name", name, "-p", thisPackage})

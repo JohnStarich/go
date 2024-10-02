@@ -12,7 +12,7 @@ func TestUserBinDir(t *testing.T) {
 	t.Run("static bin", func(t *testing.T) {
 		t.Parallel()
 		app := App{
-			getEnv: func(s string) string {
+			getEnv: func(string) string {
 				return ""
 			},
 			staticBinDir: staticBin,

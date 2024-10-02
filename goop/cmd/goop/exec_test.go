@@ -29,7 +29,7 @@ func TestExec(t *testing.T) {
 		encodedName := base64EncodeString(name)
 		encodedPackage := base64EncodeString("bar")
 		app := newTestApp(t, testAppOptions{
-			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+			runCmd: func(_ *TestApp, cmd *exec.Cmd) error {
 				return runCmd(cmd) // use real command
 			},
 		})
@@ -108,7 +108,7 @@ Build successful.
 				return nil
 			},
 		})
-		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0o700))
 		f, err := hackpadfs.Create(app.fs, path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS)))
 		require.NoError(t, err)
 		require.NoError(t, f.Close())
@@ -225,18 +225,18 @@ Build successful.
 		app.fs = newFSWithOSPath(app.fs, map[string]string{
 			thisDir: workingDirFSPath,
 		})
-		require.NoError(t, hackpadfs.MkdirAll(app.fs, workingDirFSPath, 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, "go.mod"), []byte("module foo"), 0700))
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, workingDirFSPath, 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, "go.mod"), []byte("module foo"), 0o700))
 		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, "main.go"), []byte(`
 package main
 
 func main() {}
-`), 0700))
+`), 0o700))
 
-		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0o700))
 		// set really oudated bin file that needs an update
 		filePath := path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS))
-		err = hackpadfs.WriteFullFile(app.fs, filePath, nil, 0700)
+		err = hackpadfs.WriteFullFile(app.fs, filePath, nil, 0o700)
 		require.NoError(t, err)
 		year2000 := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 		require.NoError(t, hackpadfs.Chtimes(app.fs, filePath, year2000, year2000))
@@ -320,8 +320,8 @@ func (fs *fsWithOSPath) FromOSPath(name string) (string, error) { //nolint:unpar
 func writeFiles(t *testing.T, fs hackpadfs.FS, files map[string]string, modTime time.Time) {
 	t.Helper()
 	for filePath, contents := range files {
-		require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(filePath), 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(fs, filePath, []byte(contents), 0700))
+		require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(filePath), 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(fs, filePath, []byte(contents), 0o700))
 		for f := filePath; f != path.Dir(f); f = path.Dir(f) {
 			require.NoError(t, hackpadfs.Chtimes(fs, f, modTime, modTime))
 		}

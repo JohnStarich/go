@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func (a App) info(cmd *cobra.Command, args []string) error {
+func (a App) info(cmd *cobra.Command, _ []string) error {
 	binDir, err := a.userBinDir()
 	if err != nil {
 		return err
