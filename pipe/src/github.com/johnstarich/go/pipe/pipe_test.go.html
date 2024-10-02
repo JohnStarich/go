@@ -300,7 +300,7 @@
 <span id="L243" class="ln">   243  </span>	t.Run(&#34;previous error type dropped from bridge func&#34;, func(t *testing.T) {
 <span id="L244" class="ln">   244  </span>		t.Parallel()
 <span id="L245" class="ln">   245  </span>		p1 := New(Options{}).
-<span id="L246" class="ln">   246  </span>			Append(func(args []interface{}) (int, error) {
+<span id="L246" class="ln">   246  </span>			Append(func([]interface{}) (int, error) {
 <span id="L247" class="ln">   247  </span>				return 1, nil
 <span id="L248" class="ln">   248  </span>			})
 <span id="L249" class="ln">   249  </span>		p2 := New(Options{}).
@@ -324,11 +324,11 @@
 <span id="L267" class="ln">   267  </span>	t.Run(&#34;stops on first pipe err&#34;, func(t *testing.T) {
 <span id="L268" class="ln">   268  </span>		t.Parallel()
 <span id="L269" class="ln">   269  </span>		p1 := New(Options{}).
-<span id="L270" class="ln">   270  </span>			Append(func(args []interface{}) (int, error) {
+<span id="L270" class="ln">   270  </span>			Append(func([]interface{}) (int, error) {
 <span id="L271" class="ln">   271  </span>				return 0, fmt.Errorf(&#34;failed&#34;)
 <span id="L272" class="ln">   272  </span>			})
 <span id="L273" class="ln">   273  </span>		p2 := New(Options{}).
-<span id="L274" class="ln">   274  </span>			Append(func(args []interface{}) int {
+<span id="L274" class="ln">   274  </span>			Append(func([]interface{}) int {
 <span id="L275" class="ln">   275  </span>				return 0
 <span id="L276" class="ln">   276  </span>			})
 <span id="L277" class="ln">   277  </span>		p := p1.Concat(p2)
