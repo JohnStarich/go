@@ -142,7 +142,7 @@
 <span id="L85" class="ln">    85  </span>	someError := errors.New(&#34;some error&#34;)
 <span id="L86" class="ln">    86  </span>	dialer := newMacOSDialer(Config{})
 <span id="L87" class="ln">    87  </span>	callCount := 0
-<span id="L88" class="ln">    88  </span>	dialer.readResolvers = func(ctx context.Context) (scutil.Config, error) {
+<span id="L88" class="ln">    88  </span>	dialer.readResolvers = func(context.Context) (scutil.Config, error) {
 <span id="L89" class="ln">    89  </span>		callCount++
 <span id="L90" class="ln">    90  </span>		assert.Less(t, callCount, 2, &#34;Read should not be called more than once&#34;)
 <span id="L91" class="ln">    91  </span>		return someConfig, someError

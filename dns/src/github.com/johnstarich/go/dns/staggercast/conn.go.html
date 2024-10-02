@@ -141,7 +141,7 @@
 <span id="L84" class="ln">    84  </span>	ctx, tickerCancel := context.WithCancel(context.Background())
 <span id="L85" class="ln">    85  </span>	s.tickerCancel = tickerCancel
 <span id="L86" class="ln">    86  </span>
-<span id="L87" class="ln">    87  </span>	totalLength := len(s.conns)
+<span id="L87" class="ln">    87  </span>	totalLength := uint64(len(s.conns))
 <span id="L88" class="ln">    88  </span>	s.replay = make([]chan struct{}, totalLength)
 <span id="L89" class="ln">    89  </span>	for i := range s.replay {
 <span id="L90" class="ln">    90  </span>		s.replay[i] = make(chan struct{})
@@ -157,7 +157,7 @@
 <span id="L100" class="ln">   100  </span>			select {
 <span id="L101" class="ln">   101  </span>			case &lt;-ticker:
 <span id="L102" class="ln">   102  </span>				count := connCount.Inc()
-<span id="L103" class="ln">   103  </span>				if count &gt; uint64(totalLength) {
+<span id="L103" class="ln">   103  </span>				if count &gt; totalLength {
 <span id="L104" class="ln">   104  </span>					<span class="comment">// finished enabling all connections</span>
 <span id="L105" class="ln">   105  </span>					cancel()
 <span id="L106" class="ln">   106  </span>					return
@@ -216,10 +216,10 @@
 <span id="L159" class="ln">   159  </span>	close(s.replay[connIndex]) <span class="comment">// fire off any pending iter&#39;s</span>
 <span id="L160" class="ln">   160  </span>}
 <span id="L161" class="ln">   161  </span>
-<span id="L162" class="ln">   162  </span>func (s *Conn) getConnCount() int {
-<span id="L163" class="ln">   163  </span>	count := int(s.connCount.Load())
-<span id="L164" class="ln">   164  </span>	if count &gt; len(s.conns) {
-<span id="L165" class="ln">   165  </span>		return len(s.conns)
+<span id="L162" class="ln">   162  </span>func (s *Conn) getConnCount() uint64 {
+<span id="L163" class="ln">   163  </span>	count := s.connCount.Load()
+<span id="L164" class="ln">   164  </span>	if connsLen := uint64(len(s.conns)); count &gt; connsLen {
+<span id="L165" class="ln">   165  </span>		return connsLen
 <span id="L166" class="ln">   166  </span>	}
 <span id="L167" class="ln">   167  </span>	return count
 <span id="L168" class="ln">   168  </span>}
@@ -249,7 +249,7 @@
 <span id="L192" class="ln">   192  </span>			}
 <span id="L193" class="ln">   193  </span>		}(ix, conn)
 <span id="L194" class="ln">   194  </span>	}
-<span id="L195" class="ln">   195  </span>	for i := 0; i &lt; s.getConnCount(); i++ {
+<span id="L195" class="ln">   195  </span>	for i := uint64(0); i &lt; s.getConnCount(); i++ {
 <span id="L196" class="ln">   196  </span>		select {
 <span id="L197" class="ln">   197  </span>		case &lt;-done:
 <span id="L198" class="ln">   198  </span>		case &lt;-ctx.Done():
@@ -258,7 +258,7 @@
 <span id="L201" class="ln">   201  </span>	}
 <span id="L202" class="ln">   202  </span>
 <span id="L203" class="ln">   203  </span>ctxDone:
-<span id="L204" class="ln">   204  </span>	if len(errs) &gt;= s.getConnCount() {
+<span id="L204" class="ln">   204  </span>	if uint64(len(errs)) &gt;= s.getConnCount() {
 <span id="L205" class="ln">   205  </span>		<span class="comment">// only return an error if all conns failed</span>
 <span id="L206" class="ln">   206  </span>		err := &lt;-errs
 <span id="L207" class="ln">   207  </span>		return errors.Wrapf(err, &#34;all connections have failed for %q&#34;, op)

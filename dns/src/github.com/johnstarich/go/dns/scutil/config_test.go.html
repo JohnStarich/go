@@ -293,7 +293,7 @@
 <span id="L236" class="ln">   236  </span>		t.Run(tc.description, func(t *testing.T) {
 <span id="L237" class="ln">   237  </span>			t.Parallel()
 <span id="L238" class="ln">   238  </span>			ctx := context.Background()
-<span id="L239" class="ln">   239  </span>			getSCUtilDNS := func(ctx context.Context) ([]byte, error) {
+<span id="L239" class="ln">   239  </span>			getSCUtilDNS := func(context.Context) ([]byte, error) {
 <span id="L240" class="ln">   240  </span>				return []byte(tc.scutilOutput), tc.scutilErr
 <span id="L241" class="ln">   241  </span>			}
 <span id="L242" class="ln">   242  </span>			cfg, err := readMacOSDNS(ctx, getSCUtilDNS)
