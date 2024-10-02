@@ -89,7 +89,7 @@
 <span id="L32" class="ln">    32  </span>		const name = &#34;foo&#34;
 <span id="L33" class="ln">    33  </span>		someErr := errors.New(&#34;some error&#34;)
 <span id="L34" class="ln">    34  </span>		app := newTestApp(t, testAppOptions{
-<span id="L35" class="ln">    35  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+<span id="L35" class="ln">    35  </span>			runCmd: func(*TestApp, *exec.Cmd) error {
 <span id="L36" class="ln">    36  </span>				return someErr
 <span id="L37" class="ln">    37  </span>			},
 <span id="L38" class="ln">    38  </span>		})
@@ -227,10 +227,10 @@
 <span id="L170" class="ln">   170  </span>			},
 <span id="L171" class="ln">   171  </span>		})
 <span id="L172" class="ln">   172  </span>		<span class="comment">// binary already installed, still does a reinstall</span>
-<span id="L173" class="ln">   173  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join(&#34;cache/install&#34;, appName), 0700))
-<span id="L174" class="ln">   174  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;cache/install&#34;, appName, appName), nil, 0700))
-<span id="L175" class="ln">   175  </span>		require.NoError(t, hackpadfs.Mkdir(app.fs, &#34;bin&#34;, 0700))
-<span id="L176" class="ln">   176  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;bin&#34;, appName), []byte(makeShebang(&#34;goop exec ...&#34;)), 0700))
+<span id="L173" class="ln">   173  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join(&#34;cache/install&#34;, appName), 0o700))
+<span id="L174" class="ln">   174  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;cache/install&#34;, appName, appName), nil, 0o700))
+<span id="L175" class="ln">   175  </span>		require.NoError(t, hackpadfs.Mkdir(app.fs, &#34;bin&#34;, 0o700))
+<span id="L176" class="ln">   176  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;bin&#34;, appName), []byte(makeShebang(&#34;goop exec ...&#34;)), 0o700))
 <span id="L177" class="ln">   177  </span>
 <span id="L178" class="ln">   178  </span>		err := app.Run([]string{&#34;install&#34;, &#34;-p&#34;, thisPackage})
 <span id="L179" class="ln">   179  </span>		assert.NoError(t, err)
@@ -276,10 +276,10 @@
 <span id="L219" class="ln">   219  </span>			},
 <span id="L220" class="ln">   220  </span>		})
 <span id="L221" class="ln">   221  </span>		<span class="comment">// non-goop script already installed, fails reinstall</span>
-<span id="L222" class="ln">   222  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join(&#34;cache/install&#34;, appName), 0700))
-<span id="L223" class="ln">   223  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;cache/install&#34;, appName, appName), nil, 0700))
-<span id="L224" class="ln">   224  </span>		require.NoError(t, hackpadfs.Mkdir(app.fs, &#34;bin&#34;, 0700))
-<span id="L225" class="ln">   225  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;bin&#34;, appName), nil, 0700))
+<span id="L222" class="ln">   222  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join(&#34;cache/install&#34;, appName), 0o700))
+<span id="L223" class="ln">   223  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;cache/install&#34;, appName, appName), nil, 0o700))
+<span id="L224" class="ln">   224  </span>		require.NoError(t, hackpadfs.Mkdir(app.fs, &#34;bin&#34;, 0o700))
+<span id="L225" class="ln">   225  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(&#34;bin&#34;, appName), nil, 0o700))
 <span id="L226" class="ln">   226  </span>
 <span id="L227" class="ln">   227  </span>		err := app.Run([]string{&#34;install&#34;, &#34;-p&#34;, thisPackage})
 <span id="L228" class="ln">   228  </span>		assert.EqualError(t, err, `pipe: refusing to overwrite non-goop script file: &#34;bin/goop&#34;`)

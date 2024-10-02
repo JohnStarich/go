@@ -134,7 +134,7 @@
 <span id="L77" class="ln">    77  </span>	return path.Join(a.staticCacheDir, &#34;install&#34;, name)
 <span id="L78" class="ln">    78  </span>}
 <span id="L79" class="ln">    79  </span>
-<span id="L80" class="ln">    80  </span>func (a App) exec(cmd *cobra.Command, args []string) error {
+<span id="L80" class="ln">    80  </span>func (a App) exec(cmd *cobra.Command, _ []string) error {
 <span id="L81" class="ln">    81  </span>	_, err := execPipe.Do(cmd, a)
 <span id="L82" class="ln">    82  </span>	return err
 <span id="L83" class="ln">    83  </span>}

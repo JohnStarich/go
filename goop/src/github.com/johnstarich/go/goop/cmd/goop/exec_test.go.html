@@ -86,7 +86,7 @@
 <span id="L29" class="ln">    29  </span>		encodedName := base64EncodeString(name)
 <span id="L30" class="ln">    30  </span>		encodedPackage := base64EncodeString(&#34;bar&#34;)
 <span id="L31" class="ln">    31  </span>		app := newTestApp(t, testAppOptions{
-<span id="L32" class="ln">    32  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+<span id="L32" class="ln">    32  </span>			runCmd: func(_ *TestApp, cmd *exec.Cmd) error {
 <span id="L33" class="ln">    33  </span>				return runCmd(cmd) <span class="comment">// use real command</span>
 <span id="L34" class="ln">    34  </span>			},
 <span id="L35" class="ln">    35  </span>		})
@@ -165,7 +165,7 @@
 <span id="L108" class="ln">   108  </span>				return nil
 <span id="L109" class="ln">   109  </span>			},
 <span id="L110" class="ln">   110  </span>		})
-<span id="L111" class="ln">   111  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
+<span id="L111" class="ln">   111  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0o700))
 <span id="L112" class="ln">   112  </span>		f, err := hackpadfs.Create(app.fs, path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS)))
 <span id="L113" class="ln">   113  </span>		require.NoError(t, err)
 <span id="L114" class="ln">   114  </span>		require.NoError(t, f.Close())
@@ -282,18 +282,18 @@
 <span id="L225" class="ln">   225  </span>		app.fs = newFSWithOSPath(app.fs, map[string]string{
 <span id="L226" class="ln">   226  </span>			thisDir: workingDirFSPath,
 <span id="L227" class="ln">   227  </span>		})
-<span id="L228" class="ln">   228  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, workingDirFSPath, 0700))
-<span id="L229" class="ln">   229  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, &#34;go.mod&#34;), []byte(&#34;module foo&#34;), 0700))
+<span id="L228" class="ln">   228  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, workingDirFSPath, 0o700))
+<span id="L229" class="ln">   229  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, &#34;go.mod&#34;), []byte(&#34;module foo&#34;), 0o700))
 <span id="L230" class="ln">   230  </span>		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join(workingDirFSPath, &#34;main.go&#34;), []byte(`
 <span id="L231" class="ln">   231  </span>package main
 <span id="L232" class="ln">   232  </span>
 <span id="L233" class="ln">   233  </span>func main() {}
-<span id="L234" class="ln">   234  </span>`), 0700))
+<span id="L234" class="ln">   234  </span>`), 0o700))
 <span id="L235" class="ln">   235  </span>
-<span id="L236" class="ln">   236  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0700))
+<span id="L236" class="ln">   236  </span>		require.NoError(t, hackpadfs.MkdirAll(app.fs, app.packageInstallDir(name), 0o700))
 <span id="L237" class="ln">   237  </span>		<span class="comment">// set really oudated bin file that needs an update</span>
 <span id="L238" class="ln">   238  </span>		filePath := path.Join(app.packageInstallDir(name), name+systemExt(runtime.GOOS))
-<span id="L239" class="ln">   239  </span>		err = hackpadfs.WriteFullFile(app.fs, filePath, nil, 0700)
+<span id="L239" class="ln">   239  </span>		err = hackpadfs.WriteFullFile(app.fs, filePath, nil, 0o700)
 <span id="L240" class="ln">   240  </span>		require.NoError(t, err)
 <span id="L241" class="ln">   241  </span>		year2000 := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 <span id="L242" class="ln">   242  </span>		require.NoError(t, hackpadfs.Chtimes(app.fs, filePath, year2000, year2000))
@@ -377,8 +377,8 @@
 <span id="L320" class="ln">   320  </span>func writeFiles(t *testing.T, fs hackpadfs.FS, files map[string]string, modTime time.Time) {
 <span id="L321" class="ln">   321  </span>	t.Helper()
 <span id="L322" class="ln">   322  </span>	for filePath, contents := range files {
-<span id="L323" class="ln">   323  </span>		require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(filePath), 0700))
-<span id="L324" class="ln">   324  </span>		require.NoError(t, hackpadfs.WriteFullFile(fs, filePath, []byte(contents), 0700))
+<span id="L323" class="ln">   323  </span>		require.NoError(t, hackpadfs.MkdirAll(fs, path.Dir(filePath), 0o700))
+<span id="L324" class="ln">   324  </span>		require.NoError(t, hackpadfs.WriteFullFile(fs, filePath, []byte(contents), 0o700))
 <span id="L325" class="ln">   325  </span>		for f := filePath; f != path.Dir(f); f = path.Dir(f) {
 <span id="L326" class="ln">   326  </span>			require.NoError(t, hackpadfs.Chtimes(fs, f, modTime, modTime))
 <span id="L327" class="ln">   327  </span>		}

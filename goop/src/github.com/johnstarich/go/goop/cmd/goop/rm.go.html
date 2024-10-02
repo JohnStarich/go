@@ -63,7 +63,7 @@
 <span id="L6" class="ln">     6  </span>	&#34;github.com/spf13/cobra&#34;
 <span id="L7" class="ln">     7  </span>)
 <span id="L8" class="ln">     8  </span>
-<span id="L9" class="ln">     9  </span>func (a App) rm(cmd *cobra.Command, args []string) error {
+<span id="L9" class="ln">     9  </span>func (a App) rm(cmd *cobra.Command, _ []string) error {
 <span id="L10" class="ln">    10  </span>	name, err := cmd.Flags().GetString(&#34;name&#34;)
 <span id="L11" class="ln">    11  </span>	if err != nil {
 <span id="L12" class="ln">    12  </span>		return err

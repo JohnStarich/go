@@ -82,12 +82,12 @@
 <span id="L25" class="ln">    25  </span>		const name = &#34;foo&#34;
 <span id="L26" class="ln">    26  </span>		var binDir, installDir string
 <span id="L27" class="ln">    27  </span>		app := newTestApp(t, testAppOptions{
-<span id="L28" class="ln">    28  </span>			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+<span id="L28" class="ln">    28  </span>			runCmd: func(app *TestApp, _ *exec.Cmd) error {
 <span id="L29" class="ln">    29  </span>				binDir = app.staticBinDir
 <span id="L30" class="ln">    30  </span>				installDir = app.packageInstallDir(name)
-<span id="L31" class="ln">    31  </span>				require.NoError(t, hackpadfs.MkdirAll(app.fs, binDir, 0700))
-<span id="L32" class="ln">    32  </span>				require.NoError(t, hackpadfs.MkdirAll(app.fs, installDir, 0700))
-<span id="L33" class="ln">    33  </span>				return hackpadfs.WriteFullFile(app.fs, path.Join(installDir, name), nil, 0700)
+<span id="L31" class="ln">    31  </span>				require.NoError(t, hackpadfs.MkdirAll(app.fs, binDir, 0o700))
+<span id="L32" class="ln">    32  </span>				require.NoError(t, hackpadfs.MkdirAll(app.fs, installDir, 0o700))
+<span id="L33" class="ln">    33  </span>				return hackpadfs.WriteFullFile(app.fs, path.Join(installDir, name), nil, 0o700)
 <span id="L34" class="ln">    34  </span>			},
 <span id="L35" class="ln">    35  </span>		})
 <span id="L36" class="ln">    36  </span>		err := app.Run([]string{&#34;install&#34;, &#34;--name&#34;, name, &#34;-p&#34;, thisPackage})

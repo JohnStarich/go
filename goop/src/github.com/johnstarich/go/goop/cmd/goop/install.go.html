@@ -59,7 +59,7 @@
 <span id="L2" class="ln">     2  </span>
 <span id="L3" class="ln">     3  </span>import &#34;github.com/spf13/cobra&#34;
 <span id="L4" class="ln">     4  </span>
-<span id="L5" class="ln">     5  </span>func (a App) install(cmd *cobra.Command, args []string) error {
+<span id="L5" class="ln">     5  </span>func (a App) install(cmd *cobra.Command, _ []string) error {
 <span id="L6" class="ln">     6  </span>	pkgPattern, err := cmd.Flags().GetString(&#34;package&#34;)
 <span id="L7" class="ln">     7  </span>	if err != nil {
 <span id="L8" class="ln">     8  </span>		return err
