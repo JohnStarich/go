@@ -41,7 +41,7 @@ issues:
         - gochecknoglobals
     # Reflection is slow, so some global reflect types are ok
     - text: ".*Type is a global variable"
-      source: ".*Type = reflect.TypeOf\\(.*"
+      source: ".*Type *= *reflect.TypeOf\\(.*"
       linters:
         - gochecknoglobals
     # False positive for paralleltest usage detection
