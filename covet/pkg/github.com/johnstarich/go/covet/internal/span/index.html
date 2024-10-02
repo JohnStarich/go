@@ -117,7 +117,7 @@
 					<dd>&nbsp; &nbsp; <a href="#Span.Intersection">func (s Span) Intersection(other Span) (Span, bool)</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Span.Len">func (s Span) Len() int64</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Span.Len">func (s Span) Len() uint</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Span.Merge">func (s Span) Merge(other Span) (Span, bool)</a></dd>
@@ -161,8 +161,8 @@
 			<p>Span is a numeric range with an inclusive Start and exclusive End index. i.e. [Start, End)
 
 			<pre>type Span struct {
-<span id="Span.Start"></span>    Start <a href="https://pkg.go.dev/builtin/#int64">int64</a> <span class="comment">// inclusive</span>
-<span id="Span.End"></span>    End   <a href="https://pkg.go.dev/builtin/#int64">int64</a> <span class="comment">// exclusive</span>
+<span id="Span.Start"></span>    Start <a href="https://pkg.go.dev/builtin/#uint">uint</a> <span class="comment">// inclusive</span>
+<span id="Span.End"></span>    End   <a href="https://pkg.go.dev/builtin/#uint">uint</a> <span class="comment">// exclusive</span>
 }
 </pre>
 
@@ -197,7 +197,7 @@ Returns false if they do not intersect.
 					
 					
 				</h3>
-				<pre>func (s <a href="#Span">Span</a>) Len() <a href="https://pkg.go.dev/builtin/#int64">int64</a></pre>
+				<pre>func (s <a href="#Span">Span</a>) Len() <a href="https://pkg.go.dev/builtin/#uint">uint</a></pre>
 				<p>Len returns the distance between Start and End
 
 				

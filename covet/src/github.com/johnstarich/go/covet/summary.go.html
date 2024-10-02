@@ -111,13 +111,13 @@
 <span id="L54" class="ln">    54  </span>
 <span id="L55" class="ln">    55  </span>	var uncoveredFiles []File
 <span id="L56" class="ln">    56  </span>	<span class="comment">// find minimum number of covered lines required to hit target</span>
-<span id="L57" class="ln">    57  </span>	targetMissingLines := 0
+<span id="L57" class="ln">    57  </span>	targetMissingLines := uint(0)
 <span id="L58" class="ln">    58  </span>	totalLines := uint(0)
 <span id="L59" class="ln">    59  </span>	for _, f := range coveredFiles {
 <span id="L60" class="ln">    60  </span>		totalLines += f.Covered + f.Uncovered
 <span id="L61" class="ln">    61  </span>	}
 <span id="L62" class="ln">    62  </span>	if percentDiff := target - current; percentDiff &gt; 0 {
-<span id="L63" class="ln">    63  </span>		targetMissingLines = int(percentDiff * float64(totalLines))
+<span id="L63" class="ln">    63  </span>		targetMissingLines = uint(percentDiff * float64(totalLines))
 <span id="L64" class="ln">    64  </span>	} else {
 <span id="L65" class="ln">    65  </span>		return nil <span class="comment">// target is met</span>
 <span id="L66" class="ln">    66  </span>	}
@@ -128,7 +128,7 @@
 <span id="L71" class="ln">    71  </span>			uncoveredFiles = append(uncoveredFiles, f)
 <span id="L72" class="ln">    72  </span>		}
 <span id="L73" class="ln">    73  </span>		if f.Uncovered &gt; minUncoveredThreshold {
-<span id="L74" class="ln">    74  </span>			targetMissingLines -= int(f.Uncovered)
+<span id="L74" class="ln">    74  </span>			targetMissingLines -= f.Uncovered
 <span id="L75" class="ln">    75  </span>		}
 <span id="L76" class="ln">    76  </span>		if targetMissingLines &lt;= 0 {
 <span id="L77" class="ln">    77  </span>			break

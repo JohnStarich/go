@@ -121,18 +121,18 @@
 <span id="L64" class="ln">    64  </span>	return &#34;&#34;
 <span id="L65" class="ln">    65  </span>}
 <span id="L66" class="ln">    66  </span>
-<span id="L67" class="ln">    67  </span>func formatWidth(s string, width uint) string {
+<span id="L67" class="ln">    67  </span>func formatWidth(s string, width int) string {
 <span id="L68" class="ln">    68  </span>	return fmt.Sprintf(fmt.Sprintf(&#34;%%%ds&#34;, width), s)
 <span id="L69" class="ln">    69  </span>}
 <span id="L70" class="ln">    70  </span>
-<span id="L71" class="ln">    71  </span>func formatWidthLeft(s string, width uint) string {
+<span id="L71" class="ln">    71  </span>func formatWidthLeft(s string, width int) string {
 <span id="L72" class="ln">    72  </span>	return fmt.Sprintf(fmt.Sprintf(&#34;%%-%ds&#34;, width), s)
 <span id="L73" class="ln">    73  </span>}
 <span id="L74" class="ln">    74  </span>
 <span id="L75" class="ln">    75  </span>func formatFraction(numerator, denominator uint) string {
 <span id="L76" class="ln">    76  </span>	nStr := fmt.Sprintf(&#34;%d&#34;, numerator)
 <span id="L77" class="ln">    77  </span>	dStr := fmt.Sprintf(&#34;%d&#34;, denominator)
-<span id="L78" class="ln">    78  </span>	width := uint(minmax.MaxInt(len(nStr), len(dStr)))
+<span id="L78" class="ln">    78  </span>	width := minmax.Max(len(nStr), len(dStr))
 <span id="L79" class="ln">    79  </span>	return fmt.Sprintf(&#34;%s/%s&#34;, formatWidth(nStr, width), formatWidthLeft(dStr, width))
 <span id="L80" class="ln">    80  </span>}
 <span id="L81" class="ln">    81  </span>

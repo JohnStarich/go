@@ -73,7 +73,7 @@
 <span id="L16" class="ln">    16  </span>
 <span id="L17" class="ln">    17  </span><span class="comment">// New categorizes the given percentage (between 0 and 1) as a coverage status</span>
 <span id="L18" class="ln">    18  </span>func New(f float64) Status {
-<span id="L19" class="ln">    19  </span>	<span class="comment">//nolint:gomnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we&#39;re ok.</span>
+<span id="L19" class="ln">    19  </span>	<span class="comment">//nolint:mnd // These magic numbers are indeed arbitrary thresholds. As long as they are monotonically increasing from 0 to 1, we&#39;re ok.</span>
 <span id="L20" class="ln">    20  </span>	switch {
 <span id="L21" class="ln">    21  </span>	case f &lt; 0.50:
 <span id="L22" class="ln">    22  </span>		return coverageError

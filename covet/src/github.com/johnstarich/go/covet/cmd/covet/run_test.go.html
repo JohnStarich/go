@@ -117,7 +117,7 @@
 <span id="L60" class="ln">    60  </span>			t.Parallel()
 <span id="L61" class="ln">    61  </span>			fs, err := mem.NewFS()
 <span id="L62" class="ln">    62  </span>			require.NoError(t, err)
-<span id="L63" class="ln">    63  </span>			require.NoError(t, fs.Mkdir(&#34;tmp&#34;, 0700))
+<span id="L63" class="ln">    63  </span>			require.NoError(t, fs.Mkdir(&#34;tmp&#34;, 0o700))
 <span id="L64" class="ln">    64  </span>			var output bytes.Buffer
 <span id="L65" class="ln">    65  </span>			err = run(
 <span id="L66" class="ln">    66  </span>				tc.args,
@@ -485,7 +485,7 @@
 <span id="L428" class="ln">   428  </span>			}
 <span id="L429" class="ln">   429  </span>
 <span id="L430" class="ln">   430  </span>			if args.GitHubEndpoint == &#34;replace-me&#34; {
-<span id="L431" class="ln">   431  </span>				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+<span id="L431" class="ln">   431  </span>				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 <span id="L432" class="ln">   432  </span>					w.WriteHeader(http.StatusInternalServerError)
 <span id="L433" class="ln">   433  </span>				}))
 <span id="L434" class="ln">   434  </span>				args.GitHubEndpoint = server.URL

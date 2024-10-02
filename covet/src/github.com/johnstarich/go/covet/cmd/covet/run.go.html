@@ -287,7 +287,7 @@
 <span id="L230" class="ln">   230  </span>	for _, l := range lines[nextLineIndex:] {
 <span id="L231" class="ln">   231  </span>		nextLineIndex++
 <span id="L232" class="ln">   232  </span>		if !l.Covered {
-<span id="L233" class="ln">   233  </span>			n := int64(l.LineNumber)
+<span id="L233" class="ln">   233  </span>			n := l.LineNumber
 <span id="L234" class="ln">   234  </span>			uncovered = span.Span{
 <span id="L235" class="ln">   235  </span>				Start: n,
 <span id="L236" class="ln">   236  </span>				End:   n + 1,
@@ -298,7 +298,7 @@
 <span id="L241" class="ln">   241  </span>	}
 <span id="L242" class="ln">   242  </span>	<span class="comment">// find next line number jump or covered line</span>
 <span id="L243" class="ln">   243  </span>	for _, l := range lines[nextLineIndex:] {
-<span id="L244" class="ln">   244  </span>		if l.Covered || int64(l.LineNumber) != uncovered.End {
+<span id="L244" class="ln">   244  </span>		if l.Covered || l.LineNumber != uncovered.End {
 <span id="L245" class="ln">   245  </span>			break
 <span id="L246" class="ln">   246  </span>		}
 <span id="L247" class="ln">   247  </span>		nextLineIndex++

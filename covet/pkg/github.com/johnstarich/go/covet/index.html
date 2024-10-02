@@ -128,7 +128,7 @@
 					<dd>&nbsp; &nbsp; <a href="#Covet.PriorityUncoveredFiles">func (c *Covet) PriorityUncoveredFiles(target uint) []File</a></dd>
 				
 					
-					<dd>&nbsp; &nbsp; <a href="#Covet.ReportFileCoverage">func (c *Covet) ReportFileCoverage(w io.Writer, f File, options ReportFileCoverageOptions) error</a></dd>
+					<dd>&nbsp; &nbsp; <a href="#Covet.ReportFileCoverage">func (c *Covet) ReportFileCoverage(w io.Writer, f File, _ ReportFileCoverageOptions) error</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Covet.ReportSummaryColorTerminal">func (c *Covet) ReportSummaryColorTerminal(w io.Writer, options ReportSummaryOptions) error</a></dd>
@@ -201,7 +201,7 @@
 		
 			
 			
-			<h2 id="Covet">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L23">Covet</a>
+			<h2 id="Covet">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L24">Covet</a>
 				<a class="permalink" href="#Covet">&#xb6;</a>
 				
 				
@@ -223,7 +223,7 @@
 
 			
 				
-				<h3 id="Parse">func <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L46">Parse</a>
+				<h3 id="Parse">func <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L47">Parse</a>
 					<a class="permalink" href="#Parse">&#xb6;</a>
 					
 					
@@ -237,7 +237,7 @@
 
 			
 				
-				<h3 id="Covet.DiffCoverageFiles">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L204">DiffCoverageFiles</a>
+				<h3 id="Covet.DiffCoverageFiles">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L221">DiffCoverageFiles</a>
 					<a class="permalink" href="#Covet.DiffCoverageFiles">&#xb6;</a>
 					
 					
@@ -251,7 +251,7 @@ These files can be used to display diff coverage information.
 				
 			
 				
-				<h3 id="Covet.DiffCovered">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L186">DiffCovered</a>
+				<h3 id="Covet.DiffCovered">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L203">DiffCovered</a>
 					<a class="permalink" href="#Covet.DiffCovered">&#xb6;</a>
 					
 					
@@ -278,12 +278,12 @@ The list contains just enough Files worth of uncovered lines necessary to meet t
 				
 			
 				
-				<h3 id="Covet.ReportFileCoverage">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L243">ReportFileCoverage</a>
+				<h3 id="Covet.ReportFileCoverage">func (*Covet) <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L260">ReportFileCoverage</a>
 					<a class="permalink" href="#Covet.ReportFileCoverage">&#xb6;</a>
 					
 					
 				</h3>
-				<pre>func (c *<a href="#Covet">Covet</a>) ReportFileCoverage(w <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>, f <a href="#File">File</a>, options <a href="#ReportFileCoverageOptions">ReportFileCoverageOptions</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
+				<pre>func (c *<a href="#Covet">Covet</a>) ReportFileCoverage(w <a href="https://pkg.go.dev/io/">io</a>.<a href="https://pkg.go.dev/io/#Writer">Writer</a>, f <a href="#File">File</a>, _ <a href="#ReportFileCoverageOptions">ReportFileCoverageOptions</a>) <a href="https://pkg.go.dev/builtin/#error">error</a></pre>
 				<p>ReportFileCoverage writes a diff-like plain text report with color to &apos;w&apos;.
 
 				
@@ -402,7 +402,7 @@ Includes the associated beginning and end line numbers of the chunk and the diff
 		
 			
 			
-			<h2 id="Options">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L31">Options</a>
+			<h2 id="Options">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L32">Options</a>
 				<a class="permalink" href="#Options">&#xb6;</a>
 				
 				
@@ -438,7 +438,7 @@ Includes the associated beginning and end line numbers of the chunk and the diff
 		
 			
 			
-			<h2 id="ReportFileCoverageOptions">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L240">ReportFileCoverageOptions</a>
+			<h2 id="ReportFileCoverageOptions">type <a href="/go/covet/src/github.com/johnstarich/go/covet/covet.go.html#L257">ReportFileCoverageOptions</a>
 				<a class="permalink" href="#ReportFileCoverageOptions">&#xb6;</a>
 				
 				

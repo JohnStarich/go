@@ -55,57 +55,29 @@
 
 
 <script type="text/javascript">document.ANALYSIS_DATA = null;</script>
-<pre><span id="L1" class="ln">     1  </span><span class="comment">// Package minmax contains several type-specific min and max functions.</span>
+<pre><span id="L1" class="ln">     1  </span><span class="comment">// Package minmax contains min and max functions.</span>
 <span id="L2" class="ln">     2  </span>package minmax
 <span id="L3" class="ln">     3  </span>
-<span id="L4" class="ln">     4  </span><span class="comment">// MinInt64 returns the smallest of a and b</span>
-<span id="L5" class="ln">     5  </span>func MinInt64(a, b int64) int64 {
-<span id="L6" class="ln">     6  </span>	if a &lt; b {
-<span id="L7" class="ln">     7  </span>		return a
-<span id="L8" class="ln">     8  </span>	}
-<span id="L9" class="ln">     9  </span>	return b
-<span id="L10" class="ln">    10  </span>}
-<span id="L11" class="ln">    11  </span>
-<span id="L12" class="ln">    12  </span><span class="comment">// MaxInt64 returns the largest of a and b</span>
-<span id="L13" class="ln">    13  </span>func MaxInt64(a, b int64) int64 {
-<span id="L14" class="ln">    14  </span>	if a &gt; b {
-<span id="L15" class="ln">    15  </span>		return a
-<span id="L16" class="ln">    16  </span>	}
-<span id="L17" class="ln">    17  </span>	return b
-<span id="L18" class="ln">    18  </span>}
-<span id="L19" class="ln">    19  </span>
-<span id="L20" class="ln">    20  </span><span class="comment">// MinUint returns the smallest of a and b</span>
-<span id="L21" class="ln">    21  </span>func MinUint(a, b uint) uint {
-<span id="L22" class="ln">    22  </span>	if a &lt; b {
-<span id="L23" class="ln">    23  </span>		return a
-<span id="L24" class="ln">    24  </span>	}
-<span id="L25" class="ln">    25  </span>	return b
-<span id="L26" class="ln">    26  </span>}
-<span id="L27" class="ln">    27  </span>
-<span id="L28" class="ln">    28  </span><span class="comment">// MaxUint returns the largest of a and b</span>
-<span id="L29" class="ln">    29  </span>func MaxUint(a, b uint) uint {
-<span id="L30" class="ln">    30  </span>	if a &gt; b {
-<span id="L31" class="ln">    31  </span>		return a
-<span id="L32" class="ln">    32  </span>	}
-<span id="L33" class="ln">    33  </span>	return b
-<span id="L34" class="ln">    34  </span>}
-<span id="L35" class="ln">    35  </span>
-<span id="L36" class="ln">    36  </span><span class="comment">// MinInt returns the smallest of a and b</span>
-<span id="L37" class="ln">    37  </span>func MinInt(a, b int) int {
-<span id="L38" class="ln">    38  </span>	if a &lt; b {
-<span id="L39" class="ln">    39  </span>		return a
-<span id="L40" class="ln">    40  </span>	}
-<span id="L41" class="ln">    41  </span>	return b
-<span id="L42" class="ln">    42  </span>}
-<span id="L43" class="ln">    43  </span>
-<span id="L44" class="ln">    44  </span><span class="comment">// MaxInt returns the largest of a and b</span>
-<span id="L45" class="ln">    45  </span>func MaxInt(a, b int) int {
-<span id="L46" class="ln">    46  </span>	if a &gt; b {
-<span id="L47" class="ln">    47  </span>		return a
-<span id="L48" class="ln">    48  </span>	}
-<span id="L49" class="ln">    49  </span>	return b
-<span id="L50" class="ln">    50  </span>}
-<span id="L51" class="ln">    51  </span>
+<span id="L4" class="ln">     4  </span>type ordered interface {
+<span id="L5" class="ln">     5  </span>	~int | ~int64 | ~uint | ~uint64
+<span id="L6" class="ln">     6  </span>}
+<span id="L7" class="ln">     7  </span>
+<span id="L8" class="ln">     8  </span><span class="comment">// Min returns the smallest of a and b</span>
+<span id="L9" class="ln">     9  </span>func Min[Value ordered](a, b Value) Value {
+<span id="L10" class="ln">    10  </span>	if a &lt; b {
+<span id="L11" class="ln">    11  </span>		return a
+<span id="L12" class="ln">    12  </span>	}
+<span id="L13" class="ln">    13  </span>	return b
+<span id="L14" class="ln">    14  </span>}
+<span id="L15" class="ln">    15  </span>
+<span id="L16" class="ln">    16  </span><span class="comment">// Max returns the largest of a and b</span>
+<span id="L17" class="ln">    17  </span>func Max[Value ordered](a, b Value) Value {
+<span id="L18" class="ln">    18  </span>	if a &gt; b {
+<span id="L19" class="ln">    19  </span>		return a
+<span id="L20" class="ln">    20  </span>	}
+<span id="L21" class="ln">    21  </span>	return b
+<span id="L22" class="ln">    22  </span>}
+<span id="L23" class="ln">    23  </span>
 </pre><p></p>
 
 <div id="footer">
