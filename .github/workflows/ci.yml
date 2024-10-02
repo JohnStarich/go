@@ -27,11 +27,12 @@ jobs:
           - 1.20.x
           - 1.21.x
           - 1.22.x
+          - 1.23.x
         include:
         - platform: macos-latest
-          go: 1.22.x
+          go: 1.23.x
         - platform: windows-latest
-          go: 1.22.x
+          go: 1.23.x
     name: Test (Go ${{ matrix.go }} on ${{ matrix.platform }})
     runs-on: ${{ matrix.platform }}
     permissions:
@@ -45,9 +46,9 @@ jobs:
     - name: Test
       run: make -k test
       env:
-        LINT_GO_VERSION: 1.19
+        LINT_GO_VERSION: 1.23
     - name: Publish test coverage
-      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.19.x'"
+      if: "matrix.platform == 'ubuntu-latest' && matrix.go == '1.23.x'"
       run: |
         # Fetch more commits for coverage diff.
         commits=${{ github.event.pull_request.commits }}
