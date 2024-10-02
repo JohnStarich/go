@@ -102,13 +102,15 @@
 <span id="L45" class="ln">    45  </span>}
 <span id="L46" class="ln">    46  </span>
 <span id="L47" class="ln">    47  </span><span class="comment">// Linker returns an appropriate source.Linker for the given command line args</span>
-<span id="L48" class="ln">    48  </span>func (a Args) Linker(modulePackage string) (source.Linker, error) { <span class="comment">//nolint:ireturn // This method&#39;s purpose is to determine the correct implementation of source.Linker to return</span>
-<span id="L49" class="ln">    49  </span>	if a.SourceLinkTemplate != &#34;&#34; {
-<span id="L50" class="ln">    50  </span>		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)
-<span id="L51" class="ln">    51  </span>	}
-<span id="L52" class="ln">    52  </span>	return newGoPagesLinker(a.BaseURL), nil
-<span id="L53" class="ln">    53  </span>}
-<span id="L54" class="ln">    54  </span>
+<span id="L48" class="ln">    48  </span><span class="comment">//</span>
+<span id="L49" class="ln">    49  </span><span class="comment">//nolint:ireturn // This method&#39;s purpose is to determine the correct implementation of source.Linker to return</span>
+<span id="L50" class="ln">    50  </span>func (a Args) Linker(modulePackage string) (source.Linker, error) {
+<span id="L51" class="ln">    51  </span>	if a.SourceLinkTemplate != &#34;&#34; {
+<span id="L52" class="ln">    52  </span>		return newTemplateLinker(modulePackage, a.SourceLinkTemplate)
+<span id="L53" class="ln">    53  </span>	}
+<span id="L54" class="ln">    54  </span>	return newGoPagesLinker(a.BaseURL), nil
+<span id="L55" class="ln">    55  </span>}
+<span id="L56" class="ln">    56  </span>
 </pre><p></p>
 
 <div id="footer">

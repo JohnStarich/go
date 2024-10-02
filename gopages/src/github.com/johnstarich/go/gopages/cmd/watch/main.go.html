@@ -240,7 +240,7 @@
 <span id="L183" class="ln">   183  </span>	fs   billy.Filesystem
 <span id="L184" class="ln">   184  </span>}
 <span id="L185" class="ln">   185  </span>
-<span id="L186" class="ln">   186  </span>func (h *httpFileWrapper) Readdir(count int) ([]os.FileInfo, error) {
+<span id="L186" class="ln">   186  </span>func (h *httpFileWrapper) Readdir(int) ([]os.FileInfo, error) {
 <span id="L187" class="ln">   187  </span>	return h.fs.ReadDir(h.name)
 <span id="L188" class="ln">   188  </span>}
 <span id="L189" class="ln">   189  </span>

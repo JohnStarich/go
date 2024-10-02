@@ -172,14 +172,14 @@
 <span id="L115" class="ln">   115  </span>			u := args.Linker.LinkToSource(src, source.LinkOptions{})
 <span id="L116" class="ln">   116  </span>			return u.String()
 <span id="L117" class="ln">   117  </span>		}
-<span id="L118" class="ln">   118  </span>		pres.URLForSrcPos = func(src string, line, low, high int) string {
+<span id="L118" class="ln">   118  </span>		pres.URLForSrcPos = func(src string, line, _, _ int) string {
 <span id="L119" class="ln">   119  </span>			src = strings.TrimPrefix(src, &#34;/src/&#34;)
 <span id="L120" class="ln">   120  </span>			u := args.Linker.LinkToSource(src, source.LinkOptions{
 <span id="L121" class="ln">   121  </span>				Line: line,
 <span id="L122" class="ln">   122  </span>			})
 <span id="L123" class="ln">   123  </span>			return u.String()
 <span id="L124" class="ln">   124  </span>		}
-<span id="L125" class="ln">   125  </span>		pres.URLForSrcQuery = func(src, query string, line int) string {
+<span id="L125" class="ln">   125  </span>		pres.URLForSrcQuery = func(src, _ string, line int) string {
 <span id="L126" class="ln">   126  </span>			src = strings.TrimPrefix(src, &#34;/src/&#34;)
 <span id="L127" class="ln">   127  </span>			u := args.Linker.LinkToSource(src, source.LinkOptions{
 <span id="L128" class="ln">   128  </span>				Line: line,
@@ -521,7 +521,7 @@
 <span id="L464" class="ln">   464  </span>	return f.OpenFile(name, 0, 0)
 <span id="L465" class="ln">   465  </span>}
 <span id="L466" class="ln">   466  </span>
-<span id="L467" class="ln">   467  </span>func (f *filesystemOpener) RootType(path string) vfs.RootType {
+<span id="L467" class="ln">   467  </span>func (f *filesystemOpener) RootType(string) vfs.RootType {
 <span id="L468" class="ln">   468  </span>	return &#34;&#34;
 <span id="L469" class="ln">   469  </span>}
 <span id="L470" class="ln">   470  </span>
