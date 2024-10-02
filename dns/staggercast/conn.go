@@ -84,7 +84,7 @@ func (s *Conn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc) {
 	ctx, tickerCancel := context.WithCancel(context.Background())
 	s.tickerCancel = tickerCancel
 
-	totalLength := len(s.conns)
+	totalLength := uint64(len(s.conns))
 	s.replay = make([]chan struct{}, totalLength)
 	for i := range s.replay {
 		s.replay[i] = make(chan struct{})
@@ -100,7 +100,7 @@ func (s *Conn) Stagger(ticker <-chan struct{}, cancel context.CancelFunc) {
 			select {
 			case <-ticker:
 				count := connCount.Inc()
-				if count > uint64(totalLength) {
+				if count > totalLength {
 					// finished enabling all connections
 					cancel()
 					return
@@ -159,10 +159,10 @@ func (s *Conn) runReplay(connIndex uint64) {
 	close(s.replay[connIndex]) // fire off any pending iter's
 }
 
-func (s *Conn) getConnCount() int {
-	count := int(s.connCount.Load())
-	if count > len(s.conns) {
-		return len(s.conns)
+func (s *Conn) getConnCount() uint64 {
+	count := s.connCount.Load()
+	if connsLen := uint64(len(s.conns)); count > connsLen {
+		return connsLen
 	}
 	return count
 }
@@ -192,7 +192,7 @@ func (s *Conn) iter(op connOp, fn func(conn PacketConn) (keepGoing bool, err err
 			}
 		}(ix, conn)
 	}
-	for i := 0; i < s.getConnCount(); i++ {
+	for i := uint64(0); i < s.getConnCount(); i++ {
 		select {
 		case <-done:
 		case <-ctx.Done():
@@ -201,7 +201,7 @@ func (s *Conn) iter(op connOp, fn func(conn PacketConn) (keepGoing bool, err err
 	}
 
 ctxDone:
-	if len(errs) >= s.getConnCount() {
+	if uint64(len(errs)) >= s.getConnCount() {
 		// only return an error if all conns failed
 		err := <-errs
 		return errors.Wrapf(err, "all connections have failed for %q", op)

@@ -130,7 +130,7 @@ func TestDialDNS(t *testing.T) {
 
 			res := &net.Resolver{
 				PreferGo: true,
-				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+				Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
 					var conns []PacketConn
 					for _, addr := range servers {
 						conns = append(conns, dialUDP(t, addr))
@@ -182,7 +182,7 @@ func TestStagger(t *testing.T) {
 		servers := startServers(t)
 		res := &net.Resolver{
 			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
 				var conns []PacketConn
 				for _, addr := range servers {
 					conns = append(conns, dialUDP(t, addr))
@@ -212,7 +212,7 @@ func TestStagger(t *testing.T) {
 		const delay = 1 * time.Second
 		res := &net.Resolver{
 			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			Dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
 				var conns []PacketConn
 				for _, addr := range servers {
 					conns = append(conns, dialUDP(t, addr))
@@ -256,7 +256,7 @@ func TestStagger(t *testing.T) {
 		servers := startServers(t)
 		res := &net.Resolver{
 			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
 				var conns []PacketConn
 				for _, addr := range servers {
 					conns = append(conns, dialUDP(t, addr))

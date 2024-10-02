@@ -85,7 +85,7 @@ func TestEnsureNameservers(t *testing.T) {
 	someError := errors.New("some error")
 	dialer := newMacOSDialer(Config{})
 	callCount := 0
-	dialer.readResolvers = func(ctx context.Context) (scutil.Config, error) {
+	dialer.readResolvers = func(context.Context) (scutil.Config, error) {
 		callCount++
 		assert.Less(t, callCount, 2, "Read should not be called more than once")
 		return someConfig, someError

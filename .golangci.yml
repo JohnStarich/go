@@ -6,18 +6,18 @@ linters:
     - errname
     - errorlint
     - exhaustive
-    - exportloopref
+    - exportloopref  # After minimum Go version hits 1.22, replace this with 'copyloopvar'
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - goconst
     - gocritic
     - gofmt
-    - gomnd
     - gosec
     - ireturn
     - makezero
     - misspell
+    - mnd
     - nakedret
     - nilerr
     - noctx
@@ -41,7 +41,7 @@ issues:
         - gochecknoglobals
     # Reflection is slow, so some global reflect types are ok
     - text: ".*Type is a global variable"
-      source: ".*Type = reflect.TypeOf\\(.*"
+      source: ".*Type *= *reflect.TypeOf\\(.*"
       linters:
         - gochecknoglobals
     # False positive for paralleltest usage detection
@@ -56,6 +56,7 @@ linters-settings:
       - anon
       - error
       - empty
+      - generic
       - stdlib
       # Also allow these common interfaces:
       - github\.com\/go-git\/go-billy\/v5

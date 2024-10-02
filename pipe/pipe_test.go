@@ -243,7 +243,7 @@ func TestPipeConcat(t *testing.T) {
 	t.Run("previous error type dropped from bridge func", func(t *testing.T) {
 		t.Parallel()
 		p1 := New(Options{}).
-			Append(func(args []interface{}) (int, error) {
+			Append(func([]interface{}) (int, error) {
 				return 1, nil
 			})
 		p2 := New(Options{}).
@@ -267,11 +267,11 @@ func TestPipeConcat(t *testing.T) {
 	t.Run("stops on first pipe err", func(t *testing.T) {
 		t.Parallel()
 		p1 := New(Options{}).
-			Append(func(args []interface{}) (int, error) {
+			Append(func([]interface{}) (int, error) {
 				return 0, fmt.Errorf("failed")
 			})
 		p2 := New(Options{}).
-			Append(func(args []interface{}) int {
+			Append(func([]interface{}) int {
 				return 0
 			})
 		p := p1.Concat(p2)

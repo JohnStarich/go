@@ -230,7 +230,7 @@ func findFirstUncoveredLines(lines []covet.Line, startIndex int) (uncovered span
 	for _, l := range lines[nextLineIndex:] {
 		nextLineIndex++
 		if !l.Covered {
-			n := int64(l.LineNumber)
+			n := l.LineNumber
 			uncovered = span.Span{
 				Start: n,
 				End:   n + 1,
@@ -241,7 +241,7 @@ func findFirstUncoveredLines(lines []covet.Line, startIndex int) (uncovered span
 	}
 	// find next line number jump or covered line
 	for _, l := range lines[nextLineIndex:] {
-		if l.Covered || int64(l.LineNumber) != uncovered.End {
+		if l.Covered || l.LineNumber != uncovered.End {
 			break
 		}
 		nextLineIndex++

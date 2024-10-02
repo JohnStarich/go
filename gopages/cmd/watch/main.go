@@ -183,7 +183,7 @@ type httpFileWrapper struct {
 	fs   billy.Filesystem
 }
 
-func (h *httpFileWrapper) Readdir(count int) ([]os.FileInfo, error) {
+func (h *httpFileWrapper) Readdir(int) ([]os.FileInfo, error) {
 	return h.fs.ReadDir(h.name)
 }
 

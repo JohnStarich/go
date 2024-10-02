@@ -32,7 +32,7 @@ func TestInstall(t *testing.T) {
 		const name = "foo"
 		someErr := errors.New("some error")
 		app := newTestApp(t, testAppOptions{
-			runCmd: func(app *TestApp, cmd *exec.Cmd) error {
+			runCmd: func(*TestApp, *exec.Cmd) error {
 				return someErr
 			},
 		})
@@ -170,10 +170,10 @@ Build successful.
 			},
 		})
 		// binary already installed, still does a reinstall
-		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0700))
-		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), []byte(makeShebang("goop exec ...")), 0700))
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0o700))
+		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), []byte(makeShebang("goop exec ...")), 0o700))
 
 		err := app.Run([]string{"install", "-p", thisPackage})
 		assert.NoError(t, err)
@@ -219,10 +219,10 @@ Build successful.
 			},
 		})
 		// non-goop script already installed, fails reinstall
-		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0700))
-		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0700))
-		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), nil, 0700))
+		require.NoError(t, hackpadfs.MkdirAll(app.fs, path.Join("cache/install", appName), 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("cache/install", appName, appName), nil, 0o700))
+		require.NoError(t, hackpadfs.Mkdir(app.fs, "bin", 0o700))
+		require.NoError(t, hackpadfs.WriteFullFile(app.fs, path.Join("bin", appName), nil, 0o700))
 
 		err := app.Run([]string{"install", "-p", thisPackage})
 		assert.EqualError(t, err, `pipe: refusing to overwrite non-goop script file: "bin/goop"`)

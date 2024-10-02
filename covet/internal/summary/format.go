@@ -64,18 +64,18 @@ func (f Format) StatusIcon(status coverstatus.Status) string {
 	return ""
 }
 
-func formatWidth(s string, width uint) string {
+func formatWidth(s string, width int) string {
 	return fmt.Sprintf(fmt.Sprintf("%%%ds", width), s)
 }
 
-func formatWidthLeft(s string, width uint) string {
+func formatWidthLeft(s string, width int) string {
 	return fmt.Sprintf(fmt.Sprintf("%%-%ds", width), s)
 }
 
 func formatFraction(numerator, denominator uint) string {
 	nStr := fmt.Sprintf("%d", numerator)
 	dStr := fmt.Sprintf("%d", denominator)
-	width := uint(minmax.MaxInt(len(nStr), len(dStr)))
+	width := minmax.Max(len(nStr), len(dStr))
 	return fmt.Sprintf("%s/%s", formatWidth(nStr, width), formatWidthLeft(dStr, width))
 }
 

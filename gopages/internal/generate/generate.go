@@ -115,14 +115,14 @@ var makePresentationPipe = pipe.New(pipe.Options{}).
 			u := args.Linker.LinkToSource(src, source.LinkOptions{})
 			return u.String()
 		}
-		pres.URLForSrcPos = func(src string, line, low, high int) string {
+		pres.URLForSrcPos = func(src string, line, _, _ int) string {
 			src = strings.TrimPrefix(src, "/src/")
 			u := args.Linker.LinkToSource(src, source.LinkOptions{
 				Line: line,
 			})
 			return u.String()
 		}
-		pres.URLForSrcQuery = func(src, query string, line int) string {
+		pres.URLForSrcQuery = func(src, _ string, line int) string {
 			src = strings.TrimPrefix(src, "/src/")
 			u := args.Linker.LinkToSource(src, source.LinkOptions{
 				Line: line,
@@ -464,7 +464,7 @@ func (f *filesystemOpener) Open(name string) (vfs.ReadSeekCloser, error) {
 	return f.OpenFile(name, 0, 0)
 }
 
-func (f *filesystemOpener) RootType(path string) vfs.RootType {
+func (f *filesystemOpener) RootType(string) vfs.RootType {
 	return ""
 }
 

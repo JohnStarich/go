@@ -2,7 +2,7 @@ package main
 
 import "github.com/spf13/cobra"
 
-func (a App) install(cmd *cobra.Command, args []string) error {
+func (a App) install(cmd *cobra.Command, _ []string) error {
 	pkgPattern, err := cmd.Flags().GetString("package")
 	if err != nil {
 		return err
