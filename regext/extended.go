@@ -1,4 +1,4 @@
-// Package regext enables extended regex, where spaces are ignored and inline comments are supported.
+// Package regext enables extended regex, where spaces are ignored, and inline comments are supported.
 package regext
 
 import (

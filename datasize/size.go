@@ -1,4 +1,4 @@
-// Package datasize parses, formats, and converts to differents units in bytes.
+// Package datasize parses, formats, and converts to different units in bytes.
 package datasize
 
 import (

@@ -10,7 +10,7 @@ In my experience, it is common to disable CGO for macOS CI builds. However, ther
 import _ "github.com/johnstarich/go/dns/init"
 ```
 
-This resolver reads the system's full DNS configuration and attempts to find the a successful nameserver. First, the dialer reaches out to the default nameserver. If the response isn't fast enough, more nameservers are attempted simultaneously.
+This resolver reads the system's full DNS configuration and attempts to find a successful nameserver. First, the dialer reaches out to the default nameserver. If the response isn't fast enough, more nameservers are attempted simultaneously.
 
 On non-macOS builds a normal resolver is used, so this is safe to use for multi-platform builds.
 

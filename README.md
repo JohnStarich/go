@@ -10,7 +10,7 @@ The most useful to me are:
 
 And these are pretty great too:
 
-* [datasize](./datasize): Parse, format, and convert to differents units in bytes
+* [datasize](./datasize): Parse, format, and convert to different units in bytes
 * [dns](./dns): Implements a drop-in replacement for DNS, since Go's DNS on macOS doesn't always work
 * [pipe](./pipe): Simplify error handling while keeping the original intent clear
 * [plist](./plist): Parses macOS `*.plist` input data and formats them as JSON.

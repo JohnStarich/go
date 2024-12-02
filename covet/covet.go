@@ -112,7 +112,7 @@ type signedInteger interface {
 	~int | ~int64
 }
 
-// uintFromBoundedSignedInt converts i to a uint.
+// uintFromBoundedSignedInt converts i to an uint.
 // If i is outside 0 to [math.MaxUint32], then it is capped at those bounds.
 func uintFromBoundedSignedInt[integer signedInteger](i integer) uint {
 	if i < 0 {

@@ -53,7 +53,7 @@ func findReportableUncoveredFiles(coveredFiles []File, target, current float64) 
 	})
 
 	var uncoveredFiles []File
-	// find minimum number of covered lines required to hit target
+	// find the minimum number of covered lines required to hit target
 	targetMissingLines := uint(0)
 	totalLines := uint(0)
 	for _, f := range coveredFiles {
