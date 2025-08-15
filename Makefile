@@ -66,7 +66,7 @@ test-publish-coverage:
 %-test: test-prep
 	WD="$$PWD"; \
 	cd $*; \
-	go test \
+	CGO_ENABLED=1 go test \
 		-race \
 		-cover -coverprofile "$$WD/cover/$*.out" \
 		./... >&2
