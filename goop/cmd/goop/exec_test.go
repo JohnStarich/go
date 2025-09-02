@@ -294,6 +294,7 @@ func newFSWithOSPath(fs hackpadfs.FS, osToFSPaths map[string]string) *fsWithOSPa
 	}
 }
 
+//nolint:ireturn // Returns an interface intentionally
 func (fs *fsWithOSPath) Mount(name string) (hackpadfs.FS, string) {
 	return fs.FS, name
 }
@@ -400,7 +401,6 @@ func TestModuleRoot(t *testing.T) {
 			expectRoot: ".",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()
@@ -528,7 +528,6 @@ func TestHasNewerModTime(t *testing.T) {
 			expectNewer: false,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()

@@ -79,10 +79,3 @@ func watch(ctx context.Context, path string, do func() error) error {
 	}()
 	return nil
 }
-
-func min(a, b uint64) uint64 {
-	if a < b {
-		return a
-	}
-	return b
-}

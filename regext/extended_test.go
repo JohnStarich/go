@@ -50,7 +50,6 @@ func TestRemoveComments(t *testing.T) {
 			much `,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expected, removeComments(tc.expr))
@@ -94,7 +93,6 @@ func TestRemoveWhitespace(t *testing.T) {
 			expected: `somelines\shereandhere`,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expected, removeWhitespace(tc.expr))
@@ -139,7 +137,6 @@ func TestExtendedRegex(t *testing.T) {
 			expected: `some\s(\sexpr)?`,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expected, extendedRegexp(tc.expr))

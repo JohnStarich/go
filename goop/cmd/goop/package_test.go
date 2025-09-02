@@ -66,7 +66,6 @@ func TestParsePackagePattern(t *testing.T) {
 			skip: runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.pattern, func(t *testing.T) {
 			t.Parallel()
 			if tc.skip {
@@ -112,7 +111,6 @@ func TestPackageFilePath(t *testing.T) {
 			skip:           runtime.GOOS == goosWindows, // Tilde '~' expansion is not supported on Windows yet.
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			if tc.skip {

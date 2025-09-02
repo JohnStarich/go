@@ -49,9 +49,9 @@ func TestNewMacOSDialer(t *testing.T) {
 	t.Run("fill in defaults", func(t *testing.T) {
 		t.Parallel()
 		dialer := newMacOSDialer(Config{})
-		assert.Equal(t, zap.NewNop(), dialer.Config.Logger)
-		assert.Equal(t, 150*time.Millisecond, dialer.Config.InitialNameserverDelay)
-		assert.Equal(t, 10*time.Millisecond, dialer.Config.NextNameserverInterval)
+		assert.Equal(t, zap.NewNop(), dialer.Logger)
+		assert.Equal(t, 150*time.Millisecond, dialer.InitialNameserverDelay)
+		assert.Equal(t, 10*time.Millisecond, dialer.NextNameserverInterval)
 		assert.Equal(t, &net.Dialer{Timeout: 30 * time.Second}, dialer.dialer)
 	})
 
@@ -65,9 +65,9 @@ func TestNewMacOSDialer(t *testing.T) {
 			NextNameserverInterval: someDuration,
 		})
 
-		assert.Equal(t, someLogger, dialer.Config.Logger)
-		assert.Equal(t, someDuration, dialer.Config.InitialNameserverDelay)
-		assert.Equal(t, someDuration, dialer.Config.NextNameserverInterval)
+		assert.Equal(t, someLogger, dialer.Logger)
+		assert.Equal(t, someDuration, dialer.InitialNameserverDelay)
+		assert.Equal(t, someDuration, dialer.NextNameserverInterval)
 		assert.Equal(t, &net.Dialer{Timeout: 30 * time.Second}, dialer.dialer)
 	})
 }
@@ -160,7 +160,6 @@ func TestDNSLookupHost(t *testing.T) {
 			},
 		},
 	} {
-		tc := tc
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			workingDNS := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{

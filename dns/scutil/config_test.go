@@ -232,7 +232,6 @@ resolver #2
 			},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			ctx := context.Background()

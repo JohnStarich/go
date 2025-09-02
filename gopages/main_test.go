@@ -58,7 +58,6 @@ func TestMainArgs(t *testing.T) {
 			expectErr:   "Attempted to exit with exit code 1",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			runner := func(string, flags.Args) error {

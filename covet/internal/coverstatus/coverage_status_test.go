@@ -24,7 +24,6 @@ func TestNewCoverageStatus(t *testing.T) {
 		{1.0, coverageExcellent},
 		{10, coverageExcellent},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.f, tc.status), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.status, New(tc.f))
@@ -45,7 +44,6 @@ func TestCoverageStatusWorkflowCommand(t *testing.T) {
 		{coverageError, "error"},
 		{Status(-1), "error"},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.status, tc.command), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.command, tc.status.WorkflowCommand())
@@ -66,7 +64,6 @@ func TestCoverageStatusEmoji(t *testing.T) {
 		{coverageError, "🔴"},
 		{Status(-1), "🔴"},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.status, tc.emoji), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.emoji, tc.status.Emoji())
@@ -87,7 +84,6 @@ func TestCoverageStatusColor(t *testing.T) {
 		{coverageError, boldRed()},
 		{Status(-1), boldRed()},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprint(tc.status, tc.expect), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expect, tc.status.color())

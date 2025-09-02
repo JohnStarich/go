@@ -19,7 +19,7 @@ type SafeOpener struct {
 
 // Open reimplements memfs.FS.Open() to fix bad behavior on opening directories
 func (s *SafeOpener) Open(name string) (billy.File, error) {
-	info, err := s.Filesystem.Stat(name)
+	info, err := s.Stat(name)
 	if err != nil {
 		return nil, err
 	}

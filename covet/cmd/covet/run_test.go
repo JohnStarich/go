@@ -55,7 +55,6 @@ func TestRun(t *testing.T) {
 			expectErr: "covet: open does/not/exist: file does not exist",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()
@@ -411,7 +410,6 @@ Diff coverage is below target. Add tests for these files:
 			expectErr: "malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)
@@ -485,7 +483,6 @@ func TestParseIssueURL(t *testing.T) {
 			expectErr: `strconv.ParseInt: parsing "not-a-number": invalid syntax`,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.url, func(t *testing.T) {
 			t.Parallel()
 			org, repo, number, err := parseIssueURL(tc.url)
@@ -644,7 +641,6 @@ func TestFindUncoveredLines(t *testing.T) {
 			},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			spans := findUncoveredLines(covet.File{

@@ -44,7 +44,6 @@ func TestGoPagesLinkToSource(t *testing.T) {
 			expectLink:  "/src/github.com/org/repo/mypkg/myfile.go.html#L10",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			linker := newGoPagesLinker(tc.baseURL)
@@ -101,7 +100,6 @@ func TestTemplateLinkToSource(t *testing.T) {
 			expectLink:  "",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			linker, err := newTemplateLinker(tc.modulePkg, tc.template)
@@ -133,7 +131,6 @@ func TestTemplateShouldScrapePackage(t *testing.T) {
 			expectScrape: false,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			linker, err := newTemplateLinker(tc.modulePkg, "")

@@ -24,7 +24,6 @@ func TestToJSON(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, testFiles, "Ensure glob matches something.")
 	for _, testFilePath := range testFiles {
-		testFilePath := testFilePath // enable parallel sub-tests
 		baseName := filepath.Base(testFilePath)
 		t.Run(baseName, func(t *testing.T) {
 			t.Parallel()
@@ -102,7 +101,6 @@ func TestToGo(t *testing.T) {
 			},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.fileName, func(t *testing.T) {
 			t.Parallel()
 			f, err := os.Open(filepath.Join("testdata", tc.fileName))
