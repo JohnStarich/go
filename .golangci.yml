@@ -1,18 +1,22 @@
+version: "2"
+output:
+  formats: 
+    text:
+      path: stdout
+      color: true
 linters:
   enable:
-    # Default linters plus these:
     - bodyclose
+    - copyloopvar
     - durationcheck
     - errname
     - errorlint
     - exhaustive
-    - exportloopref  # After minimum Go version hits 1.22, replace this with 'copyloopvar'
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - goconst
     - gocritic
-    - gofmt
     - gosec
     - ireturn
     - makezero
@@ -26,38 +30,43 @@ linters:
     - revive
     - unconvert
     - unparam
-
-issues:
-  include:
-    # Re-enable revive's doc comment linters:
-    - EXC0012
-    - EXC0013
-    - EXC0014
-    - EXC0015
-  exclude-rules:
-    # Pipes are best used as pre-compiled globals, much like regexp.Mustcompile()
-    - text: ".*Pipe is a global variable"
-      linters:
-        - gochecknoglobals
-    # Reflection is slow, so some global reflect types are ok
-    - text: ".*Type is a global variable"
-      source: ".*Type *= *reflect.TypeOf\\(.*"
-      linters:
-        - gochecknoglobals
-    # False positive for paralleltest usage detection
-    - text: "Range statement for test Test.* does not use range value in test Run"
-      linters:
-        - paralleltest
-
-linters-settings:
-  ireturn:
-    allow:
-      # Defaults:
-      - anon
-      - error
-      - empty
-      - generic
-      - stdlib
-      # Also allow these common interfaces:
-      - github\.com\/go-git\/go-billy\/v5
-      - golang\.org\/x\/tools\/godoc\/vfs
+  settings:
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - generic
+        - stdlib
+        - github\.com\/go-git\/go-billy\/v5
+        - golang\.org\/x\/tools\/godoc\/vfs
+  exclusions:
+    generated: lax
+    presets:
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gochecknoglobals
+        text: .*Pipe is a global variable
+      - linters:
+          - gochecknoglobals
+        text: .*Type is a global variable
+        source: .*Type *= *reflect.TypeOf\(.*
+      - linters:
+          - paralleltest
+        text: Range statement for test Test.* does not use range value in test Run
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
