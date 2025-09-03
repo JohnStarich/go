@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/goop/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -457,159 +457,157 @@
 <span id="L400" class="ln">   400  </span>			expectRoot: &#34;.&#34;,
 <span id="L401" class="ln">   401  </span>		},
 <span id="L402" class="ln">   402  </span>	} {
-<span id="L403" class="ln">   403  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L404" class="ln">   404  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L405" class="ln">   405  </span>			t.Parallel()
-<span id="L406" class="ln">   406  </span>			fs, err := mem.NewFS()
-<span id="L407" class="ln">   407  </span>			require.NoError(t, err)
-<span id="L408" class="ln">   408  </span>			writeFiles(t, fs, tc.files, time.Now())
-<span id="L409" class="ln">   409  </span>
-<span id="L410" class="ln">   410  </span>			root, err := moduleRoot(fs, tc.path)
-<span id="L411" class="ln">   411  </span>			assert.Equal(t, tc.expectRoot, root)
-<span id="L412" class="ln">   412  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L413" class="ln">   413  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L414" class="ln">   414  </span>			} else {
-<span id="L415" class="ln">   415  </span>				assert.NoError(t, err)
-<span id="L416" class="ln">   416  </span>			}
-<span id="L417" class="ln">   417  </span>		})
-<span id="L418" class="ln">   418  </span>	}
-<span id="L419" class="ln">   419  </span>}
-<span id="L420" class="ln">   420  </span>
-<span id="L421" class="ln">   421  </span>func TestHasNewerModTime(t *testing.T) {
-<span id="L422" class="ln">   422  </span>	t.Parallel()
-<span id="L423" class="ln">   423  </span>	var (
-<span id="L424" class="ln">   424  </span>		now     = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
-<span id="L425" class="ln">   425  </span>		earlier = now.Add(-time.Minute)
-<span id="L426" class="ln">   426  </span>	)
-<span id="L427" class="ln">   427  </span>	for _, tc := range []struct {
-<span id="L428" class="ln">   428  </span>		description string
-<span id="L429" class="ln">   429  </span>		files       map[string]string
-<span id="L430" class="ln">   430  </span>		fileMtimes  map[string]time.Time
-<span id="L431" class="ln">   431  </span>		root        string
-<span id="L432" class="ln">   432  </span>		baseModTime time.Time
-<span id="L433" class="ln">   433  </span>		expectNewer bool
-<span id="L434" class="ln">   434  </span>		expectErr   string
-<span id="L435" class="ln">   435  </span>	}{
-<span id="L436" class="ln">   436  </span>		{
-<span id="L437" class="ln">   437  </span>			description: &#34;no files&#34;,
-<span id="L438" class="ln">   438  </span>			root:        &#34;.&#34;,
-<span id="L439" class="ln">   439  </span>			baseModTime: now,
-<span id="L440" class="ln">   440  </span>			expectNewer: false,
-<span id="L441" class="ln">   441  </span>		},
-<span id="L442" class="ln">   442  </span>		{
-<span id="L443" class="ln">   443  </span>			description: &#34;one newer file&#34;,
-<span id="L444" class="ln">   444  </span>			root:        &#34;.&#34;,
-<span id="L445" class="ln">   445  </span>			files: map[string]string{
-<span id="L446" class="ln">   446  </span>				&#34;foo&#34;: &#34;&#34;,
-<span id="L447" class="ln">   447  </span>			},
-<span id="L448" class="ln">   448  </span>			fileMtimes: map[string]time.Time{
-<span id="L449" class="ln">   449  </span>				&#34;foo&#34;: now,
-<span id="L450" class="ln">   450  </span>			},
-<span id="L451" class="ln">   451  </span>			baseModTime: earlier,
-<span id="L452" class="ln">   452  </span>			expectNewer: true,
-<span id="L453" class="ln">   453  </span>		},
-<span id="L454" class="ln">   454  </span>		{
-<span id="L455" class="ln">   455  </span>			description: &#34;one older file&#34;,
-<span id="L456" class="ln">   456  </span>			root:        &#34;.&#34;,
-<span id="L457" class="ln">   457  </span>			files: map[string]string{
-<span id="L458" class="ln">   458  </span>				&#34;foo&#34;: &#34;&#34;,
-<span id="L459" class="ln">   459  </span>			},
-<span id="L460" class="ln">   460  </span>			fileMtimes: map[string]time.Time{
-<span id="L461" class="ln">   461  </span>				&#34;foo&#34;: earlier,
-<span id="L462" class="ln">   462  </span>			},
-<span id="L463" class="ln">   463  </span>			baseModTime: now,
-<span id="L464" class="ln">   464  </span>			expectNewer: false,
-<span id="L465" class="ln">   465  </span>		},
-<span id="L466" class="ln">   466  </span>		{
-<span id="L467" class="ln">   467  </span>			description: &#34;one newer dir&#34;,
-<span id="L468" class="ln">   468  </span>			root:        &#34;.&#34;,
-<span id="L469" class="ln">   469  </span>			files: map[string]string{
-<span id="L470" class="ln">   470  </span>				&#34;foo/bar&#34;: &#34;&#34;,
-<span id="L471" class="ln">   471  </span>			},
-<span id="L472" class="ln">   472  </span>			fileMtimes: map[string]time.Time{
-<span id="L473" class="ln">   473  </span>				&#34;foo&#34;: now,
-<span id="L474" class="ln">   474  </span>			},
-<span id="L475" class="ln">   475  </span>			baseModTime: earlier,
-<span id="L476" class="ln">   476  </span>			expectNewer: true,
-<span id="L477" class="ln">   477  </span>		},
-<span id="L478" class="ln">   478  </span>		{
-<span id="L479" class="ln">   479  </span>			description: &#34;one older dir&#34;,
-<span id="L480" class="ln">   480  </span>			root:        &#34;.&#34;,
-<span id="L481" class="ln">   481  </span>			files: map[string]string{
-<span id="L482" class="ln">   482  </span>				&#34;foo/bar&#34;: &#34;&#34;,
-<span id="L483" class="ln">   483  </span>			},
-<span id="L484" class="ln">   484  </span>			fileMtimes: map[string]time.Time{
-<span id="L485" class="ln">   485  </span>				&#34;foo&#34;: earlier,
-<span id="L486" class="ln">   486  </span>			},
-<span id="L487" class="ln">   487  </span>			baseModTime: now,
-<span id="L488" class="ln">   488  </span>			expectNewer: false,
-<span id="L489" class="ln">   489  </span>		},
-<span id="L490" class="ln">   490  </span>		{
-<span id="L491" class="ln">   491  </span>			description: &#34;one newer before second item scanned&#34;,
-<span id="L492" class="ln">   492  </span>			root:        &#34;.&#34;,
-<span id="L493" class="ln">   493  </span>			files: map[string]string{
-<span id="L494" class="ln">   494  </span>				&#34;bar/baz&#34;: &#34;&#34;,
-<span id="L495" class="ln">   495  </span>				&#34;foo&#34;:     &#34;&#34;,
-<span id="L496" class="ln">   496  </span>			},
-<span id="L497" class="ln">   497  </span>			fileMtimes: map[string]time.Time{
-<span id="L498" class="ln">   498  </span>				&#34;bar/baz&#34;: now,
-<span id="L499" class="ln">   499  </span>			},
-<span id="L500" class="ln">   500  </span>			baseModTime: earlier,
-<span id="L501" class="ln">   501  </span>			expectNewer: true,
-<span id="L502" class="ln">   502  </span>		},
-<span id="L503" class="ln">   503  </span>		{
-<span id="L504" class="ln">   504  </span>			description: &#34;one newer with root&#34;,
-<span id="L505" class="ln">   505  </span>			root:        &#34;foo&#34;,
-<span id="L506" class="ln">   506  </span>			files: map[string]string{
-<span id="L507" class="ln">   507  </span>				&#34;foo/bar&#34;: &#34;&#34;,
-<span id="L508" class="ln">   508  </span>				&#34;foo/baz&#34;: &#34;&#34;,
-<span id="L509" class="ln">   509  </span>			},
-<span id="L510" class="ln">   510  </span>			fileMtimes: map[string]time.Time{
-<span id="L511" class="ln">   511  </span>				&#34;foo/baz&#34;: now,
-<span id="L512" class="ln">   512  </span>			},
-<span id="L513" class="ln">   513  </span>			baseModTime: earlier,
-<span id="L514" class="ln">   514  </span>			expectNewer: true,
-<span id="L515" class="ln">   515  </span>		},
-<span id="L516" class="ln">   516  </span>		{
-<span id="L517" class="ln">   517  </span>			description: &#34;none newer with different root&#34;,
-<span id="L518" class="ln">   518  </span>			root:        &#34;biff&#34;,
-<span id="L519" class="ln">   519  </span>			files: map[string]string{
-<span id="L520" class="ln">   520  </span>				&#34;foo/bar&#34;:   &#34;&#34;,
-<span id="L521" class="ln">   521  </span>				&#34;foo/baz&#34;:   &#34;&#34;,
-<span id="L522" class="ln">   522  </span>				&#34;biff/derp&#34;: &#34;&#34;,
-<span id="L523" class="ln">   523  </span>			},
-<span id="L524" class="ln">   524  </span>			fileMtimes: map[string]time.Time{
-<span id="L525" class="ln">   525  </span>				&#34;foo/baz&#34;: now,
-<span id="L526" class="ln">   526  </span>			},
-<span id="L527" class="ln">   527  </span>			baseModTime: earlier,
-<span id="L528" class="ln">   528  </span>			expectNewer: false,
-<span id="L529" class="ln">   529  </span>		},
-<span id="L530" class="ln">   530  </span>	} {
-<span id="L531" class="ln">   531  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L532" class="ln">   532  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L533" class="ln">   533  </span>			t.Parallel()
-<span id="L534" class="ln">   534  </span>			fs, err := mem.NewFS()
-<span id="L535" class="ln">   535  </span>			require.NoError(t, err)
-<span id="L536" class="ln">   536  </span>			writeFiles(t, fs, tc.files, earlier)
-<span id="L537" class="ln">   537  </span>			for filePath, mtime := range tc.fileMtimes {
-<span id="L538" class="ln">   538  </span>				require.NoError(t, hackpadfs.Chtimes(fs, filePath, mtime, mtime))
-<span id="L539" class="ln">   539  </span>			}
-<span id="L540" class="ln">   540  </span>
-<span id="L541" class="ln">   541  </span>			hasNewer, err := hasNewerModTime(fs, tc.root, tc.baseModTime)
-<span id="L542" class="ln">   542  </span>			assert.Equal(t, tc.expectNewer, hasNewer)
-<span id="L543" class="ln">   543  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L544" class="ln">   544  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L545" class="ln">   545  </span>			} else {
-<span id="L546" class="ln">   546  </span>				assert.NoError(t, err)
-<span id="L547" class="ln">   547  </span>			}
-<span id="L548" class="ln">   548  </span>		})
-<span id="L549" class="ln">   549  </span>	}
-<span id="L550" class="ln">   550  </span>}
-<span id="L551" class="ln">   551  </span>
+<span id="L403" class="ln">   403  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L404" class="ln">   404  </span>			t.Parallel()
+<span id="L405" class="ln">   405  </span>			fs, err := mem.NewFS()
+<span id="L406" class="ln">   406  </span>			require.NoError(t, err)
+<span id="L407" class="ln">   407  </span>			writeFiles(t, fs, tc.files, time.Now())
+<span id="L408" class="ln">   408  </span>
+<span id="L409" class="ln">   409  </span>			root, err := moduleRoot(fs, tc.path)
+<span id="L410" class="ln">   410  </span>			assert.Equal(t, tc.expectRoot, root)
+<span id="L411" class="ln">   411  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L412" class="ln">   412  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L413" class="ln">   413  </span>			} else {
+<span id="L414" class="ln">   414  </span>				assert.NoError(t, err)
+<span id="L415" class="ln">   415  </span>			}
+<span id="L416" class="ln">   416  </span>		})
+<span id="L417" class="ln">   417  </span>	}
+<span id="L418" class="ln">   418  </span>}
+<span id="L419" class="ln">   419  </span>
+<span id="L420" class="ln">   420  </span>func TestHasNewerModTime(t *testing.T) {
+<span id="L421" class="ln">   421  </span>	t.Parallel()
+<span id="L422" class="ln">   422  </span>	var (
+<span id="L423" class="ln">   423  </span>		now     = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
+<span id="L424" class="ln">   424  </span>		earlier = now.Add(-time.Minute)
+<span id="L425" class="ln">   425  </span>	)
+<span id="L426" class="ln">   426  </span>	for _, tc := range []struct {
+<span id="L427" class="ln">   427  </span>		description string
+<span id="L428" class="ln">   428  </span>		files       map[string]string
+<span id="L429" class="ln">   429  </span>		fileMtimes  map[string]time.Time
+<span id="L430" class="ln">   430  </span>		root        string
+<span id="L431" class="ln">   431  </span>		baseModTime time.Time
+<span id="L432" class="ln">   432  </span>		expectNewer bool
+<span id="L433" class="ln">   433  </span>		expectErr   string
+<span id="L434" class="ln">   434  </span>	}{
+<span id="L435" class="ln">   435  </span>		{
+<span id="L436" class="ln">   436  </span>			description: &#34;no files&#34;,
+<span id="L437" class="ln">   437  </span>			root:        &#34;.&#34;,
+<span id="L438" class="ln">   438  </span>			baseModTime: now,
+<span id="L439" class="ln">   439  </span>			expectNewer: false,
+<span id="L440" class="ln">   440  </span>		},
+<span id="L441" class="ln">   441  </span>		{
+<span id="L442" class="ln">   442  </span>			description: &#34;one newer file&#34;,
+<span id="L443" class="ln">   443  </span>			root:        &#34;.&#34;,
+<span id="L444" class="ln">   444  </span>			files: map[string]string{
+<span id="L445" class="ln">   445  </span>				&#34;foo&#34;: &#34;&#34;,
+<span id="L446" class="ln">   446  </span>			},
+<span id="L447" class="ln">   447  </span>			fileMtimes: map[string]time.Time{
+<span id="L448" class="ln">   448  </span>				&#34;foo&#34;: now,
+<span id="L449" class="ln">   449  </span>			},
+<span id="L450" class="ln">   450  </span>			baseModTime: earlier,
+<span id="L451" class="ln">   451  </span>			expectNewer: true,
+<span id="L452" class="ln">   452  </span>		},
+<span id="L453" class="ln">   453  </span>		{
+<span id="L454" class="ln">   454  </span>			description: &#34;one older file&#34;,
+<span id="L455" class="ln">   455  </span>			root:        &#34;.&#34;,
+<span id="L456" class="ln">   456  </span>			files: map[string]string{
+<span id="L457" class="ln">   457  </span>				&#34;foo&#34;: &#34;&#34;,
+<span id="L458" class="ln">   458  </span>			},
+<span id="L459" class="ln">   459  </span>			fileMtimes: map[string]time.Time{
+<span id="L460" class="ln">   460  </span>				&#34;foo&#34;: earlier,
+<span id="L461" class="ln">   461  </span>			},
+<span id="L462" class="ln">   462  </span>			baseModTime: now,
+<span id="L463" class="ln">   463  </span>			expectNewer: false,
+<span id="L464" class="ln">   464  </span>		},
+<span id="L465" class="ln">   465  </span>		{
+<span id="L466" class="ln">   466  </span>			description: &#34;one newer dir&#34;,
+<span id="L467" class="ln">   467  </span>			root:        &#34;.&#34;,
+<span id="L468" class="ln">   468  </span>			files: map[string]string{
+<span id="L469" class="ln">   469  </span>				&#34;foo/bar&#34;: &#34;&#34;,
+<span id="L470" class="ln">   470  </span>			},
+<span id="L471" class="ln">   471  </span>			fileMtimes: map[string]time.Time{
+<span id="L472" class="ln">   472  </span>				&#34;foo&#34;: now,
+<span id="L473" class="ln">   473  </span>			},
+<span id="L474" class="ln">   474  </span>			baseModTime: earlier,
+<span id="L475" class="ln">   475  </span>			expectNewer: true,
+<span id="L476" class="ln">   476  </span>		},
+<span id="L477" class="ln">   477  </span>		{
+<span id="L478" class="ln">   478  </span>			description: &#34;one older dir&#34;,
+<span id="L479" class="ln">   479  </span>			root:        &#34;.&#34;,
+<span id="L480" class="ln">   480  </span>			files: map[string]string{
+<span id="L481" class="ln">   481  </span>				&#34;foo/bar&#34;: &#34;&#34;,
+<span id="L482" class="ln">   482  </span>			},
+<span id="L483" class="ln">   483  </span>			fileMtimes: map[string]time.Time{
+<span id="L484" class="ln">   484  </span>				&#34;foo&#34;: earlier,
+<span id="L485" class="ln">   485  </span>			},
+<span id="L486" class="ln">   486  </span>			baseModTime: now,
+<span id="L487" class="ln">   487  </span>			expectNewer: false,
+<span id="L488" class="ln">   488  </span>		},
+<span id="L489" class="ln">   489  </span>		{
+<span id="L490" class="ln">   490  </span>			description: &#34;one newer before second item scanned&#34;,
+<span id="L491" class="ln">   491  </span>			root:        &#34;.&#34;,
+<span id="L492" class="ln">   492  </span>			files: map[string]string{
+<span id="L493" class="ln">   493  </span>				&#34;bar/baz&#34;: &#34;&#34;,
+<span id="L494" class="ln">   494  </span>				&#34;foo&#34;:     &#34;&#34;,
+<span id="L495" class="ln">   495  </span>			},
+<span id="L496" class="ln">   496  </span>			fileMtimes: map[string]time.Time{
+<span id="L497" class="ln">   497  </span>				&#34;bar/baz&#34;: now,
+<span id="L498" class="ln">   498  </span>			},
+<span id="L499" class="ln">   499  </span>			baseModTime: earlier,
+<span id="L500" class="ln">   500  </span>			expectNewer: true,
+<span id="L501" class="ln">   501  </span>		},
+<span id="L502" class="ln">   502  </span>		{
+<span id="L503" class="ln">   503  </span>			description: &#34;one newer with root&#34;,
+<span id="L504" class="ln">   504  </span>			root:        &#34;foo&#34;,
+<span id="L505" class="ln">   505  </span>			files: map[string]string{
+<span id="L506" class="ln">   506  </span>				&#34;foo/bar&#34;: &#34;&#34;,
+<span id="L507" class="ln">   507  </span>				&#34;foo/baz&#34;: &#34;&#34;,
+<span id="L508" class="ln">   508  </span>			},
+<span id="L509" class="ln">   509  </span>			fileMtimes: map[string]time.Time{
+<span id="L510" class="ln">   510  </span>				&#34;foo/baz&#34;: now,
+<span id="L511" class="ln">   511  </span>			},
+<span id="L512" class="ln">   512  </span>			baseModTime: earlier,
+<span id="L513" class="ln">   513  </span>			expectNewer: true,
+<span id="L514" class="ln">   514  </span>		},
+<span id="L515" class="ln">   515  </span>		{
+<span id="L516" class="ln">   516  </span>			description: &#34;none newer with different root&#34;,
+<span id="L517" class="ln">   517  </span>			root:        &#34;biff&#34;,
+<span id="L518" class="ln">   518  </span>			files: map[string]string{
+<span id="L519" class="ln">   519  </span>				&#34;foo/bar&#34;:   &#34;&#34;,
+<span id="L520" class="ln">   520  </span>				&#34;foo/baz&#34;:   &#34;&#34;,
+<span id="L521" class="ln">   521  </span>				&#34;biff/derp&#34;: &#34;&#34;,
+<span id="L522" class="ln">   522  </span>			},
+<span id="L523" class="ln">   523  </span>			fileMtimes: map[string]time.Time{
+<span id="L524" class="ln">   524  </span>				&#34;foo/baz&#34;: now,
+<span id="L525" class="ln">   525  </span>			},
+<span id="L526" class="ln">   526  </span>			baseModTime: earlier,
+<span id="L527" class="ln">   527  </span>			expectNewer: false,
+<span id="L528" class="ln">   528  </span>		},
+<span id="L529" class="ln">   529  </span>	} {
+<span id="L530" class="ln">   530  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L531" class="ln">   531  </span>			t.Parallel()
+<span id="L532" class="ln">   532  </span>			fs, err := mem.NewFS()
+<span id="L533" class="ln">   533  </span>			require.NoError(t, err)
+<span id="L534" class="ln">   534  </span>			writeFiles(t, fs, tc.files, earlier)
+<span id="L535" class="ln">   535  </span>			for filePath, mtime := range tc.fileMtimes {
+<span id="L536" class="ln">   536  </span>				require.NoError(t, hackpadfs.Chtimes(fs, filePath, mtime, mtime))
+<span id="L537" class="ln">   537  </span>			}
+<span id="L538" class="ln">   538  </span>
+<span id="L539" class="ln">   539  </span>			hasNewer, err := hasNewerModTime(fs, tc.root, tc.baseModTime)
+<span id="L540" class="ln">   540  </span>			assert.Equal(t, tc.expectNewer, hasNewer)
+<span id="L541" class="ln">   541  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L542" class="ln">   542  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L543" class="ln">   543  </span>			} else {
+<span id="L544" class="ln">   544  </span>				assert.NoError(t, err)
+<span id="L545" class="ln">   545  </span>			}
+<span id="L546" class="ln">   546  </span>		})
+<span id="L547" class="ln">   547  </span>	}
+<span id="L548" class="ln">   548  </span>}
+<span id="L549" class="ln">   549  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->
