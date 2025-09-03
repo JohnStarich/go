@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/datasize/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -179,56 +179,54 @@
 <span id="L122" class="ln">   122  </span>		{2e21, 2, &#34;ZB&#34;},
 <span id="L123" class="ln">   123  </span>		{2e24, 2, &#34;YB&#34;},
 <span id="L124" class="ln">   124  </span>	} {
-<span id="L125" class="ln">   125  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L126" class="ln">   126  </span>		t.Run(fmt.Sprintf(&#34;%g&#34;, tc.input), func(t *testing.T) {
-<span id="L127" class="ln">   127  </span>			t.Parallel()
-<span id="L128" class="ln">   128  </span>			i, _ := big.NewFloat(tc.input).Int(nil)
-<span id="L129" class="ln">   129  </span>			num := NewFromInt(i)
-<span id="L130" class="ln">   130  </span>			value, unit := num.FormatSI()
-<span id="L131" class="ln">   131  </span>			assert.Equal(t, tc.expectedValue, value)
-<span id="L132" class="ln">   132  </span>			assert.Equal(t, tc.expectedUnit, unit)
-<span id="L133" class="ln">   133  </span>
-<span id="L134" class="ln">   134  </span>			assert.Equal(t, fmt.Sprintf(&#34;%g %s&#34;, tc.expectedValue, tc.expectedUnit), num.String())
-<span id="L135" class="ln">   135  </span>		})
-<span id="L136" class="ln">   136  </span>	}
-<span id="L137" class="ln">   137  </span>}
-<span id="L138" class="ln">   138  </span>
-<span id="L139" class="ln">   139  </span>func TestFormatIEC(t *testing.T) {
-<span id="L140" class="ln">   140  </span>	t.Parallel()
-<span id="L141" class="ln">   141  </span>	for _, tc := range []struct {
-<span id="L142" class="ln">   142  </span>		input         float64
-<span id="L143" class="ln">   143  </span>		expectedValue float64
-<span id="L144" class="ln">   144  </span>		expectedUnit  string
-<span id="L145" class="ln">   145  </span>	}{
-<span id="L146" class="ln">   146  </span>		{0, 0, &#34;B&#34;},
-<span id="L147" class="ln">   147  </span>		{1, 1, &#34;B&#34;},
-<span id="L148" class="ln">   148  </span>		{2 &lt;&lt; 10, 2, &#34;KiB&#34;},
-<span id="L149" class="ln">   149  </span>		{2345, 2.290, &#34;KiB&#34;},
-<span id="L150" class="ln">   150  </span>		{2 &lt;&lt; 20, 2, &#34;MiB&#34;},
-<span id="L151" class="ln">   151  </span>		{7893 &lt;&lt; 20, 7.708, &#34;GiB&#34;},
-<span id="L152" class="ln">   152  </span>		{2 &lt;&lt; 30, 2, &#34;GiB&#34;},
-<span id="L153" class="ln">   153  </span>		{2 &lt;&lt; 40, 2, &#34;TiB&#34;},
-<span id="L154" class="ln">   154  </span>		{2 &lt;&lt; 50, 2, &#34;PiB&#34;},
-<span id="L155" class="ln">   155  </span>		{2 &lt;&lt; 60, 2, &#34;EiB&#34;},
-<span id="L156" class="ln">   156  </span>		{2 &lt;&lt; 70, 2, &#34;ZiB&#34;},
-<span id="L157" class="ln">   157  </span>		{2 &lt;&lt; 80, 2, &#34;YiB&#34;},
-<span id="L158" class="ln">   158  </span>	} {
-<span id="L159" class="ln">   159  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L160" class="ln">   160  </span>		t.Run(fmt.Sprintf(&#34;%g&#34;, tc.input), func(t *testing.T) {
-<span id="L161" class="ln">   161  </span>			t.Parallel()
-<span id="L162" class="ln">   162  </span>			i, _ := big.NewFloat(tc.input).Int(nil)
-<span id="L163" class="ln">   163  </span>			num := NewFromInt(i)
-<span id="L164" class="ln">   164  </span>			value, unit := num.FormatIEC()
-<span id="L165" class="ln">   165  </span>			assert.InDelta(t, tc.expectedValue, value, 0.0001)
-<span id="L166" class="ln">   166  </span>			assert.Equal(t, tc.expectedUnit, unit)
-<span id="L167" class="ln">   167  </span>		})
-<span id="L168" class="ln">   168  </span>	}
-<span id="L169" class="ln">   169  </span>}
-<span id="L170" class="ln">   170  </span>
+<span id="L125" class="ln">   125  </span>		t.Run(fmt.Sprintf(&#34;%g&#34;, tc.input), func(t *testing.T) {
+<span id="L126" class="ln">   126  </span>			t.Parallel()
+<span id="L127" class="ln">   127  </span>			i, _ := big.NewFloat(tc.input).Int(nil)
+<span id="L128" class="ln">   128  </span>			num := NewFromInt(i)
+<span id="L129" class="ln">   129  </span>			value, unit := num.FormatSI()
+<span id="L130" class="ln">   130  </span>			assert.Equal(t, tc.expectedValue, value)
+<span id="L131" class="ln">   131  </span>			assert.Equal(t, tc.expectedUnit, unit)
+<span id="L132" class="ln">   132  </span>
+<span id="L133" class="ln">   133  </span>			assert.Equal(t, fmt.Sprintf(&#34;%g %s&#34;, tc.expectedValue, tc.expectedUnit), num.String())
+<span id="L134" class="ln">   134  </span>		})
+<span id="L135" class="ln">   135  </span>	}
+<span id="L136" class="ln">   136  </span>}
+<span id="L137" class="ln">   137  </span>
+<span id="L138" class="ln">   138  </span>func TestFormatIEC(t *testing.T) {
+<span id="L139" class="ln">   139  </span>	t.Parallel()
+<span id="L140" class="ln">   140  </span>	for _, tc := range []struct {
+<span id="L141" class="ln">   141  </span>		input         float64
+<span id="L142" class="ln">   142  </span>		expectedValue float64
+<span id="L143" class="ln">   143  </span>		expectedUnit  string
+<span id="L144" class="ln">   144  </span>	}{
+<span id="L145" class="ln">   145  </span>		{0, 0, &#34;B&#34;},
+<span id="L146" class="ln">   146  </span>		{1, 1, &#34;B&#34;},
+<span id="L147" class="ln">   147  </span>		{2 &lt;&lt; 10, 2, &#34;KiB&#34;},
+<span id="L148" class="ln">   148  </span>		{2345, 2.290, &#34;KiB&#34;},
+<span id="L149" class="ln">   149  </span>		{2 &lt;&lt; 20, 2, &#34;MiB&#34;},
+<span id="L150" class="ln">   150  </span>		{7893 &lt;&lt; 20, 7.708, &#34;GiB&#34;},
+<span id="L151" class="ln">   151  </span>		{2 &lt;&lt; 30, 2, &#34;GiB&#34;},
+<span id="L152" class="ln">   152  </span>		{2 &lt;&lt; 40, 2, &#34;TiB&#34;},
+<span id="L153" class="ln">   153  </span>		{2 &lt;&lt; 50, 2, &#34;PiB&#34;},
+<span id="L154" class="ln">   154  </span>		{2 &lt;&lt; 60, 2, &#34;EiB&#34;},
+<span id="L155" class="ln">   155  </span>		{2 &lt;&lt; 70, 2, &#34;ZiB&#34;},
+<span id="L156" class="ln">   156  </span>		{2 &lt;&lt; 80, 2, &#34;YiB&#34;},
+<span id="L157" class="ln">   157  </span>	} {
+<span id="L158" class="ln">   158  </span>		t.Run(fmt.Sprintf(&#34;%g&#34;, tc.input), func(t *testing.T) {
+<span id="L159" class="ln">   159  </span>			t.Parallel()
+<span id="L160" class="ln">   160  </span>			i, _ := big.NewFloat(tc.input).Int(nil)
+<span id="L161" class="ln">   161  </span>			num := NewFromInt(i)
+<span id="L162" class="ln">   162  </span>			value, unit := num.FormatIEC()
+<span id="L163" class="ln">   163  </span>			assert.InDelta(t, tc.expectedValue, value, 0.0001)
+<span id="L164" class="ln">   164  </span>			assert.Equal(t, tc.expectedUnit, unit)
+<span id="L165" class="ln">   165  </span>		})
+<span id="L166" class="ln">   166  </span>	}
+<span id="L167" class="ln">   167  </span>}
+<span id="L168" class="ln">   168  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->
