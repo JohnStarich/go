@@ -1,6 +1,6 @@
 version: "2"
 output:
-  formats: 
+  formats:
     text:
       path: stdout
       color: true
