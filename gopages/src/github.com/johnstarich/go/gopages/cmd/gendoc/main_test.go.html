@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/gopages/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -171,18 +171,17 @@
 <span id="L114" class="ln">   114  </span>			expect: 0,
 <span id="L115" class="ln">   115  </span>		},
 <span id="L116" class="ln">   116  </span>	} {
-<span id="L117" class="ln">   117  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L118" class="ln">   118  </span>		t.Run(fmt.Sprintln(tc.input), func(t *testing.T) {
-<span id="L119" class="ln">   119  </span>			t.Parallel()
-<span id="L120" class="ln">   120  </span>			assert.Equal(t, tc.expect, smallestNonNegative(tc.input...))
-<span id="L121" class="ln">   121  </span>		})
-<span id="L122" class="ln">   122  </span>	}
-<span id="L123" class="ln">   123  </span>}
-<span id="L124" class="ln">   124  </span>
+<span id="L117" class="ln">   117  </span>		t.Run(fmt.Sprintln(tc.input), func(t *testing.T) {
+<span id="L118" class="ln">   118  </span>			t.Parallel()
+<span id="L119" class="ln">   119  </span>			assert.Equal(t, tc.expect, smallestNonNegative(tc.input...))
+<span id="L120" class="ln">   120  </span>		})
+<span id="L121" class="ln">   121  </span>	}
+<span id="L122" class="ln">   122  </span>}
+<span id="L123" class="ln">   123  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->
