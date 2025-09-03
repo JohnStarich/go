@@ -6,6 +6,7 @@ output:
       color: true
 linters:
   enable:
+    # Default linters plus these:
     - bodyclose
     - copyloopvar
     - durationcheck
@@ -33,11 +34,13 @@ linters:
   settings:
     ireturn:
       allow:
+        # Defaults:
         - anon
         - error
         - empty
         - generic
         - stdlib
+        # Also allow these common interfaces:
         - github\.com\/go-git\/go-billy\/v5
         - golang\.org\/x\/tools\/godoc\/vfs
   exclusions:
@@ -47,13 +50,16 @@ linters:
       - legacy
       - std-error-handling
     rules:
+      # Pipes are best used as pre-compiled globals, much like regexp.Mustcompile()
       - linters:
           - gochecknoglobals
         text: .*Pipe is a global variable
+      # Reflection is slow, so some global reflect types are ok
       - linters:
           - gochecknoglobals
         text: .*Type is a global variable
         source: .*Type *= *reflect.TypeOf\(.*
+      # False positive for paralleltest usage detection
       - linters:
           - paralleltest
         text: Range statement for test Test.* does not use range value in test Run
