@@ -43,6 +43,7 @@ linters:
         # Also allow these common interfaces:
         - github\.com\/go-git\/go-billy\/v5
         - golang\.org\/x\/tools\/godoc\/vfs
+        - github\.com\/hack-pad\/hackpadfs\.FS
   exclusions:
     generated: lax
     presets:

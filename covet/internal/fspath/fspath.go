@@ -68,7 +68,6 @@ func WorkingDirectoryFS() (*os.FS, error) {
 	return fs, err
 }
 
-//nolint:ireturn // Returns an interface intentionally
 func workingDirectoryFS(
 	fs hackpadfs.FS,
 	goos string,

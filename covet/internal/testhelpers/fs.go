@@ -29,8 +29,6 @@ func FromOSToFS(t *testing.T, osPath string) (*os.FS, string) {
 
 // OSFSWithTemp returns an os.FS instance with 1) the current module's directory and 2) a temporary directory mounted inside.
 // Returns the FS paths to both mounts.
-//
-//nolint:ireturn // Returns an interface intentionally
 func OSFSWithTemp(t *testing.T) (fs hackpadfs.FS, workingDir, tempDir string) {
 	t.Helper()
 
@@ -56,8 +54,6 @@ func OSFSWithTemp(t *testing.T) (fs hackpadfs.FS, workingDir, tempDir string) {
 
 // FSWithFiles returns an FS with the given files contents generated inside it.
 // The contents are trimmed and a newline appended for convenient comparisons.
-//
-//nolint:ireturn // Returns an interface intentionally
 func FSWithFiles(t *testing.T, files map[string]string) hackpadfs.FS {
 	t.Helper()
 	fs, err := mem.NewFS()

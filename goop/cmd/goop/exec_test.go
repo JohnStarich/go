@@ -294,7 +294,6 @@ func newFSWithOSPath(fs hackpadfs.FS, osToFSPaths map[string]string) *fsWithOSPa
 	}
 }
 
-//nolint:ireturn // Returns an interface intentionally
 func (fs *fsWithOSPath) Mount(name string) (hackpadfs.FS, string) {
 	return fs.FS, name
 }
