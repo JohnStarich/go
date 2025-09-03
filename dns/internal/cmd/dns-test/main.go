@@ -2,9 +2,9 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"net"
 
 	"github.com/johnstarich/go/dns"
 	"go.uber.org/zap"
@@ -18,11 +18,11 @@ func main() {
 	}
 	fmt.Println("Looking up", hostname)
 
-	net.DefaultResolver = dns.NewWithConfig(dns.Config{
+	resolver := dns.NewWithConfig(dns.Config{
 		Logger: zap.NewExample(),
 	})
 
-	addrs, err := net.LookupIP(hostname)
+	addrs, err := resolver.LookupIPAddr(context.Background(), hostname)
 	if err != nil {
 		panic(err)
 	}

@@ -400,7 +400,6 @@ func TestModuleRoot(t *testing.T) {
 			expectRoot: ".",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()
@@ -528,7 +527,6 @@ func TestHasNewerModTime(t *testing.T) {
 			expectNewer: false,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs, err := mem.NewFS()

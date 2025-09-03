@@ -85,7 +85,6 @@ Diff coverage is below target. Add tests for these files:
 `,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			diffReader := strings.NewReader(strings.TrimSpace(tc.diff))

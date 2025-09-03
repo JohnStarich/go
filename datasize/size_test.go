@@ -122,7 +122,6 @@ func TestFormatSI(t *testing.T) {
 		{2e21, 2, "ZB"},
 		{2e24, 2, "YB"},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%g", tc.input), func(t *testing.T) {
 			t.Parallel()
 			i, _ := big.NewFloat(tc.input).Int(nil)
@@ -156,7 +155,6 @@ func TestFormatIEC(t *testing.T) {
 		{2 << 70, 2, "ZiB"},
 		{2 << 80, 2, "YiB"},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%g", tc.input), func(t *testing.T) {
 			t.Parallel()
 			i, _ := big.NewFloat(tc.input).Int(nil)

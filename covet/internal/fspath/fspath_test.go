@@ -43,7 +43,6 @@ func TestCommonBase(t *testing.T) {
 			expect: "a/b",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s --> %s", noSlashes(tc.a), noSlashes(tc.b)), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expect, CommonBase(tc.a, tc.b))
@@ -101,7 +100,6 @@ func TestRel(t *testing.T) {
 		},
 	} {
 		description := fmt.Sprintf("%s --> %s", noSlashes(tc.basePath), noSlashes(tc.targetPath))
-		tc := tc // enable parallel sub-tests
 		t.Run(description, func(t *testing.T) {
 			t.Parallel()
 			p, err := Rel(tc.basePath, tc.targetPath)
@@ -170,7 +168,6 @@ func TestWorkingDirectoryFS(t *testing.T) {
 			expectErr:    "some error",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			getWorkingDirectory := func() (string, error) {

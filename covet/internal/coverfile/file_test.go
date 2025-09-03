@@ -90,7 +90,6 @@ func TestFileFindContextSpans(t *testing.T) {
 			},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			spans := tc.file.findContextSpans(tc.contextLines)

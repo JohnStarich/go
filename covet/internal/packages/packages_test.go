@@ -98,7 +98,6 @@ package main
 			expectPath:       "main.go",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)
@@ -172,7 +171,6 @@ func TestFindModule(t *testing.T) {
 			expectErr:   "go.mod:1: unknown directive: not",
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)
@@ -240,7 +238,6 @@ func TestFSReadDirectory(t *testing.T) {
 			expectErr:   hackpadfs.ErrNotExist,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			fs := testhelpers.FSWithFiles(t, tc.files)

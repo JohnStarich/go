@@ -184,7 +184,7 @@ func (s *Conn) iter(op connOp, fn func(conn PacketConn) (keepGoing bool, err err
 			if err != nil {
 				errs <- err
 			} else if op == readOp || op == readFromOp {
-				s.firstResponder.CAS(-1, int64(ix))
+				s.firstResponder.CompareAndSwap(-1, int64(ix))
 			}
 			done <- struct{}{}
 			if !keepGoing {

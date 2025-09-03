@@ -49,7 +49,6 @@ func TestIntersect(t *testing.T) {
 			intersection: Span{Start: 4, End: 6},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s∩%s", tc.a, tc.b), func(t *testing.T) {
 			t.Parallel()
 			span, intersects := tc.a.Intersection(tc.b)
@@ -101,7 +100,6 @@ func TestMerge(t *testing.T) {
 			merged: Span{Start: 1, End: 10},
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintf("%s∩%s", tc.a, tc.b), func(t *testing.T) {
 			t.Parallel()
 			span, merged := tc.a.Merge(tc.b)

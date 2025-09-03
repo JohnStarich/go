@@ -82,7 +82,6 @@ must not be broken.
 			`,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expect, wordWrapLines(wrapColumn, tc.input))

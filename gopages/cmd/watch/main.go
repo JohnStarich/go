@@ -157,7 +157,7 @@ func (h *httpFSWrapper) Open(name string) (http.File, error) {
 	}
 	name = strings.TrimPrefix(name, h.base)
 	name = filepath.FromSlash(name)
-	info, err := h.Filesystem.Stat(name)
+	info, err := h.Stat(name)
 	if err != nil {
 		return nil, err
 	}

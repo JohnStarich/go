@@ -16,7 +16,7 @@ import (
 const testTimeout = 5 * time.Second
 
 func dialUDP(t *testing.T, address string) PacketConn { //nolint:ireturn // Returned interface is a convenience wrapper for tests calling New()
-	conn, err := net.Dial("udp", address)
+	conn, err := (&net.Dialer{}).DialContext(context.Background(), "udp", address)
 	require.NoError(t, err)
 	require.Implements(t, (*PacketConn)(nil), conn)
 	return conn.(PacketConn)
@@ -115,7 +115,6 @@ func TestDialDNS(t *testing.T) {
 			expectErr: "all connections have failed for \"write\": write udp",
 		},
 	} {
-		tc := tc // fix parallel access of loop variable
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			var servers []string

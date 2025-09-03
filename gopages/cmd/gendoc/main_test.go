@@ -114,7 +114,6 @@ func TestSmallestNonNegative(t *testing.T) {
 			expect: 0,
 		},
 	} {
-		tc := tc // enable parallel sub-tests
 		t.Run(fmt.Sprintln(tc.input), func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.expect, smallestNonNegative(tc.input...))
