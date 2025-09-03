@@ -215,8 +215,7 @@ func staggerTicker(initialDelay, d time.Duration, logger *zap.Logger) (<-chan st
 }
 
 func (m *macOSDialer) reorderNameservers(ctx context.Context, conn *staggercast.Conn) {
-	var zero time.Time
-	if deadline, ok := ctx.Deadline(); !ok || deadline.Equal(zero) {
+	if _, ok := ctx.Deadline(); !ok {
 		m.Logger.Debug("Skipping nameserver reorder, no deadline on context")
 		return
 	}
