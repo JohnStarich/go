@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -112,610 +112,606 @@
 <span id="L55" class="ln">    55  </span>			expectErr: &#34;covet: open does/not/exist: file does not exist&#34;,
 <span id="L56" class="ln">    56  </span>		},
 <span id="L57" class="ln">    57  </span>	} {
-<span id="L58" class="ln">    58  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L59" class="ln">    59  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L60" class="ln">    60  </span>			t.Parallel()
-<span id="L61" class="ln">    61  </span>			fs, err := mem.NewFS()
-<span id="L62" class="ln">    62  </span>			require.NoError(t, err)
-<span id="L63" class="ln">    63  </span>			require.NoError(t, fs.Mkdir(&#34;tmp&#34;, 0o700))
-<span id="L64" class="ln">    64  </span>			var output bytes.Buffer
-<span id="L65" class="ln">    65  </span>			err = run(
-<span id="L66" class="ln">    66  </span>				tc.args,
-<span id="L67" class="ln">    67  </span>				strings.NewReader(tc.stdin),
+<span id="L58" class="ln">    58  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L59" class="ln">    59  </span>			t.Parallel()
+<span id="L60" class="ln">    60  </span>			fs, err := mem.NewFS()
+<span id="L61" class="ln">    61  </span>			require.NoError(t, err)
+<span id="L62" class="ln">    62  </span>			require.NoError(t, fs.Mkdir(&#34;tmp&#34;, 0o700))
+<span id="L63" class="ln">    63  </span>			var output bytes.Buffer
+<span id="L64" class="ln">    64  </span>			err = run(
+<span id="L65" class="ln">    65  </span>				tc.args,
+<span id="L66" class="ln">    66  </span>				strings.NewReader(tc.stdin),
+<span id="L67" class="ln">    67  </span>				&amp;output,
 <span id="L68" class="ln">    68  </span>				&amp;output,
-<span id="L69" class="ln">    69  </span>				&amp;output,
-<span id="L70" class="ln">    70  </span>				fs,
-<span id="L71" class="ln">    71  </span>			)
-<span id="L72" class="ln">    72  </span>			assert.Contains(t, output.String(), tc.expectOut)
-<span id="L73" class="ln">    73  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L74" class="ln">    74  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L75" class="ln">    75  </span>				return
-<span id="L76" class="ln">    76  </span>			}
-<span id="L77" class="ln">    77  </span>			assert.NoError(t, err)
-<span id="L78" class="ln">    78  </span>		})
-<span id="L79" class="ln">    79  </span>	}
-<span id="L80" class="ln">    80  </span>}
-<span id="L81" class="ln">    81  </span>
-<span id="L82" class="ln">    82  </span>func TestRunArgs(t *testing.T) {
-<span id="L83" class="ln">    83  </span>	t.Parallel()
-<span id="L84" class="ln">    84  </span>	for _, tc := range []struct {
-<span id="L85" class="ln">    85  </span>		description string
-<span id="L86" class="ln">    86  </span>		args        Args
-<span id="L87" class="ln">    87  </span>		stdin       string
-<span id="L88" class="ln">    88  </span>		files       map[string]string
-<span id="L89" class="ln">    89  </span>		expectOut   string
-<span id="L90" class="ln">    90  </span>		expectErr   string
-<span id="L91" class="ln">    91  </span>	}{
-<span id="L92" class="ln">    92  </span>		{
-<span id="L93" class="ln">    93  </span>			description: &#34;print empty covet summary&#34;,
-<span id="L94" class="ln">    94  </span>			args: Args{
-<span id="L95" class="ln">    95  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L96" class="ln">    96  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L97" class="ln">    97  </span>			},
-<span id="L98" class="ln">    98  </span>			files: map[string]string{
-<span id="L99" class="ln">    99  </span>				&#34;my.patch&#34;: ``,
-<span id="L100" class="ln">   100  </span>				&#34;cover.out&#34;: `
-<span id="L101" class="ln">   101  </span>mode: atomic
-<span id="L102" class="ln">   102  </span>`,
-<span id="L103" class="ln">   103  </span>			},
-<span id="L104" class="ln">   104  </span>			expectOut: `
-<span id="L105" class="ln">   105  </span>No coverage information intersects with diff.
-<span id="L106" class="ln">   106  </span>`,
-<span id="L107" class="ln">   107  </span>		},
-<span id="L108" class="ln">   108  </span>		{
-<span id="L109" class="ln">   109  </span>			description: &#34;print covet summary&#34;,
-<span id="L110" class="ln">   110  </span>			args: Args{
-<span id="L111" class="ln">   111  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L112" class="ln">   112  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L113" class="ln">   113  </span>			},
-<span id="L114" class="ln">   114  </span>			files: map[string]string{
-<span id="L115" class="ln">   115  </span>				&#34;my.patch&#34;: `
-<span id="L116" class="ln">   116  </span>diff --git a/run.go b/run.go
-<span id="L117" class="ln">   117  </span>index 0000000..1111111 100644
-<span id="L118" class="ln">   118  </span>--- a/cmd/covet/main.go
-<span id="L119" class="ln">   119  </span>+++ b/cmd/covet/main.go
-<span id="L120" class="ln">   120  </span>@@ -1,4 +1,6 @@
-<span id="L121" class="ln">   121  </span> package main
-<span id="L122" class="ln">   122  </span>
-<span id="L123" class="ln">   123  </span> func main() {
-<span id="L124" class="ln">   124  </span>+	println(1)
-<span id="L125" class="ln">   125  </span>+	println(2)
-<span id="L126" class="ln">   126  </span> }
-<span id="L127" class="ln">   127  </span>`,
-<span id="L128" class="ln">   128  </span>				&#34;cover.out&#34;: `
-<span id="L129" class="ln">   129  </span>mode: atomic
-<span id="L130" class="ln">   130  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
-<span id="L131" class="ln">   131  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
-<span id="L132" class="ln">   132  </span>`,
-<span id="L133" class="ln">   133  </span>				&#34;go.mod&#34;: `
-<span id="L134" class="ln">   134  </span>module github.com/johnstarich/go/covet
-<span id="L135" class="ln">   135  </span>`,
-<span id="L136" class="ln">   136  </span>				&#34;cmd/covet/main.go&#34;: `
-<span id="L137" class="ln">   137  </span>package main
-<span id="L138" class="ln">   138  </span>
-<span id="L139" class="ln">   139  </span>func main() {
-<span id="L140" class="ln">   140  </span>	println(1)
-<span id="L141" class="ln">   141  </span>	println(2)
-<span id="L142" class="ln">   142  </span>}
-<span id="L143" class="ln">   143  </span>`,
-<span id="L144" class="ln">   144  </span>			},
-<span id="L145" class="ln">   145  </span>			expectOut: `
-<span id="L146" class="ln">   146  </span>Total diff coverage:  50.0%
-<span id="L147" class="ln">   147  </span>
-<span id="L148" class="ln">   148  </span>Diff coverage is below target. Add tests for these files:
-<span id="L149" class="ln">   149  </span>┌───────┬──────────────┬───────────────────┐
-<span id="L150" class="ln">   150  </span>│ LINES │ COVERAGE     │ FILE              │
-<span id="L151" class="ln">   151  </span>├───────┼──────────────┼───────────────────┤
-<span id="L152" class="ln">   152  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
-<span id="L153" class="ln">   153  </span>└───────┴──────────────┴───────────────────┘
-<span id="L154" class="ln">   154  </span>`,
-<span id="L155" class="ln">   155  </span>		},
-<span id="L156" class="ln">   156  </span>		{
-<span id="L157" class="ln">   157  </span>			description: &#34;print covet summary subdirectory&#34;,
-<span id="L158" class="ln">   158  </span>			args: Args{
-<span id="L159" class="ln">   159  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L160" class="ln">   160  </span>				GoCoverageFile: &#34;mypkg/cover.out&#34;,
-<span id="L161" class="ln">   161  </span>			},
-<span id="L162" class="ln">   162  </span>			files: map[string]string{
-<span id="L163" class="ln">   163  </span>				&#34;my.patch&#34;: `
-<span id="L164" class="ln">   164  </span>diff --git a/run.go b/run.go
-<span id="L165" class="ln">   165  </span>index 0000000..1111111 100644
-<span id="L166" class="ln">   166  </span>--- a/mypkg/main.go
-<span id="L167" class="ln">   167  </span>+++ b/mypkg/main.go
-<span id="L168" class="ln">   168  </span>@@ -1,4 +1,6 @@
-<span id="L169" class="ln">   169  </span> package main
-<span id="L170" class="ln">   170  </span>
-<span id="L171" class="ln">   171  </span> func main() {
-<span id="L172" class="ln">   172  </span>+	println(1)
-<span id="L173" class="ln">   173  </span>+	println(2)
-<span id="L174" class="ln">   174  </span> }
-<span id="L175" class="ln">   175  </span>`,
-<span id="L176" class="ln">   176  </span>				&#34;mypkg/cover.out&#34;: `
-<span id="L177" class="ln">   177  </span>mode: atomic
-<span id="L178" class="ln">   178  </span>mymodule/main.go:4.1,4.9 1 1
-<span id="L179" class="ln">   179  </span>mymodule/main.go:5.1,5.9 1 0
-<span id="L180" class="ln">   180  </span>`,
-<span id="L181" class="ln">   181  </span>				&#34;mypkg/go.mod&#34;: `
-<span id="L182" class="ln">   182  </span>module mymodule
-<span id="L183" class="ln">   183  </span>`,
-<span id="L184" class="ln">   184  </span>				&#34;mypkg/main.go&#34;: `
-<span id="L185" class="ln">   185  </span>package main
-<span id="L186" class="ln">   186  </span>
-<span id="L187" class="ln">   187  </span>func main() {
-<span id="L188" class="ln">   188  </span>	println(1)
-<span id="L189" class="ln">   189  </span>	println(2)
-<span id="L190" class="ln">   190  </span>}
-<span id="L191" class="ln">   191  </span>`,
-<span id="L192" class="ln">   192  </span>			},
-<span id="L193" class="ln">   193  </span>			expectOut: `
-<span id="L194" class="ln">   194  </span>Total diff coverage:  50.0%
-<span id="L195" class="ln">   195  </span>
-<span id="L196" class="ln">   196  </span>Diff coverage is below target. Add tests for these files:
-<span id="L197" class="ln">   197  </span>┌───────┬──────────────┬─────────┐
-<span id="L198" class="ln">   198  </span>│ LINES │ COVERAGE     │ FILE    │
-<span id="L199" class="ln">   199  </span>├───────┼──────────────┼─────────┤
-<span id="L200" class="ln">   200  </span>│  1/2  │  50.0% ██▌   │ main.go │
-<span id="L201" class="ln">   201  </span>└───────┴──────────────┴─────────┘
-<span id="L202" class="ln">   202  </span>`,
-<span id="L203" class="ln">   203  </span>		},
-<span id="L204" class="ln">   204  </span>		{
-<span id="L205" class="ln">   205  </span>			description: &#34;print covet summary parent directory&#34;,
-<span id="L206" class="ln">   206  </span>			args: Args{
-<span id="L207" class="ln">   207  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L208" class="ln">   208  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L209" class="ln">   209  </span>			},
-<span id="L210" class="ln">   210  </span>			files: map[string]string{
-<span id="L211" class="ln">   211  </span>				&#34;my.patch&#34;: `
-<span id="L212" class="ln">   212  </span>diff --git a/run.go b/run.go
-<span id="L213" class="ln">   213  </span>index 0000000..1111111 100644
-<span id="L214" class="ln">   214  </span>--- a/mypkg/main.go
-<span id="L215" class="ln">   215  </span>+++ b/mypkg/main.go
-<span id="L216" class="ln">   216  </span>@@ -1,4 +1,6 @@
-<span id="L217" class="ln">   217  </span> package main
-<span id="L218" class="ln">   218  </span>
-<span id="L219" class="ln">   219  </span> func main() {
-<span id="L220" class="ln">   220  </span>+	println(1)
-<span id="L221" class="ln">   221  </span>+	println(2)
-<span id="L222" class="ln">   222  </span> }
-<span id="L223" class="ln">   223  </span>`,
-<span id="L224" class="ln">   224  </span>				&#34;cover.out&#34;: `
-<span id="L225" class="ln">   225  </span>mode: atomic
-<span id="L226" class="ln">   226  </span>mymodule/mypkg/main.go:4.1,4.9 1 1
-<span id="L227" class="ln">   227  </span>mymodule/mypkg/main.go:5.1,5.9 1 0
-<span id="L228" class="ln">   228  </span>`,
-<span id="L229" class="ln">   229  </span>				&#34;go.mod&#34;: `
-<span id="L230" class="ln">   230  </span>module mymodule
-<span id="L231" class="ln">   231  </span>`,
-<span id="L232" class="ln">   232  </span>				&#34;mypkg/main.go&#34;: `
-<span id="L233" class="ln">   233  </span>package main
-<span id="L234" class="ln">   234  </span>
-<span id="L235" class="ln">   235  </span>func main() {
-<span id="L236" class="ln">   236  </span>	println(1)
-<span id="L237" class="ln">   237  </span>	println(2)
-<span id="L238" class="ln">   238  </span>}
-<span id="L239" class="ln">   239  </span>`,
-<span id="L240" class="ln">   240  </span>			},
-<span id="L241" class="ln">   241  </span>			expectOut: `
-<span id="L242" class="ln">   242  </span>Total diff coverage:  50.0%
-<span id="L243" class="ln">   243  </span>
-<span id="L244" class="ln">   244  </span>Diff coverage is below target. Add tests for these files:
-<span id="L245" class="ln">   245  </span>┌───────┬──────────────┬───────────────┐
-<span id="L246" class="ln">   246  </span>│ LINES │ COVERAGE     │ FILE          │
-<span id="L247" class="ln">   247  </span>├───────┼──────────────┼───────────────┤
-<span id="L248" class="ln">   248  </span>│  1/2  │  50.0% ██▌   │ mypkg/main.go │
-<span id="L249" class="ln">   249  </span>└───────┴──────────────┴───────────────┘
-<span id="L250" class="ln">   250  </span>`,
-<span id="L251" class="ln">   251  </span>		},
-<span id="L252" class="ln">   252  </span>		{
-<span id="L253" class="ln">   253  </span>			description: &#34;print covet&#34;,
-<span id="L254" class="ln">   254  </span>			args: Args{
-<span id="L255" class="ln">   255  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L256" class="ln">   256  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L257" class="ln">   257  </span>				ShowCoverage:   true,
-<span id="L258" class="ln">   258  </span>			},
-<span id="L259" class="ln">   259  </span>			files: map[string]string{
-<span id="L260" class="ln">   260  </span>				&#34;my.patch&#34;: `
-<span id="L261" class="ln">   261  </span>diff --git a/run.go b/run.go
-<span id="L262" class="ln">   262  </span>index 0000000..1111111 100644
-<span id="L263" class="ln">   263  </span>--- a/cmd/covet/main.go
-<span id="L264" class="ln">   264  </span>+++ b/cmd/covet/main.go
-<span id="L265" class="ln">   265  </span>@@ -1,4 +1,6 @@
-<span id="L266" class="ln">   266  </span> package main
-<span id="L267" class="ln">   267  </span>
-<span id="L268" class="ln">   268  </span> func main() {
-<span id="L269" class="ln">   269  </span>+	println(1)
-<span id="L270" class="ln">   270  </span>+	println(2)
-<span id="L271" class="ln">   271  </span> }
-<span id="L272" class="ln">   272  </span>`,
-<span id="L273" class="ln">   273  </span>				&#34;cover.out&#34;: `
-<span id="L274" class="ln">   274  </span>mode: atomic
-<span id="L275" class="ln">   275  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
-<span id="L276" class="ln">   276  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
-<span id="L277" class="ln">   277  </span>`,
-<span id="L278" class="ln">   278  </span>				&#34;go.mod&#34;: `
-<span id="L279" class="ln">   279  </span>module github.com/johnstarich/go/covet
-<span id="L280" class="ln">   280  </span>`,
-<span id="L281" class="ln">   281  </span>				&#34;cmd/covet/main.go&#34;: `
-<span id="L282" class="ln">   282  </span>package main
-<span id="L283" class="ln">   283  </span>
-<span id="L284" class="ln">   284  </span>func main() {
-<span id="L285" class="ln">   285  </span>	println(1)
-<span id="L286" class="ln">   286  </span>	println(2)
-<span id="L287" class="ln">   287  </span>}
-<span id="L288" class="ln">   288  </span>`,
-<span id="L289" class="ln">   289  </span>			},
-<span id="L290" class="ln">   290  </span>			expectOut: `
-<span id="L291" class="ln">   291  </span>Coverage diff: cmd/covet/main.go
-<span id="L292" class="ln">   292  </span>Coverage: 2 to 6
-<span id="L293" class="ln">   293  </span> 
-<span id="L294" class="ln">   294  </span> func main() {
-<span id="L295" class="ln">   295  </span>+	println(1)
-<span id="L296" class="ln">   296  </span>-	println(2)
-<span id="L297" class="ln">   297  </span> }
-<span id="L298" class="ln">   298  </span>
-<span id="L299" class="ln">   299  </span>Total diff coverage:  50.0%
-<span id="L300" class="ln">   300  </span>
-<span id="L301" class="ln">   301  </span>Diff coverage is below target. Add tests for these files:
-<span id="L302" class="ln">   302  </span>┌───────┬──────────────┬───────────────────┐
-<span id="L303" class="ln">   303  </span>│ LINES │ COVERAGE     │ FILE              │
-<span id="L304" class="ln">   304  </span>├───────┼──────────────┼───────────────────┤
-<span id="L305" class="ln">   305  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
-<span id="L306" class="ln">   306  </span>└───────┴──────────────┴───────────────────┘
-<span id="L307" class="ln">   307  </span>`,
-<span id="L308" class="ln">   308  </span>		},
-<span id="L309" class="ln">   309  </span>		{
-<span id="L310" class="ln">   310  </span>			description: &#34;post to github comment - bad status does not fail command&#34;,
-<span id="L311" class="ln">   311  </span>			args: Args{
-<span id="L312" class="ln">   312  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L313" class="ln">   313  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L314" class="ln">   314  </span>				GitHubEndpoint: &#34;replace-me&#34;,
-<span id="L315" class="ln">   315  </span>				GitHubToken:    &#34;some-gh-token&#34;,
-<span id="L316" class="ln">   316  </span>				GitHubIssue:    &#34;github.com/org/repo/pull/123&#34;,
-<span id="L317" class="ln">   317  </span>			},
-<span id="L318" class="ln">   318  </span>			files: map[string]string{
-<span id="L319" class="ln">   319  </span>				&#34;my.patch&#34;: `
-<span id="L320" class="ln">   320  </span>diff --git a/run.go b/run.go
-<span id="L321" class="ln">   321  </span>index 0000000..1111111 100644
-<span id="L322" class="ln">   322  </span>--- a/cmd/covet/main.go
-<span id="L323" class="ln">   323  </span>+++ b/cmd/covet/main.go
-<span id="L324" class="ln">   324  </span>@@ -1,4 +1,6 @@
-<span id="L325" class="ln">   325  </span> package main
-<span id="L326" class="ln">   326  </span>
-<span id="L327" class="ln">   327  </span> func main() {
-<span id="L328" class="ln">   328  </span>+	println(1)
-<span id="L329" class="ln">   329  </span>+	println(2)
-<span id="L330" class="ln">   330  </span> }
-<span id="L331" class="ln">   331  </span>`,
-<span id="L332" class="ln">   332  </span>				&#34;cover.out&#34;: `
-<span id="L333" class="ln">   333  </span>mode: atomic
-<span id="L334" class="ln">   334  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
-<span id="L335" class="ln">   335  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
-<span id="L336" class="ln">   336  </span>`,
-<span id="L337" class="ln">   337  </span>				&#34;go.mod&#34;: `
-<span id="L338" class="ln">   338  </span>module github.com/johnstarich/go/covet
-<span id="L339" class="ln">   339  </span>`,
-<span id="L340" class="ln">   340  </span>				&#34;cmd/covet/main.go&#34;: `
-<span id="L341" class="ln">   341  </span>package main
-<span id="L342" class="ln">   342  </span>
-<span id="L343" class="ln">   343  </span>func main() {
-<span id="L344" class="ln">   344  </span>	println(1)
-<span id="L345" class="ln">   345  </span>	println(2)
-<span id="L346" class="ln">   346  </span>}
-<span id="L347" class="ln">   347  </span>`,
-<span id="L348" class="ln">   348  </span>			},
-<span id="L349" class="ln">   349  </span>			expectOut: `
-<span id="L350" class="ln">   350  </span>Total diff coverage:  50.0%
-<span id="L351" class="ln">   351  </span>
-<span id="L352" class="ln">   352  </span>Diff coverage is below target. Add tests for these files:
-<span id="L353" class="ln">   353  </span>┌───────┬──────────────┬───────────────────┐
-<span id="L354" class="ln">   354  </span>│ LINES │ COVERAGE     │ FILE              │
-<span id="L355" class="ln">   355  </span>├───────┼──────────────┼───────────────────┤
-<span id="L356" class="ln">   356  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
-<span id="L357" class="ln">   357  </span>└───────┴──────────────┴───────────────────┘
-<span id="L358" class="ln">   358  </span>
-<span id="L359" class="ln">   359  </span>Failed to update GitHub comment, skipping. Error: GET {{.ServerURL}}/api/v3/repos/org/repo/issues/123/comments?sort=created: 500  []
-<span id="L360" class="ln">   360  </span>`,
-<span id="L361" class="ln">   361  </span>		},
-<span id="L362" class="ln">   362  </span>		{
-<span id="L363" class="ln">   363  </span>			description: &#34;post to github comment - bad issue URL&#34;,
-<span id="L364" class="ln">   364  </span>			args: Args{
-<span id="L365" class="ln">   365  </span>				DiffFile:       &#34;my.patch&#34;,
-<span id="L366" class="ln">   366  </span>				GoCoverageFile: &#34;cover.out&#34;,
-<span id="L367" class="ln">   367  </span>				GitHubToken:    &#34;some-gh-token&#34;,
-<span id="L368" class="ln">   368  </span>				GitHubIssue:    &#34;foo&#34;,
-<span id="L369" class="ln">   369  </span>			},
-<span id="L370" class="ln">   370  </span>			files: map[string]string{
-<span id="L371" class="ln">   371  </span>				&#34;my.patch&#34;: `
-<span id="L372" class="ln">   372  </span>diff --git a/run.go b/run.go
-<span id="L373" class="ln">   373  </span>index 0000000..1111111 100644
-<span id="L374" class="ln">   374  </span>--- a/cmd/covet/main.go
-<span id="L375" class="ln">   375  </span>+++ b/cmd/covet/main.go
-<span id="L376" class="ln">   376  </span>@@ -1,4 +1,6 @@
-<span id="L377" class="ln">   377  </span> package main
-<span id="L378" class="ln">   378  </span>
-<span id="L379" class="ln">   379  </span> func main() {
-<span id="L380" class="ln">   380  </span>+	println(1)
-<span id="L381" class="ln">   381  </span>+	println(2)
-<span id="L382" class="ln">   382  </span> }
-<span id="L383" class="ln">   383  </span>`,
-<span id="L384" class="ln">   384  </span>				&#34;cover.out&#34;: `
-<span id="L385" class="ln">   385  </span>mode: atomic
-<span id="L386" class="ln">   386  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
-<span id="L387" class="ln">   387  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
-<span id="L388" class="ln">   388  </span>`,
-<span id="L389" class="ln">   389  </span>				&#34;go.mod&#34;: `
-<span id="L390" class="ln">   390  </span>module github.com/johnstarich/go/covet
-<span id="L391" class="ln">   391  </span>`,
-<span id="L392" class="ln">   392  </span>				&#34;cmd/covet/main.go&#34;: `
-<span id="L393" class="ln">   393  </span>package main
-<span id="L394" class="ln">   394  </span>
-<span id="L395" class="ln">   395  </span>func main() {
-<span id="L396" class="ln">   396  </span>	println(1)
-<span id="L397" class="ln">   397  </span>	println(2)
-<span id="L398" class="ln">   398  </span>}
-<span id="L399" class="ln">   399  </span>`,
-<span id="L400" class="ln">   400  </span>			},
-<span id="L401" class="ln">   401  </span>			expectOut: `
-<span id="L402" class="ln">   402  </span>Total diff coverage:  50.0%
-<span id="L403" class="ln">   403  </span>
-<span id="L404" class="ln">   404  </span>Diff coverage is below target. Add tests for these files:
-<span id="L405" class="ln">   405  </span>┌───────┬──────────────┬───────────────────┐
-<span id="L406" class="ln">   406  </span>│ LINES │ COVERAGE     │ FILE              │
-<span id="L407" class="ln">   407  </span>├───────┼──────────────┼───────────────────┤
-<span id="L408" class="ln">   408  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
-<span id="L409" class="ln">   409  </span>└───────┴──────────────┴───────────────────┘
-<span id="L410" class="ln">   410  </span>`,
-<span id="L411" class="ln">   411  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
-<span id="L412" class="ln">   412  </span>		},
-<span id="L413" class="ln">   413  </span>	} {
-<span id="L414" class="ln">   414  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L415" class="ln">   415  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L416" class="ln">   416  </span>			t.Parallel()
-<span id="L417" class="ln">   417  </span>			fs := testhelpers.FSWithFiles(t, tc.files)
-<span id="L418" class="ln">   418  </span>			var output bytes.Buffer
-<span id="L419" class="ln">   419  </span>			deps := Deps{
-<span id="L420" class="ln">   420  </span>				Stdin:  strings.NewReader(tc.stdin),
-<span id="L421" class="ln">   421  </span>				Stdout: &amp;output,
-<span id="L422" class="ln">   422  </span>				FS:     fs,
-<span id="L423" class="ln">   423  </span>			}
-<span id="L424" class="ln">   424  </span>			args := tc.args
-<span id="L425" class="ln">   425  </span>			args.DiffBaseDir = &#34;.&#34;
-<span id="L426" class="ln">   426  </span>			if args.TargetDiffCoverage == 0 {
-<span id="L427" class="ln">   427  </span>				args.TargetDiffCoverage = 90
-<span id="L428" class="ln">   428  </span>			}
-<span id="L429" class="ln">   429  </span>
-<span id="L430" class="ln">   430  </span>			if args.GitHubEndpoint == &#34;replace-me&#34; {
-<span id="L431" class="ln">   431  </span>				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-<span id="L432" class="ln">   432  </span>					w.WriteHeader(http.StatusInternalServerError)
-<span id="L433" class="ln">   433  </span>				}))
-<span id="L434" class="ln">   434  </span>				args.GitHubEndpoint = server.URL
-<span id="L435" class="ln">   435  </span>				t.Cleanup(server.Close)
-<span id="L436" class="ln">   436  </span>			}
-<span id="L437" class="ln">   437  </span>
-<span id="L438" class="ln">   438  </span>			var expectOut bytes.Buffer
-<span id="L439" class="ln">   439  </span>			require.NoError(t, template.Must(template.New(&#34;&#34;).Parse(tc.expectOut)).Execute(&amp;expectOut, map[string]interface{}{
-<span id="L440" class="ln">   440  </span>				&#34;ServerURL&#34;: args.GitHubEndpoint,
-<span id="L441" class="ln">   441  </span>			}))
-<span id="L442" class="ln">   442  </span>
-<span id="L443" class="ln">   443  </span>			err := runArgs(args, deps)
-<span id="L444" class="ln">   444  </span>			assert.Equal(t, strings.TrimSpace(expectOut.String()), strings.TrimSpace(output.String()))
-<span id="L445" class="ln">   445  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L446" class="ln">   446  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L447" class="ln">   447  </span>				return
-<span id="L448" class="ln">   448  </span>			}
-<span id="L449" class="ln">   449  </span>			assert.NoError(t, err)
-<span id="L450" class="ln">   450  </span>		})
-<span id="L451" class="ln">   451  </span>	}
-<span id="L452" class="ln">   452  </span>}
-<span id="L453" class="ln">   453  </span>
-<span id="L454" class="ln">   454  </span>func TestParseIssueURL(t *testing.T) {
-<span id="L455" class="ln">   455  </span>	t.Parallel()
-<span id="L456" class="ln">   456  </span>	for _, tc := range []struct {
-<span id="L457" class="ln">   457  </span>		url          string
-<span id="L458" class="ln">   458  </span>		expectOrg    string
-<span id="L459" class="ln">   459  </span>		expectRepo   string
-<span id="L460" class="ln">   460  </span>		expectNumber int
-<span id="L461" class="ln">   461  </span>		expectErr    string
-<span id="L462" class="ln">   462  </span>	}{
-<span id="L463" class="ln">   463  </span>		{
-<span id="L464" class="ln">   464  </span>			url:       &#34;&#34;,
-<span id="L465" class="ln">   465  </span>			expectErr: &#34;-gh-issue is required&#34;,
-<span id="L466" class="ln">   466  </span>		},
-<span id="L467" class="ln">   467  </span>		{
-<span id="L468" class="ln">   468  </span>			url:       &#34;example.com&#34;,
-<span id="L469" class="ln">   469  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
-<span id="L470" class="ln">   470  </span>		},
-<span id="L471" class="ln">   471  </span>		{
-<span id="L472" class="ln">   472  </span>			url:          &#34;github.com/myorg/myrepo/pull/123&#34;,
-<span id="L473" class="ln">   473  </span>			expectOrg:    &#34;myorg&#34;,
-<span id="L474" class="ln">   474  </span>			expectRepo:   &#34;myrepo&#34;,
-<span id="L475" class="ln">   475  </span>			expectNumber: 123,
-<span id="L476" class="ln">   476  </span>		},
-<span id="L477" class="ln">   477  </span>		{
-<span id="L478" class="ln">   478  </span>			url:          &#34;github.com/myorg/myrepo/pull/123/extra&#34;,
-<span id="L479" class="ln">   479  </span>			expectOrg:    &#34;myorg&#34;,
-<span id="L480" class="ln">   480  </span>			expectRepo:   &#34;myrepo&#34;,
-<span id="L481" class="ln">   481  </span>			expectNumber: 123,
-<span id="L482" class="ln">   482  </span>		},
-<span id="L483" class="ln">   483  </span>		{
-<span id="L484" class="ln">   484  </span>			url:       &#34;github.com/myorg/myrepo/pull/not-a-number&#34;,
-<span id="L485" class="ln">   485  </span>			expectErr: `strconv.ParseInt: parsing &#34;not-a-number&#34;: invalid syntax`,
-<span id="L486" class="ln">   486  </span>		},
-<span id="L487" class="ln">   487  </span>	} {
-<span id="L488" class="ln">   488  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L489" class="ln">   489  </span>		t.Run(tc.url, func(t *testing.T) {
-<span id="L490" class="ln">   490  </span>			t.Parallel()
-<span id="L491" class="ln">   491  </span>			org, repo, number, err := parseIssueURL(tc.url)
-<span id="L492" class="ln">   492  </span>			assert.Equal(t, tc.expectOrg, org)
-<span id="L493" class="ln">   493  </span>			assert.Equal(t, tc.expectRepo, repo)
-<span id="L494" class="ln">   494  </span>			assert.Equal(t, tc.expectNumber, number)
-<span id="L495" class="ln">   495  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L496" class="ln">   496  </span>				assert.EqualError(t, err, tc.expectErr)
-<span id="L497" class="ln">   497  </span>			} else {
-<span id="L498" class="ln">   498  </span>				assert.NoError(t, err)
-<span id="L499" class="ln">   499  </span>			}
-<span id="L500" class="ln">   500  </span>		})
-<span id="L501" class="ln">   501  </span>	}
-<span id="L502" class="ln">   502  </span>}
+<span id="L69" class="ln">    69  </span>				fs,
+<span id="L70" class="ln">    70  </span>			)
+<span id="L71" class="ln">    71  </span>			assert.Contains(t, output.String(), tc.expectOut)
+<span id="L72" class="ln">    72  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L73" class="ln">    73  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L74" class="ln">    74  </span>				return
+<span id="L75" class="ln">    75  </span>			}
+<span id="L76" class="ln">    76  </span>			assert.NoError(t, err)
+<span id="L77" class="ln">    77  </span>		})
+<span id="L78" class="ln">    78  </span>	}
+<span id="L79" class="ln">    79  </span>}
+<span id="L80" class="ln">    80  </span>
+<span id="L81" class="ln">    81  </span>func TestRunArgs(t *testing.T) {
+<span id="L82" class="ln">    82  </span>	t.Parallel()
+<span id="L83" class="ln">    83  </span>	for _, tc := range []struct {
+<span id="L84" class="ln">    84  </span>		description string
+<span id="L85" class="ln">    85  </span>		args        Args
+<span id="L86" class="ln">    86  </span>		stdin       string
+<span id="L87" class="ln">    87  </span>		files       map[string]string
+<span id="L88" class="ln">    88  </span>		expectOut   string
+<span id="L89" class="ln">    89  </span>		expectErr   string
+<span id="L90" class="ln">    90  </span>	}{
+<span id="L91" class="ln">    91  </span>		{
+<span id="L92" class="ln">    92  </span>			description: &#34;print empty covet summary&#34;,
+<span id="L93" class="ln">    93  </span>			args: Args{
+<span id="L94" class="ln">    94  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L95" class="ln">    95  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L96" class="ln">    96  </span>			},
+<span id="L97" class="ln">    97  </span>			files: map[string]string{
+<span id="L98" class="ln">    98  </span>				&#34;my.patch&#34;: ``,
+<span id="L99" class="ln">    99  </span>				&#34;cover.out&#34;: `
+<span id="L100" class="ln">   100  </span>mode: atomic
+<span id="L101" class="ln">   101  </span>`,
+<span id="L102" class="ln">   102  </span>			},
+<span id="L103" class="ln">   103  </span>			expectOut: `
+<span id="L104" class="ln">   104  </span>No coverage information intersects with diff.
+<span id="L105" class="ln">   105  </span>`,
+<span id="L106" class="ln">   106  </span>		},
+<span id="L107" class="ln">   107  </span>		{
+<span id="L108" class="ln">   108  </span>			description: &#34;print covet summary&#34;,
+<span id="L109" class="ln">   109  </span>			args: Args{
+<span id="L110" class="ln">   110  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L111" class="ln">   111  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L112" class="ln">   112  </span>			},
+<span id="L113" class="ln">   113  </span>			files: map[string]string{
+<span id="L114" class="ln">   114  </span>				&#34;my.patch&#34;: `
+<span id="L115" class="ln">   115  </span>diff --git a/run.go b/run.go
+<span id="L116" class="ln">   116  </span>index 0000000..1111111 100644
+<span id="L117" class="ln">   117  </span>--- a/cmd/covet/main.go
+<span id="L118" class="ln">   118  </span>+++ b/cmd/covet/main.go
+<span id="L119" class="ln">   119  </span>@@ -1,4 +1,6 @@
+<span id="L120" class="ln">   120  </span> package main
+<span id="L121" class="ln">   121  </span>
+<span id="L122" class="ln">   122  </span> func main() {
+<span id="L123" class="ln">   123  </span>+	println(1)
+<span id="L124" class="ln">   124  </span>+	println(2)
+<span id="L125" class="ln">   125  </span> }
+<span id="L126" class="ln">   126  </span>`,
+<span id="L127" class="ln">   127  </span>				&#34;cover.out&#34;: `
+<span id="L128" class="ln">   128  </span>mode: atomic
+<span id="L129" class="ln">   129  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+<span id="L130" class="ln">   130  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
+<span id="L131" class="ln">   131  </span>`,
+<span id="L132" class="ln">   132  </span>				&#34;go.mod&#34;: `
+<span id="L133" class="ln">   133  </span>module github.com/johnstarich/go/covet
+<span id="L134" class="ln">   134  </span>`,
+<span id="L135" class="ln">   135  </span>				&#34;cmd/covet/main.go&#34;: `
+<span id="L136" class="ln">   136  </span>package main
+<span id="L137" class="ln">   137  </span>
+<span id="L138" class="ln">   138  </span>func main() {
+<span id="L139" class="ln">   139  </span>	println(1)
+<span id="L140" class="ln">   140  </span>	println(2)
+<span id="L141" class="ln">   141  </span>}
+<span id="L142" class="ln">   142  </span>`,
+<span id="L143" class="ln">   143  </span>			},
+<span id="L144" class="ln">   144  </span>			expectOut: `
+<span id="L145" class="ln">   145  </span>Total diff coverage:  50.0%
+<span id="L146" class="ln">   146  </span>
+<span id="L147" class="ln">   147  </span>Diff coverage is below target. Add tests for these files:
+<span id="L148" class="ln">   148  </span>┌───────┬──────────────┬───────────────────┐
+<span id="L149" class="ln">   149  </span>│ LINES │ COVERAGE     │ FILE              │
+<span id="L150" class="ln">   150  </span>├───────┼──────────────┼───────────────────┤
+<span id="L151" class="ln">   151  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+<span id="L152" class="ln">   152  </span>└───────┴──────────────┴───────────────────┘
+<span id="L153" class="ln">   153  </span>`,
+<span id="L154" class="ln">   154  </span>		},
+<span id="L155" class="ln">   155  </span>		{
+<span id="L156" class="ln">   156  </span>			description: &#34;print covet summary subdirectory&#34;,
+<span id="L157" class="ln">   157  </span>			args: Args{
+<span id="L158" class="ln">   158  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L159" class="ln">   159  </span>				GoCoverageFile: &#34;mypkg/cover.out&#34;,
+<span id="L160" class="ln">   160  </span>			},
+<span id="L161" class="ln">   161  </span>			files: map[string]string{
+<span id="L162" class="ln">   162  </span>				&#34;my.patch&#34;: `
+<span id="L163" class="ln">   163  </span>diff --git a/run.go b/run.go
+<span id="L164" class="ln">   164  </span>index 0000000..1111111 100644
+<span id="L165" class="ln">   165  </span>--- a/mypkg/main.go
+<span id="L166" class="ln">   166  </span>+++ b/mypkg/main.go
+<span id="L167" class="ln">   167  </span>@@ -1,4 +1,6 @@
+<span id="L168" class="ln">   168  </span> package main
+<span id="L169" class="ln">   169  </span>
+<span id="L170" class="ln">   170  </span> func main() {
+<span id="L171" class="ln">   171  </span>+	println(1)
+<span id="L172" class="ln">   172  </span>+	println(2)
+<span id="L173" class="ln">   173  </span> }
+<span id="L174" class="ln">   174  </span>`,
+<span id="L175" class="ln">   175  </span>				&#34;mypkg/cover.out&#34;: `
+<span id="L176" class="ln">   176  </span>mode: atomic
+<span id="L177" class="ln">   177  </span>mymodule/main.go:4.1,4.9 1 1
+<span id="L178" class="ln">   178  </span>mymodule/main.go:5.1,5.9 1 0
+<span id="L179" class="ln">   179  </span>`,
+<span id="L180" class="ln">   180  </span>				&#34;mypkg/go.mod&#34;: `
+<span id="L181" class="ln">   181  </span>module mymodule
+<span id="L182" class="ln">   182  </span>`,
+<span id="L183" class="ln">   183  </span>				&#34;mypkg/main.go&#34;: `
+<span id="L184" class="ln">   184  </span>package main
+<span id="L185" class="ln">   185  </span>
+<span id="L186" class="ln">   186  </span>func main() {
+<span id="L187" class="ln">   187  </span>	println(1)
+<span id="L188" class="ln">   188  </span>	println(2)
+<span id="L189" class="ln">   189  </span>}
+<span id="L190" class="ln">   190  </span>`,
+<span id="L191" class="ln">   191  </span>			},
+<span id="L192" class="ln">   192  </span>			expectOut: `
+<span id="L193" class="ln">   193  </span>Total diff coverage:  50.0%
+<span id="L194" class="ln">   194  </span>
+<span id="L195" class="ln">   195  </span>Diff coverage is below target. Add tests for these files:
+<span id="L196" class="ln">   196  </span>┌───────┬──────────────┬─────────┐
+<span id="L197" class="ln">   197  </span>│ LINES │ COVERAGE     │ FILE    │
+<span id="L198" class="ln">   198  </span>├───────┼──────────────┼─────────┤
+<span id="L199" class="ln">   199  </span>│  1/2  │  50.0% ██▌   │ main.go │
+<span id="L200" class="ln">   200  </span>└───────┴──────────────┴─────────┘
+<span id="L201" class="ln">   201  </span>`,
+<span id="L202" class="ln">   202  </span>		},
+<span id="L203" class="ln">   203  </span>		{
+<span id="L204" class="ln">   204  </span>			description: &#34;print covet summary parent directory&#34;,
+<span id="L205" class="ln">   205  </span>			args: Args{
+<span id="L206" class="ln">   206  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L207" class="ln">   207  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L208" class="ln">   208  </span>			},
+<span id="L209" class="ln">   209  </span>			files: map[string]string{
+<span id="L210" class="ln">   210  </span>				&#34;my.patch&#34;: `
+<span id="L211" class="ln">   211  </span>diff --git a/run.go b/run.go
+<span id="L212" class="ln">   212  </span>index 0000000..1111111 100644
+<span id="L213" class="ln">   213  </span>--- a/mypkg/main.go
+<span id="L214" class="ln">   214  </span>+++ b/mypkg/main.go
+<span id="L215" class="ln">   215  </span>@@ -1,4 +1,6 @@
+<span id="L216" class="ln">   216  </span> package main
+<span id="L217" class="ln">   217  </span>
+<span id="L218" class="ln">   218  </span> func main() {
+<span id="L219" class="ln">   219  </span>+	println(1)
+<span id="L220" class="ln">   220  </span>+	println(2)
+<span id="L221" class="ln">   221  </span> }
+<span id="L222" class="ln">   222  </span>`,
+<span id="L223" class="ln">   223  </span>				&#34;cover.out&#34;: `
+<span id="L224" class="ln">   224  </span>mode: atomic
+<span id="L225" class="ln">   225  </span>mymodule/mypkg/main.go:4.1,4.9 1 1
+<span id="L226" class="ln">   226  </span>mymodule/mypkg/main.go:5.1,5.9 1 0
+<span id="L227" class="ln">   227  </span>`,
+<span id="L228" class="ln">   228  </span>				&#34;go.mod&#34;: `
+<span id="L229" class="ln">   229  </span>module mymodule
+<span id="L230" class="ln">   230  </span>`,
+<span id="L231" class="ln">   231  </span>				&#34;mypkg/main.go&#34;: `
+<span id="L232" class="ln">   232  </span>package main
+<span id="L233" class="ln">   233  </span>
+<span id="L234" class="ln">   234  </span>func main() {
+<span id="L235" class="ln">   235  </span>	println(1)
+<span id="L236" class="ln">   236  </span>	println(2)
+<span id="L237" class="ln">   237  </span>}
+<span id="L238" class="ln">   238  </span>`,
+<span id="L239" class="ln">   239  </span>			},
+<span id="L240" class="ln">   240  </span>			expectOut: `
+<span id="L241" class="ln">   241  </span>Total diff coverage:  50.0%
+<span id="L242" class="ln">   242  </span>
+<span id="L243" class="ln">   243  </span>Diff coverage is below target. Add tests for these files:
+<span id="L244" class="ln">   244  </span>┌───────┬──────────────┬───────────────┐
+<span id="L245" class="ln">   245  </span>│ LINES │ COVERAGE     │ FILE          │
+<span id="L246" class="ln">   246  </span>├───────┼──────────────┼───────────────┤
+<span id="L247" class="ln">   247  </span>│  1/2  │  50.0% ██▌   │ mypkg/main.go │
+<span id="L248" class="ln">   248  </span>└───────┴──────────────┴───────────────┘
+<span id="L249" class="ln">   249  </span>`,
+<span id="L250" class="ln">   250  </span>		},
+<span id="L251" class="ln">   251  </span>		{
+<span id="L252" class="ln">   252  </span>			description: &#34;print covet&#34;,
+<span id="L253" class="ln">   253  </span>			args: Args{
+<span id="L254" class="ln">   254  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L255" class="ln">   255  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L256" class="ln">   256  </span>				ShowCoverage:   true,
+<span id="L257" class="ln">   257  </span>			},
+<span id="L258" class="ln">   258  </span>			files: map[string]string{
+<span id="L259" class="ln">   259  </span>				&#34;my.patch&#34;: `
+<span id="L260" class="ln">   260  </span>diff --git a/run.go b/run.go
+<span id="L261" class="ln">   261  </span>index 0000000..1111111 100644
+<span id="L262" class="ln">   262  </span>--- a/cmd/covet/main.go
+<span id="L263" class="ln">   263  </span>+++ b/cmd/covet/main.go
+<span id="L264" class="ln">   264  </span>@@ -1,4 +1,6 @@
+<span id="L265" class="ln">   265  </span> package main
+<span id="L266" class="ln">   266  </span>
+<span id="L267" class="ln">   267  </span> func main() {
+<span id="L268" class="ln">   268  </span>+	println(1)
+<span id="L269" class="ln">   269  </span>+	println(2)
+<span id="L270" class="ln">   270  </span> }
+<span id="L271" class="ln">   271  </span>`,
+<span id="L272" class="ln">   272  </span>				&#34;cover.out&#34;: `
+<span id="L273" class="ln">   273  </span>mode: atomic
+<span id="L274" class="ln">   274  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+<span id="L275" class="ln">   275  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
+<span id="L276" class="ln">   276  </span>`,
+<span id="L277" class="ln">   277  </span>				&#34;go.mod&#34;: `
+<span id="L278" class="ln">   278  </span>module github.com/johnstarich/go/covet
+<span id="L279" class="ln">   279  </span>`,
+<span id="L280" class="ln">   280  </span>				&#34;cmd/covet/main.go&#34;: `
+<span id="L281" class="ln">   281  </span>package main
+<span id="L282" class="ln">   282  </span>
+<span id="L283" class="ln">   283  </span>func main() {
+<span id="L284" class="ln">   284  </span>	println(1)
+<span id="L285" class="ln">   285  </span>	println(2)
+<span id="L286" class="ln">   286  </span>}
+<span id="L287" class="ln">   287  </span>`,
+<span id="L288" class="ln">   288  </span>			},
+<span id="L289" class="ln">   289  </span>			expectOut: `
+<span id="L290" class="ln">   290  </span>Coverage diff: cmd/covet/main.go
+<span id="L291" class="ln">   291  </span>Coverage: 2 to 6
+<span id="L292" class="ln">   292  </span> 
+<span id="L293" class="ln">   293  </span> func main() {
+<span id="L294" class="ln">   294  </span>+	println(1)
+<span id="L295" class="ln">   295  </span>-	println(2)
+<span id="L296" class="ln">   296  </span> }
+<span id="L297" class="ln">   297  </span>
+<span id="L298" class="ln">   298  </span>Total diff coverage:  50.0%
+<span id="L299" class="ln">   299  </span>
+<span id="L300" class="ln">   300  </span>Diff coverage is below target. Add tests for these files:
+<span id="L301" class="ln">   301  </span>┌───────┬──────────────┬───────────────────┐
+<span id="L302" class="ln">   302  </span>│ LINES │ COVERAGE     │ FILE              │
+<span id="L303" class="ln">   303  </span>├───────┼──────────────┼───────────────────┤
+<span id="L304" class="ln">   304  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+<span id="L305" class="ln">   305  </span>└───────┴──────────────┴───────────────────┘
+<span id="L306" class="ln">   306  </span>`,
+<span id="L307" class="ln">   307  </span>		},
+<span id="L308" class="ln">   308  </span>		{
+<span id="L309" class="ln">   309  </span>			description: &#34;post to github comment - bad status does not fail command&#34;,
+<span id="L310" class="ln">   310  </span>			args: Args{
+<span id="L311" class="ln">   311  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L312" class="ln">   312  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L313" class="ln">   313  </span>				GitHubEndpoint: &#34;replace-me&#34;,
+<span id="L314" class="ln">   314  </span>				GitHubToken:    &#34;some-gh-token&#34;,
+<span id="L315" class="ln">   315  </span>				GitHubIssue:    &#34;github.com/org/repo/pull/123&#34;,
+<span id="L316" class="ln">   316  </span>			},
+<span id="L317" class="ln">   317  </span>			files: map[string]string{
+<span id="L318" class="ln">   318  </span>				&#34;my.patch&#34;: `
+<span id="L319" class="ln">   319  </span>diff --git a/run.go b/run.go
+<span id="L320" class="ln">   320  </span>index 0000000..1111111 100644
+<span id="L321" class="ln">   321  </span>--- a/cmd/covet/main.go
+<span id="L322" class="ln">   322  </span>+++ b/cmd/covet/main.go
+<span id="L323" class="ln">   323  </span>@@ -1,4 +1,6 @@
+<span id="L324" class="ln">   324  </span> package main
+<span id="L325" class="ln">   325  </span>
+<span id="L326" class="ln">   326  </span> func main() {
+<span id="L327" class="ln">   327  </span>+	println(1)
+<span id="L328" class="ln">   328  </span>+	println(2)
+<span id="L329" class="ln">   329  </span> }
+<span id="L330" class="ln">   330  </span>`,
+<span id="L331" class="ln">   331  </span>				&#34;cover.out&#34;: `
+<span id="L332" class="ln">   332  </span>mode: atomic
+<span id="L333" class="ln">   333  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+<span id="L334" class="ln">   334  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
+<span id="L335" class="ln">   335  </span>`,
+<span id="L336" class="ln">   336  </span>				&#34;go.mod&#34;: `
+<span id="L337" class="ln">   337  </span>module github.com/johnstarich/go/covet
+<span id="L338" class="ln">   338  </span>`,
+<span id="L339" class="ln">   339  </span>				&#34;cmd/covet/main.go&#34;: `
+<span id="L340" class="ln">   340  </span>package main
+<span id="L341" class="ln">   341  </span>
+<span id="L342" class="ln">   342  </span>func main() {
+<span id="L343" class="ln">   343  </span>	println(1)
+<span id="L344" class="ln">   344  </span>	println(2)
+<span id="L345" class="ln">   345  </span>}
+<span id="L346" class="ln">   346  </span>`,
+<span id="L347" class="ln">   347  </span>			},
+<span id="L348" class="ln">   348  </span>			expectOut: `
+<span id="L349" class="ln">   349  </span>Total diff coverage:  50.0%
+<span id="L350" class="ln">   350  </span>
+<span id="L351" class="ln">   351  </span>Diff coverage is below target. Add tests for these files:
+<span id="L352" class="ln">   352  </span>┌───────┬──────────────┬───────────────────┐
+<span id="L353" class="ln">   353  </span>│ LINES │ COVERAGE     │ FILE              │
+<span id="L354" class="ln">   354  </span>├───────┼──────────────┼───────────────────┤
+<span id="L355" class="ln">   355  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+<span id="L356" class="ln">   356  </span>└───────┴──────────────┴───────────────────┘
+<span id="L357" class="ln">   357  </span>
+<span id="L358" class="ln">   358  </span>Failed to update GitHub comment, skipping. Error: GET {{.ServerURL}}/api/v3/repos/org/repo/issues/123/comments?sort=created: 500  []
+<span id="L359" class="ln">   359  </span>`,
+<span id="L360" class="ln">   360  </span>		},
+<span id="L361" class="ln">   361  </span>		{
+<span id="L362" class="ln">   362  </span>			description: &#34;post to github comment - bad issue URL&#34;,
+<span id="L363" class="ln">   363  </span>			args: Args{
+<span id="L364" class="ln">   364  </span>				DiffFile:       &#34;my.patch&#34;,
+<span id="L365" class="ln">   365  </span>				GoCoverageFile: &#34;cover.out&#34;,
+<span id="L366" class="ln">   366  </span>				GitHubToken:    &#34;some-gh-token&#34;,
+<span id="L367" class="ln">   367  </span>				GitHubIssue:    &#34;foo&#34;,
+<span id="L368" class="ln">   368  </span>			},
+<span id="L369" class="ln">   369  </span>			files: map[string]string{
+<span id="L370" class="ln">   370  </span>				&#34;my.patch&#34;: `
+<span id="L371" class="ln">   371  </span>diff --git a/run.go b/run.go
+<span id="L372" class="ln">   372  </span>index 0000000..1111111 100644
+<span id="L373" class="ln">   373  </span>--- a/cmd/covet/main.go
+<span id="L374" class="ln">   374  </span>+++ b/cmd/covet/main.go
+<span id="L375" class="ln">   375  </span>@@ -1,4 +1,6 @@
+<span id="L376" class="ln">   376  </span> package main
+<span id="L377" class="ln">   377  </span>
+<span id="L378" class="ln">   378  </span> func main() {
+<span id="L379" class="ln">   379  </span>+	println(1)
+<span id="L380" class="ln">   380  </span>+	println(2)
+<span id="L381" class="ln">   381  </span> }
+<span id="L382" class="ln">   382  </span>`,
+<span id="L383" class="ln">   383  </span>				&#34;cover.out&#34;: `
+<span id="L384" class="ln">   384  </span>mode: atomic
+<span id="L385" class="ln">   385  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:4.1,4.9 1 1
+<span id="L386" class="ln">   386  </span>github.com/johnstarich/go/covet/cmd/covet/main.go:5.1,5.9 1 0
+<span id="L387" class="ln">   387  </span>`,
+<span id="L388" class="ln">   388  </span>				&#34;go.mod&#34;: `
+<span id="L389" class="ln">   389  </span>module github.com/johnstarich/go/covet
+<span id="L390" class="ln">   390  </span>`,
+<span id="L391" class="ln">   391  </span>				&#34;cmd/covet/main.go&#34;: `
+<span id="L392" class="ln">   392  </span>package main
+<span id="L393" class="ln">   393  </span>
+<span id="L394" class="ln">   394  </span>func main() {
+<span id="L395" class="ln">   395  </span>	println(1)
+<span id="L396" class="ln">   396  </span>	println(2)
+<span id="L397" class="ln">   397  </span>}
+<span id="L398" class="ln">   398  </span>`,
+<span id="L399" class="ln">   399  </span>			},
+<span id="L400" class="ln">   400  </span>			expectOut: `
+<span id="L401" class="ln">   401  </span>Total diff coverage:  50.0%
+<span id="L402" class="ln">   402  </span>
+<span id="L403" class="ln">   403  </span>Diff coverage is below target. Add tests for these files:
+<span id="L404" class="ln">   404  </span>┌───────┬──────────────┬───────────────────┐
+<span id="L405" class="ln">   405  </span>│ LINES │ COVERAGE     │ FILE              │
+<span id="L406" class="ln">   406  </span>├───────┼──────────────┼───────────────────┤
+<span id="L407" class="ln">   407  </span>│  1/2  │  50.0% ██▌   │ cmd/covet/main.go │
+<span id="L408" class="ln">   408  </span>└───────┴──────────────┴───────────────────┘
+<span id="L409" class="ln">   409  </span>`,
+<span id="L410" class="ln">   410  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
+<span id="L411" class="ln">   411  </span>		},
+<span id="L412" class="ln">   412  </span>	} {
+<span id="L413" class="ln">   413  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L414" class="ln">   414  </span>			t.Parallel()
+<span id="L415" class="ln">   415  </span>			fs := testhelpers.FSWithFiles(t, tc.files)
+<span id="L416" class="ln">   416  </span>			var output bytes.Buffer
+<span id="L417" class="ln">   417  </span>			deps := Deps{
+<span id="L418" class="ln">   418  </span>				Stdin:  strings.NewReader(tc.stdin),
+<span id="L419" class="ln">   419  </span>				Stdout: &amp;output,
+<span id="L420" class="ln">   420  </span>				FS:     fs,
+<span id="L421" class="ln">   421  </span>			}
+<span id="L422" class="ln">   422  </span>			args := tc.args
+<span id="L423" class="ln">   423  </span>			args.DiffBaseDir = &#34;.&#34;
+<span id="L424" class="ln">   424  </span>			if args.TargetDiffCoverage == 0 {
+<span id="L425" class="ln">   425  </span>				args.TargetDiffCoverage = 90
+<span id="L426" class="ln">   426  </span>			}
+<span id="L427" class="ln">   427  </span>
+<span id="L428" class="ln">   428  </span>			if args.GitHubEndpoint == &#34;replace-me&#34; {
+<span id="L429" class="ln">   429  </span>				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+<span id="L430" class="ln">   430  </span>					w.WriteHeader(http.StatusInternalServerError)
+<span id="L431" class="ln">   431  </span>				}))
+<span id="L432" class="ln">   432  </span>				args.GitHubEndpoint = server.URL
+<span id="L433" class="ln">   433  </span>				t.Cleanup(server.Close)
+<span id="L434" class="ln">   434  </span>			}
+<span id="L435" class="ln">   435  </span>
+<span id="L436" class="ln">   436  </span>			var expectOut bytes.Buffer
+<span id="L437" class="ln">   437  </span>			require.NoError(t, template.Must(template.New(&#34;&#34;).Parse(tc.expectOut)).Execute(&amp;expectOut, map[string]interface{}{
+<span id="L438" class="ln">   438  </span>				&#34;ServerURL&#34;: args.GitHubEndpoint,
+<span id="L439" class="ln">   439  </span>			}))
+<span id="L440" class="ln">   440  </span>
+<span id="L441" class="ln">   441  </span>			err := runArgs(args, deps)
+<span id="L442" class="ln">   442  </span>			assert.Equal(t, strings.TrimSpace(expectOut.String()), strings.TrimSpace(output.String()))
+<span id="L443" class="ln">   443  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L444" class="ln">   444  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L445" class="ln">   445  </span>				return
+<span id="L446" class="ln">   446  </span>			}
+<span id="L447" class="ln">   447  </span>			assert.NoError(t, err)
+<span id="L448" class="ln">   448  </span>		})
+<span id="L449" class="ln">   449  </span>	}
+<span id="L450" class="ln">   450  </span>}
+<span id="L451" class="ln">   451  </span>
+<span id="L452" class="ln">   452  </span>func TestParseIssueURL(t *testing.T) {
+<span id="L453" class="ln">   453  </span>	t.Parallel()
+<span id="L454" class="ln">   454  </span>	for _, tc := range []struct {
+<span id="L455" class="ln">   455  </span>		url          string
+<span id="L456" class="ln">   456  </span>		expectOrg    string
+<span id="L457" class="ln">   457  </span>		expectRepo   string
+<span id="L458" class="ln">   458  </span>		expectNumber int
+<span id="L459" class="ln">   459  </span>		expectErr    string
+<span id="L460" class="ln">   460  </span>	}{
+<span id="L461" class="ln">   461  </span>		{
+<span id="L462" class="ln">   462  </span>			url:       &#34;&#34;,
+<span id="L463" class="ln">   463  </span>			expectErr: &#34;-gh-issue is required&#34;,
+<span id="L464" class="ln">   464  </span>		},
+<span id="L465" class="ln">   465  </span>		{
+<span id="L466" class="ln">   466  </span>			url:       &#34;example.com&#34;,
+<span id="L467" class="ln">   467  </span>			expectErr: &#34;malformed issue URL: expected 4+ path components, e.g. github.com/org/repo/pull/123&#34;,
+<span id="L468" class="ln">   468  </span>		},
+<span id="L469" class="ln">   469  </span>		{
+<span id="L470" class="ln">   470  </span>			url:          &#34;github.com/myorg/myrepo/pull/123&#34;,
+<span id="L471" class="ln">   471  </span>			expectOrg:    &#34;myorg&#34;,
+<span id="L472" class="ln">   472  </span>			expectRepo:   &#34;myrepo&#34;,
+<span id="L473" class="ln">   473  </span>			expectNumber: 123,
+<span id="L474" class="ln">   474  </span>		},
+<span id="L475" class="ln">   475  </span>		{
+<span id="L476" class="ln">   476  </span>			url:          &#34;github.com/myorg/myrepo/pull/123/extra&#34;,
+<span id="L477" class="ln">   477  </span>			expectOrg:    &#34;myorg&#34;,
+<span id="L478" class="ln">   478  </span>			expectRepo:   &#34;myrepo&#34;,
+<span id="L479" class="ln">   479  </span>			expectNumber: 123,
+<span id="L480" class="ln">   480  </span>		},
+<span id="L481" class="ln">   481  </span>		{
+<span id="L482" class="ln">   482  </span>			url:       &#34;github.com/myorg/myrepo/pull/not-a-number&#34;,
+<span id="L483" class="ln">   483  </span>			expectErr: `strconv.ParseInt: parsing &#34;not-a-number&#34;: invalid syntax`,
+<span id="L484" class="ln">   484  </span>		},
+<span id="L485" class="ln">   485  </span>	} {
+<span id="L486" class="ln">   486  </span>		t.Run(tc.url, func(t *testing.T) {
+<span id="L487" class="ln">   487  </span>			t.Parallel()
+<span id="L488" class="ln">   488  </span>			org, repo, number, err := parseIssueURL(tc.url)
+<span id="L489" class="ln">   489  </span>			assert.Equal(t, tc.expectOrg, org)
+<span id="L490" class="ln">   490  </span>			assert.Equal(t, tc.expectRepo, repo)
+<span id="L491" class="ln">   491  </span>			assert.Equal(t, tc.expectNumber, number)
+<span id="L492" class="ln">   492  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L493" class="ln">   493  </span>				assert.EqualError(t, err, tc.expectErr)
+<span id="L494" class="ln">   494  </span>			} else {
+<span id="L495" class="ln">   495  </span>				assert.NoError(t, err)
+<span id="L496" class="ln">   496  </span>			}
+<span id="L497" class="ln">   497  </span>		})
+<span id="L498" class="ln">   498  </span>	}
+<span id="L499" class="ln">   499  </span>}
+<span id="L500" class="ln">   500  </span>
+<span id="L501" class="ln">   501  </span>func TestParseArgs(t *testing.T) {
+<span id="L502" class="ln">   502  </span>	t.Parallel()
 <span id="L503" class="ln">   503  </span>
-<span id="L504" class="ln">   504  </span>func TestParseArgs(t *testing.T) {
-<span id="L505" class="ln">   505  </span>	t.Parallel()
-<span id="L506" class="ln">   506  </span>
-<span id="L507" class="ln">   507  </span>	t.Run(&#34;missing required param&#34;, func(t *testing.T) {
-<span id="L508" class="ln">   508  </span>		t.Parallel()
-<span id="L509" class="ln">   509  </span>		var buf bytes.Buffer
-<span id="L510" class="ln">   510  </span>		_, err := parseArgs([]string{}, &amp;buf)
-<span id="L511" class="ln">   511  </span>		assert.EqualError(t, err, &#34;flag -cover-go is required&#34;)
-<span id="L512" class="ln">   512  </span>	})
-<span id="L513" class="ln">   513  </span>
-<span id="L514" class="ln">   514  </span>	t.Run(&#34;invalid flags&#34;, func(t *testing.T) {
-<span id="L515" class="ln">   515  </span>		t.Parallel()
-<span id="L516" class="ln">   516  </span>		var buf bytes.Buffer
-<span id="L517" class="ln">   517  </span>		_, err := parseArgs([]string{
-<span id="L518" class="ln">   518  </span>			&#34;-target-diff-coverage&#34;, &#34;not-a-number&#34;,
-<span id="L519" class="ln">   519  </span>		}, &amp;buf)
-<span id="L520" class="ln">   520  </span>		assert.EqualError(t, err, `invalid value &#34;not-a-number&#34; for flag -target-diff-coverage: parse error`)
-<span id="L521" class="ln">   521  </span>	})
-<span id="L522" class="ln">   522  </span>
-<span id="L523" class="ln">   523  </span>	t.Run(&#34;set fs paths&#34;, func(t *testing.T) {
-<span id="L524" class="ln">   524  </span>		t.Parallel()
-<span id="L525" class="ln">   525  </span>		const (
-<span id="L526" class="ln">   526  </span>			someCoverPath = &#34;some-cover-path&#34;
-<span id="L527" class="ln">   527  </span>			someDiffPath  = &#34;mydiff.patch&#34;
-<span id="L528" class="ln">   528  </span>		)
-<span id="L529" class="ln">   529  </span>		var buf bytes.Buffer
-<span id="L530" class="ln">   530  </span>		args, err := parseArgs([]string{
-<span id="L531" class="ln">   531  </span>			&#34;-cover-go&#34;, someCoverPath,
-<span id="L532" class="ln">   532  </span>			&#34;-diff-file&#34;, someDiffPath,
-<span id="L533" class="ln">   533  </span>		}, &amp;buf)
-<span id="L534" class="ln">   534  </span>		assert.NoError(t, err)
-<span id="L535" class="ln">   535  </span>
-<span id="L536" class="ln">   536  </span>		wd, err := os.Getwd()
-<span id="L537" class="ln">   537  </span>		require.NoError(t, err)
-<span id="L538" class="ln">   538  </span>		_, workingDir := testhelpers.FromOSToFS(t, wd)
-<span id="L539" class="ln">   539  </span>
-<span id="L540" class="ln">   540  </span>		assert.Equal(t, Args{
-<span id="L541" class="ln">   541  </span>			DiffFile:           path.Join(workingDir, someDiffPath),
-<span id="L542" class="ln">   542  </span>			DiffBaseDir:        workingDir,
-<span id="L543" class="ln">   543  </span>			GoCoverageFile:     path.Join(workingDir, someCoverPath),
-<span id="L544" class="ln">   544  </span>			TargetDiffCoverage: 90,
-<span id="L545" class="ln">   545  </span>			GitHubEndpoint:     &#34;https://api.github.com&#34;,
-<span id="L546" class="ln">   546  </span>		}, args)
-<span id="L547" class="ln">   547  </span>	})
-<span id="L548" class="ln">   548  </span>}
-<span id="L549" class="ln">   549  </span>
-<span id="L550" class="ln">   550  </span>func TestSetErr(t *testing.T) {
-<span id="L551" class="ln">   551  </span>	t.Parallel()
-<span id="L552" class="ln">   552  </span>	someError := errors.New(&#34;some error&#34;)
-<span id="L553" class="ln">   553  </span>	var err error
-<span id="L554" class="ln">   554  </span>	setErr(nil, &amp;err)
-<span id="L555" class="ln">   555  </span>	assert.NoError(t, err)
-<span id="L556" class="ln">   556  </span>
-<span id="L557" class="ln">   557  </span>	setErr(someError, &amp;err)
-<span id="L558" class="ln">   558  </span>	assert.Same(t, someError, err)
-<span id="L559" class="ln">   559  </span>}
-<span id="L560" class="ln">   560  </span>
-<span id="L561" class="ln">   561  </span>func TestFindUncoveredLines(t *testing.T) {
-<span id="L562" class="ln">   562  </span>	t.Parallel()
-<span id="L563" class="ln">   563  </span>	for _, tc := range []struct {
-<span id="L564" class="ln">   564  </span>		description string
-<span id="L565" class="ln">   565  </span>		lines       []covet.Line
-<span id="L566" class="ln">   566  </span>		expect      []span.Span
-<span id="L567" class="ln">   567  </span>	}{
-<span id="L568" class="ln">   568  </span>		{
-<span id="L569" class="ln">   569  </span>			description: &#34;no lines&#34;,
-<span id="L570" class="ln">   570  </span>			lines:       []covet.Line{},
-<span id="L571" class="ln">   571  </span>			expect:      nil,
-<span id="L572" class="ln">   572  </span>		},
-<span id="L573" class="ln">   573  </span>		{
-<span id="L574" class="ln">   574  </span>			description: &#34;1 covered line&#34;,
-<span id="L575" class="ln">   575  </span>			lines: []covet.Line{
-<span id="L576" class="ln">   576  </span>				{Covered: true, LineNumber: 1},
-<span id="L577" class="ln">   577  </span>			},
-<span id="L578" class="ln">   578  </span>			expect: nil,
-<span id="L579" class="ln">   579  </span>		},
-<span id="L580" class="ln">   580  </span>		{
-<span id="L581" class="ln">   581  </span>			description: &#34;1 uncovered line&#34;,
-<span id="L582" class="ln">   582  </span>			lines: []covet.Line{
-<span id="L583" class="ln">   583  </span>				{Covered: false, LineNumber: 1},
+<span id="L504" class="ln">   504  </span>	t.Run(&#34;missing required param&#34;, func(t *testing.T) {
+<span id="L505" class="ln">   505  </span>		t.Parallel()
+<span id="L506" class="ln">   506  </span>		var buf bytes.Buffer
+<span id="L507" class="ln">   507  </span>		_, err := parseArgs([]string{}, &amp;buf)
+<span id="L508" class="ln">   508  </span>		assert.EqualError(t, err, &#34;flag -cover-go is required&#34;)
+<span id="L509" class="ln">   509  </span>	})
+<span id="L510" class="ln">   510  </span>
+<span id="L511" class="ln">   511  </span>	t.Run(&#34;invalid flags&#34;, func(t *testing.T) {
+<span id="L512" class="ln">   512  </span>		t.Parallel()
+<span id="L513" class="ln">   513  </span>		var buf bytes.Buffer
+<span id="L514" class="ln">   514  </span>		_, err := parseArgs([]string{
+<span id="L515" class="ln">   515  </span>			&#34;-target-diff-coverage&#34;, &#34;not-a-number&#34;,
+<span id="L516" class="ln">   516  </span>		}, &amp;buf)
+<span id="L517" class="ln">   517  </span>		assert.EqualError(t, err, `invalid value &#34;not-a-number&#34; for flag -target-diff-coverage: parse error`)
+<span id="L518" class="ln">   518  </span>	})
+<span id="L519" class="ln">   519  </span>
+<span id="L520" class="ln">   520  </span>	t.Run(&#34;set fs paths&#34;, func(t *testing.T) {
+<span id="L521" class="ln">   521  </span>		t.Parallel()
+<span id="L522" class="ln">   522  </span>		const (
+<span id="L523" class="ln">   523  </span>			someCoverPath = &#34;some-cover-path&#34;
+<span id="L524" class="ln">   524  </span>			someDiffPath  = &#34;mydiff.patch&#34;
+<span id="L525" class="ln">   525  </span>		)
+<span id="L526" class="ln">   526  </span>		var buf bytes.Buffer
+<span id="L527" class="ln">   527  </span>		args, err := parseArgs([]string{
+<span id="L528" class="ln">   528  </span>			&#34;-cover-go&#34;, someCoverPath,
+<span id="L529" class="ln">   529  </span>			&#34;-diff-file&#34;, someDiffPath,
+<span id="L530" class="ln">   530  </span>		}, &amp;buf)
+<span id="L531" class="ln">   531  </span>		assert.NoError(t, err)
+<span id="L532" class="ln">   532  </span>
+<span id="L533" class="ln">   533  </span>		wd, err := os.Getwd()
+<span id="L534" class="ln">   534  </span>		require.NoError(t, err)
+<span id="L535" class="ln">   535  </span>		_, workingDir := testhelpers.FromOSToFS(t, wd)
+<span id="L536" class="ln">   536  </span>
+<span id="L537" class="ln">   537  </span>		assert.Equal(t, Args{
+<span id="L538" class="ln">   538  </span>			DiffFile:           path.Join(workingDir, someDiffPath),
+<span id="L539" class="ln">   539  </span>			DiffBaseDir:        workingDir,
+<span id="L540" class="ln">   540  </span>			GoCoverageFile:     path.Join(workingDir, someCoverPath),
+<span id="L541" class="ln">   541  </span>			TargetDiffCoverage: 90,
+<span id="L542" class="ln">   542  </span>			GitHubEndpoint:     &#34;https://api.github.com&#34;,
+<span id="L543" class="ln">   543  </span>		}, args)
+<span id="L544" class="ln">   544  </span>	})
+<span id="L545" class="ln">   545  </span>}
+<span id="L546" class="ln">   546  </span>
+<span id="L547" class="ln">   547  </span>func TestSetErr(t *testing.T) {
+<span id="L548" class="ln">   548  </span>	t.Parallel()
+<span id="L549" class="ln">   549  </span>	someError := errors.New(&#34;some error&#34;)
+<span id="L550" class="ln">   550  </span>	var err error
+<span id="L551" class="ln">   551  </span>	setErr(nil, &amp;err)
+<span id="L552" class="ln">   552  </span>	assert.NoError(t, err)
+<span id="L553" class="ln">   553  </span>
+<span id="L554" class="ln">   554  </span>	setErr(someError, &amp;err)
+<span id="L555" class="ln">   555  </span>	assert.Same(t, someError, err)
+<span id="L556" class="ln">   556  </span>}
+<span id="L557" class="ln">   557  </span>
+<span id="L558" class="ln">   558  </span>func TestFindUncoveredLines(t *testing.T) {
+<span id="L559" class="ln">   559  </span>	t.Parallel()
+<span id="L560" class="ln">   560  </span>	for _, tc := range []struct {
+<span id="L561" class="ln">   561  </span>		description string
+<span id="L562" class="ln">   562  </span>		lines       []covet.Line
+<span id="L563" class="ln">   563  </span>		expect      []span.Span
+<span id="L564" class="ln">   564  </span>	}{
+<span id="L565" class="ln">   565  </span>		{
+<span id="L566" class="ln">   566  </span>			description: &#34;no lines&#34;,
+<span id="L567" class="ln">   567  </span>			lines:       []covet.Line{},
+<span id="L568" class="ln">   568  </span>			expect:      nil,
+<span id="L569" class="ln">   569  </span>		},
+<span id="L570" class="ln">   570  </span>		{
+<span id="L571" class="ln">   571  </span>			description: &#34;1 covered line&#34;,
+<span id="L572" class="ln">   572  </span>			lines: []covet.Line{
+<span id="L573" class="ln">   573  </span>				{Covered: true, LineNumber: 1},
+<span id="L574" class="ln">   574  </span>			},
+<span id="L575" class="ln">   575  </span>			expect: nil,
+<span id="L576" class="ln">   576  </span>		},
+<span id="L577" class="ln">   577  </span>		{
+<span id="L578" class="ln">   578  </span>			description: &#34;1 uncovered line&#34;,
+<span id="L579" class="ln">   579  </span>			lines: []covet.Line{
+<span id="L580" class="ln">   580  </span>				{Covered: false, LineNumber: 1},
+<span id="L581" class="ln">   581  </span>			},
+<span id="L582" class="ln">   582  </span>			expect: []span.Span{
+<span id="L583" class="ln">   583  </span>				{Start: 1, End: 2},
 <span id="L584" class="ln">   584  </span>			},
-<span id="L585" class="ln">   585  </span>			expect: []span.Span{
-<span id="L586" class="ln">   586  </span>				{Start: 1, End: 2},
-<span id="L587" class="ln">   587  </span>			},
-<span id="L588" class="ln">   588  </span>		},
-<span id="L589" class="ln">   589  </span>		{
-<span id="L590" class="ln">   590  </span>			description: &#34;2 small spans&#34;,
-<span id="L591" class="ln">   591  </span>			lines: []covet.Line{
-<span id="L592" class="ln">   592  </span>				{Covered: false, LineNumber: 1},
-<span id="L593" class="ln">   593  </span>				{Covered: true, LineNumber: 2},
-<span id="L594" class="ln">   594  </span>				{Covered: false, LineNumber: 3},
-<span id="L595" class="ln">   595  </span>			},
-<span id="L596" class="ln">   596  </span>			expect: []span.Span{
-<span id="L597" class="ln">   597  </span>				{Start: 1, End: 2},
-<span id="L598" class="ln">   598  </span>				{Start: 3, End: 4},
-<span id="L599" class="ln">   599  </span>			},
-<span id="L600" class="ln">   600  </span>		},
-<span id="L601" class="ln">   601  </span>		{
-<span id="L602" class="ln">   602  </span>			description: &#34;2 sparse spans&#34;,
-<span id="L603" class="ln">   603  </span>			lines: []covet.Line{
-<span id="L604" class="ln">   604  </span>				{Covered: false, LineNumber: 1},
-<span id="L605" class="ln">   605  </span>				{Covered: false, LineNumber: 3},
-<span id="L606" class="ln">   606  </span>			},
-<span id="L607" class="ln">   607  </span>			expect: []span.Span{
-<span id="L608" class="ln">   608  </span>				{Start: 1, End: 2},
-<span id="L609" class="ln">   609  </span>				{Start: 3, End: 4},
-<span id="L610" class="ln">   610  </span>			},
-<span id="L611" class="ln">   611  </span>		},
-<span id="L612" class="ln">   612  </span>		{
-<span id="L613" class="ln">   613  </span>			description: &#34;2 spans with 1 larger span&#34;,
-<span id="L614" class="ln">   614  </span>			lines: []covet.Line{
-<span id="L615" class="ln">   615  </span>				{Covered: false, LineNumber: 1},
-<span id="L616" class="ln">   616  </span>				{Covered: false, LineNumber: 3},
-<span id="L617" class="ln">   617  </span>				{Covered: false, LineNumber: 4},
-<span id="L618" class="ln">   618  </span>			},
-<span id="L619" class="ln">   619  </span>			expect: []span.Span{
-<span id="L620" class="ln">   620  </span>				{Start: 3, End: 5},
-<span id="L621" class="ln">   621  </span>				{Start: 1, End: 2},
-<span id="L622" class="ln">   622  </span>			},
-<span id="L623" class="ln">   623  </span>		},
-<span id="L624" class="ln">   624  </span>		{
-<span id="L625" class="ln">   625  </span>			description: &#34;multiple spans&#34;,
-<span id="L626" class="ln">   626  </span>			lines: []covet.Line{
-<span id="L627" class="ln">   627  </span>				{Covered: false, LineNumber: 1},
+<span id="L585" class="ln">   585  </span>		},
+<span id="L586" class="ln">   586  </span>		{
+<span id="L587" class="ln">   587  </span>			description: &#34;2 small spans&#34;,
+<span id="L588" class="ln">   588  </span>			lines: []covet.Line{
+<span id="L589" class="ln">   589  </span>				{Covered: false, LineNumber: 1},
+<span id="L590" class="ln">   590  </span>				{Covered: true, LineNumber: 2},
+<span id="L591" class="ln">   591  </span>				{Covered: false, LineNumber: 3},
+<span id="L592" class="ln">   592  </span>			},
+<span id="L593" class="ln">   593  </span>			expect: []span.Span{
+<span id="L594" class="ln">   594  </span>				{Start: 1, End: 2},
+<span id="L595" class="ln">   595  </span>				{Start: 3, End: 4},
+<span id="L596" class="ln">   596  </span>			},
+<span id="L597" class="ln">   597  </span>		},
+<span id="L598" class="ln">   598  </span>		{
+<span id="L599" class="ln">   599  </span>			description: &#34;2 sparse spans&#34;,
+<span id="L600" class="ln">   600  </span>			lines: []covet.Line{
+<span id="L601" class="ln">   601  </span>				{Covered: false, LineNumber: 1},
+<span id="L602" class="ln">   602  </span>				{Covered: false, LineNumber: 3},
+<span id="L603" class="ln">   603  </span>			},
+<span id="L604" class="ln">   604  </span>			expect: []span.Span{
+<span id="L605" class="ln">   605  </span>				{Start: 1, End: 2},
+<span id="L606" class="ln">   606  </span>				{Start: 3, End: 4},
+<span id="L607" class="ln">   607  </span>			},
+<span id="L608" class="ln">   608  </span>		},
+<span id="L609" class="ln">   609  </span>		{
+<span id="L610" class="ln">   610  </span>			description: &#34;2 spans with 1 larger span&#34;,
+<span id="L611" class="ln">   611  </span>			lines: []covet.Line{
+<span id="L612" class="ln">   612  </span>				{Covered: false, LineNumber: 1},
+<span id="L613" class="ln">   613  </span>				{Covered: false, LineNumber: 3},
+<span id="L614" class="ln">   614  </span>				{Covered: false, LineNumber: 4},
+<span id="L615" class="ln">   615  </span>			},
+<span id="L616" class="ln">   616  </span>			expect: []span.Span{
+<span id="L617" class="ln">   617  </span>				{Start: 3, End: 5},
+<span id="L618" class="ln">   618  </span>				{Start: 1, End: 2},
+<span id="L619" class="ln">   619  </span>			},
+<span id="L620" class="ln">   620  </span>		},
+<span id="L621" class="ln">   621  </span>		{
+<span id="L622" class="ln">   622  </span>			description: &#34;multiple spans&#34;,
+<span id="L623" class="ln">   623  </span>			lines: []covet.Line{
+<span id="L624" class="ln">   624  </span>				{Covered: false, LineNumber: 1},
+<span id="L625" class="ln">   625  </span>
+<span id="L626" class="ln">   626  </span>				{Covered: true, LineNumber: 3},
+<span id="L627" class="ln">   627  </span>				{Covered: false, LineNumber: 4},
 <span id="L628" class="ln">   628  </span>
-<span id="L629" class="ln">   629  </span>				{Covered: true, LineNumber: 3},
-<span id="L630" class="ln">   630  </span>				{Covered: false, LineNumber: 4},
+<span id="L629" class="ln">   629  </span>				{Covered: true, LineNumber: 7},
+<span id="L630" class="ln">   630  </span>				{Covered: true, LineNumber: 8},
 <span id="L631" class="ln">   631  </span>
-<span id="L632" class="ln">   632  </span>				{Covered: true, LineNumber: 7},
-<span id="L633" class="ln">   633  </span>				{Covered: true, LineNumber: 8},
-<span id="L634" class="ln">   634  </span>
-<span id="L635" class="ln">   635  </span>				{Covered: false, LineNumber: 10},
-<span id="L636" class="ln">   636  </span>				{Covered: false, LineNumber: 11},
-<span id="L637" class="ln">   637  </span>				{Covered: false, LineNumber: 12},
-<span id="L638" class="ln">   638  </span>				{Covered: false, LineNumber: 13},
-<span id="L639" class="ln">   639  </span>			},
-<span id="L640" class="ln">   640  </span>			expect: []span.Span{
-<span id="L641" class="ln">   641  </span>				{Start: 10, End: 14},
-<span id="L642" class="ln">   642  </span>				{Start: 1, End: 2},
-<span id="L643" class="ln">   643  </span>				{Start: 4, End: 5},
-<span id="L644" class="ln">   644  </span>			},
-<span id="L645" class="ln">   645  </span>		},
-<span id="L646" class="ln">   646  </span>	} {
-<span id="L647" class="ln">   647  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L648" class="ln">   648  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L649" class="ln">   649  </span>			t.Parallel()
-<span id="L650" class="ln">   650  </span>			spans := findUncoveredLines(covet.File{
-<span id="L651" class="ln">   651  </span>				Lines: tc.lines,
-<span id="L652" class="ln">   652  </span>			})
-<span id="L653" class="ln">   653  </span>			assert.Equal(t, tc.expect, spans)
-<span id="L654" class="ln">   654  </span>		})
-<span id="L655" class="ln">   655  </span>	}
-<span id="L656" class="ln">   656  </span>}
-<span id="L657" class="ln">   657  </span>
+<span id="L632" class="ln">   632  </span>				{Covered: false, LineNumber: 10},
+<span id="L633" class="ln">   633  </span>				{Covered: false, LineNumber: 11},
+<span id="L634" class="ln">   634  </span>				{Covered: false, LineNumber: 12},
+<span id="L635" class="ln">   635  </span>				{Covered: false, LineNumber: 13},
+<span id="L636" class="ln">   636  </span>			},
+<span id="L637" class="ln">   637  </span>			expect: []span.Span{
+<span id="L638" class="ln">   638  </span>				{Start: 10, End: 14},
+<span id="L639" class="ln">   639  </span>				{Start: 1, End: 2},
+<span id="L640" class="ln">   640  </span>				{Start: 4, End: 5},
+<span id="L641" class="ln">   641  </span>			},
+<span id="L642" class="ln">   642  </span>		},
+<span id="L643" class="ln">   643  </span>	} {
+<span id="L644" class="ln">   644  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L645" class="ln">   645  </span>			t.Parallel()
+<span id="L646" class="ln">   646  </span>			spans := findUncoveredLines(covet.File{
+<span id="L647" class="ln">   647  </span>				Lines: tc.lines,
+<span id="L648" class="ln">   648  </span>			})
+<span id="L649" class="ln">   649  </span>			assert.Equal(t, tc.expect, spans)
+<span id="L650" class="ln">   650  </span>		})
+<span id="L651" class="ln">   651  </span>	}
+<span id="L652" class="ln">   652  </span>}
+<span id="L653" class="ln">   653  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->

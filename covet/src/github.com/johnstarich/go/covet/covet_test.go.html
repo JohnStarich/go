@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/covet/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -146,174 +146,172 @@
 <span id="L89" class="ln">    89  </span>			expectErr: &#34;bad mode line: foo&#34;,
 <span id="L90" class="ln">    90  </span>		},
 <span id="L91" class="ln">    91  </span>	} {
-<span id="L92" class="ln">    92  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L93" class="ln">    93  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L94" class="ln">    94  </span>			t.Parallel()
-<span id="L95" class="ln">    95  </span>			if tc.diffReader == nil {
-<span id="L96" class="ln">    96  </span>				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
-<span id="L97" class="ln">    97  </span>			}
-<span id="L98" class="ln">    98  </span>			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
-<span id="L99" class="ln">    99  </span>
-<span id="L100" class="ln">   100  </span>			coverFile := path.Join(tmpDir, &#34;cover.out&#34;)
-<span id="L101" class="ln">   101  </span>			{
-<span id="L102" class="ln">   102  </span>				f, err := hackpadfs.OpenFile(fs, coverFile, hackpadfs.FlagWriteOnly|hackpadfs.FlagCreate, 0600)
-<span id="L103" class="ln">   103  </span>				require.NoError(t, err)
-<span id="L104" class="ln">   104  </span>				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(tc.coverage)))
-<span id="L105" class="ln">   105  </span>				require.NoError(t, err)
-<span id="L106" class="ln">   106  </span>				require.NoError(t, f.Close())
-<span id="L107" class="ln">   107  </span>			}
-<span id="L108" class="ln">   108  </span>
-<span id="L109" class="ln">   109  </span>			covet, err := Parse(Options{
-<span id="L110" class="ln">   110  </span>				FS:                fs,
-<span id="L111" class="ln">   111  </span>				Diff:              tc.diffReader,
-<span id="L112" class="ln">   112  </span>				DiffBaseDir:       wd,
-<span id="L113" class="ln">   113  </span>				GoCoveragePath:    coverFile,
-<span id="L114" class="ln">   114  </span>				GoCoverageBaseDir: wd,
-<span id="L115" class="ln">   115  </span>			})
-<span id="L116" class="ln">   116  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L117" class="ln">   117  </span>				assert.EqualError(t, err, &#34;covet: &#34;+tc.expectErr)
-<span id="L118" class="ln">   118  </span>				return
-<span id="L119" class="ln">   119  </span>			}
-<span id="L120" class="ln">   120  </span>			require.NoError(t, err)
-<span id="L121" class="ln">   121  </span>
-<span id="L122" class="ln">   122  </span>			files := covet.DiffCoverageFiles()
-<span id="L123" class="ln">   123  </span>			assert.NotEmpty(t, files)
-<span id="L124" class="ln">   124  </span>
-<span id="L125" class="ln">   125  </span>			covered := covet.DiffCovered()
-<span id="L126" class="ln">   126  </span>			assert.Equal(t, tc.expectDiffCovered, covered)
-<span id="L127" class="ln">   127  </span>		})
-<span id="L128" class="ln">   128  </span>	}
-<span id="L129" class="ln">   129  </span>}
-<span id="L130" class="ln">   130  </span>
-<span id="L131" class="ln">   131  </span>func TestParseInvalidOptions(t *testing.T) {
-<span id="L132" class="ln">   132  </span>	t.Parallel()
-<span id="L133" class="ln">   133  </span>	wd, err := goos.Getwd()
-<span id="L134" class="ln">   134  </span>	require.NoError(t, err)
-<span id="L135" class="ln">   135  </span>	var (
-<span id="L136" class="ln">   136  </span>		wdFS, workingDirectory = testhelpers.FromOSToFS(t, wd)
-<span id="L137" class="ln">   137  </span>		baseDir                = path.Join(workingDirectory, &#34;testdata&#34;)
-<span id="L138" class="ln">   138  </span>		coverFile              = path.Join(baseDir, &#34;add2.out&#34;)
-<span id="L139" class="ln">   139  </span>	)
-<span id="L140" class="ln">   140  </span>	for _, tc := range []struct {
-<span id="L141" class="ln">   141  </span>		description string
-<span id="L142" class="ln">   142  </span>		options     Options
-<span id="L143" class="ln">   143  </span>		expectErr   string
-<span id="L144" class="ln">   144  </span>	}{
-<span id="L145" class="ln">   145  </span>		{
-<span id="L146" class="ln">   146  </span>			description: &#34;invalid diff base dir&#34;,
-<span id="L147" class="ln">   147  </span>			options: Options{
-<span id="L148" class="ln">   148  </span>				DiffBaseDir: &#34;/os-path/not/ok&#34;,
-<span id="L149" class="ln">   149  </span>			},
-<span id="L150" class="ln">   150  </span>			expectErr: &#34;invalid diff base directory FS path: /os-path/not/ok&#34;,
-<span id="L151" class="ln">   151  </span>		},
-<span id="L152" class="ln">   152  </span>		{
-<span id="L153" class="ln">   153  </span>			description: &#34;invalid go coverage file path&#34;,
-<span id="L154" class="ln">   154  </span>			options: Options{
-<span id="L155" class="ln">   155  </span>				DiffBaseDir:    &#34;.&#34;,
-<span id="L156" class="ln">   156  </span>				GoCoveragePath: &#34;/os-path/not/ok&#34;,
-<span id="L157" class="ln">   157  </span>			},
-<span id="L158" class="ln">   158  </span>			expectErr: &#34;invalid coverage FS path: /os-path/not/ok&#34;,
-<span id="L159" class="ln">   159  </span>		},
-<span id="L160" class="ln">   160  </span>		{
-<span id="L161" class="ln">   161  </span>			description: &#34;fs is optional&#34;,
-<span id="L162" class="ln">   162  </span>			options: Options{
-<span id="L163" class="ln">   163  </span>				FS:             nil,
-<span id="L164" class="ln">   164  </span>				Diff:           bytes.NewReader(nil),
-<span id="L165" class="ln">   165  </span>				DiffBaseDir:    baseDir,
-<span id="L166" class="ln">   166  </span>				GoCoveragePath: coverFile,
-<span id="L167" class="ln">   167  </span>			},
-<span id="L168" class="ln">   168  </span>		},
-<span id="L169" class="ln">   169  </span>		{
-<span id="L170" class="ln">   170  </span>			description: &#34;go coverage base dir is optional&#34;,
-<span id="L171" class="ln">   171  </span>			options: Options{
-<span id="L172" class="ln">   172  </span>				FS:                wdFS,
-<span id="L173" class="ln">   173  </span>				Diff:              bytes.NewReader(nil),
-<span id="L174" class="ln">   174  </span>				DiffBaseDir:       &#34;.&#34;,
-<span id="L175" class="ln">   175  </span>				GoCoveragePath:    coverFile,
-<span id="L176" class="ln">   176  </span>				GoCoverageBaseDir: &#34;&#34;,
-<span id="L177" class="ln">   177  </span>			},
-<span id="L178" class="ln">   178  </span>		},
-<span id="L179" class="ln">   179  </span>		{
-<span id="L180" class="ln">   180  </span>			description: &#34;invalid go coverage base dir&#34;,
-<span id="L181" class="ln">   181  </span>			options: Options{
-<span id="L182" class="ln">   182  </span>				FS:                wdFS,
-<span id="L183" class="ln">   183  </span>				Diff:              bytes.NewReader(nil),
-<span id="L184" class="ln">   184  </span>				DiffBaseDir:       &#34;.&#34;,
-<span id="L185" class="ln">   185  </span>				GoCoveragePath:    coverFile,
-<span id="L186" class="ln">   186  </span>				GoCoverageBaseDir: &#34;/os-path/not/ok&#34;,
-<span id="L187" class="ln">   187  </span>			},
-<span id="L188" class="ln">   188  </span>			expectErr: &#34;invalid coverage base directory FS path: /os-path/not/ok&#34;,
-<span id="L189" class="ln">   189  </span>		},
-<span id="L190" class="ln">   190  </span>		{
-<span id="L191" class="ln">   191  </span>			description: &#34;diff is required&#34;,
-<span id="L192" class="ln">   192  </span>			options: Options{
-<span id="L193" class="ln">   193  </span>				FS:                wdFS,
-<span id="L194" class="ln">   194  </span>				Diff:              nil,
-<span id="L195" class="ln">   195  </span>				DiffBaseDir:       &#34;.&#34;,
-<span id="L196" class="ln">   196  </span>				GoCoveragePath:    coverFile,
-<span id="L197" class="ln">   197  </span>				GoCoverageBaseDir: baseDir,
-<span id="L198" class="ln">   198  </span>			},
-<span id="L199" class="ln">   199  </span>			expectErr: &#34;diff reader must not be nil&#34;,
-<span id="L200" class="ln">   200  </span>		},
-<span id="L201" class="ln">   201  </span>	} {
-<span id="L202" class="ln">   202  </span>		tc := tc <span class="comment">// enable parallel sub-tests</span>
-<span id="L203" class="ln">   203  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L204" class="ln">   204  </span>			t.Parallel()
-<span id="L205" class="ln">   205  </span>			_, err := Parse(tc.options)
-<span id="L206" class="ln">   206  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L207" class="ln">   207  </span>				assert.EqualError(t, err, &#34;covet: &#34;+tc.expectErr)
-<span id="L208" class="ln">   208  </span>				return
-<span id="L209" class="ln">   209  </span>			}
-<span id="L210" class="ln">   210  </span>			assert.NoError(t, err)
-<span id="L211" class="ln">   211  </span>		})
-<span id="L212" class="ln">   212  </span>	}
-<span id="L213" class="ln">   213  </span>}
-<span id="L214" class="ln">   214  </span>
-<span id="L215" class="ln">   215  </span>func TestReportFileCoverage(t *testing.T) {
-<span id="L216" class="ln">   216  </span>	t.Parallel()
-<span id="L217" class="ln">   217  </span>	fs := testhelpers.FSWithFiles(t, map[string]string{
-<span id="L218" class="ln">   218  </span>		&#34;main.go&#34;: `
-<span id="L219" class="ln">   219  </span>package main
-<span id="L220" class="ln">   220  </span>
-<span id="L221" class="ln">   221  </span>func main() {
-<span id="L222" class="ln">   222  </span>	println(&#34;A&#34;)
-<span id="L223" class="ln">   223  </span>	println(&#34;B&#34;)
-<span id="L224" class="ln">   224  </span>}
-<span id="L225" class="ln">   225  </span>`,
-<span id="L226" class="ln">   226  </span>	})
-<span id="L227" class="ln">   227  </span>
-<span id="L228" class="ln">   228  </span>	covet := &amp;Covet{
-<span id="L229" class="ln">   229  </span>		options: Options{
-<span id="L230" class="ln">   230  </span>			FS:                fs,
-<span id="L231" class="ln">   231  </span>			GoCoveragePath:    &#34;subdir/cover.out&#34;,
-<span id="L232" class="ln">   232  </span>			GoCoverageBaseDir: &#34;.&#34;,
-<span id="L233" class="ln">   233  </span>		},
-<span id="L234" class="ln">   234  </span>	}
-<span id="L235" class="ln">   235  </span>	file := File{
-<span id="L236" class="ln">   236  </span>		Name:      &#34;main.go&#34;,
-<span id="L237" class="ln">   237  </span>		Covered:   1,
-<span id="L238" class="ln">   238  </span>		Uncovered: 1,
-<span id="L239" class="ln">   239  </span>		Lines: []Line{
-<span id="L240" class="ln">   240  </span>			{Covered: true, LineNumber: 4},
-<span id="L241" class="ln">   241  </span>			{Covered: false, LineNumber: 5},
-<span id="L242" class="ln">   242  </span>		},
-<span id="L243" class="ln">   243  </span>	}
-<span id="L244" class="ln">   244  </span>	var buf bytes.Buffer
-<span id="L245" class="ln">   245  </span>	assert.NoError(t, covet.ReportFileCoverage(&amp;buf, file, ReportFileCoverageOptions{}))
-<span id="L246" class="ln">   246  </span>	assert.Equal(t, strings.TrimSpace(`
-<span id="L247" class="ln">   247  </span>Coverage: 2 to 6
-<span id="L248" class="ln">   248  </span> 
-<span id="L249" class="ln">   249  </span> func main() {
-<span id="L250" class="ln">   250  </span>+	println(&#34;A&#34;)
-<span id="L251" class="ln">   251  </span>-	println(&#34;B&#34;)
-<span id="L252" class="ln">   252  </span> }
-<span id="L253" class="ln">   253  </span>`), strings.TrimSpace(buf.String()))
-<span id="L254" class="ln">   254  </span>}
-<span id="L255" class="ln">   255  </span>
+<span id="L92" class="ln">    92  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L93" class="ln">    93  </span>			t.Parallel()
+<span id="L94" class="ln">    94  </span>			if tc.diffReader == nil {
+<span id="L95" class="ln">    95  </span>				tc.diffReader = strings.NewReader(strings.TrimSpace(tc.diff))
+<span id="L96" class="ln">    96  </span>			}
+<span id="L97" class="ln">    97  </span>			fs, wd, tmpDir := testhelpers.OSFSWithTemp(t)
+<span id="L98" class="ln">    98  </span>
+<span id="L99" class="ln">    99  </span>			coverFile := path.Join(tmpDir, &#34;cover.out&#34;)
+<span id="L100" class="ln">   100  </span>			{
+<span id="L101" class="ln">   101  </span>				f, err := hackpadfs.OpenFile(fs, coverFile, hackpadfs.FlagWriteOnly|hackpadfs.FlagCreate, 0600)
+<span id="L102" class="ln">   102  </span>				require.NoError(t, err)
+<span id="L103" class="ln">   103  </span>				_, err = hackpadfs.WriteFile(f, []byte(strings.TrimSpace(tc.coverage)))
+<span id="L104" class="ln">   104  </span>				require.NoError(t, err)
+<span id="L105" class="ln">   105  </span>				require.NoError(t, f.Close())
+<span id="L106" class="ln">   106  </span>			}
+<span id="L107" class="ln">   107  </span>
+<span id="L108" class="ln">   108  </span>			covet, err := Parse(Options{
+<span id="L109" class="ln">   109  </span>				FS:                fs,
+<span id="L110" class="ln">   110  </span>				Diff:              tc.diffReader,
+<span id="L111" class="ln">   111  </span>				DiffBaseDir:       wd,
+<span id="L112" class="ln">   112  </span>				GoCoveragePath:    coverFile,
+<span id="L113" class="ln">   113  </span>				GoCoverageBaseDir: wd,
+<span id="L114" class="ln">   114  </span>			})
+<span id="L115" class="ln">   115  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L116" class="ln">   116  </span>				assert.EqualError(t, err, &#34;covet: &#34;+tc.expectErr)
+<span id="L117" class="ln">   117  </span>				return
+<span id="L118" class="ln">   118  </span>			}
+<span id="L119" class="ln">   119  </span>			require.NoError(t, err)
+<span id="L120" class="ln">   120  </span>
+<span id="L121" class="ln">   121  </span>			files := covet.DiffCoverageFiles()
+<span id="L122" class="ln">   122  </span>			assert.NotEmpty(t, files)
+<span id="L123" class="ln">   123  </span>
+<span id="L124" class="ln">   124  </span>			covered := covet.DiffCovered()
+<span id="L125" class="ln">   125  </span>			assert.Equal(t, tc.expectDiffCovered, covered)
+<span id="L126" class="ln">   126  </span>		})
+<span id="L127" class="ln">   127  </span>	}
+<span id="L128" class="ln">   128  </span>}
+<span id="L129" class="ln">   129  </span>
+<span id="L130" class="ln">   130  </span>func TestParseInvalidOptions(t *testing.T) {
+<span id="L131" class="ln">   131  </span>	t.Parallel()
+<span id="L132" class="ln">   132  </span>	wd, err := goos.Getwd()
+<span id="L133" class="ln">   133  </span>	require.NoError(t, err)
+<span id="L134" class="ln">   134  </span>	var (
+<span id="L135" class="ln">   135  </span>		wdFS, workingDirectory = testhelpers.FromOSToFS(t, wd)
+<span id="L136" class="ln">   136  </span>		baseDir                = path.Join(workingDirectory, &#34;testdata&#34;)
+<span id="L137" class="ln">   137  </span>		coverFile              = path.Join(baseDir, &#34;add2.out&#34;)
+<span id="L138" class="ln">   138  </span>	)
+<span id="L139" class="ln">   139  </span>	for _, tc := range []struct {
+<span id="L140" class="ln">   140  </span>		description string
+<span id="L141" class="ln">   141  </span>		options     Options
+<span id="L142" class="ln">   142  </span>		expectErr   string
+<span id="L143" class="ln">   143  </span>	}{
+<span id="L144" class="ln">   144  </span>		{
+<span id="L145" class="ln">   145  </span>			description: &#34;invalid diff base dir&#34;,
+<span id="L146" class="ln">   146  </span>			options: Options{
+<span id="L147" class="ln">   147  </span>				DiffBaseDir: &#34;/os-path/not/ok&#34;,
+<span id="L148" class="ln">   148  </span>			},
+<span id="L149" class="ln">   149  </span>			expectErr: &#34;invalid diff base directory FS path: /os-path/not/ok&#34;,
+<span id="L150" class="ln">   150  </span>		},
+<span id="L151" class="ln">   151  </span>		{
+<span id="L152" class="ln">   152  </span>			description: &#34;invalid go coverage file path&#34;,
+<span id="L153" class="ln">   153  </span>			options: Options{
+<span id="L154" class="ln">   154  </span>				DiffBaseDir:    &#34;.&#34;,
+<span id="L155" class="ln">   155  </span>				GoCoveragePath: &#34;/os-path/not/ok&#34;,
+<span id="L156" class="ln">   156  </span>			},
+<span id="L157" class="ln">   157  </span>			expectErr: &#34;invalid coverage FS path: /os-path/not/ok&#34;,
+<span id="L158" class="ln">   158  </span>		},
+<span id="L159" class="ln">   159  </span>		{
+<span id="L160" class="ln">   160  </span>			description: &#34;fs is optional&#34;,
+<span id="L161" class="ln">   161  </span>			options: Options{
+<span id="L162" class="ln">   162  </span>				FS:             nil,
+<span id="L163" class="ln">   163  </span>				Diff:           bytes.NewReader(nil),
+<span id="L164" class="ln">   164  </span>				DiffBaseDir:    baseDir,
+<span id="L165" class="ln">   165  </span>				GoCoveragePath: coverFile,
+<span id="L166" class="ln">   166  </span>			},
+<span id="L167" class="ln">   167  </span>		},
+<span id="L168" class="ln">   168  </span>		{
+<span id="L169" class="ln">   169  </span>			description: &#34;go coverage base dir is optional&#34;,
+<span id="L170" class="ln">   170  </span>			options: Options{
+<span id="L171" class="ln">   171  </span>				FS:                wdFS,
+<span id="L172" class="ln">   172  </span>				Diff:              bytes.NewReader(nil),
+<span id="L173" class="ln">   173  </span>				DiffBaseDir:       &#34;.&#34;,
+<span id="L174" class="ln">   174  </span>				GoCoveragePath:    coverFile,
+<span id="L175" class="ln">   175  </span>				GoCoverageBaseDir: &#34;&#34;,
+<span id="L176" class="ln">   176  </span>			},
+<span id="L177" class="ln">   177  </span>		},
+<span id="L178" class="ln">   178  </span>		{
+<span id="L179" class="ln">   179  </span>			description: &#34;invalid go coverage base dir&#34;,
+<span id="L180" class="ln">   180  </span>			options: Options{
+<span id="L181" class="ln">   181  </span>				FS:                wdFS,
+<span id="L182" class="ln">   182  </span>				Diff:              bytes.NewReader(nil),
+<span id="L183" class="ln">   183  </span>				DiffBaseDir:       &#34;.&#34;,
+<span id="L184" class="ln">   184  </span>				GoCoveragePath:    coverFile,
+<span id="L185" class="ln">   185  </span>				GoCoverageBaseDir: &#34;/os-path/not/ok&#34;,
+<span id="L186" class="ln">   186  </span>			},
+<span id="L187" class="ln">   187  </span>			expectErr: &#34;invalid coverage base directory FS path: /os-path/not/ok&#34;,
+<span id="L188" class="ln">   188  </span>		},
+<span id="L189" class="ln">   189  </span>		{
+<span id="L190" class="ln">   190  </span>			description: &#34;diff is required&#34;,
+<span id="L191" class="ln">   191  </span>			options: Options{
+<span id="L192" class="ln">   192  </span>				FS:                wdFS,
+<span id="L193" class="ln">   193  </span>				Diff:              nil,
+<span id="L194" class="ln">   194  </span>				DiffBaseDir:       &#34;.&#34;,
+<span id="L195" class="ln">   195  </span>				GoCoveragePath:    coverFile,
+<span id="L196" class="ln">   196  </span>				GoCoverageBaseDir: baseDir,
+<span id="L197" class="ln">   197  </span>			},
+<span id="L198" class="ln">   198  </span>			expectErr: &#34;diff reader must not be nil&#34;,
+<span id="L199" class="ln">   199  </span>		},
+<span id="L200" class="ln">   200  </span>	} {
+<span id="L201" class="ln">   201  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L202" class="ln">   202  </span>			t.Parallel()
+<span id="L203" class="ln">   203  </span>			_, err := Parse(tc.options)
+<span id="L204" class="ln">   204  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L205" class="ln">   205  </span>				assert.EqualError(t, err, &#34;covet: &#34;+tc.expectErr)
+<span id="L206" class="ln">   206  </span>				return
+<span id="L207" class="ln">   207  </span>			}
+<span id="L208" class="ln">   208  </span>			assert.NoError(t, err)
+<span id="L209" class="ln">   209  </span>		})
+<span id="L210" class="ln">   210  </span>	}
+<span id="L211" class="ln">   211  </span>}
+<span id="L212" class="ln">   212  </span>
+<span id="L213" class="ln">   213  </span>func TestReportFileCoverage(t *testing.T) {
+<span id="L214" class="ln">   214  </span>	t.Parallel()
+<span id="L215" class="ln">   215  </span>	fs := testhelpers.FSWithFiles(t, map[string]string{
+<span id="L216" class="ln">   216  </span>		&#34;main.go&#34;: `
+<span id="L217" class="ln">   217  </span>package main
+<span id="L218" class="ln">   218  </span>
+<span id="L219" class="ln">   219  </span>func main() {
+<span id="L220" class="ln">   220  </span>	println(&#34;A&#34;)
+<span id="L221" class="ln">   221  </span>	println(&#34;B&#34;)
+<span id="L222" class="ln">   222  </span>}
+<span id="L223" class="ln">   223  </span>`,
+<span id="L224" class="ln">   224  </span>	})
+<span id="L225" class="ln">   225  </span>
+<span id="L226" class="ln">   226  </span>	covet := &amp;Covet{
+<span id="L227" class="ln">   227  </span>		options: Options{
+<span id="L228" class="ln">   228  </span>			FS:                fs,
+<span id="L229" class="ln">   229  </span>			GoCoveragePath:    &#34;subdir/cover.out&#34;,
+<span id="L230" class="ln">   230  </span>			GoCoverageBaseDir: &#34;.&#34;,
+<span id="L231" class="ln">   231  </span>		},
+<span id="L232" class="ln">   232  </span>	}
+<span id="L233" class="ln">   233  </span>	file := File{
+<span id="L234" class="ln">   234  </span>		Name:      &#34;main.go&#34;,
+<span id="L235" class="ln">   235  </span>		Covered:   1,
+<span id="L236" class="ln">   236  </span>		Uncovered: 1,
+<span id="L237" class="ln">   237  </span>		Lines: []Line{
+<span id="L238" class="ln">   238  </span>			{Covered: true, LineNumber: 4},
+<span id="L239" class="ln">   239  </span>			{Covered: false, LineNumber: 5},
+<span id="L240" class="ln">   240  </span>		},
+<span id="L241" class="ln">   241  </span>	}
+<span id="L242" class="ln">   242  </span>	var buf bytes.Buffer
+<span id="L243" class="ln">   243  </span>	assert.NoError(t, covet.ReportFileCoverage(&amp;buf, file, ReportFileCoverageOptions{}))
+<span id="L244" class="ln">   244  </span>	assert.Equal(t, strings.TrimSpace(`
+<span id="L245" class="ln">   245  </span>Coverage: 2 to 6
+<span id="L246" class="ln">   246  </span> 
+<span id="L247" class="ln">   247  </span> func main() {
+<span id="L248" class="ln">   248  </span>+	println(&#34;A&#34;)
+<span id="L249" class="ln">   249  </span>-	println(&#34;B&#34;)
+<span id="L250" class="ln">   250  </span> }
+<span id="L251" class="ln">   251  </span>`), strings.TrimSpace(buf.String()))
+<span id="L252" class="ln">   252  </span>}
+<span id="L253" class="ln">   253  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->
