@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -73,7 +73,7 @@
 <span id="L16" class="ln">    16  </span>const testTimeout = 5 * time.Second
 <span id="L17" class="ln">    17  </span>
 <span id="L18" class="ln">    18  </span>func dialUDP(t *testing.T, address string) PacketConn { <span class="comment">//nolint:ireturn // Returned interface is a convenience wrapper for tests calling New()</span>
-<span id="L19" class="ln">    19  </span>	conn, err := net.Dial(&#34;udp&#34;, address)
+<span id="L19" class="ln">    19  </span>	conn, err := (&amp;net.Dialer{}).DialContext(context.Background(), &#34;udp&#34;, address)
 <span id="L20" class="ln">    20  </span>	require.NoError(t, err)
 <span id="L21" class="ln">    21  </span>	require.Implements(t, (*PacketConn)(nil), conn)
 <span id="L22" class="ln">    22  </span>	return conn.(PacketConn)
@@ -172,262 +172,261 @@
 <span id="L115" class="ln">   115  </span>			expectErr: &#34;all connections have failed for \&#34;write\&#34;: write udp&#34;,
 <span id="L116" class="ln">   116  </span>		},
 <span id="L117" class="ln">   117  </span>	} {
-<span id="L118" class="ln">   118  </span>		tc := tc <span class="comment">// fix parallel access of loop variable</span>
-<span id="L119" class="ln">   119  </span>		t.Run(tc.description, func(t *testing.T) {
-<span id="L120" class="ln">   120  </span>			t.Parallel()
-<span id="L121" class="ln">   121  </span>			var servers []string
-<span id="L122" class="ln">   122  </span>			for _, server := range tc.servers {
-<span id="L123" class="ln">   123  </span>				addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-<span id="L124" class="ln">   124  </span>					ResponseDelay: server.delay,
-<span id="L125" class="ln">   125  </span>					Hostnames:     server.hostnames,
-<span id="L126" class="ln">   126  </span>				})
-<span id="L127" class="ln">   127  </span>				servers = append(servers, addr)
-<span id="L128" class="ln">   128  </span>			}
-<span id="L129" class="ln">   129  </span>			t.Logf(&#34;DNS servers, in-order: %+v&#34;, servers)
-<span id="L130" class="ln">   130  </span>
-<span id="L131" class="ln">   131  </span>			res := &amp;net.Resolver{
-<span id="L132" class="ln">   132  </span>				PreferGo: true,
-<span id="L133" class="ln">   133  </span>				Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
-<span id="L134" class="ln">   134  </span>					var conns []PacketConn
-<span id="L135" class="ln">   135  </span>					for _, addr := range servers {
-<span id="L136" class="ln">   136  </span>						conns = append(conns, dialUDP(t, addr))
-<span id="L137" class="ln">   137  </span>					}
-<span id="L138" class="ln">   138  </span>					return New(conns), nil
-<span id="L139" class="ln">   139  </span>				},
-<span id="L140" class="ln">   140  </span>			}
-<span id="L141" class="ln">   141  </span>
-<span id="L142" class="ln">   142  </span>			ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
-<span id="L143" class="ln">   143  </span>			defer cancel()
-<span id="L144" class="ln">   144  </span>
-<span id="L145" class="ln">   145  </span>			addrs, err := res.LookupHost(ctx, tc.lookup)
-<span id="L146" class="ln">   146  </span>			if tc.expectErr != &#34;&#34; {
-<span id="L147" class="ln">   147  </span>				assert.Equal(t, tc.expectAddrs, addrs)
-<span id="L148" class="ln">   148  </span>				require.Error(t, err)
-<span id="L149" class="ln">   149  </span>				assert.Contains(t, err.Error(), tc.expectErr)
-<span id="L150" class="ln">   150  </span>				return
-<span id="L151" class="ln">   151  </span>			}
-<span id="L152" class="ln">   152  </span>			require.NoError(t, err)
-<span id="L153" class="ln">   153  </span>			assert.Equal(t, tc.expectAddrs, addrs)
-<span id="L154" class="ln">   154  </span>		})
-<span id="L155" class="ln">   155  </span>	}
-<span id="L156" class="ln">   156  </span>}
-<span id="L157" class="ln">   157  </span>
-<span id="L158" class="ln">   158  </span>func TestStagger(t *testing.T) {
-<span id="L159" class="ln">   159  </span>	t.Parallel()
-<span id="L160" class="ln">   160  </span>
-<span id="L161" class="ln">   161  </span>	startServers := func(t *testing.T) []string {
-<span id="L162" class="ln">   162  </span>		const slowServerDelay = 30 * time.Second
-<span id="L163" class="ln">   163  </span>		var servers []string
-<span id="L164" class="ln">   164  </span>		addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-<span id="L165" class="ln">   165  </span>			ResponseDelay: slowServerDelay,
-<span id="L166" class="ln">   166  </span>			Hostnames: map[string][]string{
-<span id="L167" class="ln">   167  </span>				&#34;hi.local.&#34;: {&#34;1.2.3.4&#34;},
-<span id="L168" class="ln">   168  </span>			},
-<span id="L169" class="ln">   169  </span>		})
-<span id="L170" class="ln">   170  </span>		servers = append(servers, addr)
-<span id="L171" class="ln">   171  </span>		addr = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
-<span id="L172" class="ln">   172  </span>			Hostnames: map[string][]string{
-<span id="L173" class="ln">   173  </span>				&#34;hi.local.&#34;: {&#34;5.6.7.8&#34;},
-<span id="L174" class="ln">   174  </span>			},
-<span id="L175" class="ln">   175  </span>		})
-<span id="L176" class="ln">   176  </span>		servers = append(servers, addr)
-<span id="L177" class="ln">   177  </span>		return servers
-<span id="L178" class="ln">   178  </span>	}
-<span id="L179" class="ln">   179  </span>
-<span id="L180" class="ln">   180  </span>	t.Run(&#34;stagger never enables&#34;, func(t *testing.T) {
-<span id="L181" class="ln">   181  </span>		t.Parallel()
-<span id="L182" class="ln">   182  </span>		servers := startServers(t)
-<span id="L183" class="ln">   183  </span>		res := &amp;net.Resolver{
-<span id="L184" class="ln">   184  </span>			PreferGo: true,
-<span id="L185" class="ln">   185  </span>			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
-<span id="L186" class="ln">   186  </span>				var conns []PacketConn
-<span id="L187" class="ln">   187  </span>				for _, addr := range servers {
-<span id="L188" class="ln">   188  </span>					conns = append(conns, dialUDP(t, addr))
-<span id="L189" class="ln">   189  </span>				}
-<span id="L190" class="ln">   190  </span>				conn := New(conns)
-<span id="L191" class="ln">   191  </span>				conn.Stagger(nil, func() {}) <span class="comment">// effectively disable all further connections</span>
-<span id="L192" class="ln">   192  </span>				return conn, nil
-<span id="L193" class="ln">   193  </span>			},
-<span id="L194" class="ln">   194  </span>		}
-<span id="L195" class="ln">   195  </span>
-<span id="L196" class="ln">   196  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
-<span id="L197" class="ln">   197  </span>		defer cancel()
-<span id="L198" class="ln">   198  </span>
-<span id="L199" class="ln">   199  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
-<span id="L200" class="ln">   200  </span>		assert.Empty(t, addrs)
-<span id="L201" class="ln">   201  </span>		require.Error(t, err)
-<span id="L202" class="ln">   202  </span>		assert.Contains(t, err.Error(), &#34;all connections have failed for \&#34;write\&#34;: write udp&#34;)
-<span id="L203" class="ln">   203  </span>	})
-<span id="L204" class="ln">   204  </span>
-<span id="L205" class="ln">   205  </span>	t.Run(&#34;stagger eventually succeeds&#34;, func(t *testing.T) {
-<span id="L206" class="ln">   206  </span>		t.Parallel()
-<span id="L207" class="ln">   207  </span>		if os.Getenv(&#34;CI&#34;) == &#34;true&#34; &amp;&amp; runtime.GOOS == &#34;darwin&#34; {
-<span id="L208" class="ln">   208  </span>			t.Skip(&#34;DNS timeouts on macOS in CI don&#39;t work very well.&#34;) <span class="comment">// FIXME: This doesn&#39;t seem to work on macOS in CI, despite working fine locally.</span>
-<span id="L209" class="ln">   209  </span>		}
-<span id="L210" class="ln">   210  </span>
-<span id="L211" class="ln">   211  </span>		servers := startServers(t)
-<span id="L212" class="ln">   212  </span>		const delay = 1 * time.Second
-<span id="L213" class="ln">   213  </span>		res := &amp;net.Resolver{
-<span id="L214" class="ln">   214  </span>			PreferGo: true,
-<span id="L215" class="ln">   215  </span>			Dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
-<span id="L216" class="ln">   216  </span>				var conns []PacketConn
-<span id="L217" class="ln">   217  </span>				for _, addr := range servers {
-<span id="L218" class="ln">   218  </span>					conns = append(conns, dialUDP(t, addr))
-<span id="L219" class="ln">   219  </span>				}
-<span id="L220" class="ln">   220  </span>				conn := New(conns)
-<span id="L221" class="ln">   221  </span>
-<span id="L222" class="ln">   222  </span>				<span class="comment">// stagger new connections with a ticker of &#39;delay&#39; interval</span>
-<span id="L223" class="ln">   223  </span>				ctx, cancel := context.WithCancel(ctx)
-<span id="L224" class="ln">   224  </span>				c := make(chan struct{})
-<span id="L225" class="ln">   225  </span>				go func() {
-<span id="L226" class="ln">   226  </span>					ticker := time.NewTicker(delay)
-<span id="L227" class="ln">   227  </span>					for {
-<span id="L228" class="ln">   228  </span>						select {
-<span id="L229" class="ln">   229  </span>						case &lt;-ticker.C:
-<span id="L230" class="ln">   230  </span>							c &lt;- struct{}{}
-<span id="L231" class="ln">   231  </span>						case &lt;-ctx.Done():
-<span id="L232" class="ln">   232  </span>							ticker.Stop()
-<span id="L233" class="ln">   233  </span>							return
-<span id="L234" class="ln">   234  </span>						}
-<span id="L235" class="ln">   235  </span>					}
-<span id="L236" class="ln">   236  </span>				}()
-<span id="L237" class="ln">   237  </span>				conn.Stagger(c, cancel) <span class="comment">// effectively disable all further connections</span>
-<span id="L238" class="ln">   238  </span>				return conn, nil
-<span id="L239" class="ln">   239  </span>			},
-<span id="L240" class="ln">   240  </span>		}
-<span id="L241" class="ln">   241  </span>
-<span id="L242" class="ln">   242  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
-<span id="L243" class="ln">   243  </span>		defer cancel()
-<span id="L244" class="ln">   244  </span>
-<span id="L245" class="ln">   245  </span>		start := time.Now()
-<span id="L246" class="ln">   246  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
-<span id="L247" class="ln">   247  </span>		d := time.Since(start)
-<span id="L248" class="ln">   248  </span>		assert.NoError(t, err)
-<span id="L249" class="ln">   249  </span>		assert.Equal(t, []string{&#34;5.6.7.8&#34;}, addrs)
-<span id="L250" class="ln">   250  </span>		assert.LessOrEqual(t, int(delay), int(d), &#34;DNS should not resolve before second connection is enabled&#34;)
-<span id="L251" class="ln">   251  </span>		assert.GreaterOrEqual(t, int(testTimeout), int(d), &#34;DNS should resolve before the test times out&#34;)
-<span id="L252" class="ln">   252  </span>	})
-<span id="L253" class="ln">   253  </span>
-<span id="L254" class="ln">   254  </span>	t.Run(&#34;stagger enables all (almost) instantly&#34;, func(t *testing.T) {
-<span id="L255" class="ln">   255  </span>		t.Parallel()
-<span id="L256" class="ln">   256  </span>		servers := startServers(t)
-<span id="L257" class="ln">   257  </span>		res := &amp;net.Resolver{
-<span id="L258" class="ln">   258  </span>			PreferGo: true,
-<span id="L259" class="ln">   259  </span>			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
-<span id="L260" class="ln">   260  </span>				var conns []PacketConn
-<span id="L261" class="ln">   261  </span>				for _, addr := range servers {
-<span id="L262" class="ln">   262  </span>					conns = append(conns, dialUDP(t, addr))
-<span id="L263" class="ln">   263  </span>				}
-<span id="L264" class="ln">   264  </span>				conn := New(conns)
-<span id="L265" class="ln">   265  </span>
-<span id="L266" class="ln">   266  </span>				<span class="comment">// stagger new connections with a ticker of &#39;delay&#39; interval</span>
-<span id="L267" class="ln">   267  </span>				c := make(chan struct{})
-<span id="L268" class="ln">   268  </span>				close(c)
-<span id="L269" class="ln">   269  </span>				conn.Stagger(c, func() {}) <span class="comment">// effectively disable all further connections</span>
-<span id="L270" class="ln">   270  </span>				return conn, nil
-<span id="L271" class="ln">   271  </span>			},
-<span id="L272" class="ln">   272  </span>		}
-<span id="L273" class="ln">   273  </span>
-<span id="L274" class="ln">   274  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
-<span id="L275" class="ln">   275  </span>		defer cancel()
-<span id="L276" class="ln">   276  </span>
-<span id="L277" class="ln">   277  </span>		start := time.Now()
-<span id="L278" class="ln">   278  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
-<span id="L279" class="ln">   279  </span>		d := time.Since(start)
-<span id="L280" class="ln">   280  </span>		assert.NoError(t, err)
-<span id="L281" class="ln">   281  </span>		assert.Equal(t, []string{&#34;5.6.7.8&#34;}, addrs)
-<span id="L282" class="ln">   282  </span>		assert.Less(t, int(d), int(float64(testTimeout)*0.01), &#34;Second connection should be used almost immediately&#34;)
-<span id="L283" class="ln">   283  </span>	})
-<span id="L284" class="ln">   284  </span>}
-<span id="L285" class="ln">   285  </span>
-<span id="L286" class="ln">   286  </span>func TestLocalAddr(t *testing.T) {
-<span id="L287" class="ln">   287  </span>	t.Parallel()
-<span id="L288" class="ln">   288  </span>	firstConn := dialUDP(t, &#34;1.2.3.4:53&#34;)
-<span id="L289" class="ln">   289  </span>	conn := New([]PacketConn{
-<span id="L290" class="ln">   290  </span>		firstConn,
-<span id="L291" class="ln">   291  </span>		dialUDP(t, &#34;5.6.7.8:53&#34;),
-<span id="L292" class="ln">   292  </span>	})
-<span id="L293" class="ln">   293  </span>	assert.Equal(t, firstConn.LocalAddr(), conn.LocalAddr())
-<span id="L294" class="ln">   294  </span>}
-<span id="L295" class="ln">   295  </span>
-<span id="L296" class="ln">   296  </span>func TestRemoteAddr(t *testing.T) {
-<span id="L297" class="ln">   297  </span>	t.Parallel()
-<span id="L298" class="ln">   298  </span>	firstConn := dialUDP(t, &#34;1.2.3.4:53&#34;)
-<span id="L299" class="ln">   299  </span>	conn := New([]PacketConn{
-<span id="L300" class="ln">   300  </span>		firstConn,
-<span id="L301" class="ln">   301  </span>		dialUDP(t, &#34;5.6.7.8:53&#34;),
-<span id="L302" class="ln">   302  </span>	})
-<span id="L303" class="ln">   303  </span>	assert.Equal(t, firstConn.RemoteAddr(), conn.RemoteAddr())
-<span id="L304" class="ln">   304  </span>}
-<span id="L305" class="ln">   305  </span>
-<span id="L306" class="ln">   306  </span>type wrapperConn struct {
-<span id="L307" class="ln">   307  </span>	PacketConn
-<span id="L308" class="ln">   308  </span>	readDeadline, writeDeadline time.Time
-<span id="L309" class="ln">   309  </span>	remoteAddr                  net.Addr
-<span id="L310" class="ln">   310  </span>}
-<span id="L311" class="ln">   311  </span>
-<span id="L312" class="ln">   312  </span>func (w *wrapperConn) SetWriteDeadline(t time.Time) error {
-<span id="L313" class="ln">   313  </span>	w.writeDeadline = t
-<span id="L314" class="ln">   314  </span>	return nil
-<span id="L315" class="ln">   315  </span>}
-<span id="L316" class="ln">   316  </span>
-<span id="L317" class="ln">   317  </span>func (w *wrapperConn) SetReadDeadline(t time.Time) error {
-<span id="L318" class="ln">   318  </span>	w.readDeadline = t
-<span id="L319" class="ln">   319  </span>	return nil
-<span id="L320" class="ln">   320  </span>}
-<span id="L321" class="ln">   321  </span>
-<span id="L322" class="ln">   322  </span>func (w *wrapperConn) RemoteAddr() net.Addr {
-<span id="L323" class="ln">   323  </span>	return w.remoteAddr
-<span id="L324" class="ln">   324  </span>}
-<span id="L325" class="ln">   325  </span>
-<span id="L326" class="ln">   326  </span>func TestSetReadDeadline(t *testing.T) {
-<span id="L327" class="ln">   327  </span>	t.Parallel()
-<span id="L328" class="ln">   328  </span>	conns := []PacketConn{
+<span id="L118" class="ln">   118  </span>		t.Run(tc.description, func(t *testing.T) {
+<span id="L119" class="ln">   119  </span>			t.Parallel()
+<span id="L120" class="ln">   120  </span>			var servers []string
+<span id="L121" class="ln">   121  </span>			for _, server := range tc.servers {
+<span id="L122" class="ln">   122  </span>				addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+<span id="L123" class="ln">   123  </span>					ResponseDelay: server.delay,
+<span id="L124" class="ln">   124  </span>					Hostnames:     server.hostnames,
+<span id="L125" class="ln">   125  </span>				})
+<span id="L126" class="ln">   126  </span>				servers = append(servers, addr)
+<span id="L127" class="ln">   127  </span>			}
+<span id="L128" class="ln">   128  </span>			t.Logf(&#34;DNS servers, in-order: %+v&#34;, servers)
+<span id="L129" class="ln">   129  </span>
+<span id="L130" class="ln">   130  </span>			res := &amp;net.Resolver{
+<span id="L131" class="ln">   131  </span>				PreferGo: true,
+<span id="L132" class="ln">   132  </span>				Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
+<span id="L133" class="ln">   133  </span>					var conns []PacketConn
+<span id="L134" class="ln">   134  </span>					for _, addr := range servers {
+<span id="L135" class="ln">   135  </span>						conns = append(conns, dialUDP(t, addr))
+<span id="L136" class="ln">   136  </span>					}
+<span id="L137" class="ln">   137  </span>					return New(conns), nil
+<span id="L138" class="ln">   138  </span>				},
+<span id="L139" class="ln">   139  </span>			}
+<span id="L140" class="ln">   140  </span>
+<span id="L141" class="ln">   141  </span>			ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+<span id="L142" class="ln">   142  </span>			defer cancel()
+<span id="L143" class="ln">   143  </span>
+<span id="L144" class="ln">   144  </span>			addrs, err := res.LookupHost(ctx, tc.lookup)
+<span id="L145" class="ln">   145  </span>			if tc.expectErr != &#34;&#34; {
+<span id="L146" class="ln">   146  </span>				assert.Equal(t, tc.expectAddrs, addrs)
+<span id="L147" class="ln">   147  </span>				require.Error(t, err)
+<span id="L148" class="ln">   148  </span>				assert.Contains(t, err.Error(), tc.expectErr)
+<span id="L149" class="ln">   149  </span>				return
+<span id="L150" class="ln">   150  </span>			}
+<span id="L151" class="ln">   151  </span>			require.NoError(t, err)
+<span id="L152" class="ln">   152  </span>			assert.Equal(t, tc.expectAddrs, addrs)
+<span id="L153" class="ln">   153  </span>		})
+<span id="L154" class="ln">   154  </span>	}
+<span id="L155" class="ln">   155  </span>}
+<span id="L156" class="ln">   156  </span>
+<span id="L157" class="ln">   157  </span>func TestStagger(t *testing.T) {
+<span id="L158" class="ln">   158  </span>	t.Parallel()
+<span id="L159" class="ln">   159  </span>
+<span id="L160" class="ln">   160  </span>	startServers := func(t *testing.T) []string {
+<span id="L161" class="ln">   161  </span>		const slowServerDelay = 30 * time.Second
+<span id="L162" class="ln">   162  </span>		var servers []string
+<span id="L163" class="ln">   163  </span>		addr := testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+<span id="L164" class="ln">   164  </span>			ResponseDelay: slowServerDelay,
+<span id="L165" class="ln">   165  </span>			Hostnames: map[string][]string{
+<span id="L166" class="ln">   166  </span>				&#34;hi.local.&#34;: {&#34;1.2.3.4&#34;},
+<span id="L167" class="ln">   167  </span>			},
+<span id="L168" class="ln">   168  </span>		})
+<span id="L169" class="ln">   169  </span>		servers = append(servers, addr)
+<span id="L170" class="ln">   170  </span>		addr = testhelpers.StartDNSServer(t, testhelpers.DNSConfig{
+<span id="L171" class="ln">   171  </span>			Hostnames: map[string][]string{
+<span id="L172" class="ln">   172  </span>				&#34;hi.local.&#34;: {&#34;5.6.7.8&#34;},
+<span id="L173" class="ln">   173  </span>			},
+<span id="L174" class="ln">   174  </span>		})
+<span id="L175" class="ln">   175  </span>		servers = append(servers, addr)
+<span id="L176" class="ln">   176  </span>		return servers
+<span id="L177" class="ln">   177  </span>	}
+<span id="L178" class="ln">   178  </span>
+<span id="L179" class="ln">   179  </span>	t.Run(&#34;stagger never enables&#34;, func(t *testing.T) {
+<span id="L180" class="ln">   180  </span>		t.Parallel()
+<span id="L181" class="ln">   181  </span>		servers := startServers(t)
+<span id="L182" class="ln">   182  </span>		res := &amp;net.Resolver{
+<span id="L183" class="ln">   183  </span>			PreferGo: true,
+<span id="L184" class="ln">   184  </span>			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
+<span id="L185" class="ln">   185  </span>				var conns []PacketConn
+<span id="L186" class="ln">   186  </span>				for _, addr := range servers {
+<span id="L187" class="ln">   187  </span>					conns = append(conns, dialUDP(t, addr))
+<span id="L188" class="ln">   188  </span>				}
+<span id="L189" class="ln">   189  </span>				conn := New(conns)
+<span id="L190" class="ln">   190  </span>				conn.Stagger(nil, func() {}) <span class="comment">// effectively disable all further connections</span>
+<span id="L191" class="ln">   191  </span>				return conn, nil
+<span id="L192" class="ln">   192  </span>			},
+<span id="L193" class="ln">   193  </span>		}
+<span id="L194" class="ln">   194  </span>
+<span id="L195" class="ln">   195  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+<span id="L196" class="ln">   196  </span>		defer cancel()
+<span id="L197" class="ln">   197  </span>
+<span id="L198" class="ln">   198  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
+<span id="L199" class="ln">   199  </span>		assert.Empty(t, addrs)
+<span id="L200" class="ln">   200  </span>		require.Error(t, err)
+<span id="L201" class="ln">   201  </span>		assert.Contains(t, err.Error(), &#34;all connections have failed for \&#34;write\&#34;: write udp&#34;)
+<span id="L202" class="ln">   202  </span>	})
+<span id="L203" class="ln">   203  </span>
+<span id="L204" class="ln">   204  </span>	t.Run(&#34;stagger eventually succeeds&#34;, func(t *testing.T) {
+<span id="L205" class="ln">   205  </span>		t.Parallel()
+<span id="L206" class="ln">   206  </span>		if os.Getenv(&#34;CI&#34;) == &#34;true&#34; &amp;&amp; runtime.GOOS == &#34;darwin&#34; {
+<span id="L207" class="ln">   207  </span>			t.Skip(&#34;DNS timeouts on macOS in CI don&#39;t work very well.&#34;) <span class="comment">// FIXME: This doesn&#39;t seem to work on macOS in CI, despite working fine locally.</span>
+<span id="L208" class="ln">   208  </span>		}
+<span id="L209" class="ln">   209  </span>
+<span id="L210" class="ln">   210  </span>		servers := startServers(t)
+<span id="L211" class="ln">   211  </span>		const delay = 1 * time.Second
+<span id="L212" class="ln">   212  </span>		res := &amp;net.Resolver{
+<span id="L213" class="ln">   213  </span>			PreferGo: true,
+<span id="L214" class="ln">   214  </span>			Dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
+<span id="L215" class="ln">   215  </span>				var conns []PacketConn
+<span id="L216" class="ln">   216  </span>				for _, addr := range servers {
+<span id="L217" class="ln">   217  </span>					conns = append(conns, dialUDP(t, addr))
+<span id="L218" class="ln">   218  </span>				}
+<span id="L219" class="ln">   219  </span>				conn := New(conns)
+<span id="L220" class="ln">   220  </span>
+<span id="L221" class="ln">   221  </span>				<span class="comment">// stagger new connections with a ticker of &#39;delay&#39; interval</span>
+<span id="L222" class="ln">   222  </span>				ctx, cancel := context.WithCancel(ctx)
+<span id="L223" class="ln">   223  </span>				c := make(chan struct{})
+<span id="L224" class="ln">   224  </span>				go func() {
+<span id="L225" class="ln">   225  </span>					ticker := time.NewTicker(delay)
+<span id="L226" class="ln">   226  </span>					for {
+<span id="L227" class="ln">   227  </span>						select {
+<span id="L228" class="ln">   228  </span>						case &lt;-ticker.C:
+<span id="L229" class="ln">   229  </span>							c &lt;- struct{}{}
+<span id="L230" class="ln">   230  </span>						case &lt;-ctx.Done():
+<span id="L231" class="ln">   231  </span>							ticker.Stop()
+<span id="L232" class="ln">   232  </span>							return
+<span id="L233" class="ln">   233  </span>						}
+<span id="L234" class="ln">   234  </span>					}
+<span id="L235" class="ln">   235  </span>				}()
+<span id="L236" class="ln">   236  </span>				conn.Stagger(c, cancel) <span class="comment">// effectively disable all further connections</span>
+<span id="L237" class="ln">   237  </span>				return conn, nil
+<span id="L238" class="ln">   238  </span>			},
+<span id="L239" class="ln">   239  </span>		}
+<span id="L240" class="ln">   240  </span>
+<span id="L241" class="ln">   241  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+<span id="L242" class="ln">   242  </span>		defer cancel()
+<span id="L243" class="ln">   243  </span>
+<span id="L244" class="ln">   244  </span>		start := time.Now()
+<span id="L245" class="ln">   245  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
+<span id="L246" class="ln">   246  </span>		d := time.Since(start)
+<span id="L247" class="ln">   247  </span>		assert.NoError(t, err)
+<span id="L248" class="ln">   248  </span>		assert.Equal(t, []string{&#34;5.6.7.8&#34;}, addrs)
+<span id="L249" class="ln">   249  </span>		assert.LessOrEqual(t, int(delay), int(d), &#34;DNS should not resolve before second connection is enabled&#34;)
+<span id="L250" class="ln">   250  </span>		assert.GreaterOrEqual(t, int(testTimeout), int(d), &#34;DNS should resolve before the test times out&#34;)
+<span id="L251" class="ln">   251  </span>	})
+<span id="L252" class="ln">   252  </span>
+<span id="L253" class="ln">   253  </span>	t.Run(&#34;stagger enables all (almost) instantly&#34;, func(t *testing.T) {
+<span id="L254" class="ln">   254  </span>		t.Parallel()
+<span id="L255" class="ln">   255  </span>		servers := startServers(t)
+<span id="L256" class="ln">   256  </span>		res := &amp;net.Resolver{
+<span id="L257" class="ln">   257  </span>			PreferGo: true,
+<span id="L258" class="ln">   258  </span>			Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
+<span id="L259" class="ln">   259  </span>				var conns []PacketConn
+<span id="L260" class="ln">   260  </span>				for _, addr := range servers {
+<span id="L261" class="ln">   261  </span>					conns = append(conns, dialUDP(t, addr))
+<span id="L262" class="ln">   262  </span>				}
+<span id="L263" class="ln">   263  </span>				conn := New(conns)
+<span id="L264" class="ln">   264  </span>
+<span id="L265" class="ln">   265  </span>				<span class="comment">// stagger new connections with a ticker of &#39;delay&#39; interval</span>
+<span id="L266" class="ln">   266  </span>				c := make(chan struct{})
+<span id="L267" class="ln">   267  </span>				close(c)
+<span id="L268" class="ln">   268  </span>				conn.Stagger(c, func() {}) <span class="comment">// effectively disable all further connections</span>
+<span id="L269" class="ln">   269  </span>				return conn, nil
+<span id="L270" class="ln">   270  </span>			},
+<span id="L271" class="ln">   271  </span>		}
+<span id="L272" class="ln">   272  </span>
+<span id="L273" class="ln">   273  </span>		ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+<span id="L274" class="ln">   274  </span>		defer cancel()
+<span id="L275" class="ln">   275  </span>
+<span id="L276" class="ln">   276  </span>		start := time.Now()
+<span id="L277" class="ln">   277  </span>		addrs, err := res.LookupHost(ctx, &#34;hi.local&#34;)
+<span id="L278" class="ln">   278  </span>		d := time.Since(start)
+<span id="L279" class="ln">   279  </span>		assert.NoError(t, err)
+<span id="L280" class="ln">   280  </span>		assert.Equal(t, []string{&#34;5.6.7.8&#34;}, addrs)
+<span id="L281" class="ln">   281  </span>		assert.Less(t, int(d), int(float64(testTimeout)*0.01), &#34;Second connection should be used almost immediately&#34;)
+<span id="L282" class="ln">   282  </span>	})
+<span id="L283" class="ln">   283  </span>}
+<span id="L284" class="ln">   284  </span>
+<span id="L285" class="ln">   285  </span>func TestLocalAddr(t *testing.T) {
+<span id="L286" class="ln">   286  </span>	t.Parallel()
+<span id="L287" class="ln">   287  </span>	firstConn := dialUDP(t, &#34;1.2.3.4:53&#34;)
+<span id="L288" class="ln">   288  </span>	conn := New([]PacketConn{
+<span id="L289" class="ln">   289  </span>		firstConn,
+<span id="L290" class="ln">   290  </span>		dialUDP(t, &#34;5.6.7.8:53&#34;),
+<span id="L291" class="ln">   291  </span>	})
+<span id="L292" class="ln">   292  </span>	assert.Equal(t, firstConn.LocalAddr(), conn.LocalAddr())
+<span id="L293" class="ln">   293  </span>}
+<span id="L294" class="ln">   294  </span>
+<span id="L295" class="ln">   295  </span>func TestRemoteAddr(t *testing.T) {
+<span id="L296" class="ln">   296  </span>	t.Parallel()
+<span id="L297" class="ln">   297  </span>	firstConn := dialUDP(t, &#34;1.2.3.4:53&#34;)
+<span id="L298" class="ln">   298  </span>	conn := New([]PacketConn{
+<span id="L299" class="ln">   299  </span>		firstConn,
+<span id="L300" class="ln">   300  </span>		dialUDP(t, &#34;5.6.7.8:53&#34;),
+<span id="L301" class="ln">   301  </span>	})
+<span id="L302" class="ln">   302  </span>	assert.Equal(t, firstConn.RemoteAddr(), conn.RemoteAddr())
+<span id="L303" class="ln">   303  </span>}
+<span id="L304" class="ln">   304  </span>
+<span id="L305" class="ln">   305  </span>type wrapperConn struct {
+<span id="L306" class="ln">   306  </span>	PacketConn
+<span id="L307" class="ln">   307  </span>	readDeadline, writeDeadline time.Time
+<span id="L308" class="ln">   308  </span>	remoteAddr                  net.Addr
+<span id="L309" class="ln">   309  </span>}
+<span id="L310" class="ln">   310  </span>
+<span id="L311" class="ln">   311  </span>func (w *wrapperConn) SetWriteDeadline(t time.Time) error {
+<span id="L312" class="ln">   312  </span>	w.writeDeadline = t
+<span id="L313" class="ln">   313  </span>	return nil
+<span id="L314" class="ln">   314  </span>}
+<span id="L315" class="ln">   315  </span>
+<span id="L316" class="ln">   316  </span>func (w *wrapperConn) SetReadDeadline(t time.Time) error {
+<span id="L317" class="ln">   317  </span>	w.readDeadline = t
+<span id="L318" class="ln">   318  </span>	return nil
+<span id="L319" class="ln">   319  </span>}
+<span id="L320" class="ln">   320  </span>
+<span id="L321" class="ln">   321  </span>func (w *wrapperConn) RemoteAddr() net.Addr {
+<span id="L322" class="ln">   322  </span>	return w.remoteAddr
+<span id="L323" class="ln">   323  </span>}
+<span id="L324" class="ln">   324  </span>
+<span id="L325" class="ln">   325  </span>func TestSetReadDeadline(t *testing.T) {
+<span id="L326" class="ln">   326  </span>	t.Parallel()
+<span id="L327" class="ln">   327  </span>	conns := []PacketConn{
+<span id="L328" class="ln">   328  </span>		&amp;wrapperConn{},
 <span id="L329" class="ln">   329  </span>		&amp;wrapperConn{},
-<span id="L330" class="ln">   330  </span>		&amp;wrapperConn{},
-<span id="L331" class="ln">   331  </span>	}
-<span id="L332" class="ln">   332  </span>	conn := New(conns)
-<span id="L333" class="ln">   333  </span>	someTime := time.Now()
-<span id="L334" class="ln">   334  </span>	assert.NoError(t, conn.SetReadDeadline(someTime))
-<span id="L335" class="ln">   335  </span>	for _, conn := range conns {
-<span id="L336" class="ln">   336  </span>		assert.Equal(t, someTime, conn.(*wrapperConn).readDeadline)
-<span id="L337" class="ln">   337  </span>	}
-<span id="L338" class="ln">   338  </span>}
-<span id="L339" class="ln">   339  </span>
-<span id="L340" class="ln">   340  </span>func TestSetWriteDeadline(t *testing.T) {
-<span id="L341" class="ln">   341  </span>	t.Parallel()
-<span id="L342" class="ln">   342  </span>	conns := []PacketConn{
+<span id="L330" class="ln">   330  </span>	}
+<span id="L331" class="ln">   331  </span>	conn := New(conns)
+<span id="L332" class="ln">   332  </span>	someTime := time.Now()
+<span id="L333" class="ln">   333  </span>	assert.NoError(t, conn.SetReadDeadline(someTime))
+<span id="L334" class="ln">   334  </span>	for _, conn := range conns {
+<span id="L335" class="ln">   335  </span>		assert.Equal(t, someTime, conn.(*wrapperConn).readDeadline)
+<span id="L336" class="ln">   336  </span>	}
+<span id="L337" class="ln">   337  </span>}
+<span id="L338" class="ln">   338  </span>
+<span id="L339" class="ln">   339  </span>func TestSetWriteDeadline(t *testing.T) {
+<span id="L340" class="ln">   340  </span>	t.Parallel()
+<span id="L341" class="ln">   341  </span>	conns := []PacketConn{
+<span id="L342" class="ln">   342  </span>		&amp;wrapperConn{},
 <span id="L343" class="ln">   343  </span>		&amp;wrapperConn{},
-<span id="L344" class="ln">   344  </span>		&amp;wrapperConn{},
-<span id="L345" class="ln">   345  </span>	}
-<span id="L346" class="ln">   346  </span>	conn := New(conns)
-<span id="L347" class="ln">   347  </span>	someTime := time.Now()
-<span id="L348" class="ln">   348  </span>	assert.NoError(t, conn.SetWriteDeadline(someTime))
-<span id="L349" class="ln">   349  </span>	for _, conn := range conns {
-<span id="L350" class="ln">   350  </span>		assert.Equal(t, someTime, conn.(*wrapperConn).writeDeadline)
-<span id="L351" class="ln">   351  </span>	}
-<span id="L352" class="ln">   352  </span>}
-<span id="L353" class="ln">   353  </span>
-<span id="L354" class="ln">   354  </span>func TestStats(t *testing.T) {
-<span id="L355" class="ln">   355  </span>	t.Parallel()
-<span id="L356" class="ln">   356  </span>	_, addr, err := net.ParseCIDR(&#34;192.0.2.0/24&#34;)
-<span id="L357" class="ln">   357  </span>	require.NoError(t, err)
-<span id="L358" class="ln">   358  </span>
-<span id="L359" class="ln">   359  </span>	conn1, conn2 := &amp;wrapperConn{}, &amp;wrapperConn{remoteAddr: addr}
-<span id="L360" class="ln">   360  </span>
-<span id="L361" class="ln">   361  </span>	conn := New([]PacketConn{conn1, conn2})
-<span id="L362" class="ln">   362  </span>	conn.firstResponder.Store(1)
-<span id="L363" class="ln">   363  </span>	stats := conn.Stats()
-<span id="L364" class="ln">   364  </span>	assert.Equal(t, Stats{
-<span id="L365" class="ln">   365  </span>		FastestRemoteIndex: 1,
-<span id="L366" class="ln">   366  </span>		FastestRemote:      addr,
-<span id="L367" class="ln">   367  </span>	}, stats)
-<span id="L368" class="ln">   368  </span>}
-<span id="L369" class="ln">   369  </span>
+<span id="L344" class="ln">   344  </span>	}
+<span id="L345" class="ln">   345  </span>	conn := New(conns)
+<span id="L346" class="ln">   346  </span>	someTime := time.Now()
+<span id="L347" class="ln">   347  </span>	assert.NoError(t, conn.SetWriteDeadline(someTime))
+<span id="L348" class="ln">   348  </span>	for _, conn := range conns {
+<span id="L349" class="ln">   349  </span>		assert.Equal(t, someTime, conn.(*wrapperConn).writeDeadline)
+<span id="L350" class="ln">   350  </span>	}
+<span id="L351" class="ln">   351  </span>}
+<span id="L352" class="ln">   352  </span>
+<span id="L353" class="ln">   353  </span>func TestStats(t *testing.T) {
+<span id="L354" class="ln">   354  </span>	t.Parallel()
+<span id="L355" class="ln">   355  </span>	_, addr, err := net.ParseCIDR(&#34;192.0.2.0/24&#34;)
+<span id="L356" class="ln">   356  </span>	require.NoError(t, err)
+<span id="L357" class="ln">   357  </span>
+<span id="L358" class="ln">   358  </span>	conn1, conn2 := &amp;wrapperConn{}, &amp;wrapperConn{remoteAddr: addr}
+<span id="L359" class="ln">   359  </span>
+<span id="L360" class="ln">   360  </span>	conn := New([]PacketConn{conn1, conn2})
+<span id="L361" class="ln">   361  </span>	conn.firstResponder.Store(1)
+<span id="L362" class="ln">   362  </span>	stats := conn.Stats()
+<span id="L363" class="ln">   363  </span>	assert.Equal(t, Stats{
+<span id="L364" class="ln">   364  </span>		FastestRemoteIndex: 1,
+<span id="L365" class="ln">   365  </span>		FastestRemote:      addr,
+<span id="L366" class="ln">   366  </span>	}, stats)
+<span id="L367" class="ln">   367  </span>}
+<span id="L368" class="ln">   368  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->

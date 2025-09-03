@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -272,51 +272,50 @@
 <span id="L215" class="ln">   215  </span>}
 <span id="L216" class="ln">   216  </span>
 <span id="L217" class="ln">   217  </span>func (m *macOSDialer) reorderNameservers(ctx context.Context, conn *staggercast.Conn) {
-<span id="L218" class="ln">   218  </span>	var zero time.Time
-<span id="L219" class="ln">   219  </span>	if deadline, ok := ctx.Deadline(); !ok || deadline == zero {
-<span id="L220" class="ln">   220  </span>		m.Logger.Debug(&#34;Skipping nameserver reorder, no deadline on context&#34;)
-<span id="L221" class="ln">   221  </span>		return
-<span id="L222" class="ln">   222  </span>	}
-<span id="L223" class="ln">   223  </span>
-<span id="L224" class="ln">   224  </span>	&lt;-ctx.Done()
-<span id="L225" class="ln">   225  </span>	stats := conn.Stats()
-<span id="L226" class="ln">   226  </span>	if stats.FastestRemoteIndex == 0 {
-<span id="L227" class="ln">   227  </span>		return
-<span id="L228" class="ln">   228  </span>	}
-<span id="L229" class="ln">   229  </span>
-<span id="L230" class="ln">   230  </span>	m.nameserversMu.Lock()
-<span id="L231" class="ln">   231  </span>	defer m.nameserversMu.Unlock()
-<span id="L232" class="ln">   232  </span>
-<span id="L233" class="ln">   233  </span>	fastestRemoteAddr := stats.FastestRemote.String()
-<span id="L234" class="ln">   234  </span>	fastIndexNS := m.nameservers[stats.FastestRemoteIndex]
-<span id="L235" class="ln">   235  </span>	if fastIndexNS != fastestRemoteAddr {
-<span id="L236" class="ln">   236  </span>		m.Logger.Debug(&#34;Fastest remote already reordered&#34;, zap.String(&#34;remote&#34;, stats.FastestRemote.String()), zap.String(&#34;nsIndex&#34;, fastIndexNS))
-<span id="L237" class="ln">   237  </span>		return
-<span id="L238" class="ln">   238  </span>	}
-<span id="L239" class="ln">   239  </span>	newNS := []string{fastIndexNS}
-<span id="L240" class="ln">   240  </span>	newNS = append(newNS, m.nameservers[:stats.FastestRemoteIndex]...)
-<span id="L241" class="ln">   241  </span>	newNS = append(newNS, m.nameservers[stats.FastestRemoteIndex+1:]...)
-<span id="L242" class="ln">   242  </span>	m.nameservers = newNS
-<span id="L243" class="ln">   243  </span>	m.Logger.Debug(&#34;Reordering fastest nameserver to the front&#34;, zap.Strings(&#34;nameservers&#34;, newNS))
-<span id="L244" class="ln">   244  </span>}
-<span id="L245" class="ln">   245  </span>
-<span id="L246" class="ln">   246  </span>func dialableNameserver(nameserver string) string {
-<span id="L247" class="ln">   247  </span>	ipStr := nameserver
-<span id="L248" class="ln">   248  </span>	if i := strings.IndexRune(nameserver, &#39;%&#39;); i != -1 {
-<span id="L249" class="ln">   249  </span>		<span class="comment">// remove optional IPv6 zone ID suffix to parse IP</span>
-<span id="L250" class="ln">   250  </span>		ipStr = nameserver[:i]
-<span id="L251" class="ln">   251  </span>	}
-<span id="L252" class="ln">   252  </span>	isIPv4 := net.ParseIP(ipStr).To4() != nil
-<span id="L253" class="ln">   253  </span>	if !isIPv4 {
-<span id="L254" class="ln">   254  </span>		return fmt.Sprintf(&#34;[%s]&#34;, nameserver)
-<span id="L255" class="ln">   255  </span>	}
-<span id="L256" class="ln">   256  </span>	return nameserver
-<span id="L257" class="ln">   257  </span>}
-<span id="L258" class="ln">   258  </span>
+<span id="L218" class="ln">   218  </span>	if _, ok := ctx.Deadline(); !ok {
+<span id="L219" class="ln">   219  </span>		m.Logger.Debug(&#34;Skipping nameserver reorder, no deadline on context&#34;)
+<span id="L220" class="ln">   220  </span>		return
+<span id="L221" class="ln">   221  </span>	}
+<span id="L222" class="ln">   222  </span>
+<span id="L223" class="ln">   223  </span>	&lt;-ctx.Done()
+<span id="L224" class="ln">   224  </span>	stats := conn.Stats()
+<span id="L225" class="ln">   225  </span>	if stats.FastestRemoteIndex == 0 {
+<span id="L226" class="ln">   226  </span>		return
+<span id="L227" class="ln">   227  </span>	}
+<span id="L228" class="ln">   228  </span>
+<span id="L229" class="ln">   229  </span>	m.nameserversMu.Lock()
+<span id="L230" class="ln">   230  </span>	defer m.nameserversMu.Unlock()
+<span id="L231" class="ln">   231  </span>
+<span id="L232" class="ln">   232  </span>	fastestRemoteAddr := stats.FastestRemote.String()
+<span id="L233" class="ln">   233  </span>	fastIndexNS := m.nameservers[stats.FastestRemoteIndex]
+<span id="L234" class="ln">   234  </span>	if fastIndexNS != fastestRemoteAddr {
+<span id="L235" class="ln">   235  </span>		m.Logger.Debug(&#34;Fastest remote already reordered&#34;, zap.String(&#34;remote&#34;, stats.FastestRemote.String()), zap.String(&#34;nsIndex&#34;, fastIndexNS))
+<span id="L236" class="ln">   236  </span>		return
+<span id="L237" class="ln">   237  </span>	}
+<span id="L238" class="ln">   238  </span>	newNS := []string{fastIndexNS}
+<span id="L239" class="ln">   239  </span>	newNS = append(newNS, m.nameservers[:stats.FastestRemoteIndex]...)
+<span id="L240" class="ln">   240  </span>	newNS = append(newNS, m.nameservers[stats.FastestRemoteIndex+1:]...)
+<span id="L241" class="ln">   241  </span>	m.nameservers = newNS
+<span id="L242" class="ln">   242  </span>	m.Logger.Debug(&#34;Reordering fastest nameserver to the front&#34;, zap.Strings(&#34;nameservers&#34;, newNS))
+<span id="L243" class="ln">   243  </span>}
+<span id="L244" class="ln">   244  </span>
+<span id="L245" class="ln">   245  </span>func dialableNameserver(nameserver string) string {
+<span id="L246" class="ln">   246  </span>	ipStr := nameserver
+<span id="L247" class="ln">   247  </span>	if i := strings.IndexRune(nameserver, &#39;%&#39;); i != -1 {
+<span id="L248" class="ln">   248  </span>		<span class="comment">// remove optional IPv6 zone ID suffix to parse IP</span>
+<span id="L249" class="ln">   249  </span>		ipStr = nameserver[:i]
+<span id="L250" class="ln">   250  </span>	}
+<span id="L251" class="ln">   251  </span>	isIPv4 := net.ParseIP(ipStr).To4() != nil
+<span id="L252" class="ln">   252  </span>	if !isIPv4 {
+<span id="L253" class="ln">   253  </span>		return fmt.Sprintf(&#34;[%s]&#34;, nameserver)
+<span id="L254" class="ln">   254  </span>	}
+<span id="L255" class="ln">   255  </span>	return nameserver
+<span id="L256" class="ln">   256  </span>}
+<span id="L257" class="ln">   257  </span>
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->

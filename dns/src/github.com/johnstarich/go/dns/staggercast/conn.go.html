@@ -13,7 +13,7 @@
 
 
 
-<script>var goVersion = "go1.19.13";</script>
+<script>var goVersion = "go1.25.0";</script>
 <script src="/go/dns/lib/godoc/godocs.js" defer=""></script>
 
 </head>
@@ -241,7 +241,7 @@
 <span id="L184" class="ln">   184  </span>			if err != nil {
 <span id="L185" class="ln">   185  </span>				errs &lt;- err
 <span id="L186" class="ln">   186  </span>			} else if op == readOp || op == readFromOp {
-<span id="L187" class="ln">   187  </span>				s.firstResponder.CAS(-1, int64(ix))
+<span id="L187" class="ln">   187  </span>				s.firstResponder.CompareAndSwap(-1, int64(ix))
 <span id="L188" class="ln">   188  </span>			}
 <span id="L189" class="ln">   189  </span>			done &lt;- struct{}{}
 <span id="L190" class="ln">   190  </span>			if !keepGoing {
@@ -432,7 +432,7 @@
 </pre><p></p>
 
 <div id="footer">
-Build version go1.19.13.<br/>
+Build version go1.25.0.<br/>
 </div>
 
 </div><!-- .container -->
