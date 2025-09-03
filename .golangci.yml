@@ -45,7 +45,6 @@ linters:
         - golang\.org\/x\/tools\/godoc\/vfs
         - github\.com\/hack-pad\/hackpadfs\.FS
   exclusions:
-    generated: lax
     presets:
       - common-false-positives
       - legacy
@@ -64,16 +63,6 @@ linters:
       - linters:
           - paralleltest
         text: Range statement for test Test.* does not use range value in test Run
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
 formatters:
   enable:
     - gofmt
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
